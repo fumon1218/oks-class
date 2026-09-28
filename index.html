@@ -203,6 +203,18 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 .celebrate-card .mascot-row{justify-content:center;margin-top:0;}
 .celebrate-card .mascot-avatar{width:110px;height:130px;}
 
+/* ---------- season pill ---------- */
+.season-pill{
+  display:flex;align-items:center;gap:8px;
+  width:fit-content;margin:10px auto 0;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:999px;padding:8px 16px;
+  font-size:14px;font-weight:700;color:var(--ink);
+  box-shadow:var(--shadow);
+}
+.season-pill svg{width:16px;height:16px;color:var(--ink-soft);}
+.season-pill:active svg{transform:rotate(50deg);}
+
 /* ---------- world map (마을 그림 지도) ---------- */
 .world-map{
   position:relative;
@@ -857,16 +869,32 @@ const ART={
     winter:'icons/world-winter.jpg'
   }
 };
-/* ---------- 마을 그림 계절 뽑기(정글 점프 마을과 동일한 방식: 하루에 한 번, 어제와 다른 계절을 무작위로) ---------- */
+/* ---------- 마을 그림 계절(정글 점프 마을과 동일한 방식: 하루에 한 번 무작위로 바뀌고, 버튼으로도 직접 바꿀 수 있음) ---------- */
+const SEASON_META={
+  spring:{emoji:'🌸', label:'봄날'},
+  summer:{emoji:'☀️', label:'여름날'},
+  autumn:{emoji:'🍁', label:'가을날'},
+  winter:{emoji:'⛄', label:'겨울날'},
+};
+function todayKey(){ const d=new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; }
+function saveWorldSeason(season){
+  try{ localStorage.setItem('oks_world_season', JSON.stringify({day:todayKey(), season})); }catch(e){}
+}
 function pickWorldSeason(){
   const seasons=Object.keys(ART.worldSeasons);
-  const todayKey=(()=>{ const d=new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; })();
   let saved=null;
   try{ saved=JSON.parse(localStorage.getItem('oks_world_season')||'null'); }catch(e){}
-  if(saved && saved.day===todayKey && seasons.includes(saved.season)) return saved.season;
+  if(saved && saved.day===todayKey() && seasons.includes(saved.season)) return saved.season;
   const pool=seasons.filter(s=>!saved || s!==saved.season);
   const season=pool[Math.floor(Math.random()*pool.length)];
-  try{ localStorage.setItem('oks_world_season', JSON.stringify({day:todayKey, season})); }catch(e){}
+  saveWorldSeason(season);
+  return season;
+}
+function cycleWorldSeason(current){
+  const seasons=Object.keys(ART.worldSeasons);
+  const pool=seasons.filter(s=>s!==current);
+  const season=pool[Math.floor(Math.random()*pool.length)];
+  saveWorldSeason(season);
   return season;
 }
 function mascotSVG(pose){
@@ -916,6 +944,7 @@ function mascotBlock(pose,text,extraClass){
 /* ================= icons for chrome ================= */
 const ICON_BACK=svgWrap(`<path d="M62 20 L34 50 L62 80" stroke="currentColor" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
 const ICON_GEAR=svgWrap(`<circle cx="50" cy="50" r="14" fill="none" stroke="currentColor" stroke-width="8"/><path d="M50 8v10M50 82v10M8 50h10M82 50h10M20 20l7 7M73 73l7 7M80 20l-7 7M27 73l-7 7" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>`);
+const ICON_REFRESH=svgWrap(`<path d="M78 32 A32 32 0 1 0 84 56" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/><path d="M78 12 V34 H56" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`);
 const ICON_SPEAKER=svgWrap(`<path d="M15 40 v20 h15 l20 18 V22 L30 40 Z" fill="currentColor"/><path d="M68 35 a20 20 0 0 1 0 30 M78 25 a34 34 0 0 1 0 50" stroke="currentColor" stroke-width="7" fill="none" stroke-linecap="round"/>`);
 const ICON_HOME=svgWrap(`<path d="M50 14 L88 46 V88 H60 V62 H40 V88 H12 V46 Z" fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="round"/>`);
 
@@ -968,6 +997,7 @@ function renderWorld(){
       <span class="map-spot-label">${r.label}</span>
     </button>`;
   }).join('');
+  const sm=SEASON_META[season];
   return `
   <div class="scene-panel">
     <div class="hero">
@@ -975,6 +1005,9 @@ function renderWorld(){
       <p>어느 교실로 들어가볼까요?</p>
     </div>
     ${mascotBlock('cheer','안녕! 지도에서 교실을 골라봐!')}
+    <button class="season-pill" data-action="cycle-season" data-season="${season}">
+      <span>${sm.emoji} ${sm.label}</span>${ICON_REFRESH}
+    </button>
     <div class="world-map" style="background-image:url('${bgUrl}')">
       ${nodes}
     </div>
@@ -1253,6 +1286,13 @@ function onGlobalAction(e){
   else if(action==='go-path-from-activity'){ route.view='path'; route.method=null; runtime=null; render(); }
   else if(action==='locked-node'){ speak('먼저 앞 단계를 완성해볼까요?'); }
   else if(action==='soon-room'){ speak('이 교실은 곧 열려요!'); }
+  else if(action==='cycle-season'){
+    const cur=e.currentTarget.getAttribute('data-season');
+    const next=cycleWorldSeason(cur);
+    const sm=SEASON_META[next];
+    speak(`${sm.label}으로 바뀌었어요!`);
+    render();
+  }
   else if(action==='open-settings'){ settingsOpen=true; render(); }
   else if(action==='replay'){ speak(activityInstructionText()); }
 }
