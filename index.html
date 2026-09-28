@@ -236,6 +236,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
   background:var(--surface);padding:3px 10px;border-radius:999px;
   box-shadow:var(--shadow);white-space:nowrap;
 }
+.map-node.soon .map-node-art{filter:grayscale(.75) opacity(.8) drop-shadow(0 6px 8px rgba(43,46,74,.16));}
 .map-node.soon .map-node-label{color:var(--ink-soft);}
 .node-lock{position:absolute;right:-2px;bottom:2px;font-size:20px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
 
@@ -573,9 +574,9 @@ const ROOMS={
 };
 const ROOM_ORDER=['arts'];
 const SOON_ROOMS=[
-  {label:'음악실', sub:'곧 만나요', tint:'#E3ECFB', roof:'#5B7FD1'},
-  {label:'글자놀이방', sub:'곧 만나요', tint:'#E8F8F0', roof:'#3AAFA9'},
-  {label:'숫자놀이터', sub:'곧 만나요', tint:'#FFF3E0', roof:'#F5B301'},
+  {key:'music', label:'음악실', sub:'곧 만나요', tint:'#E3ECFB', roof:'#5B7FD1'},
+  {key:'word', label:'글자놀이방', sub:'곧 만나요', tint:'#E8F8F0', roof:'#3AAFA9'},
+  {key:'number', label:'숫자놀이터', sub:'곧 만나요', tint:'#FFF3E0', roof:'#F5B301'},
 ];
 
 /* ---- activity configs ---- */
@@ -829,8 +830,13 @@ function retryFeedback(msg){
 const ART={
   mascotIdle:'icons/mascot-idle.png', mascotCheer:'icons/mascot-cheer.png', mascotSoft:'icons/mascot-soft.png',
   bgArtRoom:'icons/bg-artroom.jpg',
-  mapSchool:null,           // 중앙 학교 건물 이미지 (없으면 아이콘 사용)
-  mapHouse:{}                // 방 key -> 이미지 경로 (없으면 아이콘 사용), 예: { arts:'icons/house-arts.png' }
+  mapSchool:'icons/school.png',
+  mapHouse:{
+    arts:'icons/house-arts.png',
+    music:'icons/house-music.png',
+    word:'icons/house-word.png',
+    number:'icons/house-number.png'
+  }
 };
 function mascotSVG(pose){
   // simple chibi placeholder: round face, side hair, purple top — matches the reference pose language
