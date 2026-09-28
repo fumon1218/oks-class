@@ -292,15 +292,32 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 }
 
 .map-avatar{
-  position:absolute;left:48%;top:41%;z-index:4;
-  transform:translate(-50%,-92%);
-  font-size:26px;line-height:1;
+  position:absolute;z-index:4;height:15%;
+  transform:translate(-50%,-88%);
   transition:left .65s cubic-bezier(.4,0,.2,1), top .65s cubic-bezier(.4,0,.2,1);
-  filter:drop-shadow(0 4px 4px rgba(0,0,0,.35));
   pointer-events:none;
 }
-.map-avatar.walking{animation:avatar-bob .28s ease-in-out infinite;}
+.map-avatar.dragging{transition:none;}
+.map-avatar img{
+  height:100%;width:auto;display:block;
+  filter:drop-shadow(0 5px 5px rgba(0,0,0,.32));
+}
+.map-avatar.walking img{animation:avatar-bob .28s ease-in-out infinite;}
 @keyframes avatar-bob{0%,100%{margin-top:0;}50%{margin-top:-5px;}}
+
+.joy-zone{position:absolute;inset:0;z-index:2;touch-action:none;}
+.joystick{
+  position:absolute;width:92px;height:92px;margin:-46px 0 0 -46px;
+  border-radius:50%;background:rgba(255,255,255,.22);
+  border:3px solid rgba(255,255,255,.6);
+  z-index:8;opacity:0;pointer-events:none;transition:opacity .12s;
+}
+.joystick.on{opacity:1;}
+.joy-knob{
+  position:absolute;left:50%;top:50%;width:40px;height:40px;
+  margin:-20px 0 0 -20px;border-radius:50%;
+  background:rgba(255,255,255,.9);box-shadow:0 3px 8px rgba(0,0,0,.3);
+}
 
 .hud-mascot{position:absolute;left:10px;bottom:10px;z-index:5;max-width:62%;pointer-events:none;}
 .hud-mascot-inner{margin:0;}
@@ -895,6 +912,8 @@ function recordResult(subject,method,stars){
 let route={view:'world', room:null, subject:null, method:null};
 let runtime=null; // per-activity mutable state
 let settingsOpen=false;
+let avatarPos={left:48, top:41}; // 지도 위 학생 캐릭터의 현재 위치(%) - 다시 그려도 유지됨
+let avatarFacing=1; // 1=오른쪽, -1=왼쪽
 
 /* ---------- audio ---------- */
 let actx=null;
@@ -960,6 +979,7 @@ function retryFeedback(msg){
 const ART={
   mascotIdle:'icons/mascot-idle.png', mascotCheer:'icons/mascot-cheer.png', mascotSoft:'icons/mascot-soft.png',
   bgArtRoom:'icons/bg-artroom.jpg',
+  charWalk:['icons/avatar-walk-a.png'],
   worldSeasons:{
     spring:'icons/world-spring.jpg',
     summer:'icons/world-summer.jpg',
@@ -1121,7 +1141,8 @@ function renderWorld(){
     <h1>옥쌤의 즐거운 교실</h1>
     <p>어느 교실로 들어가볼까요?</p>
   </div>
-  <div class="world-hero" style="background-image:url('${bgUrl}')">
+  <div class="world-hero" id="world-hero" style="background-image:url('${bgUrl}')">
+    <div class="joy-zone" id="joyZone"></div>
     <div class="hud-row hud-top">
       <div class="hud-profile">
         <span class="hud-avatar">🧑‍🎨</span>
@@ -1140,7 +1161,10 @@ function renderWorld(){
     </div>
 
     ${nodes}
-    <div class="map-avatar" id="map-avatar">🧒</div>
+    <div class="map-avatar" id="map-avatar" style="left:${avatarPos.left}%;top:${avatarPos.top}%">
+      <img src="${ART.charWalk[0]}" alt="" style="transform:scaleX(${avatarFacing})">
+    </div>
+    <div class="joystick" id="joystick"><div class="joy-knob" id="joyKnob"></div></div>
 
     <div class="hud-mascot">${mascotBlock('cheer','안녕! 지도에서 교실을 골라봐!','hud-mascot-inner')}</div>
 
@@ -1415,24 +1439,96 @@ function renderMosaicOrderBoard(){
 /* ================= wiring ================= */
 function walkAvatarTo(targetEl, callback){
   const avatar=document.getElementById('map-avatar');
-  const stage=document.querySelector('.world-hero');
+  const stage=document.getElementById('world-hero');
   if(!avatar || !stage){ callback(); return; }
   const stageRect=stage.getBoundingClientRect();
   const targetRect=targetEl.getBoundingClientRect();
   const leftPct=((targetRect.left+targetRect.width/2)-stageRect.left)/stageRect.width*100;
   const topPct=((targetRect.top+targetRect.height*0.85)-stageRect.top)/stageRect.height*100;
+  if(leftPct+0.5 < avatarPos.left) avatarFacing=-1;
+  else if(leftPct-0.5 > avatarPos.left) avatarFacing=1;
+  avatarPos.left=leftPct; avatarPos.top=topPct;
   avatar.style.left=leftPct+'%';
   avatar.style.top=topPct+'%';
+  avatar.querySelector('img').style.transform=`scaleX(${avatarFacing})`;
   avatar.classList.add('walking');
   setTimeout(()=>{
     avatar.classList.remove('walking');
     callback();
   }, 650);
 }
+
+/* ---- 조이스틱: 평소엔 숨어 있다가 지도(빈 곳)를 누르면 그 자리에 나타나 캐릭터를 자유롭게 움직임 ---- */
+let joyId=null, joyOrigin=null, joyVec={x:0,y:0}, joyRAF=null;
+const JOY_R=46, JOY_BOUNDS={left:4,right:96,top:14,bottom:92};
+function wireJoystick(){
+  if(joyRAF){ cancelAnimationFrame(joyRAF); joyRAF=null; }
+  joyId=null; joyOrigin=null; joyVec={x:0,y:0};
+  const zone=document.getElementById('joyZone');
+  const stick=document.getElementById('joystick');
+  const knob=document.getElementById('joyKnob');
+  const avatar=document.getElementById('map-avatar');
+  const stage=document.getElementById('world-hero');
+  if(!zone || !stick || !knob || !avatar || !stage) return;
+
+  function placeStick(clientX, clientY){
+    const r=stage.getBoundingClientRect();
+    const x=Math.min(Math.max(clientX, r.left+JOY_R+2), r.right-JOY_R-2);
+    const y=Math.min(Math.max(clientY, r.top+JOY_R+2), r.bottom-JOY_R-2);
+    stick.style.left=(x-r.left)+'px';
+    stick.style.top=(y-r.top)+'px';
+    joyOrigin={x, y};
+  }
+  function updateKnob(dx,dy){ knob.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; }
+  function stepMove(){
+    if(joyId===null) return;
+    if(Math.hypot(joyVec.x, joyVec.y) > 0.06){
+      const speed=0.55; // % of stage per frame
+      avatarPos.left=Math.min(JOY_BOUNDS.right, Math.max(JOY_BOUNDS.left, avatarPos.left+joyVec.x*speed));
+      avatarPos.top=Math.min(JOY_BOUNDS.bottom, Math.max(JOY_BOUNDS.top, avatarPos.top+joyVec.y*speed));
+      avatar.style.left=avatarPos.left+'%';
+      avatar.style.top=avatarPos.top+'%';
+      if(joyVec.x>0.12) avatarFacing=1; else if(joyVec.x<-0.12) avatarFacing=-1;
+      avatar.querySelector('img').style.transform=`scaleX(${avatarFacing})`;
+    }
+    joyRAF=requestAnimationFrame(stepMove);
+  }
+  zone.addEventListener('pointerdown', e=>{
+    if(joyId!==null) return;
+    joyId=e.pointerId;
+    try{ zone.setPointerCapture(e.pointerId); }catch(err){}
+    placeStick(e.clientX, e.clientY);
+    updateKnob(0,0);
+    stick.classList.add('on');
+    avatar.classList.add('dragging','walking');
+    joyVec={x:0,y:0};
+    joyRAF=requestAnimationFrame(stepMove);
+  });
+  zone.addEventListener('pointermove', e=>{
+    if(e.pointerId!==joyId || !joyOrigin) return;
+    let dx=e.clientX-joyOrigin.x, dy=e.clientY-joyOrigin.y;
+    const d=Math.hypot(dx,dy);
+    if(d>JOY_R){ dx*=JOY_R/d; dy*=JOY_R/d; }
+    updateKnob(dx,dy);
+    const dead=JOY_R*0.18;
+    joyVec.x=Math.abs(dx)>dead ? dx/JOY_R : 0;
+    joyVec.y=Math.abs(dy)>dead ? dy/JOY_R : 0;
+  });
+  const endJoy=e=>{
+    if(e.pointerId!==joyId) return;
+    joyId=null; joyOrigin=null; joyVec={x:0,y:0};
+    if(joyRAF){ cancelAnimationFrame(joyRAF); joyRAF=null; }
+    stick.classList.remove('on');
+    updateKnob(0,0);
+    avatar.classList.remove('dragging','walking');
+  };
+  ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>zone.addEventListener(ev, endJoy));
+}
 function wireGlobal(){
   app.querySelectorAll('[data-action]').forEach(el=>{
     el.addEventListener('click',onGlobalAction);
   });
+  if(route.view==='world') wireJoystick();
 }
 function onGlobalAction(e){
   const action=e.currentTarget.getAttribute('data-action');
