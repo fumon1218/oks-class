@@ -174,24 +174,44 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 .hero p{margin:6px 0 0;color:var(--ink-soft);font-size:17px;}
 
 .grid-cards{
-  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px;
+  display:flex;flex-direction:column;gap:14px;margin-top:18px;
 }
 .subject-card{
-  background:rgba(255,255,255,.94);border-radius:var(--radius-lg);
-  box-shadow:0 6px 16px rgba(43,46,74,.18);padding:20px 14px 16px;
-  display:flex;flex-direction:column;align-items:center;gap:10px;
+  background:rgba(255,255,255,.94);border-radius:24px;
+  box-shadow:0 6px 16px rgba(43,46,74,.18);padding:14px 16px 14px 14px;
+  display:flex;flex-direction:row;align-items:center;gap:16px;
+  text-align:left;position:relative;overflow:hidden;
   border:2px solid transparent;
   transition:transform .15s ease;
 }
 .subject-card:active{transform:scale(.97);}
-.subject-card .icon-wrap{
-  width:88px;height:88px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 10px rgba(43,46,74,.16), inset 0 2px 5px rgba(255,255,255,.7);
+.subject-card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:7px;
+  background:var(--card-accent,var(--accent-2));
 }
-.subject-card .icon-wrap svg{width:56px;height:56px;}
-.subject-card span{font-size:20px;font-weight:700;}
-.subject-card small{color:var(--ink-soft);font-size:14px;margin-top:-6px;}
+.subject-card .icon-wrap{
+  width:76px;height:76px;border-radius:50%;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 0 5px var(--card-glow,rgba(58,175,169,.2)),
+    0 4px 10px rgba(43,46,74,.16), inset 0 2px 5px rgba(255,255,255,.7);
+}
+.subject-card .icon-wrap svg{width:48px;height:48px;}
+.subject-card .card-txt{flex:1;min-width:0;}
+.subject-card .card-txt span{font-size:19px;font-weight:800;display:block;}
+.subject-card .card-txt small{color:var(--ink-soft);font-size:13.5px;display:block;margin-top:2px;}
+.subject-card .card-badge{
+  flex:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+}
+.subject-card .card-badge .badge-pct{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;color:var(--ink);
+  background:var(--surface-2);
+  box-shadow:0 2px 6px rgba(43,46,74,.14);
+}
+.subject-card .card-badge.done .badge-pct{background:var(--ok);color:#fff;}
+.subject-card .card-arrow{flex:none;color:var(--ink-soft);opacity:.55;}
+.subject-card .card-arrow svg{width:16px;height:16px;}
 .subject-card.soon{opacity:.55;}
 .subject-card.soon .icon-wrap{background:var(--surface-2) !important;}
 .mini-stars-row{display:flex;gap:2px;}
@@ -681,7 +701,7 @@ function hexToRgba(hex,alpha){
 const SUBJECTS={
   colors:{
     label:'색깔', sub:'예쁜 색을 배워요',
-    icon:paletteIcon('#F5B301'), tint:'#FFF3E0',
+    icon:paletteIcon('#F5B301'), tint:'#FFF3E0', accent:'#F5A623',
     methods:{
       connect:{label:'연결하기',sub:'같은 색끼리 이어보아요'},
       paint:{label:'칠하기',sub:'그림에 색을 칠해요'},
@@ -690,7 +710,7 @@ const SUBJECTS={
   },
   shapes:{
     label:'모양', sub:'여러 모양을 배워요',
-    icon:shapesGroupIcon(), tint:'#E3F2FD',
+    icon:shapesGroupIcon(), tint:'#E3F2FD', accent:'#4A90D9',
     methods:{
       connect:{label:'연결하기',sub:'같은 모양끼리 이어보아요'},
       paint:{label:'칠하기',sub:'모양 그림에 색을 칠해요'},
@@ -699,7 +719,7 @@ const SUBJECTS={
   },
   sizes:{
     label:'크기', sub:'크고 작은 것을 배워요',
-    icon:rulerIcon(), tint:'#E8F8F0',
+    icon:rulerIcon(), tint:'#E8F8F0', accent:'#3CB88F',
     methods:{
       connect:{label:'연결하기',sub:'크기가 맞는 것끼리 이어보아요'},
       paint:{label:'칠하기',sub:'알맞은 크기를 찾아 칠해요'},
@@ -1089,6 +1109,8 @@ function mascotBlock(pose,text,extraClass){
 
 /* ================= icons for chrome ================= */
 const ICON_BACK=svgWrap(`<path d="M62 20 L34 50 L62 80" stroke="currentColor" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
+const ICON_CHEVRON_R=svgWrap(`<path d="M38 20 L66 50 L38 80" stroke="currentColor" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
+const ICON_CHECK=svgWrap(`<path d="M20 52 L42 74 L82 26" stroke="currentColor" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
 const ICON_GEAR=svgWrap(`<circle cx="50" cy="50" r="14" fill="none" stroke="currentColor" stroke-width="8"/><path d="M50 8v10M50 82v10M8 50h10M82 50h10M20 20l7 7M73 73l7 7M80 20l-7 7M27 73l-7 7" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>`);
 const ICON_REFRESH=svgWrap(`<path d="M78 32 A32 32 0 1 0 84 56" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round"/><path d="M78 12 V34 H56" fill="none" stroke="currentColor" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`);
 const ICON_SPEAKER=svgWrap(`<path d="M15 40 v20 h15 l20 18 V22 L30 40 Z" fill="currentColor"/><path d="M68 35 a20 20 0 0 1 0 30 M78 25 a34 34 0 0 1 0 50" stroke="currentColor" stroke-width="7" fill="none" stroke-linecap="round"/>`);
@@ -1211,12 +1233,23 @@ function renderRoom(){
   const room=ROOMS[route.room];
   const cards=room.subjects.map(key=>{
     const s=SUBJECTS[key];
+    const starsMax=METHOD_ORDER.length*3;
     const stars = METHOD_ORDER.reduce((sum,m)=>sum+starsFor(key,m),0);
-    return `<button class="subject-card" data-action="go-path" data-subject="${key}">
+    const done=stars>=starsMax;
+    const badge = done
+      ? `<div class="card-badge done"><div class="badge-pct">${ICON_CHECK}</div><small>완료!</small></div>`
+      : stars>0
+        ? `<div class="card-badge"><div class="badge-pct">${stars}/${starsMax}</div><small>진행중</small></div>`
+        : '';
+    return `<button class="subject-card" data-action="go-path" data-subject="${key}"
+      style="--card-accent:${s.accent};--card-glow:${hexToRgba(s.accent,.22)}">
       <div class="icon-wrap" style="background:${s.tint}">${s.icon}</div>
-      <span>${s.label}</span>
-      <small>${s.sub}</small>
-      ${stars>0?`<div class="mini-stars">${miniStars(stars)}</div>`:''}
+      <div class="card-txt">
+        <span>${s.label}</span>
+        <small>${s.sub}</small>
+      </div>
+      ${badge}
+      <span class="card-arrow">${ICON_CHEVRON_R}</span>
     </button>`;
   }).join('');
   return `
