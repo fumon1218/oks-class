@@ -494,18 +494,64 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 
 /* free draw canvas */
 .draw-stage{display:flex;justify-content:center;}
+.canvas-wrap{position:relative;width:100%;max-width:420px;}
 .draw-canvas{
-  width:100%;max-width:420px;aspect-ratio:600/480;
+  display:block;width:100%;aspect-ratio:600/480;
   border-radius:16px;background:#fff;
   box-shadow:0 2px 8px rgba(43,46,74,.18) inset, 0 0 0 3px var(--surface-2);
   touch-action:none;cursor:crosshair;
+}
+.fold-line{
+  position:absolute;top:3%;bottom:3%;left:50%;
+  border-left:3px dashed rgba(108,99,181,.45);pointer-events:none;
+}
+.stamp-picker{display:flex;justify-content:center;gap:8px;margin-top:14px;}
+.stamp-btn{
+  width:52px;height:52px;border-radius:14px;background:var(--surface-2);
+  display:flex;align-items:center;justify-content:center;border:3px solid transparent;
+}
+.stamp-btn svg{width:34px;height:34px;}
+.stamp-btn.active{border-color:var(--accent-2);background:#fff;box-shadow:0 3px 8px rgba(43,46,74,.15);}
+.trace-bar{height:14px;border-radius:999px;background:var(--surface-2);margin:16px 4px 12px;overflow:hidden;}
+.trace-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#3CB88F,#F5B301);transition:width .2s ease;}
+.mood-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.mood-btn{
+  background:#fff;border-radius:20px;padding:14px 8px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  box-shadow:0 4px 12px rgba(43,46,74,.14);border:3px solid transparent;
+  font-size:18px;font-weight:800;color:var(--ink);
+}
+.mood-btn svg{width:84px;height:84px;}
+.mood-btn:active{transform:scale(.96);border-color:var(--mood);}
+
+/* 숨은 모양 찾기 */
+.hidden-counter{display:flex;justify-content:center;gap:10px;margin-bottom:12px;}
+.hidden-slot svg{width:34px;height:34px;}
+.hidden-slot.on svg{animation:starpop .4s ease;}
+.hidden-scene{
+  position:relative;width:100%;aspect-ratio:4/3;border-radius:16px;overflow:hidden;
+  background-size:cover;background-position:center;
+  box-shadow:inset 0 0 0 3px var(--surface-2);
+}
+.hidden-item{
+  position:absolute;width:14%;aspect-ratio:1/1;padding:0;
+  transform:translate(-50%,-50%) rotate(var(--rot));
+  border-radius:50%;
+}
+.hidden-item svg{width:100%;height:100%;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 2px 3px rgba(0,0,0,.35));}
+.hidden-item.found{background:rgba(255,255,255,.7);box-shadow:0 0 0 4px var(--ok),0 0 14px 4px rgba(46,204,113,.5);}
+.hidden-item.shake{animation:hiddenShake .4s;}
+@keyframes hiddenShake{
+  0%,100%{transform:translate(-50%,-50%) rotate(var(--rot));}
+  25%{transform:translate(calc(-50% - 7px),-50%) rotate(var(--rot));}
+  75%{transform:translate(calc(-50% + 7px),-50%) rotate(var(--rot));}
 }
 .draw-toolbar{
   display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px 16px;
   margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);
 }
-.draw-swatches{display:flex;gap:10px;}
-.draw-swatches .swatch{width:40px;height:40px;}
+.draw-swatches{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;}
+.draw-swatches .swatch{width:36px;height:36px;border-width:3px;}
 .draw-sizes{display:flex;gap:6px;}
 .brush-size-btn{
   background:var(--surface-2);color:var(--ink-soft);
@@ -745,6 +791,13 @@ function crayonIcon(){
       <path d="M56 82 L63 92 L70 82 Z" fill="#5A6E82"/>
     </g>`);
 }
+/* 탐험 놀이 카드 임시 아이콘 — icons/subj-explore.png가 준비되면 <img>로 교체 */
+function magnifierIcon(){
+  return svgWrap(`
+    <circle cx="42" cy="42" r="28" fill="#FFF8E1" stroke="#E0A800" stroke-width="8"/>
+    <polygon points="${starPoly(42,43,15,7)}" fill="#FF6F59"/>
+    <path d="M62 62 L86 86" stroke="#8D6E63" stroke-width="12" stroke-linecap="round"/>`);
+}
 function galleryFrameIcon(){
   return svgWrap(`
     <rect x="12" y="16" width="76" height="58" rx="6" fill="#fff" stroke="#6C63B5" stroke-width="6"/>
@@ -847,12 +900,24 @@ const SUBJECTS={
       mosaic:{label:'모자이크 완성하기',sub:'작은 것부터 순서대로 놓아요'},
     }
   },
-  draw:{
-    label:'자유 그리기', sub:'내 마음대로 그려요',
-    icon:'<img src="icons/subj-draw.png" alt="">', tint:'#FDEAF1', accent:'#E8608A',
-    methodOrder:['free'],
+  explore:{
+    label:'탐험 놀이', sub:'눈으로 찾고 느껴 보아요',
+    icon:magnifierIcon(), tint:'#FFF4D6', accent:'#E0A800',
+    methodOrder:['hidden'],
     methods:{
-      free:{label:'그림 그리기',sub:'선을 따라 자유롭게 그려요'},
+      hidden:{label:'숨은 모양 찾기',sub:'그림 속에 숨은 모양을 찾아요'},
+    }
+  },
+  draw:{
+    label:'그리기 놀이', sub:'선 긋기 · 도장 · 데칼코마니',
+    icon:'<img src="icons/subj-draw.png" alt="">', tint:'#FDEAF1', accent:'#E8608A',
+    methodOrder:['trace','free','stamp','decal','mood'],
+    methods:{
+      trace:{label:'선 따라 그리기',sub:'점선을 따라 쭉 그어요'},
+      free:{label:'자유 그리기',sub:'마음대로 그려요'},
+      stamp:{label:'도장 찍기',sub:'콕콕 도장으로 꾸며요'},
+      decal:{label:'데칼코마니',sub:'반쪽을 그리면 나비가 돼요'},
+      mood:{label:'기분 색칠',sub:'내 기분을 색으로 나타내요'},
     }
   },
   gallery:{
@@ -867,14 +932,14 @@ const SUBJECTS={
 /* 색깔/모양/크기처럼 3단계(연결·칠하기·모자이크)로 구성된 과목 외에, 자유 그리기·전시관처럼
    자체 methodOrder(활동 순서)를 갖는 과목도 있어 이 헬퍼로 항상 올바른 순서를 가져온다 */
 function methodOrderFor(subjectKey){ return (SUBJECTS[subjectKey]&&SUBJECTS[subjectKey].methodOrder) || METHOD_ORDER; }
-const SUBJECT_ORDER=['colors','shapes','sizes','draw','gallery'];
+const SUBJECT_ORDER=['colors','shapes','sizes','explore','draw','gallery'];
 /* 지도 하단 '이번 주 미션' 카드처럼 색깔/모양/크기 3과목의 같은 활동을 가로로 비교하는 곳에서만 쓰는 목록 */
 const CORE_SUBJECT_ORDER=['colors','shapes','sizes'];
 const METHOD_ORDER=['connect','paint','mosaic'];
 
 /* ---- rooms (world map) ---- */
 const ROOMS={
-  arts:{ label:'미술실', sub:'색깔 · 모양 · 크기 · 그리기 · 전시관', unlocked:true, subjects:SUBJECT_ORDER },
+  arts:{ label:'미술실', sub:'색깔 · 모양 · 크기 · 탐험 · 그리기 · 전시관', unlocked:true, subjects:SUBJECT_ORDER },
 };
 const ROOM_ORDER=['arts'];
 /* 마을 지도 속 각 건물 간판에 맞춘 교실들 — 콘텐츠는 차차 추가 예정 */
@@ -1041,7 +1106,26 @@ const ACTIVITIES={
       ]
     }
   },
+  explore:{
+    hidden:{
+      type:'hiddenFind',
+      rounds:[
+        {target:'circle', count:3, distract:['triangle','square','triangle']},
+        {target:'star',   count:3, distract:['heart','circle','heart']},
+        {target:'heart',  count:3, distract:['star','square','star']},
+      ]
+    }
+  },
   draw:{
+    trace:{
+      type:'traceDraw',
+      rounds:[
+        {theme:'초록 점에서 시작해 점선을 따라 쭉 그어요', guide:'line', color:'#FF6F59'},
+        {theme:'구불구불 물결을 따라 그려요', guide:'wave', color:'#2E86DE'},
+        {theme:'동그라미를 따라 한 바퀴 그려요', guide:'circle', color:'#27AE60'},
+        {theme:'세모를 따라 그려요', guide:'triangle', color:'#F2884B'},
+      ]
+    },
     free:{
       type:'freeDraw',
       instruction:'화면에 손가락으로 자유롭게 그림을 그려요',
@@ -1050,6 +1134,24 @@ const ACTIVITIES={
         {theme:'가을 풍경 그리기'},
         {theme:'내가 좋아하는 것 그리기'},
       ]
+    },
+    stamp:{
+      type:'stampDraw',
+      rounds:[
+        {theme:'도장을 골라 콕콕 찍어 꾸며요', stamp:'star', color:'#F5B301'},
+        {theme:'나뭇잎 도장으로 나무를 꾸며요', stamp:'leaf', color:'#27AE60', preset:'tree'},
+      ]
+    },
+    decal:{
+      type:'decalDraw',
+      rounds:[
+        {theme:'한쪽 날개를 그리면 반대쪽도 똑같이 그려져요', preset:'butterfly', color:'#9B6BD3'},
+        {theme:'반쪽에 마음대로 그려 데칼코마니를 만들어요', color:'#2E86DE'},
+      ]
+    },
+    mood:{
+      type:'moodDraw',
+      rounds:[ {}, {} ]
     }
   },
   gallery:{
@@ -1092,6 +1194,13 @@ try{
       });
     });
   }
+  /* 활동 순서가 바뀌거나 새 활동이 끼어들어도, 이미 별을 받은 활동의 다음 단계는 열어 둔다 */
+  SUBJECT_ORDER.forEach(subj=>{
+    const order=methodOrderFor(subj);
+    order.forEach((m,i)=>{
+      if(progress[subj][m].stars>0 && order[i+1]) progress[subj][order[i+1]].unlocked=true;
+    });
+  });
 }catch(e){}
 function saveProgress(){try{localStorage.setItem('oks-class-progress-v1',JSON.stringify(progress));}catch(e){}}
 function starsFor(subject,method){ return (progress[subject] && progress[subject][method]) ? progress[subject][method].stars : 0; }
@@ -1443,6 +1552,11 @@ function renderPath(){
     paint:svgWrap('<path d="M50 90 C20 90 12 68 22 50 C30 36 46 34 50 20 C54 34 70 36 78 50 C88 68 80 90 50 90 Z" fill="#F5B301"/><circle cx="50" cy="60" r="12" fill="#fff"/>'),
     mosaic:svgWrap('<rect x="10" y="10" width="35" height="35" fill="#E74C3C"/><rect x="55" y="10" width="35" height="35" fill="#F5B301"/><rect x="10" y="55" width="35" height="35" fill="#2E86DE"/><rect x="55" y="55" width="35" height="35" fill="#27AE60"/>'),
     free:svgWrap('<path d="M22 78 L60 40 L72 52 L34 90 L18 92 Z" fill="#E8608A"/><path d="M60 40 L72 28 L84 40 L72 52 Z" fill="#F5B301"/><path d="M22 78 L18 92 L32 88 Z" fill="#7A4A57"/>'),
+    trace:svgWrap('<path d="M12 62 Q31 28 50 52 T88 42" fill="none" stroke="#B9BFDA" stroke-width="9" stroke-linecap="round" stroke-dasharray="2 13"/><path d="M12 62 Q31 28 50 52" fill="none" stroke="#FF6F59" stroke-width="9" stroke-linecap="round"/><circle cx="12" cy="62" r="8" fill="#3CB88F"/>'),
+    stamp:svgWrap('<path d="M34 10 C58 22 62 48 34 72 C6 48 10 22 34 10 Z" fill="#27AE60"/><polygon points="'+starPoly(70,66,24,11)+'" fill="#F5B301"/>'),
+    decal:svgWrap('<path d="M50 30 C36 8 8 14 12 38 C14 52 32 54 50 50 Z M50 50 C34 54 18 66 26 82 C34 94 48 80 50 62 Z" fill="#9B6BD3"/><path d="M50 30 C64 8 92 14 88 38 C86 52 68 54 50 50 Z M50 50 C66 54 82 66 74 82 C66 94 52 80 50 62 Z" fill="#C7A6EE"/><rect x="47" y="26" width="6" height="52" rx="3" fill="#5D4037"/>'),
+    mood:svgWrap('<circle cx="50" cy="50" r="40" fill="#F5B301"/><circle cx="37" cy="42" r="5" fill="#3A2E2A"/><circle cx="63" cy="42" r="5" fill="#3A2E2A"/><path d="M32 58 Q50 78 68 58" stroke="#3A2E2A" stroke-width="6" fill="none" stroke-linecap="round"/>'),
+    hidden:svgWrap('<circle cx="42" cy="42" r="26" fill="#FFF8E1" stroke="#E0A800" stroke-width="8"/><circle cx="42" cy="42" r="10" fill="#2E86DE"/><path d="M61 61 L84 84" stroke="#8D6E63" stroke-width="11" stroke-linecap="round"/>'),
     view:svgWrap('<rect x="14" y="18" width="72" height="56" rx="6" fill="none" stroke="#6C63B5" stroke-width="7"/><circle cx="34" cy="40" r="7" fill="#F5B301"/><path d="M20 68 L42 46 L58 60 L70 44 L82 66" fill="none" stroke="#6C63B5" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>'),
   };
   const methodOrder=methodOrderFor(route.subject);
@@ -1510,8 +1624,22 @@ function initRoundState(){
     const sizes=rc.sizes.slice();
     const shuffled=sizes.map((sz,i)=>({id:'b'+i,size:sz})).sort(()=>Math.random()-0.5);
     runtime.roundState={slots:sizes.map((sz,i)=>({id:'slot'+i,size:sz,filled:false})), blocks:shuffled, selectedBlock:null};
-  } else if(cfg.type==='freeDraw'){
-    runtime.roundState={brushColor:COLORS[0].hex, brushSize:'m', tool:'brush', imageData:null, undoStack:[]};
+  } else if(CANVAS_TYPES.includes(cfg.type)){
+    runtime.roundState={brushColor:rc.color||COLORS[0].hex, brushSize:'m', tool:'brush', stamp:rc.stamp||'star',
+      mood:null, imageData:null, baseImage:null, undoStack:[], guidePts:null, hits:null, done:false};
+  } else if(cfg.type==='hiddenFind'){
+    const cells=[];
+    [20,50,80].forEach(y=>[13,37,63,87].forEach(x=>cells.push([x,y])));
+    cells.sort(()=>Math.random()-0.5);
+    const kinds=[...Array(rc.count).fill(rc.target), ...rc.distract].sort(()=>Math.random()-0.5);
+    const jitter=n=>Math.round((Math.random()*2-1)*n);
+    const items=kinds.map((kind,i)=>({
+      id:'h'+i, kind,
+      x:cells[i][0]+jitter(5), y:cells[i][1]+jitter(6),
+      color:COLORS[Math.floor(Math.random()*COLORS.length)].hex,
+      rot:jitter(25), found:false
+    }));
+    runtime.roundState={items, foundCount:0, total:rc.count};
   } else if(cfg.type==='gallery'){
     runtime.roundState={items:loadGallery()};
   }
@@ -1548,7 +1676,12 @@ function activityInstructionText(){
   const cfg=runtime.cfg, rc=currentRoundCfg();
   if(cfg.type==='paintTarget') return rc.ask;
   if(cfg.type==='paintFree') return cfg.instruction+' ('+rc.name+')';
-  if(cfg.type==='freeDraw') return rc.theme;
+  if(cfg.type==='moodDraw'){
+    const m=MOODS.find(x=>x.key===runtime.roundState.mood);
+    return m ? `${m.label}! 떠오르는 색으로 마음껏 칠해 보아요` : '오늘 기분은 어때요? 내 기분과 닮은 얼굴을 골라요';
+  }
+  if(CANVAS_TYPES.includes(cfg.type)) return rc.theme;
+  if(cfg.type==='hiddenFind') return `그림 속에 숨은 ${withEulReul(SHAPE_WORD[rc.target])} ${rc.count}개 찾아요`;
   return cfg.instruction;
 }
 
@@ -1560,7 +1693,8 @@ function renderBoard(){
   if(cfg.type==='mosaicSingle') return renderMosaicSingleBoard();
   if(cfg.type==='paintTarget') return renderPaintTargetBoard();
   if(cfg.type==='mosaicOrder') return renderMosaicOrderBoard();
-  if(cfg.type==='freeDraw') return renderFreeDrawBoard();
+  if(CANVAS_TYPES.includes(cfg.type)) return renderCanvasArtBoard();
+  if(cfg.type==='hiddenFind') return renderHiddenFindBoard();
   if(cfg.type==='gallery') return renderGalleryBoard();
   return '';
 }
@@ -1594,22 +1728,153 @@ function isMatched(side,id){
   return (rs._matched||{})[side+':'+id]===true;
 }
 
-/* ---- FREE DRAW (자유 그리기 캔버스) ---- */
-function renderFreeDrawBoard(){
-  const rs=runtime.roundState;
-  const swatches=COLORS.map(c=>`<button class="swatch ${rs.tool==='brush'&&rs.brushColor===c.hex?'active':''}" style="background:${c.hex}" data-color="${c.hex}" title="${c.label}"></button>`).join('');
-  const sizeBtns=[['s','작게'],['m','보통'],['l','굵게']].map(([sz,label])=>
+/* ---- CANVAS ART (그리기 놀이: 자유 그리기·선 따라 그리기·도장·데칼코마니·기분 색칠) ---- */
+const CANVAS_TYPES=['freeDraw','traceDraw','stampDraw','decalDraw','moodDraw'];
+const CANVAS_W=600, CANVAS_H=480;
+const EXT_COLORS=[
+  ...COLORS,
+  {key:'pink',  label:'분홍', hex:'#FF8FB1'},
+  {key:'purple',label:'보라', hex:'#9B6BD3'},
+  {key:'brown', label:'갈색', hex:'#8D6E63'},
+];
+const MOODS=[
+  {key:'happy', label:'기뻐요',   color:'#F5B301'},
+  {key:'sad',   label:'슬퍼요',   color:'#4A90D9'},
+  {key:'angry', label:'화나요',   color:'#E74C3C'},
+  {key:'calm',  label:'편안해요', color:'#3CB88F'},
+];
+function moodFace(key,color){
+  const ink='stroke="#3A2E2A" stroke-width="5" fill="none" stroke-linecap="round"';
+  let f='';
+  if(key==='happy') f=`<circle cx="36" cy="42" r="5" fill="#3A2E2A"/><circle cx="64" cy="42" r="5" fill="#3A2E2A"/><path d="M30 58 Q50 80 70 58" ${ink}/>`;
+  else if(key==='sad') f=`<circle cx="36" cy="44" r="5" fill="#3A2E2A"/><circle cx="64" cy="44" r="5" fill="#3A2E2A"/><path d="M32 72 Q50 58 68 72" ${ink}/><path d="M66 52 C60 62 62 68 66 68 C70 68 72 62 66 52 Z" fill="#BFE3FF"/>`;
+  else if(key==='angry') f=`<path d="M26 32 L44 40" ${ink}/><path d="M74 32 L56 40" ${ink}/><circle cx="37" cy="47" r="5" fill="#3A2E2A"/><circle cx="63" cy="47" r="5" fill="#3A2E2A"/><path d="M34 70 Q50 60 66 70" ${ink}/>`;
+  else f=`<path d="M28 44 Q36 50 44 44" ${ink}/><path d="M56 44 Q64 50 72 44" ${ink}/><path d="M38 62 Q50 70 62 62" ${ink}/><circle cx="28" cy="56" r="5" fill="#FF9A9A" opacity=".6"/><circle cx="72" cy="56" r="5" fill="#FF9A9A" opacity=".6"/>`;
+  return svgWrap(`<circle cx="50" cy="50" r="44" fill="${color}"/><circle cx="50" cy="50" r="44" fill="#fff" opacity=".35"/>${f}`);
+}
+const STAMP_KINDS=[
+  {key:'star',  label:'별'},
+  {key:'leaf',  label:'나뭇잎'},
+  {key:'heart', label:'하트'},
+  {key:'flower',label:'꽃'},
+  {key:'circle',label:'동그라미'},
+];
+const STAMP_PATHS={
+  leaf:'M50 4 C84 22 92 60 50 96 C8 60 16 22 50 4 Z',
+  heart:'M50 88 C 8 58 6 28 27 18 C 42 11 50 24 50 32 C 50 24 58 11 73 18 C 94 28 92 58 50 88 Z',
+  star:'M'+starPoly(50,52,46,20).split(' ').join(' L')+' Z',
+};
+const STAMP_SIZE={s:48, m:76, l:108};
+function stampIconSvg(kind){
+  if(kind==='circle') return svgWrap(`<circle cx="50" cy="50" r="40" fill="currentColor"/>`);
+  if(kind==='flower'){
+    let p='';
+    for(let i=0;i<5;i++){ const a=i*Math.PI*2/5-Math.PI/2; p+=`<circle cx="${(50+Math.cos(a)*26).toFixed(1)}" cy="${(50+Math.sin(a)*26).toFixed(1)}" r="20" fill="currentColor"/>`; }
+    return svgWrap(p+`<circle cx="50" cy="50" r="15" fill="#F5B301" stroke="#fff" stroke-width="3"/>`);
+  }
+  const vein = kind==='leaf' ? `<path d="M50 16 V86" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".7"/>` : '';
+  return svgWrap(`<path d="${STAMP_PATHS[kind]}" fill="currentColor"/>${vein}`);
+}
+function drawStamp(ctx,kind,x,y,size,color,rot){
+  ctx.save();
+  ctx.translate(x,y); ctx.rotate(rot); ctx.scale(size/100,size/100); ctx.translate(-50,-50);
+  ctx.globalAlpha=.93;
+  ctx.fillStyle=color;
+  if(kind==='circle'){ ctx.beginPath(); ctx.arc(50,50,44,0,Math.PI*2); ctx.fill(); }
+  else if(kind==='flower'){
+    for(let i=0;i<5;i++){ const a=i*Math.PI*2/5-Math.PI/2; ctx.beginPath(); ctx.arc(50+Math.cos(a)*26,50+Math.sin(a)*26,20,0,Math.PI*2); ctx.fill(); }
+    ctx.fillStyle = color==='#F5B301' ? '#E67E22' : '#F5B301';
+    ctx.beginPath(); ctx.arc(50,50,15,0,Math.PI*2); ctx.fill();
+  } else {
+    ctx.fill(new Path2D(STAMP_PATHS[kind]));
+    if(kind==='leaf'){ ctx.strokeStyle='rgba(255,255,255,.7)'; ctx.lineWidth=5; ctx.lineCap='round'; ctx.beginPath(); ctx.moveTo(50,16); ctx.lineTo(50,86); ctx.stroke(); }
+  }
+  ctx.restore();
+}
+/* 라운드 시작 시 캔버스에 미리 그려두는 밑그림 (나무 줄기, 나비 몸통) */
+function drawPreset(ctx,preset){
+  const line=(x1,y1,x2,y2)=>{ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); };
+  ctx.save(); ctx.lineCap='round';
+  if(preset==='tree'){
+    ctx.strokeStyle='#8D6E63';
+    ctx.lineWidth=46; line(300,478,300,300);
+    ctx.lineWidth=22; line(300,330,205,230); line(300,320,398,218); line(300,300,300,170);
+    ctx.lineWidth=12; line(205,230,160,196); line(398,218,446,186); line(300,170,276,120);
+  } else if(preset==='butterfly'){
+    ctx.fillStyle='#5D4037';
+    ctx.beginPath(); ctx.ellipse(300,270,15,105,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(300,148,22,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#5D4037'; ctx.lineWidth=5;
+    ctx.beginPath(); ctx.moveTo(292,130); ctx.quadraticCurveTo(272,96,256,78); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(308,130); ctx.quadraticCurveTo(328,96,344,78); ctx.stroke();
+    ctx.beginPath(); ctx.arc(256,78,7,0,Math.PI*2); ctx.arc(344,78,7,0,Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+}
+/* 선 따라 그리기 — 안내선을 촘촘한 점으로 만들어, 학생 선이 몇 %를 지나갔는지 계산한다 */
+function traceGuidePoints(kind){
+  const pts=[];
+  if(kind==='line'){ for(let x=90;x<=510;x+=10) pts.push([x,240]); }
+  else if(kind==='wave'){ for(let x=80;x<=520;x+=8) pts.push([x,240+Math.sin((x-80)/440*Math.PI*3)*85]); }
+  else if(kind==='circle'){ for(let a=0;a<=360;a+=5){ const r=a*Math.PI/180-Math.PI/2; pts.push([300+Math.cos(r)*160,240+Math.sin(r)*160]); } }
+  else if(kind==='triangle'){
+    const v=[[300,72],[490,400],[110,400],[300,72]];
+    for(let i=0;i<3;i++){
+      const [x1,y1]=v[i],[x2,y2]=v[i+1];
+      const n=Math.ceil(Math.hypot(x2-x1,y2-y1)/10);
+      for(let k=0;k<n;k++) pts.push([x1+(x2-x1)*k/n, y1+(y2-y1)*k/n]);
+    }
+    pts.push([300,72]);
+  }
+  return pts;
+}
+function drawTraceGuide(ctx,pts){
+  const path=()=>{ ctx.beginPath(); pts.forEach(([x,y],i)=> i?ctx.lineTo(x,y):ctx.moveTo(x,y)); };
+  ctx.save(); ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.strokeStyle='#E8ECF4'; ctx.lineWidth=48; path(); ctx.stroke();
+  ctx.strokeStyle='#A9B0CE'; ctx.lineWidth=6; ctx.setLineDash([2,14]); path(); ctx.stroke(); ctx.setLineDash([]);
+  const [sx,sy]=pts[0], [ex,ey]=pts[pts.length-1];
+  if(Math.hypot(ex-sx,ey-sy)>20){
+    ctx.fillStyle='#F5B301'; ctx.fill(new Path2D(`M${starPoly(ex,ey,22,10).split(' ').join(' L')} Z`));
+  }
+  ctx.fillStyle='#3CB88F'; ctx.beginPath(); ctx.arc(sx,sy,17,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(sx,sy,6,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+function tracePct(rs){
+  if(!rs.hits||!rs.hits.length) return 0;
+  return Math.round(rs.hits.filter(Boolean).length/rs.hits.length*100);
+}
+function renderMoodPicker(){
+  const btns=MOODS.map(m=>`<button class="mood-btn" data-mood="${m.key}" style="--mood:${m.color}">${moodFace(m.key,m.color)}<span>${m.label}</span></button>`).join('');
+  return `<div class="mood-grid">${btns}</div>`;
+}
+function renderCanvasArtBoard(){
+  const rs=runtime.roundState, t=runtime.cfg.type;
+  if(t==='moodDraw' && !rs.mood) return renderMoodPicker();
+  const fold = t==='decalDraw' ? '<div class="fold-line"></div>' : '';
+  const stage=`<div class="draw-stage"><div class="canvas-wrap"><canvas id="drawCanvas" class="draw-canvas" width="${CANVAS_W}" height="${CANVAS_H}"></canvas>${fold}</div></div>`;
+  if(t==='traceDraw'){
+    return `${stage}
+    <div class="trace-bar"><div class="trace-bar-fill" id="traceFill" style="width:${tracePct(rs)}%"></div></div>
+    <button class="big-btn secondary" data-action="trace-reset">${ICON_REFRESH} 처음부터 다시 그리기</button>`;
+  }
+  const swatches=EXT_COLORS.map(c=>`<button class="swatch ${rs.tool!=='eraser'&&rs.brushColor===c.hex?'active':''}" style="background:${c.hex}" data-color="${c.hex}" title="${c.label}"></button>`).join('');
+  const sizeBtns=[['s','작게'],['m','보통'],['l',t==='stampDraw'?'크게':'굵게']].map(([sz,label])=>
     `<button class="brush-size-btn ${rs.brushSize===sz?'active':''}" data-size="${sz}">${label}</button>`
   ).join('');
+  const stampPicker = t==='stampDraw'
+    ? `<div class="stamp-picker" id="stampPicker" style="color:${rs.brushColor}">${STAMP_KINDS.map(k=>`<button class="stamp-btn ${rs.stamp===k.key?'active':''}" data-stamp="${k.key}" title="${k.label}">${stampIconSvg(k.key)}</button>`).join('')}</div>`
+    : '';
+  const eraser = t==='stampDraw' ? '' : `<button class="tool-btn ${rs.tool==='eraser'?'active':''}" data-tool="eraser" title="지우개">${ICON_ERASER}</button>`;
   return `
-  <div class="draw-stage">
-    <canvas id="drawCanvas" class="draw-canvas" width="600" height="480"></canvas>
-  </div>
+  ${stage}
+  ${stampPicker}
   <div class="draw-toolbar">
     <div class="draw-swatches">${swatches}</div>
     <div class="draw-sizes">${sizeBtns}</div>
     <div class="draw-tools">
-      <button class="tool-btn ${rs.tool==='eraser'?'active':''}" data-tool="eraser" title="지우개">${ICON_ERASER}</button>
+      ${eraser}
       <button class="tool-btn" data-action="draw-undo" title="되돌리기">${ICON_UNDO}</button>
       <button class="tool-btn" data-action="draw-clear" title="전체 지우기">${ICON_TRASH}</button>
     </div>
@@ -1617,11 +1882,26 @@ function renderFreeDrawBoard(){
   <button class="big-btn draw-done-btn" data-action="draw-finish">${ICON_CHECK} 완성했어요!</button>`;
 }
 
+/* ---- HIDDEN FIND (탐험 놀이: 숨은 모양 찾기) ---- */
+const SHAPE_WORD={circle:'동그라미', triangle:'세모', square:'네모', star:'별', heart:'하트'};
+function hasBatchim(w){ const c=w.charCodeAt(w.length-1); return c>=0xAC00 && c<=0xD7A3 && (c-0xAC00)%28!==0; }
+function withEulReul(w){ return w+(hasBatchim(w)?'을':'를'); }
+function withIeyo(w){ return w+(hasBatchim(w)?'이에요':'예요'); }
+function renderHiddenFindBoard(){
+  const rs=runtime.roundState, rc=currentRoundCfg();
+  const items=rs.items.map(it=>`<button class="hidden-item ${it.found?'found':''}" data-id="${it.id}" aria-label="${SHAPE_WORD[it.kind]}"
+      style="left:${it.x}%;top:${it.y}%;--rot:${it.rot}deg">${shapeIcon(it.kind,it.color)}</button>`).join('');
+  const slots=Array.from({length:rs.total}).map((_,i)=>
+    `<span class="hidden-slot ${i<rs.foundCount?'on':''}">${shapeIcon(rc.target, i<rs.foundCount?'#F5B301':'#D5DAE6')}</span>`).join('');
+  return `<div class="hidden-counter">${slots}</div>
+  <div class="hidden-scene" style="background-image:url('${ART.bgArtRoom}')">${items}</div>`;
+}
+
 /* ---- GALLERY (작품 전시관) ---- */
 function renderGalleryBoard(){
   const items=(runtime.roundState&&runtime.roundState.items)||loadGallery();
   if(!items.length){
-    return `<div class="gallery-empty">${mascotBlock('soft','아직 그림이 없어요. 자유 그리기에서 작품을 만들어 보아요!')}</div>`;
+    return `<div class="gallery-empty">${mascotBlock('soft','아직 그림이 없어요. 그리기 놀이에서 작품을 만들어 보아요!')}</div>`;
   }
   const cards=items.map(it=>`
     <div class="gallery-card">
@@ -1855,7 +2135,8 @@ function wireActivity(){
   else if(cfg.type==='mosaicSingle') wireMosaicSingle();
   else if(cfg.type==='paintTarget') wirePaintTarget();
   else if(cfg.type==='mosaicOrder') wireMosaicOrder();
-  else if(cfg.type==='freeDraw') wireFreeDraw();
+  else if(CANVAS_TYPES.includes(cfg.type)) wireCanvasArt();
+  else if(cfg.type==='hiddenFind') wireHiddenFind();
   else if(cfg.type==='gallery') wireGallery();
 }
 
@@ -1941,51 +2222,123 @@ function drawMatchLines(){
 }
 function cssEscape(s){ return String(s).replace(/([^a-zA-Z0-9_-])/g,'\\$1'); }
 
-/* ---- free draw wiring (표현관: 자유 그리기 캔버스) ----
+/* ---- canvas art wiring (그리기 놀이) ----
    주의: 팔레트/도구 버튼을 누를 때 화면 전체를 다시 그리는 render()를 호출하면
-   <canvas>가 새로 생성되어 그림이 지워지므로, 여기서는 상태만 바꾸고 DOM은 직접 갱신한다. */
-function wireFreeDraw(){
+   <canvas>가 새로 생성되어 그림이 지워지므로, 여기서는 상태만 바꾸고 DOM은 직접 갱신한다.
+   (render()가 다른 이유로 호출돼도 rs.imageData로 그림을 되살린다) */
+function playPop(){ if(settings.sound) tone(700+Math.random()*200,0,0.09,'triangle',0.12); }
+function distToSeg(px,py,x1,y1,x2,y2){
+  const dx=x2-x1, dy=y2-y1, len2=dx*dx+dy*dy;
+  let t=len2 ? ((px-x1)*dx+(py-y1)*dy)/len2 : 0;
+  t=Math.max(0,Math.min(1,t));
+  return Math.hypot(px-(x1+t*dx), py-(y1+t*dy));
+}
+function wireCanvasArt(){
+  const t=runtime.cfg.type, rs=runtime.roundState, rc=currentRoundCfg();
+
+  if(t==='moodDraw' && !rs.mood){
+    document.querySelectorAll('.mood-btn[data-mood]').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const m=MOODS.find(x=>x.key===b.getAttribute('data-mood'));
+        rs.mood=m.key; rs.brushColor=m.color;
+        playSuccess();
+        render();
+        speak(activityInstructionText());
+      });
+    });
+    return;
+  }
+
   const canvas=document.getElementById('drawCanvas');
   if(!canvas) return;
   const ctx=canvas.getContext('2d');
-  const rs=runtime.roundState;
-  if(rs.imageData){ ctx.putImageData(rs.imageData,0,0); }
-  else { ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height); }
+  const W=canvas.width;
 
-  let drawing=false, lastX=0, lastY=0;
-  function pos(e){
+  if(!rs.baseImage){
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,canvas.height);
+    if(rc.preset) drawPreset(ctx,rc.preset);
+    if(t==='traceDraw'){
+      rs.guidePts=traceGuidePoints(rc.guide);
+      rs.hits=new Array(rs.guidePts.length).fill(false);
+      drawTraceGuide(ctx,rs.guidePts);
+    }
+    rs.baseImage=ctx.getImageData(0,0,W,canvas.height);
+  }
+  ctx.putImageData(rs.imageData||rs.baseImage,0,0);
+
+  let drawing=false, lastX=0, lastY=0, lastStampX=-999, lastStampY=-999;
+  const pos=e=>{
     const r=canvas.getBoundingClientRect();
-    return {x:(e.clientX-r.left)*(canvas.width/r.width), y:(e.clientY-r.top)*(canvas.height/r.height)};
-  }
-  function pushUndo(){
-    rs.undoStack=rs.undoStack||[];
-    rs.undoStack.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+    return {x:(e.clientX-r.left)*(W/r.width), y:(e.clientY-r.top)*(canvas.height/r.height)};
+  };
+  const pushUndo=()=>{
+    rs.undoStack.push(ctx.getImageData(0,0,W,canvas.height));
     if(rs.undoStack.length>15) rs.undoStack.shift();
-  }
-  function drawSegment(x1,y1,x2,y2){
+  };
+  const strokeLine=(x1,y1,x2,y2)=>{ ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke(); };
+  const markTrace=(x1,y1,x2,y2)=>{
+    rs.guidePts.forEach(([gx,gy],i)=>{ if(!rs.hits[i] && distToSeg(gx,gy,x1,y1,x2,y2)<34) rs.hits[i]=true; });
+    const fill=document.getElementById('traceFill');
+    if(fill) fill.style.width=tracePct(rs)+'%';
+  };
+  const drawSegment=(x1,y1,x2,y2)=>{
     ctx.lineJoin='round'; ctx.lineCap='round';
-    if(rs.tool==='eraser'){ ctx.strokeStyle='#ffffff'; ctx.lineWidth=36; }
+    if(t==='traceDraw'){ ctx.strokeStyle=rs.brushColor; ctx.lineWidth=18; }
+    else if(rs.tool==='eraser'){ ctx.strokeStyle='#ffffff'; ctx.lineWidth=36; }
     else { ctx.strokeStyle=rs.brushColor; ctx.lineWidth = rs.brushSize==='l'?26 : rs.brushSize==='s'?8 : 16; }
-    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
-  }
+    strokeLine(x1,y1,x2,y2);
+    if(t==='decalDraw') strokeLine(W-x1,y1,W-x2,y2); // 반대쪽에 거울처럼
+    if(t==='traceDraw') markTrace(x1,y1,x2,y2);
+  };
+  const stampAt=(x,y)=>{
+    drawStamp(ctx, rs.stamp, x, y, STAMP_SIZE[rs.brushSize], rs.brushColor, (Math.random()-0.5)*0.9);
+    lastStampX=x; lastStampY=y;
+    playPop();
+  };
+
   canvas.addEventListener('pointerdown', e=>{
+    if(rs.done) return;
     canvas.setPointerCapture(e.pointerId);
     pushUndo();
     drawing=true;
     const p=pos(e); lastX=p.x; lastY=p.y;
-    drawSegment(p.x,p.y,p.x+0.1,p.y+0.1); // 톡 찍어도 점이 보이도록
+    if(t==='stampDraw') stampAt(p.x,p.y);
+    else drawSegment(p.x,p.y,p.x+0.1,p.y+0.1); // 톡 찍어도 점이 보이도록
   });
   canvas.addEventListener('pointermove', e=>{
     if(!drawing) return;
     const p=pos(e);
+    if(t==='stampDraw'){
+      // 누른 채 움직이면 도장 크기만큼 떨어질 때마다 이어서 찍힌다
+      if(Math.hypot(p.x-lastStampX,p.y-lastStampY) > STAMP_SIZE[rs.brushSize]*0.85) stampAt(p.x,p.y);
+      return;
+    }
     drawSegment(lastX,lastY,p.x,p.y);
     lastX=p.x; lastY=p.y;
   });
   ['pointerup','pointercancel','lostpointercapture'].forEach(ev=>canvas.addEventListener(ev, ()=>{
     if(!drawing) return;
     drawing=false;
-    rs.imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+    rs.imageData=ctx.getImageData(0,0,W,canvas.height);
+    if(t==='traceDraw' && !rs.done && tracePct(rs)>=90){
+      rs.done=true;
+      playSuccess();
+      speak('끝까지 잘 따라 그렸어요! '+randomPraise());
+      setTimeout(finishRound,700);
+    }
   }));
+
+  const resetToBase=()=>{
+    ctx.putImageData(rs.baseImage,0,0);
+    rs.imageData=null;
+  };
+  const traceReset=document.querySelector('[data-action="trace-reset"]');
+  if(traceReset) traceReset.addEventListener('click',()=>{
+    if(rs.done) return;
+    resetToBase();
+    rs.hits=new Array(rs.guidePts.length).fill(false);
+    const fill=document.getElementById('traceFill'); if(fill) fill.style.width='0%';
+  });
 
   document.querySelectorAll('.draw-swatches .swatch').forEach(sw=>{
     sw.addEventListener('click',()=>{
@@ -1993,8 +2346,15 @@ function wireFreeDraw(){
       rs.tool='brush';
       document.querySelectorAll('.draw-swatches .swatch').forEach(s2=>s2.classList.remove('active'));
       sw.classList.add('active');
-      const eraserBtn=document.querySelector('.tool-btn[data-tool="eraser"]');
-      if(eraserBtn) eraserBtn.classList.remove('active');
+      const eb=document.querySelector('.tool-btn[data-tool="eraser"]'); if(eb) eb.classList.remove('active');
+      const sp=document.getElementById('stampPicker'); if(sp) sp.style.color=rs.brushColor;
+    });
+  });
+  document.querySelectorAll('.stamp-btn[data-stamp]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      rs.stamp=b.getAttribute('data-stamp');
+      document.querySelectorAll('.stamp-btn').forEach(b2=>b2.classList.remove('active'));
+      b.classList.add('active');
     });
   });
   document.querySelectorAll('.brush-size-btn[data-size]').forEach(b=>{
@@ -2011,7 +2371,7 @@ function wireFreeDraw(){
   });
   const undoBtn=document.querySelector('[data-action="draw-undo"]');
   if(undoBtn) undoBtn.addEventListener('click',()=>{
-    if(rs.undoStack && rs.undoStack.length){
+    if(rs.undoStack.length){
       const prev=rs.undoStack.pop();
       ctx.putImageData(prev,0,0);
       rs.imageData=prev;
@@ -2020,18 +2380,45 @@ function wireFreeDraw(){
   const clearBtn=document.querySelector('[data-action="draw-clear"]');
   if(clearBtn) clearBtn.addEventListener('click',()=>{
     pushUndo();
-    ctx.fillStyle='#ffffff';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-    rs.imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+    resetToBase();
   });
   const finishBtn=document.querySelector('[data-action="draw-finish"]');
   if(finishBtn) finishBtn.addEventListener('click',()=>{
-    const dataUrl=canvas.toDataURL('image/png');
-    const rc=currentRoundCfg();
-    addToGallery(dataUrl, rc.theme);
+    if(rs.done) return;
+    rs.done=true;
+    let theme=rc.theme;
+    if(t==='moodDraw'){ const m=MOODS.find(x=>x.key===rs.mood); theme='기분 색칠 · '+(m?m.label:''); }
+    addToGallery(canvas.toDataURL('image/png'), theme);
     playSuccess();
     speak(randomPraise());
     setTimeout(finishRound,400);
+  });
+}
+
+/* ---- hidden find wiring (탐험 놀이: 숨은 모양 찾기) ---- */
+function wireHiddenFind(){
+  const rs=runtime.roundState, rc=currentRoundCfg();
+  const want=SHAPE_WORD[rc.target];
+  document.querySelectorAll('.hidden-item[data-id]').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const it=rs.items.find(i=>i.id===el.getAttribute('data-id'));
+      if(!it || it.found || rs.foundCount>=rs.total) return;
+      if(it.kind===rc.target){
+        it.found=true;
+        rs.foundCount++;
+        playSuccess();
+        render();
+        if(rs.foundCount>=rs.total){
+          speak(`${want} ${rs.total}개를 모두 찾았어요! `+randomPraise());
+          setTimeout(finishRound,700);
+        } else {
+          speak(`${withEulReul(want)} 찾았어요!`);
+        }
+      } else {
+        retryFeedback(`그건 ${withIeyo(SHAPE_WORD[it.kind])}. ${withEulReul(want)} 찾아봐요`);
+        el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+      }
+    });
   });
 }
 
