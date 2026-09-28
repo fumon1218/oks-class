@@ -1,5 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
-const CACHE_NAME = 'oks-class-v1';
+// 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
+const CACHE_NAME = 'oks-class-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -25,9 +26,25 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 캐시 우선, 실패 시 네트워크로 재시도 (오프라인에서도 앱이 열리도록)
+// 화면(HTML)은 항상 최신을 먼저 받아오고, 오프라인일 때만 저장본을 씀(네트워크 우선).
+// 아이콘 등 잘 안 바뀌는 파일은 저장본을 먼저 씀(캐시 우선) — 그래야 배포 직후에도 바로 새 화면이 보입니다.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
+
+  if (isPage) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
