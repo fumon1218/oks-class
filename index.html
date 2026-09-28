@@ -458,17 +458,31 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 }
 
 /* match engine */
-.match-cols{display:flex;gap:14px;}
-.match-col{flex:1;display:flex;flex-direction:column;gap:12px;}
+.match-cols{display:flex;gap:14px;position:relative;}
+.match-col{flex:1;display:flex;flex-direction:column;gap:12px;position:relative;z-index:1;}
+.match-lines{position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:0;}
+.match-line-path{fill:none;stroke:var(--ok);stroke-width:5;stroke-linecap:round;
+  filter:drop-shadow(0 2px 3px rgba(46,204,113,.4));}
+.match-line-dot{fill:var(--ok);}
 .match-item{
-  background:var(--surface-2);border-radius:var(--radius-sm);
+  background:rgba(255,255,255,.94);border-radius:18px;
   border:3px solid transparent;
-  min-height:76px;display:flex;align-items:center;justify-content:center;gap:8px;
-  padding:8px;font-size:17px;font-weight:700;
+  min-height:78px;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:10px;font-size:17px;font-weight:800;color:var(--ink);
+  box-shadow:0 4px 12px rgba(43,46,74,.14);
+  transition:transform .15s ease, box-shadow .15s ease;
 }
-.match-item svg{width:44px;height:44px;}
-.match-item.selected{border-color:var(--accent-2);background:var(--surface);}
-.match-item.matched{opacity:.45;border-color:var(--ok);}
+.match-item:active{transform:scale(.96);}
+.match-item svg{width:50px;height:50px;filter:drop-shadow(0 3px 4px rgba(43,46,74,.16));}
+.match-item .size-icon{display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.match-item .size-icon svg{width:100%;height:100%;}
+.match-item.selected{
+  border-color:var(--accent-2);
+  box-shadow:0 0 0 5px rgba(58,175,169,.24), 0 4px 12px rgba(43,46,74,.14);
+}
+.match-item.matched{
+  opacity:.55;border-color:var(--ok);background:rgba(224,247,235,.9);
+}
 .match-item.shake{animation:shake .4s;}
 @keyframes shake{
   0%,100%{transform:translateX(0);}
@@ -623,6 +637,21 @@ function starPoly(cx,cy,rOuter,rInner){
   return pts.join(' ');
 }
 function svgWrap(inner,vb){return `<svg viewBox="0 0 ${vb||100} ${vb||100}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}</svg>`;}
+let _bubbleUid=0;
+function colorBubbleIcon(hex){
+  const gid='bubble'+(_bubbleUid++);
+  return svgWrap(`
+    <defs>
+      <radialGradient id="${gid}" cx="35%" cy="30%" r="75%">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity=".95"/>
+        <stop offset="35%" stop-color="${hex}" stop-opacity=".55"/>
+        <stop offset="100%" stop-color="${hex}"/>
+      </radialGradient>
+    </defs>
+    <circle cx="50" cy="50" r="38" fill="url(#${gid})" stroke="${hex}" stroke-width="2"/>
+    <ellipse cx="38" cy="36" rx="10" ry="6" fill="#fff" opacity=".65"/>
+  `);
+}
 
 function shapeIcon(kind,color,outlineOnly){
   const f=outlineOnly?'none':color;
@@ -777,7 +806,7 @@ const ACTIVITIES={
           {id:'leaf',   icon:objectIcon('leaf',COLORS[3].hex), matchId:'green'},
           {id:'orange', icon:objectIcon('orange',COLORS[4].hex), matchId:'orange'},
         ],
-        targets: COLORS.map(c=>({id:c.key, matchId:c.key, icon:svgWrap(`<circle cx="50" cy="50" r="38" fill="${c.hex}"/>`), label:c.label}))
+        targets: COLORS.map(c=>({id:c.key, matchId:c.key, icon:colorBubbleIcon(c.hex), label:c.label}))
       }]
     },
     paint:{
@@ -1390,19 +1419,28 @@ function renderBoard(){
 }
 
 /* ---- MATCH ---- */
+function matchItemIcon(item,rc){
+  if(item.icon) return item.icon;
+  if(item.size && rc && rc.object) return `<div class="size-icon" style="width:${Math.min(item.size,60)}px;height:${Math.min(item.size,60)}px">${objectIcon(rc.object, rc.color||'#8E9BCB')}</div>`;
+  return '';
+}
 function renderMatchBoard(){
   const rs=runtime.roundState;
+  const rc=currentRoundCfg();
   const leftHtml=rs.left.map(item=>{
     const matched=isMatched('left',item.id);
     const selected=rs.selected&&rs.selected.side==='left'&&rs.selected.id===item.id;
-    return `<button class="match-item ${matched?'matched':''} ${selected?'selected':''}" data-side="left" data-id="${item.id}" ${matched?'disabled':''}>${item.icon}</button>`;
+    return `<button class="match-item ${matched?'matched':''} ${selected?'selected':''}" data-side="left" data-id="${item.id}" ${matched?'disabled':''}>${matchItemIcon(item,rc)}</button>`;
   }).join('');
   const rightHtml=rs.right.map(item=>{
     const matched=isMatched('right',item.id);
     const selected=rs.selected&&rs.selected.side==='right'&&rs.selected.id===item.id;
-    return `<button class="match-item ${matched?'matched':''} ${selected?'selected':''}" data-side="right" data-id="${item.id}" ${matched?'disabled':''}>${item.icon||''}<span>${item.label||''}</span></button>`;
+    return `<button class="match-item ${matched?'matched':''} ${selected?'selected':''}" data-side="right" data-id="${item.id}" ${matched?'disabled':''}>${matchItemIcon(item,rc)}<span>${item.label||''}</span></button>`;
   }).join('');
-  return `<div class="match-cols"><div class="match-col">${leftHtml}</div><div class="match-col">${rightHtml}</div></div>`;
+  return `<div class="match-cols">
+    <svg class="match-lines" id="matchLines"></svg>
+    <div class="match-col">${leftHtml}</div><div class="match-col">${rightHtml}</div>
+  </div>`;
 }
 function isMatched(side,id){
   const rs=runtime.roundState;
@@ -1666,8 +1704,53 @@ function wireMatch(){
       }
     });
   });
+  drawMatchLines();
 }
 function findBy(arr,id){return arr.find(x=>x.id===id);}
+function drawMatchLines(){
+  const svg=document.getElementById('matchLines');
+  const cols=document.querySelector('.match-cols');
+  if(!svg||!cols||!runtime||!runtime.roundState) return;
+  const colsRect=cols.getBoundingClientRect();
+  svg.setAttribute('width',colsRect.width);
+  svg.setAttribute('height',colsRect.height);
+  svg.innerHTML='';
+  const rs=runtime.roundState;
+  const matched=rs._matched||{};
+  Object.keys(matched).filter(k=>k.startsWith('left:')).forEach(k=>{
+    const leftId=k.slice(5);
+    const leftItem=findBy(rs.left,leftId);
+    if(!leftItem) return;
+    const rightItem=rs.right.find(r=>r.matchId===leftItem.matchId);
+    if(!rightItem) return;
+    const leftEl=cols.querySelector(`.match-item[data-side="left"][data-id="${cssEscape(leftId)}"]`);
+    const rightEl=cols.querySelector(`.match-item[data-side="right"][data-id="${cssEscape(rightItem.id)}"]`);
+    if(!leftEl||!rightEl) return;
+    const lr=leftEl.getBoundingClientRect(), rr=rightEl.getBoundingClientRect();
+    const x1=lr.right-colsRect.left, y1=lr.top+lr.height/2-colsRect.top;
+    const x2=rr.left-colsRect.left, y2=rr.top+rr.height/2-colsRect.top;
+    const midX=(x1+x2)/2;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`);
+    path.setAttribute('class','match-line-path');
+    svg.appendChild(path);
+    const len=path.getTotalLength();
+    path.style.strokeDasharray=len;
+    path.style.strokeDashoffset=len;
+    path.getBoundingClientRect();
+    requestAnimationFrame(()=>{
+      path.style.transition='stroke-dashoffset .5s ease';
+      path.style.strokeDashoffset='0';
+    });
+    [[x1,y1],[x2,y2]].forEach(([cx,cy])=>{
+      const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx',cx); dot.setAttribute('cy',cy); dot.setAttribute('r',6);
+      dot.setAttribute('class','match-line-dot');
+      svg.appendChild(dot);
+    });
+  });
+}
+function cssEscape(s){ return String(s).replace(/([^a-zA-Z0-9_-])/g,'\\$1'); }
 
 /* ---- paint free wiring ---- */
 function wirePaintFree(){
