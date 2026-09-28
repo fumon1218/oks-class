@@ -92,6 +92,8 @@ body{
   padding-block:12px 40px;
   min-height:100%;
 }
+body.is-world #app{max-width:none;padding-inline:0;}
+body.is-world .hero-title{padding-inline:16px;}
 .scene-panel{
   background:var(--surface-glass);
   backdrop-filter:blur(6px) saturate(1.1);
@@ -203,40 +205,72 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 .celebrate-card .mascot-row{justify-content:center;margin-top:0;}
 .celebrate-card .mascot-avatar{width:110px;height:130px;}
 
-/* ---------- season pill ---------- */
-.season-pill{
-  display:flex;align-items:center;gap:8px;
-  width:fit-content;margin:10px auto 0;
-  background:var(--surface);border:1px solid var(--line);
-  border-radius:999px;padding:8px 16px;
-  font-size:14px;font-weight:700;color:var(--ink);
-  box-shadow:var(--shadow);
-}
-.season-pill svg{width:16px;height:16px;color:var(--ink-soft);}
-.season-pill:active svg{transform:rotate(50deg);}
+/* ---------- world hero (마을 그림, 정글 점프 로비 느낌의 HUD) ---------- */
+.hero-title{padding-top:14px;padding-bottom:2px;text-align:center;}
+.hero-title h1{font-size:26px;color:var(--accent);}
+.hero-title p{margin:4px 0 0;color:var(--ink-soft);font-size:15px;}
 
-/* ---------- world map (마을 그림 지도) ---------- */
-.world-map{
+.world-hero{
   position:relative;
-  margin-top:16px;
+  margin-top:10px;
+  width:100%;
   aspect-ratio:1100/733;
-  border-radius:26px;
   overflow:hidden;
   background-size:cover;
   background-position:center;
-  box-shadow:inset 0 0 0 2px rgba(255,255,255,.5);
+  box-shadow:inset 0 0 0 2px rgba(255,255,255,.4);
 }
+@media (min-width:761px){ .world-hero{border-radius:26px;} }
+
+.hud-row{position:absolute;left:0;right:0;display:flex;z-index:5;padding:10px 12px;pointer-events:none;}
+.hud-row>*{pointer-events:auto;}
+.hud-top{top:0;justify-content:space-between;align-items:flex-start;gap:6px;flex-wrap:wrap;}
+.hud-profile{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.92);border-radius:999px;
+  padding:5px 14px 5px 5px;box-shadow:0 4px 12px rgba(0,0,0,.25);
+}
+.hud-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(160deg,#FFD8CC,#FFB199);
+  display:flex;align-items:center;justify-content:center;font-size:18px;flex:none;
+}
+.hud-profile-text{display:flex;flex-direction:column;gap:2px;min-width:84px;}
+.hud-profile-name{font-size:11.5px;font-weight:700;color:#2B2E4A;}
+.hud-bar{width:84px;height:6px;border-radius:999px;background:#E3E8EF;overflow:hidden;}
+.hud-bar-fill{height:100%;background:linear-gradient(90deg,#7EE070,#3AAFA9);border-radius:999px;}
+.hud-stats{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+.hud-pill{
+  background:rgba(255,255,255,.92);border-radius:999px;
+  padding:6px 12px;font-size:12.5px;font-weight:800;color:#2B2E4A;
+  box-shadow:0 4px 12px rgba(0,0,0,.25);white-space:nowrap;
+}
+
+.season-pill{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.94);border:none;
+  border-radius:999px;padding:6px 13px;
+  font-size:12px;font-weight:700;color:var(--ink);
+  box-shadow:0 4px 12px rgba(0,0,0,.22);
+  white-space:nowrap;
+  order:2;margin:0 auto;
+}
+.season-pill svg{width:14px;height:14px;color:var(--ink-soft);flex:none;}
+.season-pill:active svg{transform:rotate(50deg);}
+.hud-profile{order:1;}
+.hud-stats{order:3;}
+
 .map-spot{
   position:absolute;transform:translate(-50%,-50%);
   display:flex;flex-direction:column;align-items:center;gap:2px;
-  width:19%;
+  width:16%;z-index:3;
   padding:0;
 }
 .map-spot-label{
-  font-size:11.5px;font-weight:700;color:var(--ink);
-  background:var(--surface);padding:2px 8px;border-radius:999px;
+  font-size:11px;font-weight:700;color:var(--ink);
+  background:var(--surface);padding:2px 7px;border-radius:999px;
   box-shadow:var(--shadow);white-space:nowrap;
-  transform:translateY(2.6em);
+  transform:translateY(2.4em);
 }
 .map-spot.active::before{
   content:'';position:absolute;left:50%;top:50%;
@@ -249,10 +283,46 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 }
 @keyframes spot-pulse{0%,100%{opacity:.55;transform:translate(-50%,-50%) scale(.94);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.05);}}
 .map-spot.soon .map-spot-label{color:var(--ink-soft);}
+.map-spot.label-above .map-spot-label{transform:translateY(-3.1em);}
+.map-spot.label-above .spot-lock{top:auto;bottom:8%;}
 .spot-lock{
   position:absolute;left:50%;top:8%;transform:translate(-50%,-50%);
-  font-size:15px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));
+  font-size:14px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));
 }
+
+.hud-mascot{position:absolute;left:10px;bottom:10px;z-index:5;max-width:62%;pointer-events:none;}
+.hud-mascot-inner{margin:0;}
+.hud-mascot-inner .speech-bubble{font-size:12.5px;padding:8px 12px;}
+.hud-mascot-inner .mascot-avatar{width:56px;height:66px;}
+
+.hud-quest{
+  position:absolute;right:8px;bottom:8px;z-index:5;
+  background:rgba(255,255,255,.95);border-radius:14px;
+  padding:6px 10px;box-shadow:0 6px 16px rgba(0,0,0,.22);
+  min-width:132px;pointer-events:none;
+}
+.hud-quest-head{font-size:10.5px;font-weight:800;color:var(--ink);margin-bottom:2px;}
+.hud-quest-row{display:flex;align-items:center;gap:4px;font-size:10.5px;color:var(--ink-soft);padding:1px 0;}
+.hud-quest-row.done{color:var(--ink);}
+.hud-quest-name{flex:1;}
+.hud-quest-count{font-weight:700;}
+
+.hud-navbar{
+  display:flex;justify-content:center;gap:16px;
+  padding:14px 16px 6px;
+}
+.navcircle{
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  font-size:11px;font-weight:700;color:var(--ink-soft);
+}
+.navcircle span{
+  width:52px;height:52px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;background:var(--surface);box-shadow:var(--shadow);
+  border:3px solid transparent;
+}
+.navcircle.active span{border-color:var(--accent);}
+.navcircle.active{color:var(--ink);}
 
 /* ---------- level path ---------- */
 .path-board{padding:24px 18px 30px;}
@@ -605,11 +675,13 @@ const VILLAGE_SPOTS={
   science:{left:'60%', top:'21%'},
   story:  {left:'73%', top:'36%'},
   pe:     {left:'85%', top:'45%'},
-  space:  {left:'67%', top:'56%'},
+  space:  {left:'65%', top:'50%'},
   social: {left:'26%', top:'51%'},
   music:  {left:'9%',  top:'47%'},
   number: {left:'11%', top:'31%'},
 };
+/* 아래쪽 HUD 패널과 라벨이 겹치는 건물은 라벨을 위쪽에 띄움 */
+const VILLAGE_LABEL_ABOVE=new Set();
 
 /* ---- activity configs ---- */
 const ACTIVITIES={
@@ -786,6 +858,19 @@ try{
 function saveProgress(){try{localStorage.setItem('oks-class-progress-v1',JSON.stringify(progress));}catch(e){}}
 function starsFor(subject,method){ return (progress[subject] && progress[subject][method]) ? progress[subject][method].stars : 0; }
 function isUnlocked(subject,method){ return (progress[subject] && progress[subject][method]) ? progress[subject][method].unlocked : false; }
+function totalStarsEarned(){
+  let n=0;
+  SUBJECT_ORDER.forEach(s=>METHOD_ORDER.forEach(m=>n+=starsFor(s,m)));
+  return n;
+}
+function totalStarsPossible(){ return SUBJECT_ORDER.length*METHOD_ORDER.length*3; }
+function completedActivityCount(){
+  let n=0;
+  SUBJECT_ORDER.forEach(s=>METHOD_ORDER.forEach(m=>{ if(starsFor(s,m)>0) n++; }));
+  return n;
+}
+function totalActivityCount(){ return SUBJECT_ORDER.length*METHOD_ORDER.length; }
+function explorerLevel(){ return 1+Math.floor(totalStarsEarned()/6); } // 별 6개마다 레벨업
 function recordResult(subject,method,stars){
   const idx=METHOD_ORDER.indexOf(method);
   progress[subject][method].stars=Math.max(progress[subject][method].stars, stars);
@@ -953,11 +1038,15 @@ const app=document.getElementById('app');
 
 function render(){
   let html='';
-  html+=renderBrandbar();
-  if(route.view==='world') html+=renderWorld();
-  else if(route.view==='room') html+=renderRoom();
-  else if(route.view==='path') html+=renderPath();
-  else if(route.view==='activity') html+=renderActivityShell();
+  document.body.classList.toggle('is-world', route.view==='world');
+  if(route.view==='world'){
+    html+=renderWorld();
+  }else{
+    html+=renderBrandbar();
+    if(route.view==='room') html+=renderRoom();
+    else if(route.view==='path') html+=renderPath();
+    else if(route.view==='activity') html+=renderActivityShell();
+  }
   app.innerHTML=html;
   updateSceneBackground();
   wireGlobal();
@@ -988,29 +1077,67 @@ function renderWorld(){
   ];
   const season=pickWorldSeason();
   const bgUrl=ART.worldSeasons[season];
+  const sm=SEASON_META[season];
   const nodes=allRooms.map(r=>{
     const slot=VILLAGE_SPOTS[r.key]||{left:'50%',top:'50%'};
     const action = r.locked ? 'soon-room' : 'go-room';
     const roomAttr = r.key ? `data-room="${r.key}"` : '';
-    return `<button class="map-spot ${r.locked?'soon':'active'}" style="left:${slot.left};top:${slot.top}" data-action="${action}" ${roomAttr} aria-label="${r.label}">
+    const aboveCls = VILLAGE_LABEL_ABOVE.has(r.key) ? ' label-above' : '';
+    return `<button class="map-spot ${r.locked?'soon':'active'}${aboveCls}" style="left:${slot.left};top:${slot.top}" data-action="${action}" ${roomAttr} aria-label="${r.label}">
       ${r.locked?'<span class="spot-lock">🔒</span>':''}
       <span class="map-spot-label">${r.label}</span>
     </button>`;
   }).join('');
-  const sm=SEASON_META[season];
+
+  const lv=explorerLevel(), starsN=totalStarsEarned(), starsMax=totalStarsPossible();
+  const lvFloor=(lv-1)*6, lvPct=Math.min(100, Math.round((starsN-lvFloor)/6*100));
+  const done=completedActivityCount(), totalAct=totalActivityCount();
+
+  const methodRows=METHOD_ORDER.map(m=>{
+    const n=SUBJECT_ORDER.reduce((sum,s)=>sum+(starsFor(s,m)>0?1:0),0);
+    const label=SUBJECTS.colors.methods[m].label;
+    return `<div class="hud-quest-row ${n===SUBJECT_ORDER.length?'done':''}">
+      <span class="hud-quest-check">${n===SUBJECT_ORDER.length?'✅':'⬜'}</span>
+      <span class="hud-quest-name">${label}</span>
+      <span class="hud-quest-count">${n}/${SUBJECT_ORDER.length}</span>
+    </div>`;
+  }).join('');
+
   return `
-  <div class="scene-panel">
-    <div class="hero">
-      <h1>옥쌤의 즐거운 교실</h1>
-      <p>어느 교실로 들어가볼까요?</p>
+  <div class="hero hero-title">
+    <h1>옥쌤의 즐거운 교실</h1>
+    <p>어느 교실로 들어가볼까요?</p>
+  </div>
+  <div class="world-hero" style="background-image:url('${bgUrl}')">
+    <div class="hud-row hud-top">
+      <div class="hud-profile">
+        <span class="hud-avatar">🧑‍🎨</span>
+        <div class="hud-profile-text">
+          <div class="hud-profile-name">탐험가 <b>Lv.${lv}</b></div>
+          <div class="hud-bar"><div class="hud-bar-fill" style="width:${lvPct}%"></div></div>
+        </div>
+      </div>
+      <button class="season-pill" data-action="cycle-season" data-season="${season}">
+        <span>${sm.emoji} ${sm.label}</span>${ICON_REFRESH}
+      </button>
+      <div class="hud-stats">
+        <span class="hud-pill">⭐ ${starsN}/${starsMax}</span>
+        <span class="hud-pill">🏫 ${done}/${totalAct}</span>
+      </div>
     </div>
-    ${mascotBlock('cheer','안녕! 지도에서 교실을 골라봐!')}
-    <button class="season-pill" data-action="cycle-season" data-season="${season}">
-      <span>${sm.emoji} ${sm.label}</span>${ICON_REFRESH}
-    </button>
-    <div class="world-map" style="background-image:url('${bgUrl}')">
-      ${nodes}
+
+    ${nodes}
+
+    <div class="hud-mascot">${mascotBlock('cheer','안녕! 지도에서 교실을 골라봐!','hud-mascot-inner')}</div>
+
+    <div class="hud-quest">
+      <div class="hud-quest-head">🎨 미술실 학습 현황</div>
+      ${methodRows}
     </div>
+  </div>
+  <div class="hud-navbar">
+    <button class="navcircle active" data-action="go-world"><span>🗺️</span>지도</button>
+    <button class="navcircle" data-action="open-settings"><span>⚙️</span>설정</button>
   </div>`;
 }
 
