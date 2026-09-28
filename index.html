@@ -203,42 +203,44 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 .celebrate-card .mascot-row{justify-content:center;margin-top:0;}
 .celebrate-card .mascot-avatar{width:110px;height:130px;}
 
-/* ---------- world map (미니맵) ---------- */
+/* ---------- world map (마을 그림 지도) ---------- */
 .world-map{
   position:relative;
   margin-top:16px;
-  min-height:400px;
+  aspect-ratio:1100/733;
   border-radius:26px;
   overflow:hidden;
-  background:
-    radial-gradient(120% 60% at 50% 0%, #CFEBFF 0%, #E9F6E3 55%, #DCEFCB 100%);
+  background-size:cover;
+  background-position:center;
   box-shadow:inset 0 0 0 2px rgba(255,255,255,.5);
 }
-.map-paths{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}
-.map-school{
-  position:absolute;left:50%;top:8%;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:2px;
-  width:130px;
-}
-.map-school-art{width:110px;height:110px;filter:drop-shadow(0 8px 10px rgba(43,46,74,.18));}
-.map-school-art svg,.map-school-art img{width:100%;height:100%;object-fit:contain;}
-.map-school span{font-size:14px;font-weight:700;color:var(--ink);background:rgba(255,255,255,.75);padding:2px 10px;border-radius:999px;}
-.map-node{
+.map-spot{
   position:absolute;transform:translate(-50%,-50%);
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-  width:86px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  width:19%;
+  padding:0;
 }
-.map-node-art{width:74px;height:74px;position:relative;filter:drop-shadow(0 6px 8px rgba(43,46,74,.16));transition:transform .15s ease;}
-.map-node-art svg,.map-node-art img{width:100%;height:100%;object-fit:contain;}
-.map-node:active .map-node-art{transform:scale(.94);}
-.map-node-label{
-  font-size:13px;font-weight:700;color:var(--ink);
-  background:var(--surface);padding:3px 10px;border-radius:999px;
+.map-spot-label{
+  font-size:11.5px;font-weight:700;color:var(--ink);
+  background:var(--surface);padding:2px 8px;border-radius:999px;
   box-shadow:var(--shadow);white-space:nowrap;
+  transform:translateY(2.6em);
 }
-.map-node.soon .map-node-art{filter:grayscale(.75) opacity(.8) drop-shadow(0 6px 8px rgba(43,46,74,.16));}
-.map-node.soon .map-node-label{color:var(--ink-soft);}
-.node-lock{position:absolute;right:-2px;bottom:2px;font-size:20px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
+.map-spot.active::before{
+  content:'';position:absolute;left:50%;top:50%;
+  width:64%;aspect-ratio:1/1;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  box-shadow:0 0 0 3px rgba(255,255,255,.9), 0 0 0 6px rgba(255,111,89,.55);
+  animation:spot-pulse 1.8s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes spot-pulse{0%,100%{opacity:.55;transform:translate(-50%,-50%) scale(.94);}50%{opacity:1;transform:translate(-50%,-50%) scale(1.05);}}
+.map-spot.soon .map-spot-label{color:var(--ink-soft);}
+.spot-lock{
+  position:absolute;left:50%;top:8%;transform:translate(-50%,-50%);
+  font-size:15px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));
+}
 
 /* ---------- level path ---------- */
 .path-board{padding:24px 18px 30px;}
@@ -570,14 +572,32 @@ const METHOD_ORDER=['connect','paint','mosaic'];
 
 /* ---- rooms (world map) ---- */
 const ROOMS={
-  arts:{ label:'미술실', sub:'색깔 · 모양 · 크기', unlocked:true, subjects:SUBJECT_ORDER, tint:'#FFE3DC', roof:'#FF6F59' },
+  arts:{ label:'미술실', sub:'색깔 · 모양 · 크기', unlocked:true, subjects:SUBJECT_ORDER },
 };
 const ROOM_ORDER=['arts'];
+/* 마을 지도 속 각 건물 간판에 맞춘 교실들 — 콘텐츠는 차차 추가 예정 */
 const SOON_ROOMS=[
-  {key:'music', label:'음악실', sub:'곧 만나요', tint:'#E3ECFB', roof:'#5B7FD1'},
-  {key:'word', label:'글자놀이방', sub:'곧 만나요', tint:'#E8F8F0', roof:'#3AAFA9'},
-  {key:'number', label:'숫자놀이터', sub:'곧 만나요', tint:'#FFF3E0', roof:'#F5B301'},
+  {key:'word',    label:'글자놀이방', sub:'곧 만나요'},
+  {key:'science', label:'과학실',     sub:'곧 만나요'},
+  {key:'story',   label:'이야기방',   sub:'곧 만나요'},
+  {key:'pe',      label:'체육관',     sub:'곧 만나요'},
+  {key:'space',   label:'우주교실',   sub:'곧 만나요'},
+  {key:'social',  label:'사회교실',   sub:'곧 만나요'},
+  {key:'music',   label:'음악실',     sub:'곧 만나요'},
+  {key:'number',  label:'숫자놀이터', sub:'곧 만나요'},
 ];
+/* 마을 그림 속 건물 위치(%) — 간판(아이콘)은 이미 그림에 그려져 있어 버튼은 투명 히트박스 역할만 함 */
+const VILLAGE_SPOTS={
+  arts:   {left:'42%', top:'18%'},
+  word:   {left:'25%', top:'21%'},
+  science:{left:'60%', top:'21%'},
+  story:  {left:'73%', top:'36%'},
+  pe:     {left:'85%', top:'45%'},
+  space:  {left:'67%', top:'56%'},
+  social: {left:'26%', top:'51%'},
+  music:  {left:'9%',  top:'47%'},
+  number: {left:'11%', top:'31%'},
+};
 
 /* ---- activity configs ---- */
 const ACTIVITIES={
@@ -830,14 +850,25 @@ function retryFeedback(msg){
 const ART={
   mascotIdle:'icons/mascot-idle.png', mascotCheer:'icons/mascot-cheer.png', mascotSoft:'icons/mascot-soft.png',
   bgArtRoom:'icons/bg-artroom.jpg',
-  mapSchool:'icons/school.png',
-  mapHouse:{
-    arts:'icons/house-arts.png',
-    music:'icons/house-music.png',
-    word:'icons/house-word.png',
-    number:'icons/house-number.png'
+  worldSeasons:{
+    spring:'icons/world-spring.jpg',
+    summer:'icons/world-summer.jpg',
+    autumn:'icons/world-autumn.jpg',
+    winter:'icons/world-winter.jpg'
   }
 };
+/* ---------- 마을 그림 계절 뽑기(정글 점프 마을과 동일한 방식: 하루에 한 번, 어제와 다른 계절을 무작위로) ---------- */
+function pickWorldSeason(){
+  const seasons=Object.keys(ART.worldSeasons);
+  const todayKey=(()=>{ const d=new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; })();
+  let saved=null;
+  try{ saved=JSON.parse(localStorage.getItem('oks_world_season')||'null'); }catch(e){}
+  if(saved && saved.day===todayKey && seasons.includes(saved.season)) return saved.season;
+  const pool=seasons.filter(s=>!saved || s!==saved.season);
+  const season=pool[Math.floor(Math.random()*pool.length)];
+  try{ localStorage.setItem('oks_world_season', JSON.stringify({day:todayKey, season})); }catch(e){}
+  return season;
+}
 function mascotSVG(pose){
   // simple chibi placeholder: round face, side hair, purple top — matches the reference pose language
   // (idle: arms down · cheer: arms up + sparkles · soft: gentle head tilt, encouraging)
@@ -921,40 +952,22 @@ function renderBrandbar(){
   </div>`;
 }
 
-/* 학교 중심 + 교실집 배치 좌표(%) — 노드가 늘어나면 이 배열에 자리만 추가하면 됨 */
-const MAP_SLOTS=[
-  {left:'12%', top:'54%'},
-  {left:'80%', top:'50%'},
-  {left:'20%', top:'86%'},
-  {left:'72%', top:'88%'},
-  {left:'46%', top:'92%'},
-];
-function mapConnectorSvg(n){
-  const school={x:50,y:22};
-  const paths=[];
-  for(let i=0;i<n;i++){
-    const slot=MAP_SLOTS[i];
-    const x=parseFloat(slot.left), y=parseFloat(slot.top);
-    paths.push(`<path d="M${school.x} ${school.y} Q${(school.x+x)/2} ${(school.y+y)/2-6} ${x} ${y-6}" stroke="#fff" stroke-width="2.4" stroke-dasharray="1 7" stroke-linecap="round" fill="none" opacity=".9"/>`);
-  }
-  return `<svg class="map-paths" viewBox="0 0 100 100" preserveAspectRatio="none">${paths.join('')}</svg>`;
-}
 function renderWorld(){
   const allRooms=[
     ...ROOM_ORDER.map(key=>({key, ...ROOMS[key], locked:false})),
-    ...SOON_ROOMS.map(r=>({key:null, ...r, locked:true})),
+    ...SOON_ROOMS.map(r=>({...r, locked:true})),
   ];
-  const nodes=allRooms.map((r,i)=>{
-    const slot=MAP_SLOTS[i]||MAP_SLOTS[MAP_SLOTS.length-1];
-    const art = r.key && ART.mapHouse[r.key] ? `<img src="${ART.mapHouse[r.key]}" alt="">` : classroomHouseIcon(r.tint,r.roof,r.locked);
+  const season=pickWorldSeason();
+  const bgUrl=ART.worldSeasons[season];
+  const nodes=allRooms.map(r=>{
+    const slot=VILLAGE_SPOTS[r.key]||{left:'50%',top:'50%'};
     const action = r.locked ? 'soon-room' : 'go-room';
     const roomAttr = r.key ? `data-room="${r.key}"` : '';
-    return `<button class="map-node ${r.locked?'soon':''}" style="left:${slot.left};top:${slot.top}" data-action="${action}" ${roomAttr}>
-      <div class="map-node-art">${art}${r.locked?'<span class="node-lock">🔒</span>':''}</div>
-      <span class="map-node-label">${r.label}</span>
+    return `<button class="map-spot ${r.locked?'soon':'active'}" style="left:${slot.left};top:${slot.top}" data-action="${action}" ${roomAttr} aria-label="${r.label}">
+      ${r.locked?'<span class="spot-lock">🔒</span>':''}
+      <span class="map-spot-label">${r.label}</span>
     </button>`;
   }).join('');
-  const schoolArt = ART.mapSchool ? `<img src="${ART.mapSchool}" alt="">` : schoolHubIcon();
   return `
   <div class="scene-panel">
     <div class="hero">
@@ -962,9 +975,7 @@ function renderWorld(){
       <p>어느 교실로 들어가볼까요?</p>
     </div>
     ${mascotBlock('cheer','안녕! 지도에서 교실을 골라봐!')}
-    <div class="world-map">
-      ${mapConnectorSvg(allRooms.length)}
-      <div class="map-school"><div class="map-school-art">${schoolArt}</div><span>옥쌤 학교</span></div>
+    <div class="world-map" style="background-image:url('${bgUrl}')">
       ${nodes}
     </div>
   </div>`;
@@ -1039,30 +1050,6 @@ function lockIcon(){return svgWrap('<rect x="26" y="46" width="48" height="38" r
 function schoolDoorIcon(color,locked){
   return svgWrap(`<rect x="22" y="10" width="56" height="82" rx="6" fill="${color}"/><circle cx="64" cy="52" r="4" fill="#fff"/>${locked?'<rect x="40" y="34" width="20" height="16" rx="4" fill="#fff" opacity=".6"/>':''}`);
 }
-function schoolHubIcon(){
-  return svgWrap(`
-    <polygon points="50,8 92,42 8,42" fill="#FF6F59"/>
-    <rect x="16" y="42" width="68" height="46" rx="4" fill="#FFF7EE" stroke="#E9C9A8" stroke-width="2"/>
-    <rect x="8" y="20" width="14" height="22" fill="#3AAFA9"/>
-    <circle cx="15" cy="16" r="7" fill="#3AAFA9"/>
-    <rect x="42" y="58" width="16" height="30" rx="3" fill="#8E5B3C"/>
-    <circle cx="55" cy="73" r="1.6" fill="#FFE7C2"/>
-    <rect x="24" y="52" width="14" height="12" rx="2" fill="#BEE3F8"/>
-    <rect x="62" y="52" width="14" height="12" rx="2" fill="#BEE3F8"/>
-    <path d="M6 90 Q50 82 94 90" stroke="#DDEAD1" stroke-width="0" fill="none"/>
-  `, 100);
-}
-function classroomHouseIcon(tint,roof,locked){
-  return svgWrap(`
-    <polygon points="50,14 88,44 12,44" fill="${locked?'#C9CEE3':roof}"/>
-    <rect x="20" y="44" width="60" height="42" rx="6" fill="${locked?'#E3E8EF':tint}"/>
-    <rect x="40" y="58" width="20" height="28" rx="3" fill="${locked?'#B9BFDA':'#fff'}" opacity="${locked?'1':'.85'}"/>
-    ${locked
-      ? '<rect x="45" y="63" width="10" height="8" rx="2" fill="#8E97C9"/><path d="M47 63 v-4 a3 3 0 0 1 6 0 v4" stroke="#8E97C9" stroke-width="3" fill="none"/>'
-      : '<circle cx="50" cy="72" r="2" fill="'+roof+'"/>'}
-  `, 100);
-}
-
 /* ---------- activity shell + dispatch ---------- */
 function ensureRuntime(){
   if(runtime && runtime.subject===route.subject && runtime.method===route.method) return;
