@@ -154,8 +154,67 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 .subject-card small{color:var(--ink-soft);font-size:14px;margin-top:-6px;}
 .subject-card.soon{opacity:.55;}
 .subject-card.soon .icon-wrap{background:var(--surface-2) !important;}
+.mini-stars-row{display:flex;gap:2px;}
+.mini-stars-row svg{width:12px;height:12px;}
+.mini-stars{margin-top:-4px;}
 
-/* ---------- method menu ---------- */
+/* ---------- mascot ---------- */
+.mascot-row{
+  display:flex;align-items:flex-end;gap:12px;
+  margin:10px 0 4px;
+}
+.mascot-avatar{width:76px;height:76px;flex:none;}
+.mascot-avatar svg{width:100%;height:100%;}
+.pose-cheer{animation:mascot-bounce 1.1s ease infinite;}
+@keyframes mascot-bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+.speech-bubble{
+  position:relative;
+  background:var(--surface);border:2px solid var(--line);
+  border-radius:16px;padding:10px 14px;
+  font-size:15px;font-weight:700;color:var(--ink);
+  box-shadow:var(--shadow);
+  margin-bottom:10px;
+}
+.speech-bubble::after{
+  content:'';position:absolute;left:-8px;bottom:14px;
+  width:14px;height:14px;background:var(--surface);
+  border-left:2px solid var(--line);border-bottom:2px solid var(--line);
+  transform:rotate(45deg);
+}
+.celebrate-card .mascot-row{justify-content:center;margin-top:0;}
+.celebrate-card .mascot-avatar{width:96px;height:96px;}
+
+/* ---------- world map ---------- */
+.world-grid{margin-top:14px;}
+.room-door{
+  background:var(--surface);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);padding:16px 12px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+.door-frame{width:64px;height:76px;}
+.door-frame svg{width:100%;height:100%;}
+.room-door span{font-size:18px;font-weight:700;}
+.room-door small{color:var(--ink-soft);font-size:13px;}
+.room-door.soon{opacity:.5;}
+
+/* ---------- level path ---------- */
+.path-board{padding:24px 18px 30px;}
+.path-track{display:flex;flex-direction:column;align-items:center;}
+.path-node-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.path-node-wrap.shift{transform:translateX(-54px);}
+.path-connector{width:4px;height:34px;background:repeating-linear-gradient(var(--line) 0 6px, transparent 6px 12px);}
+.path-node{
+  width:88px;height:88px;border-radius:50%;
+  background:var(--surface);box-shadow:var(--shadow);
+  border:4px solid var(--accent-2);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.path-node.locked{border-color:var(--line);opacity:.6;}
+.path-node-label{font-size:16px;font-weight:700;}
+.path-node-stars{display:flex;gap:2px;}
+.star-mini svg{width:16px;height:16px;}
+
+/* ---------- method menu (legacy, unused styles kept harmless) ---------- */
 .method-list{display:flex;flex-direction:column;gap:14px;margin-top:8px;}
 .method-card{
   background:var(--surface);border-radius:var(--radius-md);
@@ -464,6 +523,18 @@ const SUBJECTS={
   }
 };
 const SUBJECT_ORDER=['colors','shapes','sizes'];
+const METHOD_ORDER=['connect','paint','mosaic'];
+
+/* ---- rooms (world map) ---- */
+const ROOMS={
+  arts:{ label:'미술실', sub:'색깔 · 모양 · 크기', unlocked:true, subjects:SUBJECT_ORDER },
+};
+const ROOM_ORDER=['arts'];
+const SOON_ROOMS=[
+  {label:'음악실', sub:'곧 만나요'},
+  {label:'글자놀이방', sub:'곧 만나요'},
+  {label:'숫자놀이터', sub:'곧 만나요'},
+];
 
 /* ---- activity configs ---- */
 const ACTIVITIES={
@@ -614,7 +685,41 @@ try{
 }catch(e){}
 function saveSettings(){try{localStorage.setItem('oksaem-settings',JSON.stringify(settings));}catch(e){}}
 
-let route={view:'home', subject:null, method:null};
+/* ---------- progress (stars + unlocks) ---------- */
+function defaultProgress(){
+  const p={};
+  SUBJECT_ORDER.forEach(subj=>{
+    p[subj]={};
+    METHOD_ORDER.forEach((m,i)=>{ p[subj][m]={stars:0, unlocked:i===0}; });
+  });
+  return p;
+}
+let progress=defaultProgress();
+try{
+  const saved=JSON.parse(localStorage.getItem('oks-class-progress-v1')||'null');
+  if(saved){
+    SUBJECT_ORDER.forEach(subj=>{
+      METHOD_ORDER.forEach((m,i)=>{
+        if(saved[subj] && saved[subj][m]){
+          progress[subj][m].stars=saved[subj][m].stars||0;
+          progress[subj][m].unlocked = i===0 ? true : !!saved[subj][m].unlocked;
+        }
+      });
+    });
+  }
+}catch(e){}
+function saveProgress(){try{localStorage.setItem('oks-class-progress-v1',JSON.stringify(progress));}catch(e){}}
+function starsFor(subject,method){ return (progress[subject] && progress[subject][method]) ? progress[subject][method].stars : 0; }
+function isUnlocked(subject,method){ return (progress[subject] && progress[subject][method]) ? progress[subject][method].unlocked : false; }
+function recordResult(subject,method,stars){
+  const idx=METHOD_ORDER.indexOf(method);
+  progress[subject][method].stars=Math.max(progress[subject][method].stars, stars);
+  const next=METHOD_ORDER[idx+1];
+  if(next && stars>=1) progress[subject][next].unlocked=true;
+  saveProgress();
+}
+
+let route={view:'world', room:null, subject:null, method:null};
 let runtime=null; // per-activity mutable state
 let settingsOpen=false;
 
@@ -672,6 +777,57 @@ function speak(text){
 }
 const PRAISE=['잘했어요!','최고예요!','정말 멋져요!','훌륭해요!','참 잘했어요!'];
 function randomPraise(){return PRAISE[Math.floor(Math.random()*PRAISE.length)];}
+function retryFeedback(msg){
+  playRetry();
+  speak(msg||'다시 해볼까요?');
+  if(runtime) runtime.mistakes=(runtime.mistakes||0)+1;
+}
+
+/* ---------- mascot (옥쌤) — placeholder art, swap ART.mascot* with real files later ---------- */
+const ART={ mascotIdle:null, mascotCheer:null, mascotSoft:null, bgWorld:null, bgArtRoom:null };
+function mascotSVG(pose){
+  // simple chibi placeholder: round face, side hair, purple top — matches the reference pose language
+  // (idle: arms down · cheer: arms up + sparkles · soft: gentle head tilt, encouraging)
+  const armsUp = pose==='cheer';
+  const tilt = pose==='soft' ? '8' : '0';
+  const sparkles = pose==='cheer' ? `
+    <path d="M18 22 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3 Z" fill="#FFD1E8"/>
+    <path d="M84 30 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2 Z" fill="#FFD1E8"/>` : '';
+  return svgWrap(`
+  <g transform="rotate(${tilt} 50 55)">
+    <ellipse cx="50" cy="88" rx="22" ry="6" fill="#00000014"/>
+    ${armsUp?`
+      <path d="M34 66 C 20 60 14 46 18 34" stroke="#B79CD9" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M66 66 C 80 60 86 46 82 34" stroke="#B79CD9" stroke-width="10" fill="none" stroke-linecap="round"/>
+    `:`
+      <path d="M34 68 C 28 76 28 82 32 86" stroke="#B79CD9" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M66 68 C 72 76 72 82 68 86" stroke="#B79CD9" stroke-width="10" fill="none" stroke-linecap="round"/>
+    `}
+    <path d="M32 60 C 32 40 68 40 68 60 L 68 82 C 68 90 32 90 32 82 Z" fill="#C9AEEB"/>
+    <path d="M40 60 h20 v8 a10 10 0 0 1 -20 0 Z" fill="#fff" opacity=".55"/>
+    <circle cx="50" cy="34" r="22" fill="#FFE3D1"/>
+    <path d="M26 30 C 24 12 44 4 50 8 C 58 2 78 12 74 32 C 70 24 64 30 64 22 C 56 28 44 28 36 22 C 36 30 28 24 26 30 Z" fill="#8B5A3C"/>
+    <path d="M25 30 C 20 42 24 54 32 58" stroke="#8B5A3C" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M75 30 C 80 42 76 54 68 58" stroke="#8B5A3C" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M40 33 q3 -5 6 0" stroke="#5A3B28" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M54 33 q3 -5 6 0" stroke="#5A3B28" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <circle cx="38" cy="40" r="4" fill="#FFB0A8" opacity=".7"/>
+    <circle cx="62" cy="40" r="4" fill="#FFB0A8" opacity=".7"/>
+    <path d="M42 42 q8 8 16 0" stroke="#5A3B28" stroke-width="3" fill="none" stroke-linecap="round"/>
+    ${sparkles}
+  </g>`, 100);
+}
+function speechBubble(text){
+  return `<div class="speech-bubble">${text}</div>`;
+}
+function mascotBlock(pose,text,extraClass){
+  const src = pose==='cheer'?ART.mascotCheer : pose==='soft'?ART.mascotSoft : ART.mascotIdle;
+  const art = src ? `<img src="${src}" alt="">` : mascotSVG(pose);
+  return `<div class="mascot-row ${extraClass||''}">
+    <div class="mascot-avatar pose-${pose}">${art}</div>
+    ${text?speechBubble(text):''}
+  </div>`;
+}
 
 /* ================= icons for chrome ================= */
 const ICON_BACK=svgWrap(`<path d="M62 20 L34 50 L62 80" stroke="currentColor" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
@@ -685,10 +841,10 @@ const app=document.getElementById('app');
 function render(){
   let html='';
   html+=renderBrandbar();
-  if(route.view==='home') html+=renderHome();
-  else if(route.view==='methods') html+=renderMethods();
+  if(route.view==='world') html+=renderWorld();
+  else if(route.view==='room') html+=renderRoom();
+  else if(route.view==='path') html+=renderPath();
   else if(route.view==='activity') html+=renderActivityShell();
-  html+= route.celebrateDone ? '' : '';
   app.innerHTML=html;
   wireGlobal();
   if(route.view==='activity') wireActivity();
@@ -699,58 +855,102 @@ function render(){
 function renderBrandbar(){
   return `
   <div class="brandbar">
-    <button class="brand" data-action="go-home">${paletteIcon('#FF6F59')}<span>옥쌤의 즐거운 교실</span></button>
+    <button class="brand" data-action="go-world">${paletteIcon('#FF6F59')}<span>옥쌤의 즐거운 교실</span></button>
     <div class="spacer"></div>
     <button class="gear" data-action="open-settings">${ICON_GEAR}설정</button>
   </div>`;
 }
 
-function renderHome(){
-  const cards=SUBJECT_ORDER.map(key=>{
-    const s=SUBJECTS[key];
-    return `<button class="subject-card" data-action="go-methods" data-subject="${key}">
-      <div class="icon-wrap" style="background:${s.tint}">${s.icon}</div>
-      <span>${s.label}</span>
-      <small>${s.sub}</small>
+function renderWorld(){
+  const doors=ROOM_ORDER.map(key=>{
+    const r=ROOMS[key];
+    return `<button class="room-door" data-action="go-room" data-room="${key}">
+      <div class="door-frame">${schoolDoorIcon('#FF6F59')}</div>
+      <span>${r.label}</span>
+      <small>${r.sub}</small>
     </button>`;
   }).join('');
+  const soon=SOON_ROOMS.map(r=>`
+    <button class="room-door soon" data-action="soon-room">
+      <div class="door-frame">${schoolDoorIcon('#B9BFDA',true)}</div>
+      <span>${r.label}</span>
+      <small>${r.sub}</small>
+    </button>`).join('');
   return `
   <div class="hero">
     <h1>옥쌤의 즐거운 교실</h1>
-    <p>미술 시간 · 색깔 · 모양 · 크기를 재미있게 배워요</p>
+    <p>어느 교실로 들어가볼까요?</p>
   </div>
-  <div class="grid-cards">
-    ${cards}
-    <button class="subject-card soon" disabled>
-      <div class="icon-wrap">${svgWrap('<circle cx="50" cy="50" r="34" fill="none" stroke="#9AA0C0" stroke-width="8" stroke-dasharray="10 10"/><path d="M50 34v32M34 50h32" stroke="#9AA0C0" stroke-width="8" stroke-linecap="round"/>')}</div>
-      <span>준비중</span>
-      <small>새 수업을 만들고 있어요</small>
-    </button>
-  </div>`;
+  ${mascotBlock('cheer','안녕! 오늘은 뭘 배워볼까?')}
+  <div class="grid-cards world-grid">${doors}${soon}</div>`;
 }
 
-function renderMethods(){
-  const s=SUBJECTS[route.subject];
-  const methodKeys=['connect','paint','mosaic'];
-  const iconFor={
-    connect:svgWrap('<circle cx="28" cy="30" r="10" fill="#3AAFA9"/><circle cx="72" cy="70" r="10" fill="#FF6F59"/><path d="M34 36 L66 64" stroke="#8E9BCB" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 10"/>'),
-    paint:svgWrap('<path d="M50 90 C20 90 12 68 22 50 C30 36 46 34 50 20 C54 34 70 36 78 50 C88 68 80 90 50 90 Z" fill="#F5B301"/><circle cx="50" cy="60" r="12" fill="#fff"/>'),
-    mosaic:svgWrap('<rect x="10" y="10" width="35" height="35" fill="#E74C3C"/><rect x="55" y="10" width="35" height="35" fill="#F5B301"/><rect x="10" y="55" width="35" height="35" fill="#2E86DE"/><rect x="55" y="55" width="35" height="35" fill="#27AE60"/>'),
-  };
-  const cards=methodKeys.map(mk=>{
-    const m=s.methods[mk];
-    return `<button class="method-card" data-action="go-activity" data-method="${mk}">
-      <div class="icon-wrap">${iconFor[mk]}</div>
-      <div class="txt"><strong>${m.label}</strong><span>${m.sub}</span></div>
+function renderRoom(){
+  const room=ROOMS[route.room];
+  const cards=room.subjects.map(key=>{
+    const s=SUBJECTS[key];
+    const stars = METHOD_ORDER.reduce((sum,m)=>sum+starsFor(key,m),0);
+    return `<button class="subject-card" data-action="go-path" data-subject="${key}">
+      <div class="icon-wrap" style="background:${s.tint}">${s.icon}</div>
+      <span>${s.label}</span>
+      <small>${s.sub}</small>
+      ${stars>0?`<div class="mini-stars">${miniStars(stars)}</div>`:''}
     </button>`;
   }).join('');
   return `
   <div class="subheader">
-    <button class="back" data-action="go-home">${ICON_BACK}뒤로</button>
+    <button class="back" data-action="go-world">${ICON_BACK}뒤로</button>
+    <h2>${room.label}</h2>
+    <div></div>
+  </div>
+  ${mascotBlock('idle','무엇을 배워볼까요?')}
+  <div class="grid-cards">${cards}</div>`;
+}
+
+function miniStars(n){
+  let out='';
+  for(let i=0;i<9;i++) out+= (i<n? bigStarIcon('#F5B301') : bigStarIcon('#E3E8EF'));
+  return `<span class="mini-stars-row">${out}</span>`;
+}
+
+function renderPath(){
+  const s=SUBJECTS[route.subject];
+  const nodeIconFor={
+    connect:svgWrap('<circle cx="28" cy="30" r="10" fill="#3AAFA9"/><circle cx="72" cy="70" r="10" fill="#FF6F59"/><path d="M34 36 L66 64" stroke="#8E9BCB" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 10"/>'),
+    paint:svgWrap('<path d="M50 90 C20 90 12 68 22 50 C30 36 46 34 50 20 C54 34 70 36 78 50 C88 68 80 90 50 90 Z" fill="#F5B301"/><circle cx="50" cy="60" r="12" fill="#fff"/>'),
+    mosaic:svgWrap('<rect x="10" y="10" width="35" height="35" fill="#E74C3C"/><rect x="55" y="10" width="35" height="35" fill="#F5B301"/><rect x="10" y="55" width="35" height="35" fill="#2E86DE"/><rect x="55" y="55" width="35" height="35" fill="#27AE60"/>'),
+  };
+  const nodes=METHOD_ORDER.map((mk,i)=>{
+    const m=s.methods[mk];
+    const unlocked=isUnlocked(route.subject,mk);
+    const stars=starsFor(route.subject,mk);
+    return `<div class="path-node-wrap ${i%2===1?'shift':''}">
+      <button class="path-node ${unlocked?'':'locked'}" data-action="${unlocked?'go-activity':'locked-node'}" data-method="${mk}">
+        ${unlocked?nodeIconFor[mk]:lockIcon()}
+      </button>
+      <div class="path-node-label">${m.label}</div>
+      <div class="path-node-stars">${starRow(stars)}</div>
+    </div>`;
+  }).join('<div class="path-connector"></div>');
+  return `
+  <div class="subheader">
+    <button class="back" data-action="go-room" data-room="${route.room}">${ICON_BACK}뒤로</button>
     <h2>${s.label}</h2>
     <div></div>
   </div>
-  <div class="method-list">${cards}</div>`;
+  ${mascotBlock('idle','순서대로 도전해보아요!')}
+  <div class="board path-board">
+    <div class="path-track">${nodes}</div>
+  </div>`;
+}
+function starRow(n){
+  let out='';
+  for(let i=0;i<3;i++) out+=`<span class="star-mini">${bigStarIcon(i<n?'#F5B301':'#E3E8EF')}</span>`;
+  return out;
+}
+function lockIcon(){return svgWrap('<rect x="26" y="46" width="48" height="38" rx="8" fill="#B9BFDA"/><path d="M34 46 V32 a16 16 0 0 1 32 0 V46" stroke="#B9BFDA" stroke-width="8" fill="none"/>');}
+function schoolDoorIcon(color,locked){
+  return svgWrap(`<rect x="22" y="10" width="56" height="82" rx="6" fill="${color}"/><circle cx="64" cy="52" r="4" fill="#fff"/>${locked?'<rect x="40" y="34" width="20" height="16" rx="4" fill="#fff" opacity=".6"/>':''}`);
 }
 
 /* ---------- activity shell + dispatch ---------- */
@@ -759,7 +959,7 @@ function ensureRuntime(){
   const cfg=ACTIVITIES[route.subject][route.method];
   runtime={
     subject:route.subject, method:route.method,
-    cfg, roundIndex:0, celebrate:null,
+    cfg, roundIndex:0, celebrate:null, mistakes:0,
     roundState:null
   };
   initRoundState();
@@ -803,7 +1003,7 @@ function renderActivityShell(){
   const instructionText=activityInstructionText();
   return `
   <div class="subheader">
-    <button class="back" data-action="go-methods-from-activity">${ICON_BACK}뒤로</button>
+    <button class="back" data-action="go-path-from-activity">${ICON_BACK}뒤로</button>
     <h2>${m.label}</h2>
     <div class="dots">${dotsHtml}</div>
   </div>
@@ -949,10 +1149,13 @@ function wireGlobal(){
 }
 function onGlobalAction(e){
   const action=e.currentTarget.getAttribute('data-action');
-  if(action==='go-home'){ route={view:'home',subject:null,method:null}; runtime=null; render(); }
-  else if(action==='go-methods'){ route.view='methods'; route.subject=e.currentTarget.getAttribute('data-subject'); render(); }
+  if(action==='go-world'){ route={view:'world',room:null,subject:null,method:null}; runtime=null; render(); }
+  else if(action==='go-room'){ route.view='room'; route.room=e.currentTarget.getAttribute('data-room')||route.room; route.subject=null; route.method=null; runtime=null; render(); }
+  else if(action==='go-path'){ route.view='path'; route.subject=e.currentTarget.getAttribute('data-subject'); route.method=null; runtime=null; render(); }
   else if(action==='go-activity'){ route.view='activity'; route.method=e.currentTarget.getAttribute('data-method'); runtime=null; render(); speakInstructionSoon(); }
-  else if(action==='go-methods-from-activity'){ route.view='methods'; route.method=null; runtime=null; render(); }
+  else if(action==='go-path-from-activity'){ route.view='path'; route.method=null; runtime=null; render(); }
+  else if(action==='locked-node'){ speak('먼저 앞 단계를 완성해볼까요?'); }
+  else if(action==='soon-room'){ speak('이 교실은 곧 열려요!'); }
   else if(action==='open-settings'){ settingsOpen=true; render(); }
   else if(action==='replay'){ speak(activityInstructionText()); }
 }
@@ -992,8 +1195,7 @@ function wireMatch(){
         render();
         if(rs.matchedCount>=rs.total){ setTimeout(finishRound,500); }
       } else {
-        playRetry();
-        speak('다시 해볼까요?');
+        retryFeedback('다시 해볼까요?');
         rs.shakeIds=[ (side==='left'?id:rs.selected.id), (side==='right'?id:rs.selected.id) ];
         rs.selected=null;
         render();
@@ -1063,8 +1265,7 @@ function wireMosaicColor(){
           setTimeout(finishRound,600);
         }
       } else {
-        playRetry();
-        speak('다른 색을 골라볼까요?');
+        retryFeedback('다른 색을 골라볼까요?');
         cell.classList.add('wrong');
         setTimeout(()=>cell.classList.remove('wrong'),400);
       }
@@ -1091,7 +1292,7 @@ function wireMosaicSingle(){
           setTimeout(finishRound,600);
         }
       } else {
-        playRetry();
+        retryFeedback('다시 눌러볼까요?');
         cell.classList.add('wrong');
         setTimeout(()=>cell.classList.remove('wrong'),400);
       }
@@ -1112,7 +1313,7 @@ function wirePaintTarget(){
         render();
         setTimeout(finishRound,600);
       } else {
-        playRetry(); speak('다시 골라볼까요?');
+        retryFeedback('다시 골라볼까요?');
         rs.shakeIndex=idx; render();
         setTimeout(()=>{ rs.shakeIndex=null; render(); },400);
       }
@@ -1149,7 +1350,7 @@ function wireMosaicOrder(){
           setTimeout(finishRound,600);
         }
       } else {
-        playRetry(); speak('다른 크기를 놓아볼까요?');
+        retryFeedback('다른 크기를 놓아볼까요?');
         rs.selectedBlock=null;
         rs.shakeSlot=slotId;
         render();
@@ -1160,24 +1361,37 @@ function wireMosaicOrder(){
 }
 
 /* ================= round / activity completion ================= */
+function starsFromMistakes(mistakes){
+  if(mistakes<=0) return 3;
+  if(mistakes<=2) return 2;
+  return 1;
+}
 function finishRound(){
   if(runtime.celebrate) return;
   playBigWin();
-  runtime.celebrate={
-    kind: runtime.roundIndex < totalRounds()-1 ? 'round' : 'final'
-  };
+  const isFinal = runtime.roundIndex >= totalRounds()-1;
+  let earnedStars=null;
+  if(isFinal){
+    earnedStars=starsFromMistakes(runtime.mistakes||0);
+    recordResult(runtime.subject, runtime.method, earnedStars);
+  }
+  runtime.celebrate={ kind: isFinal ? 'final' : 'round', stars: earnedStars };
   render();
 }
 function renderCelebrateOverlay(state){
   const overlay=document.createElement('div');
   overlay.className='celebrate-overlay';
   const isFinal=state.kind==='final';
+  const starsHtml = isFinal
+    ? Array.from({length:3}).map((_,i)=>bigStarIcon(i<state.stars?'#F5B301':'#E3E8EF')).join('')
+    : `${bigStarIcon('#F5B301')}${bigStarIcon('#FF6F59')}${bigStarIcon('#3AAFA9')}`;
   overlay.innerHTML=`
     <div class="celebrate-card">
-      <div class="stars-row">${bigStarIcon('#F5B301')}${bigStarIcon('#FF6F59')}${bigStarIcon('#3AAFA9')}</div>
+      ${mascotBlock('cheer','')}
+      <div class="stars-row">${starsHtml}</div>
       <h2>${isFinal?'다 완성했어요!':'참 잘했어요!'}</h2>
-      <p>${isFinal?'모든 활동을 끝냈어요. 정말 대단해요!':'다음으로 넘어가볼까요?'}</p>
-      <button class="big-btn" data-action="celebrate-next">${isFinal?'메뉴로 돌아가기':'다음으로'}</button>
+      <p>${isFinal?'모든 단계를 끝냈어요. 정말 대단해요!':'다음으로 넘어가볼까요?'}</p>
+      <button class="big-btn" data-action="celebrate-next">${isFinal?'경로로 돌아가기':'다음으로'}</button>
       ${isFinal?`<button class="big-btn secondary" data-action="celebrate-again">${'처음부터 다시하기'}</button>`:''}
     </div>`;
   document.body.appendChild(overlay);
@@ -1185,7 +1399,7 @@ function renderCelebrateOverlay(state){
     document.body.removeChild(overlay);
     runtime.celebrate=null;
     if(isFinal){
-      route.view='methods'; route.method=null; runtime=null;
+      route.view='path'; route.method=null; runtime=null;
       render();
     } else {
       runtime.roundIndex++;
@@ -1200,6 +1414,7 @@ function renderCelebrateOverlay(state){
       document.body.removeChild(overlay);
       runtime.celebrate=null;
       runtime.roundIndex=0;
+      runtime.mistakes=0;
       initRoundState();
       render();
       speakInstructionSoon();
