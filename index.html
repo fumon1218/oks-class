@@ -196,6 +196,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
     0 4px 10px rgba(43,46,74,.16), inset 0 2px 5px rgba(255,255,255,.7);
 }
 .subject-card .icon-wrap svg{width:48px;height:48px;}
+.subject-card .icon-wrap img{width:60px;height:60px;object-fit:contain;}
 .subject-card .card-txt{flex:1;min-width:0;}
 .subject-card .card-txt span{font-size:19px;font-weight:800;display:block;}
 .subject-card .card-txt small{color:var(--ink-soft);font-size:13.5px;display:block;margin-top:2px;}
@@ -600,6 +601,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
   .grid-cards{gap:10px;}
   .subject-card .icon-wrap{width:72px;height:72px;}
   .subject-card .icon-wrap svg{width:44px;height:44px;}
+  .subject-card .icon-wrap img{width:56px;height:56px;}
 }
 </style>
 </head>
@@ -701,7 +703,7 @@ function hexToRgba(hex,alpha){
 const SUBJECTS={
   colors:{
     label:'색깔', sub:'예쁜 색을 배워요',
-    icon:paletteIcon('#F5B301'), tint:'#FFF3E0', accent:'#F5A623',
+    icon:'<img src="icons/subj-colors.png" alt="">', tint:'#FFF3E0', accent:'#F5A623',
     methods:{
       connect:{label:'연결하기',sub:'같은 색끼리 이어보아요'},
       paint:{label:'칠하기',sub:'그림에 색을 칠해요'},
@@ -710,7 +712,7 @@ const SUBJECTS={
   },
   shapes:{
     label:'모양', sub:'여러 모양을 배워요',
-    icon:shapesGroupIcon(), tint:'#E3F2FD', accent:'#4A90D9',
+    icon:'<img src="icons/subj-shapes.png" alt="">', tint:'#E3F2FD', accent:'#4A90D9',
     methods:{
       connect:{label:'연결하기',sub:'같은 모양끼리 이어보아요'},
       paint:{label:'칠하기',sub:'모양 그림에 색을 칠해요'},
@@ -719,7 +721,7 @@ const SUBJECTS={
   },
   sizes:{
     label:'크기', sub:'크고 작은 것을 배워요',
-    icon:rulerIcon(), tint:'#E8F8F0', accent:'#3CB88F',
+    icon:'<img src="icons/subj-sizes.png" alt="">', tint:'#E8F8F0', accent:'#3CB88F',
     methods:{
       connect:{label:'연결하기',sub:'크기가 맞는 것끼리 이어보아요'},
       paint:{label:'칠하기',sub:'알맞은 크기를 찾아 칠해요'},
