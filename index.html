@@ -407,6 +407,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
   display:flex;align-items:center;justify-content:center;padding:16px;
 }
 .path-node.locked{border-color:var(--line);opacity:.6;}
+.path-node img.stk{width:100%;height:100%;object-fit:contain;}
 .path-node-label{
   font-size:14px;font-weight:800;color:var(--ink);
   background:rgba(255,255,255,.94);padding:4px 12px;border-radius:999px;
@@ -539,6 +540,42 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
   border-radius:50%;
 }
 .hidden-item svg{width:100%;height:100%;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 2px 3px rgba(0,0,0,.35));}
+.hidden-item.is-img{width:17%;border-radius:18px;}
+.hidden-item img.stk{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));}
+.hidden-slot.img img{width:40px;height:40px;object-fit:contain;filter:grayscale(1) opacity(.35);}
+.hidden-slot.img.on img{filter:none;animation:starpop .4s ease;}
+
+/* 스티커 꾸미기 */
+.sticker-picker{display:flex;gap:8px;overflow-x:auto;padding:12px 2px 4px;margin-top:4px;scrollbar-width:thin;}
+.sticker-btn{
+  flex:none;width:64px;height:64px;border-radius:16px;background:var(--surface-2);
+  border:3px solid transparent;padding:6px;
+}
+.sticker-btn img{width:100%;height:100%;object-fit:contain;}
+.sticker-btn.active{border-color:var(--accent-2);background:#fff;box-shadow:0 3px 8px rgba(43,46,74,.15);}
+
+/* 그림 보고 고르기 (계절 감상) */
+.pick-scene{border-radius:16px;overflow:hidden;box-shadow:inset 0 0 0 3px var(--surface-2);}
+.pick-scene img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;}
+.pick-reason{
+  display:flex;align-items:center;gap:8px;margin-top:12px;padding:12px 14px;border-radius:14px;
+  background:rgba(224,247,235,.95);color:#1E7A4B;font-weight:800;font-size:16px;animation:pop .3s ease;
+}
+.pick-reason svg{width:22px;height:22px;flex:none;}
+.pick-options{display:grid;gap:10px;margin-top:14px;}
+.pick-options.n2{grid-template-columns:repeat(2,1fr);}
+.pick-options.n4{grid-template-columns:repeat(2,1fr);}
+.pick-btn{
+  background:#fff;border-radius:18px;padding:14px 8px;border:3px solid transparent;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  font-size:22px;font-weight:800;color:var(--ink);box-shadow:0 4px 12px rgba(43,46,74,.14);
+}
+.pick-emoji{font-size:30px;line-height:1;}
+.pick-btn.correct{border-color:var(--ok);background:rgba(224,247,235,.95);}
+.pick-btn.wrong{animation:shake .4s;opacity:.55;}
+.pick-btn:disabled:not(.correct){opacity:.45;}
+.match-item img.stk{width:56px;height:56px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(43,46,74,.16));}
+
 .hidden-item.found{background:rgba(255,255,255,.7);box-shadow:0 0 0 4px var(--ok),0 0 14px 4px rgba(46,204,113,.5);}
 .hidden-item.shake{animation:hiddenShake .4s;}
 @keyframes hiddenShake{
@@ -791,6 +828,12 @@ function crayonIcon(){
       <path d="M56 82 L63 92 L70 82 Z" fill="#5A6E82"/>
     </g>`);
 }
+/* 정글 점프 앱에서 가져온 3D 그림 (art/stickers, art/scenes) */
+function stickerSrc(name){ return `art/stickers/${name}.png`; }
+function stickerImg(name){ return `<img class="stk" src="${stickerSrc(name)}" alt="" draggable="false">`; }
+function sceneSrc(name){ return `art/scenes/${name}.jpg`; }
+const STICKER_WORD={monkey:'원숭이', frog:'개구리', penguin:'펭귄', parrot:'앵무새', tiger:'호랑이', owl:'부엉이',
+  sloth:'나무늘보', chameleon:'카멜레온', rabbit:'토끼', bear:'곰', fox:'여우', panda:'판다', elephant:'코끼리', koala:'코알라', bee:'꿀벌'};
 /* 탐험 놀이 카드 임시 아이콘 — icons/subj-explore.png가 준비되면 <img>로 교체 */
 function magnifierIcon(){
   return svgWrap(`
@@ -903,19 +946,21 @@ const SUBJECTS={
   explore:{
     label:'탐험 놀이', sub:'눈으로 찾고 느껴 보아요',
     icon:'<img src="icons/subj-explore.png" alt="">', tint:'#FFF4D6', accent:'#E0A800',
-    methodOrder:['hidden'],
+    methodOrder:['hidden','friends'],
     methods:{
       hidden:{label:'숨은 모양 찾기',sub:'그림 속에 숨은 모양을 찾아요'},
+      friends:{label:'숨은 친구 찾기',sub:'그림 속 동물 친구를 찾아요'},
     }
   },
   draw:{
     label:'그리기 놀이', sub:'선 긋기 · 도장 · 데칼코마니',
     icon:'<img src="icons/subj-draw.png" alt="">', tint:'#FDEAF1', accent:'#E8608A',
-    methodOrder:['trace','free','stamp','decal','mood'],
+    methodOrder:['trace','free','stamp','sticker','decal','mood'],
     methods:{
       trace:{label:'선 따라 그리기',sub:'점선을 따라 쭉 그어요'},
       free:{label:'자유 그리기',sub:'마음대로 그려요'},
       stamp:{label:'도장 찍기',sub:'콕콕 도장으로 꾸며요'},
+      sticker:{label:'스티커 꾸미기',sub:'동물 친구 스티커로 장면을 꾸며요'},
       decal:{label:'데칼코마니',sub:'반쪽을 그리면 나비가 돼요'},
       mood:{label:'기분 색칠',sub:'내 기분을 색으로 나타내요'},
     }
@@ -923,9 +968,10 @@ const SUBJECTS={
   gallery:{
     label:'작품 전시관', sub:'내가 그린 그림을 감상해요',
     icon:'<img src="icons/subj-gallery.png" alt="">', tint:'#EEEFFB', accent:'#6C63B5',
-    methodOrder:['view'],
+    methodOrder:['view','season'],
     methods:{
       view:{label:'감상하기',sub:'내가 그린 작품을 둘러보아요'},
+      season:{label:'계절 그림 감상',sub:'그림 속 계절을 찾아요'},
     }
   }
 };
@@ -981,6 +1027,16 @@ const ACTIVITIES={
           {id:'drop',   icon:objectIcon('drop',COLORS[2].hex), matchId:'blue'},
           {id:'leaf',   icon:objectIcon('leaf',COLORS[3].hex), matchId:'green'},
           {id:'orange', icon:objectIcon('orange',COLORS[4].hex), matchId:'orange'},
+        ],
+        targets: COLORS.map(c=>({id:c.key, matchId:c.key, icon:colorBubbleIcon(c.hex), label:c.label}))
+      },{
+        // 생활 속 물건의 색 찾기 [4미술02-02] — 정글 점프 3D 그림 사용
+        pairs:[
+          {id:'tomato',  icon:stickerImg('tomato'),       matchId:'red'},
+          {id:'danmuji', icon:stickerImg('danmuji'),      matchId:'yellow'},
+          {id:'can',     icon:stickerImg('watering_can'), matchId:'blue'},
+          {id:'lettuce', icon:stickerImg('lettuce'),      matchId:'green'},
+          {id:'carrot',  icon:stickerImg('carrot'),       matchId:'orange'},
         ],
         targets: COLORS.map(c=>({id:c.key, matchId:c.key, icon:colorBubbleIcon(c.hex), label:c.label}))
       }]
@@ -1114,6 +1170,14 @@ const ACTIVITIES={
         {target:'star',   count:3, distract:['heart','circle','heart']},
         {target:'heart',  count:3, distract:['star','square','star']},
       ]
+    },
+    friends:{
+      type:'hiddenFind',
+      rounds:[
+        {img:true, bg:'treehouse', target:'monkey',  count:2, distract:['parrot','owl','sloth']},
+        {img:true, bg:'pond',      target:'frog',    count:2, distract:['bee','owl','rabbit']},
+        {img:true, bg:'snow',      target:'penguin', count:2, distract:['rabbit','fox','bear']},
+      ]
     }
   },
   draw:{
@@ -1142,6 +1206,14 @@ const ACTIVITIES={
         {theme:'나뭇잎 도장으로 나무를 꾸며요', stamp:'leaf', color:'#27AE60', preset:'tree'},
       ]
     },
+    sticker:{
+      type:'stickerDraw',
+      rounds:[
+        {theme:'정글에 동물 친구들을 초대해요', bg:'jungle', stickers:['monkey','tiger','parrot','elephant','frog','sloth','chameleon','owl']},
+        {theme:'눈 나라를 꾸며요', bg:'snow', stickers:['penguin','rabbit','bear','fox','panda','snowball','owl','koala']},
+        {theme:'우리 공원을 꾸며요', bg:'park', stickers:['dog','cat','rabbit','bee','basket','strawberry','watermelon','house']},
+      ]
+    },
     decal:{
       type:'decalDraw',
       rounds:[
@@ -1155,6 +1227,15 @@ const ACTIVITIES={
     }
   },
   gallery:{
+    season:{
+      type:'pickOne',
+      rounds:[
+        {scene:'town_winter', ask:'이 그림은 어떤 계절일까요?', options:['summer','winter'], answer:'winter', reason:'하얀 눈이 소복이 쌓였어요.'},
+        {scene:'town_autumn', ask:'이 그림은 어떤 계절일까요?', options:['spring','autumn'], answer:'autumn', reason:'나뭇잎이 빨갛고 노랗게 물들었어요.'},
+        {scene:'town_spring', ask:'이 그림은 어떤 계절일까요?', options:['spring','summer','autumn','winter'], answer:'spring', reason:'분홍 벚꽃이 활짝 피었어요.'},
+        {scene:'town_summer', ask:'이 그림은 어떤 계절일까요?', options:['spring','summer','autumn','winter'], answer:'summer', reason:'초록 나무와 파라솔, 시원한 바다가 보여요.'},
+      ]
+    },
     view:{
       type:'gallery',
       instruction:'내가 그린 작품을 둘러보고 마음에 들면 하트를 눌러보아요',
@@ -1556,6 +1637,9 @@ function renderPath(){
     stamp:svgWrap('<path d="M34 10 C58 22 62 48 34 72 C6 48 10 22 34 10 Z" fill="#27AE60"/><polygon points="'+starPoly(70,66,24,11)+'" fill="#F5B301"/>'),
     decal:svgWrap('<path d="M50 30 C36 8 8 14 12 38 C14 52 32 54 50 50 Z M50 50 C34 54 18 66 26 82 C34 94 48 80 50 62 Z" fill="#9B6BD3"/><path d="M50 30 C64 8 92 14 88 38 C86 52 68 54 50 50 Z M50 50 C66 54 82 66 74 82 C66 94 52 80 50 62 Z" fill="#C7A6EE"/><rect x="47" y="26" width="6" height="52" rx="3" fill="#5D4037"/>'),
     mood:svgWrap('<circle cx="50" cy="50" r="40" fill="#F5B301"/><circle cx="37" cy="42" r="5" fill="#3A2E2A"/><circle cx="63" cy="42" r="5" fill="#3A2E2A"/><path d="M32 58 Q50 78 68 58" stroke="#3A2E2A" stroke-width="6" fill="none" stroke-linecap="round"/>'),
+    sticker:stickerImg('parrot'),
+    friends:stickerImg('monkey'),
+    season:svgWrap('<path d="M50 50 L50 8 A42 42 0 0 1 92 50 Z" fill="#FF9EC4"/><path d="M50 50 L92 50 A42 42 0 0 1 50 92 Z" fill="#3CB88F"/><path d="M50 50 L50 92 A42 42 0 0 1 8 50 Z" fill="#F2884B"/><path d="M50 50 L8 50 A42 42 0 0 1 50 8 Z" fill="#DDEBFA"/><circle cx="50" cy="50" r="42" fill="none" stroke="#fff" stroke-width="4"/>'),
     hidden:svgWrap('<circle cx="42" cy="42" r="26" fill="#FFF8E1" stroke="#E0A800" stroke-width="8"/><circle cx="42" cy="42" r="10" fill="#2E86DE"/><path d="M61 61 L84 84" stroke="#8D6E63" stroke-width="11" stroke-linecap="round"/>'),
     view:svgWrap('<rect x="14" y="18" width="72" height="56" rx="6" fill="none" stroke="#6C63B5" stroke-width="7"/><circle cx="34" cy="40" r="7" fill="#F5B301"/><path d="M20 68 L42 46 L58 60 L70 44 L82 66" fill="none" stroke="#6C63B5" stroke-width="6" stroke-linejoin="round" stroke-linecap="round"/>'),
   };
@@ -1625,19 +1709,25 @@ function initRoundState(){
     const shuffled=sizes.map((sz,i)=>({id:'b'+i,size:sz})).sort(()=>Math.random()-0.5);
     runtime.roundState={slots:sizes.map((sz,i)=>({id:'slot'+i,size:sz,filled:false})), blocks:shuffled, selectedBlock:null};
   } else if(CANVAS_TYPES.includes(cfg.type)){
+    canvasRoundSrcs(rc).forEach(src=>loadImg(src).catch(()=>{}));
     runtime.roundState={brushColor:rc.color||COLORS[0].hex, brushSize:'m', tool:'brush', stamp:rc.stamp||'star',
+      sticker:rc.stickers?rc.stickers[0]:null,
       mood:null, imageData:null, baseImage:null, undoStack:[], guidePts:null, hits:null, done:false};
+  } else if(cfg.type==='pickOne'){
+    runtime.roundState={picked:null, wrong:null};
   } else if(cfg.type==='hiddenFind'){
     const cells=[];
-    [20,50,80].forEach(y=>[13,37,63,87].forEach(x=>cells.push([x,y])));
+    // 동물 그림은 하늘에 뜨지 않게 땅 쪽(아래 2/3)에만 둔다
+    if(rc.img) [42,63,84].forEach(y=>[11,30,50,70,89].forEach(x=>cells.push([x,y])));
+    else [20,50,80].forEach(y=>[13,37,63,87].forEach(x=>cells.push([x,y])));
     cells.sort(()=>Math.random()-0.5);
     const kinds=[...Array(rc.count).fill(rc.target), ...rc.distract].sort(()=>Math.random()-0.5);
     const jitter=n=>Math.round((Math.random()*2-1)*n);
     const items=kinds.map((kind,i)=>({
       id:'h'+i, kind,
-      x:cells[i][0]+jitter(5), y:cells[i][1]+jitter(6),
+      x:cells[i][0]+jitter(rc.img?3:5), y:cells[i][1]+jitter(rc.img?4:6),
       color:COLORS[Math.floor(Math.random()*COLORS.length)].hex,
-      rot:jitter(25), found:false
+      rot:rc.img ? jitter(8) : jitter(25), found:false
     }));
     runtime.roundState={items, foundCount:0, total:rc.count};
   } else if(cfg.type==='gallery'){
@@ -1681,7 +1771,8 @@ function activityInstructionText(){
     return m ? `${m.label}! 떠오르는 색으로 마음껏 칠해 보아요` : '오늘 기분은 어때요? 내 기분과 닮은 얼굴을 골라요';
   }
   if(CANVAS_TYPES.includes(cfg.type)) return rc.theme;
-  if(cfg.type==='hiddenFind') return `그림 속에 숨은 ${withEulReul(SHAPE_WORD[rc.target])} ${rc.count}개 찾아요`;
+  if(cfg.type==='hiddenFind') return `그림 속에 숨은 ${withEulReul(hiddenWord(rc.target,rc))} ${rc.count}${rc.img?'마리':'개'} 찾아요`;
+  if(cfg.type==='pickOne') return rc.ask;
   return cfg.instruction;
 }
 
@@ -1695,6 +1786,7 @@ function renderBoard(){
   if(cfg.type==='mosaicOrder') return renderMosaicOrderBoard();
   if(CANVAS_TYPES.includes(cfg.type)) return renderCanvasArtBoard();
   if(cfg.type==='hiddenFind') return renderHiddenFindBoard();
+  if(cfg.type==='pickOne') return renderPickOneBoard();
   if(cfg.type==='gallery') return renderGalleryBoard();
   return '';
 }
@@ -1729,7 +1821,27 @@ function isMatched(side,id){
 }
 
 /* ---- CANVAS ART (그리기 놀이: 자유 그리기·선 따라 그리기·도장·데칼코마니·기분 색칠) ---- */
-const CANVAS_TYPES=['freeDraw','traceDraw','stampDraw','decalDraw','moodDraw'];
+const CANVAS_TYPES=['freeDraw','traceDraw','stampDraw','stickerDraw','decalDraw','moodDraw'];
+const STICKER_SIZE={s:90, m:130, l:180};
+/* 그림 파일을 한 번만 불러와 두고 캔버스에 바로 그릴 수 있게 보관 */
+const _imgReady={}, _imgLoading={};
+function loadImg(src){
+  if(!_imgLoading[src]) _imgLoading[src]=new Promise((res,rej)=>{
+    const im=new Image();
+    im.onload=()=>{ _imgReady[src]=im; res(im); };
+    im.onerror=rej;
+    im.src=src;
+  });
+  return _imgLoading[src];
+}
+function drawCover(ctx,img,W,H){
+  const sc=Math.max(W/img.naturalWidth, H/img.naturalHeight);
+  const w=img.naturalWidth*sc, h=img.naturalHeight*sc;
+  ctx.drawImage(img,(W-w)/2,(H-h)/2,w,h);
+}
+function canvasRoundSrcs(rc){
+  return [...(rc.bg?[sceneSrc(rc.bg)]:[]), ...(rc.stickers||[]).map(stickerSrc)];
+}
 const CANVAS_W=600, CANVAS_H=480;
 const EXT_COLORS=[
   ...COLORS,
@@ -1859,8 +1971,18 @@ function renderCanvasArtBoard(){
     <div class="trace-bar"><div class="trace-bar-fill" id="traceFill" style="width:${tracePct(rs)}%"></div></div>
     <button class="big-btn secondary" data-action="trace-reset">${ICON_REFRESH} 처음부터 다시 그리기</button>`;
   }
+  const sizeLabel = (t==='stampDraw'||t==='stickerDraw') ? '크게' : '굵게';
+  const undoClear=`<button class="tool-btn" data-action="draw-undo" title="되돌리기">${ICON_UNDO}</button>
+      <button class="tool-btn" data-action="draw-clear" title="전체 지우기">${ICON_TRASH}</button>`;
+  const finish=`<button class="big-btn draw-done-btn" data-action="draw-finish">${ICON_CHECK} 완성했어요!</button>`;
+  if(t==='stickerDraw'){
+    const rc=currentRoundCfg();
+    const picker=`<div class="sticker-picker">${rc.stickers.map(k=>`<button class="sticker-btn ${rs.sticker===k?'active':''}" data-sticker="${k}">${stickerImg(k)}</button>`).join('')}</div>`;
+    const sz=[['s','작게'],['m','보통'],['l',sizeLabel]].map(([k,l])=>`<button class="brush-size-btn ${rs.brushSize===k?'active':''}" data-size="${k}">${l}</button>`).join('');
+    return `${stage}${picker}<div class="draw-toolbar"><div class="draw-sizes">${sz}</div><div class="draw-tools">${undoClear}</div></div>${finish}`;
+  }
   const swatches=EXT_COLORS.map(c=>`<button class="swatch ${rs.tool!=='eraser'&&rs.brushColor===c.hex?'active':''}" style="background:${c.hex}" data-color="${c.hex}" title="${c.label}"></button>`).join('');
-  const sizeBtns=[['s','작게'],['m','보통'],['l',t==='stampDraw'?'크게':'굵게']].map(([sz,label])=>
+  const sizeBtns=[['s','작게'],['m','보통'],['l',sizeLabel]].map(([sz,label])=>
     `<button class="brush-size-btn ${rs.brushSize===sz?'active':''}" data-size="${sz}">${label}</button>`
   ).join('');
   const stampPicker = t==='stampDraw'
@@ -1882,19 +2004,44 @@ function renderCanvasArtBoard(){
   <button class="big-btn draw-done-btn" data-action="draw-finish">${ICON_CHECK} 완성했어요!</button>`;
 }
 
+/* ---- PICK ONE (그림 보고 고르기 — 계절 그림 감상 등) ---- */
+const PICK_CHOICES={
+  spring:{label:'봄',   emoji:'🌸'},
+  summer:{label:'여름', emoji:'☀️'},
+  autumn:{label:'가을', emoji:'🍁'},
+  winter:{label:'겨울', emoji:'⛄'},
+};
+function renderPickOneBoard(){
+  const rs=runtime.roundState, rc=currentRoundCfg();
+  const opts=rc.options.map(k=>{
+    const o=PICK_CHOICES[k];
+    const cls = rs.picked===k ? 'correct' : (rs.wrong===k ? 'wrong' : '');
+    return `<button class="pick-btn ${cls}" data-pick="${k}" ${rs.picked?'disabled':''}><span class="pick-emoji">${o.emoji}</span><span>${o.label}</span></button>`;
+  }).join('');
+  const reason = rs.picked ? `<div class="pick-reason">${ICON_CHECK}<span>${rc.reason}</span></div>` : '';
+  return `<div class="pick-scene"><img src="${sceneSrc(rc.scene)}" alt=""></div>
+  ${reason}
+  <div class="pick-options n${rc.options.length}">${opts}</div>`;
+}
+
 /* ---- HIDDEN FIND (탐험 놀이: 숨은 모양 찾기) ---- */
 const SHAPE_WORD={circle:'동그라미', triangle:'세모', square:'네모', star:'별', heart:'하트'};
 function hasBatchim(w){ const c=w.charCodeAt(w.length-1); return c>=0xAC00 && c<=0xD7A3 && (c-0xAC00)%28!==0; }
 function withEulReul(w){ return w+(hasBatchim(w)?'을':'를'); }
 function withIeyo(w){ return w+(hasBatchim(w)?'이에요':'예요'); }
+function hiddenWord(kind,rc){ return rc.img ? STICKER_WORD[kind] : SHAPE_WORD[kind]; }
 function renderHiddenFindBoard(){
   const rs=runtime.roundState, rc=currentRoundCfg();
-  const items=rs.items.map(it=>`<button class="hidden-item ${it.found?'found':''}" data-id="${it.id}" aria-label="${SHAPE_WORD[it.kind]}"
-      style="left:${it.x}%;top:${it.y}%;--rot:${it.rot}deg">${shapeIcon(it.kind,it.color)}</button>`).join('');
+  const art=it=> rc.img ? stickerImg(it.kind) : shapeIcon(it.kind,it.color);
+  const items=rs.items.map(it=>`<button class="hidden-item ${rc.img?'is-img':''} ${it.found?'found':''}" data-id="${it.id}" aria-label="${hiddenWord(it.kind,rc)}"
+      style="left:${it.x}%;top:${it.y}%;--rot:${it.rot}deg">${art(it)}</button>`).join('');
   const slots=Array.from({length:rs.total}).map((_,i)=>
-    `<span class="hidden-slot ${i<rs.foundCount?'on':''}">${shapeIcon(rc.target, i<rs.foundCount?'#F5B301':'#D5DAE6')}</span>`).join('');
+    rc.img
+      ? `<span class="hidden-slot img ${i<rs.foundCount?'on':''}">${stickerImg(rc.target)}</span>`
+      : `<span class="hidden-slot ${i<rs.foundCount?'on':''}">${shapeIcon(rc.target, i<rs.foundCount?'#F5B301':'#D5DAE6')}</span>`).join('');
+  const bg = rc.bg ? sceneSrc(rc.bg) : ART.bgArtRoom;
   return `<div class="hidden-counter">${slots}</div>
-  <div class="hidden-scene" style="background-image:url('${ART.bgArtRoom}')">${items}</div>`;
+  <div class="hidden-scene" style="background-image:url('${bg}')">${items}</div>`;
 }
 
 /* ---- GALLERY (작품 전시관) ---- */
@@ -2137,6 +2284,7 @@ function wireActivity(){
   else if(cfg.type==='mosaicOrder') wireMosaicOrder();
   else if(CANVAS_TYPES.includes(cfg.type)) wireCanvasArt();
   else if(cfg.type==='hiddenFind') wireHiddenFind();
+  else if(cfg.type==='pickOne') wirePickOne();
   else if(cfg.type==='gallery') wireGallery();
 }
 
@@ -2254,8 +2402,21 @@ function wireCanvasArt(){
   const ctx=canvas.getContext('2d');
   const W=canvas.width;
 
+  // 배경·스티커 그림이 아직 안 불러와졌으면 잠깐 기다렸다가 다시 그린다
+  const pending=canvasRoundSrcs(rc).filter(src=>!_imgReady[src]);
+  if(pending.length){
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,canvas.height);
+    ctx.fillStyle='#A9B0CE'; ctx.font='bold 28px sans-serif'; ctx.textAlign='center';
+    ctx.fillText('그림을 불러오는 중…',W/2,canvas.height/2);
+    Promise.all(pending.map(src=>loadImg(src))).then(()=>{
+      if(runtime && runtime.roundState===rs) render();
+    }).catch(()=>{});
+    return;
+  }
+
   if(!rs.baseImage){
     ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,canvas.height);
+    if(rc.bg) drawCover(ctx,_imgReady[sceneSrc(rc.bg)],W,canvas.height);
     if(rc.preset) drawPreset(ctx,rc.preset);
     if(t==='traceDraw'){
       rs.guidePts=traceGuidePoints(rc.guide);
@@ -2296,8 +2457,27 @@ function wireCanvasArt(){
     playPop();
   };
 
+  const placeSticker=(x,y)=>{
+    const img=_imgReady[stickerSrc(rs.sticker)];
+    if(!img) return;
+    const sc=STICKER_SIZE[rs.brushSize]/Math.max(img.naturalWidth,img.naturalHeight);
+    const w=img.naturalWidth*sc, h=img.naturalHeight*sc;
+    ctx.save();
+    ctx.shadowColor='rgba(0,0,0,.28)'; ctx.shadowBlur=10; ctx.shadowOffsetY=5;
+    ctx.drawImage(img,x-w/2,y-h/2,w,h);
+    ctx.restore();
+    playPop();
+  };
+
   canvas.addEventListener('pointerdown', e=>{
     if(rs.done) return;
+    if(t==='stickerDraw'){
+      pushUndo();
+      const p=pos(e);
+      placeSticker(p.x,p.y);
+      rs.imageData=ctx.getImageData(0,0,W,canvas.height);
+      return;
+    }
     canvas.setPointerCapture(e.pointerId);
     pushUndo();
     drawing=true;
@@ -2350,6 +2530,14 @@ function wireCanvasArt(){
       const sp=document.getElementById('stampPicker'); if(sp) sp.style.color=rs.brushColor;
     });
   });
+  document.querySelectorAll('.sticker-btn[data-sticker]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      rs.sticker=b.getAttribute('data-sticker');
+      document.querySelectorAll('.sticker-btn').forEach(b2=>b2.classList.remove('active'));
+      b.classList.add('active');
+      const w=STICKER_WORD[rs.sticker]; if(w) speak(w);
+    });
+  });
   document.querySelectorAll('.stamp-btn[data-stamp]').forEach(b=>{
     b.addEventListener('click',()=>{
       rs.stamp=b.getAttribute('data-stamp');
@@ -2395,10 +2583,32 @@ function wireCanvasArt(){
   });
 }
 
+/* ---- pick one wiring ---- */
+function wirePickOne(){
+  const rs=runtime.roundState, rc=currentRoundCfg();
+  document.querySelectorAll('.pick-btn[data-pick]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      if(rs.picked) return;
+      const k=b.getAttribute('data-pick');
+      if(k===rc.answer){
+        rs.picked=k; rs.wrong=null;
+        playSuccess();
+        render();
+        speak(`맞아요, ${withIeyo(PICK_CHOICES[k].label)}! ${rc.reason}`);
+        setTimeout(finishRound,2200);
+      } else {
+        rs.wrong=k;
+        retryFeedback('그림을 다시 살펴볼까요?');
+        render();
+      }
+    });
+  });
+}
+
 /* ---- hidden find wiring (탐험 놀이: 숨은 모양 찾기) ---- */
 function wireHiddenFind(){
   const rs=runtime.roundState, rc=currentRoundCfg();
-  const want=SHAPE_WORD[rc.target];
+  const want=hiddenWord(rc.target,rc);
   document.querySelectorAll('.hidden-item[data-id]').forEach(el=>{
     el.addEventListener('click',()=>{
       const it=rs.items.find(i=>i.id===el.getAttribute('data-id'));
@@ -2409,13 +2619,13 @@ function wireHiddenFind(){
         playSuccess();
         render();
         if(rs.foundCount>=rs.total){
-          speak(`${want} ${rs.total}개를 모두 찾았어요! `+randomPraise());
+          speak(`${want} ${rs.total}${rc.img?'마리':'개'}를 모두 찾았어요! `+randomPraise());
           setTimeout(finishRound,700);
         } else {
           speak(`${withEulReul(want)} 찾았어요!`);
         }
       } else {
-        retryFeedback(`그건 ${withIeyo(SHAPE_WORD[it.kind])}. ${withEulReul(want)} 찾아봐요`);
+        retryFeedback(`그건 ${withIeyo(hiddenWord(it.kind,rc))}. ${withEulReul(want)} 찾아봐요`);
         el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
       }
     });
