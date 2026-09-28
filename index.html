@@ -37,6 +37,7 @@ body{
   --radius-lg:28px;
   --radius-md:20px;
   --radius-sm:14px;
+  --surface-glass:rgba(255,255,255,.86);
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
@@ -53,6 +54,7 @@ body{
     --line:#383B54;
     --ok:#4ade80;
     --shadow:0 10px 24px rgba(0,0,0,.35);
+    --surface-glass:rgba(27,29,42,.82);
     color-scheme:dark;
   }
 }
@@ -69,11 +71,19 @@ body{
   --line:#383B54;
   --ok:#4ade80;
   --shadow:0 10px 24px rgba(0,0,0,.35);
+  --surface-glass:rgba(27,29,42,.82);
   color-scheme:dark;
 }
 
 *{box-sizing:border-box;}
 body{background:var(--bg);color:var(--ink);}
+body{
+  background-size:cover;
+  background-position:center 30%;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  transition:background-image .25s ease;
+}
 #app{
   font-family:'Gowun Dodum','Noto Sans KR',system-ui,sans-serif;
   max-width:760px;
@@ -81,6 +91,14 @@ body{background:var(--bg);color:var(--ink);}
   padding-inline:16px;
   padding-block:12px 40px;
   min-height:100%;
+}
+.scene-panel{
+  background:var(--surface-glass);
+  backdrop-filter:blur(6px) saturate(1.1);
+  -webkit-backdrop-filter:blur(6px) saturate(1.1);
+  border-radius:var(--radius-lg);
+  padding:6px 10px 18px;
+  box-shadow:var(--shadow);
 }
 h1,h2,h3{font-family:'Gaegu','Gowun Dodum',sans-serif;text-wrap:balance;margin:0;}
 #app svg{max-width:100%;height:auto;display:block;}
@@ -163,8 +181,9 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
   display:flex;align-items:flex-end;gap:12px;
   margin:10px 0 4px;
 }
-.mascot-avatar{width:76px;height:76px;flex:none;}
+.mascot-avatar{width:88px;height:104px;flex:none;display:flex;align-items:flex-end;justify-content:center;}
 .mascot-avatar svg{width:100%;height:100%;}
+.mascot-avatar img{width:100%;height:100%;object-fit:contain;object-position:bottom;filter:drop-shadow(0 6px 8px rgba(43,46,74,.18));}
 .pose-cheer{animation:mascot-bounce 1.1s ease infinite;}
 @keyframes mascot-bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
 .speech-bubble{
@@ -182,7 +201,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
   transform:rotate(45deg);
 }
 .celebrate-card .mascot-row{justify-content:center;margin-top:0;}
-.celebrate-card .mascot-avatar{width:96px;height:96px;}
+.celebrate-card .mascot-avatar{width:110px;height:130px;}
 
 /* ---------- world map ---------- */
 .world-grid{margin-top:14px;}
@@ -784,7 +803,7 @@ function retryFeedback(msg){
 }
 
 /* ---------- mascot (옥쌤) — placeholder art, swap ART.mascot* with real files later ---------- */
-const ART={ mascotIdle:null, mascotCheer:null, mascotSoft:null, bgWorld:null, bgArtRoom:null };
+const ART={ mascotIdle:'icons/mascot-idle.png', mascotCheer:'icons/mascot-cheer.png', mascotSoft:'icons/mascot-soft.png', bgWorld:'icons/bg-world.jpg', bgArtRoom:'icons/bg-artroom.jpg' };
 function mascotSVG(pose){
   // simple chibi placeholder: round face, side hair, purple top — matches the reference pose language
   // (idle: arms down · cheer: arms up + sparkles · soft: gentle head tilt, encouraging)
@@ -846,10 +865,18 @@ function render(){
   else if(route.view==='path') html+=renderPath();
   else if(route.view==='activity') html+=renderActivityShell();
   app.innerHTML=html;
+  updateSceneBackground();
   wireGlobal();
   if(route.view==='activity') wireActivity();
   if(settingsOpen) renderSettingsModal();
   if(runtime && runtime.celebrate) renderCelebrateOverlay(runtime.celebrate);
+}
+
+function updateSceneBackground(){
+  let img=null;
+  if(route.view==='world') img=ART.bgWorld;
+  else if(route.view==='room') img=ART.bgArtRoom;
+  document.body.style.backgroundImage = img ? `url('${img}')` : '';
 }
 
 function renderBrandbar(){
@@ -877,12 +904,14 @@ function renderWorld(){
       <small>${r.sub}</small>
     </button>`).join('');
   return `
-  <div class="hero">
-    <h1>옥쌤의 즐거운 교실</h1>
-    <p>어느 교실로 들어가볼까요?</p>
-  </div>
-  ${mascotBlock('cheer','안녕! 오늘은 뭘 배워볼까?')}
-  <div class="grid-cards world-grid">${doors}${soon}</div>`;
+  <div class="scene-panel">
+    <div class="hero">
+      <h1>옥쌤의 즐거운 교실</h1>
+      <p>어느 교실로 들어가볼까요?</p>
+    </div>
+    ${mascotBlock('cheer','안녕! 오늘은 뭘 배워볼까?')}
+    <div class="grid-cards world-grid">${doors}${soon}</div>
+  </div>`;
 }
 
 function renderRoom(){
@@ -898,13 +927,15 @@ function renderRoom(){
     </button>`;
   }).join('');
   return `
-  <div class="subheader">
-    <button class="back" data-action="go-world">${ICON_BACK}뒤로</button>
-    <h2>${room.label}</h2>
-    <div></div>
-  </div>
-  ${mascotBlock('idle','무엇을 배워볼까요?')}
-  <div class="grid-cards">${cards}</div>`;
+  <div class="scene-panel">
+    <div class="subheader">
+      <button class="back" data-action="go-world">${ICON_BACK}뒤로</button>
+      <h2>${room.label}</h2>
+      <div></div>
+    </div>
+    ${mascotBlock('idle','무엇을 배워볼까요?')}
+    <div class="grid-cards">${cards}</div>
+  </div>`;
 }
 
 function miniStars(n){
