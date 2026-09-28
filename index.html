@@ -206,15 +206,16 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 .celebrate-card .mascot-avatar{width:110px;height:130px;}
 
 /* ---------- world hero (마을 그림, 정글 점프 로비 느낌의 HUD) ---------- */
-.hero-title{padding-top:14px;padding-bottom:2px;text-align:center;}
+.hero-title{padding-top:14px;padding-bottom:2px;text-align:center;max-width:1000px;margin-inline:auto;}
 .hero-title h1{font-size:26px;color:var(--accent);}
 .hero-title p{margin:4px 0 0;color:var(--ink-soft);font-size:15px;}
 
 .world-hero{
   position:relative;
-  margin-top:10px;
+  margin:10px auto 0;
   width:100%;
-  aspect-ratio:1100/733;
+  max-width:1000px;
+  aspect-ratio:1000/666;
   overflow:hidden;
   background-size:cover;
   background-position:center;
@@ -290,6 +291,17 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
   font-size:14px;filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));
 }
 
+.map-avatar{
+  position:absolute;left:48%;top:41%;z-index:4;
+  transform:translate(-50%,-92%);
+  font-size:26px;line-height:1;
+  transition:left .65s cubic-bezier(.4,0,.2,1), top .65s cubic-bezier(.4,0,.2,1);
+  filter:drop-shadow(0 4px 4px rgba(0,0,0,.35));
+  pointer-events:none;
+}
+.map-avatar.walking{animation:avatar-bob .28s ease-in-out infinite;}
+@keyframes avatar-bob{0%,100%{margin-top:0;}50%{margin-top:-5px;}}
+
 .hud-mascot{position:absolute;left:10px;bottom:10px;z-index:5;max-width:62%;pointer-events:none;}
 .hud-mascot-inner{margin:0;}
 .hud-mascot-inner .speech-bubble{font-size:12.5px;padding:8px 12px;}
@@ -310,6 +322,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 .hud-navbar{
   display:flex;justify-content:center;gap:16px;
   padding:14px 16px 6px;
+  max-width:1000px;margin-inline:auto;
 }
 .navcircle{
   display:flex;flex-direction:column;align-items:center;gap:2px;
@@ -1127,6 +1140,7 @@ function renderWorld(){
     </div>
 
     ${nodes}
+    <div class="map-avatar" id="map-avatar">🧒</div>
 
     <div class="hud-mascot">${mascotBlock('cheer','안녕! 지도에서 교실을 골라봐!','hud-mascot-inner')}</div>
 
@@ -1399,6 +1413,22 @@ function renderMosaicOrderBoard(){
 }
 
 /* ================= wiring ================= */
+function walkAvatarTo(targetEl, callback){
+  const avatar=document.getElementById('map-avatar');
+  const stage=document.querySelector('.world-hero');
+  if(!avatar || !stage){ callback(); return; }
+  const stageRect=stage.getBoundingClientRect();
+  const targetRect=targetEl.getBoundingClientRect();
+  const leftPct=((targetRect.left+targetRect.width/2)-stageRect.left)/stageRect.width*100;
+  const topPct=((targetRect.top+targetRect.height*0.85)-stageRect.top)/stageRect.height*100;
+  avatar.style.left=leftPct+'%';
+  avatar.style.top=topPct+'%';
+  avatar.classList.add('walking');
+  setTimeout(()=>{
+    avatar.classList.remove('walking');
+    callback();
+  }, 650);
+}
 function wireGlobal(){
   app.querySelectorAll('[data-action]').forEach(el=>{
     el.addEventListener('click',onGlobalAction);
@@ -1407,12 +1437,20 @@ function wireGlobal(){
 function onGlobalAction(e){
   const action=e.currentTarget.getAttribute('data-action');
   if(action==='go-world'){ route={view:'world',room:null,subject:null,method:null}; runtime=null; render(); }
-  else if(action==='go-room'){ route.view='room'; route.room=e.currentTarget.getAttribute('data-room')||route.room; route.subject=null; route.method=null; runtime=null; render(); }
+  else if(action==='go-room'){
+    const btn=e.currentTarget;
+    const room=btn.getAttribute('data-room')||route.room;
+    const doNav=()=>{ route.view='room'; route.room=room; route.subject=null; route.method=null; runtime=null; render(); };
+    if(btn.closest('.world-hero')) walkAvatarTo(btn, doNav); else doNav();
+  }
   else if(action==='go-path'){ route.view='path'; route.subject=e.currentTarget.getAttribute('data-subject'); route.method=null; runtime=null; render(); }
   else if(action==='go-activity'){ route.view='activity'; route.method=e.currentTarget.getAttribute('data-method'); runtime=null; render(); speakInstructionSoon(); }
   else if(action==='go-path-from-activity'){ route.view='path'; route.method=null; runtime=null; render(); }
   else if(action==='locked-node'){ speak('먼저 앞 단계를 완성해볼까요?'); }
-  else if(action==='soon-room'){ speak('이 교실은 곧 열려요!'); }
+  else if(action==='soon-room'){
+    const btn=e.currentTarget;
+    walkAvatarTo(btn, ()=>speak('이 교실은 곧 열려요!'));
+  }
   else if(action==='cycle-season'){
     const cur=e.currentTarget.getAttribute('data-season');
     const next=cycleWorldSeason(cur);
