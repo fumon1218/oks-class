@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover">
+<title>옥쌤의 즐거운 교실 · ok's class</title>
+<meta name="description" content="특수교육대상학생을 위한 미술 학습 앱 - 색깔·모양·크기를 연결하기, 칠하기, 모자이크로 배워요.">
+<meta name="theme-color" content="#FF6F59">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ok's class">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap">
+<style>
+html,body{margin:0;padding:0;height:100%;}
+body{
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root{
+  --bg:#F5F7FA;
+  --surface:#FFFFFF;
+  --surface-2:#EEF2F7;
+  --ink:#2B2E4A;
+  --ink-soft:#5B5F82;
+  --accent:#FF6F59;
+  --accent-ink:#FFFFFF;
+  --accent-2:#3AAFA9;
+  --accent-2-ink:#FFFFFF;
+  --line:#E3E8EF;
+  --ok:#2ecc71;
+  --shadow:0 10px 24px rgba(43,46,74,.10);
+  --radius-lg:28px;
+  --radius-md:20px;
+  --radius-sm:14px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B1D2A;
+    --surface:#242739;
+    --surface-2:#2C2F45;
+    --ink:#EDEFF7;
+    --ink-soft:#B7BAD6;
+    --accent:#FF8A75;
+    --accent-ink:#1B1D2A;
+    --accent-2:#5FD1CA;
+    --accent-2-ink:#0E2C2A;
+    --line:#383B54;
+    --ok:#4ade80;
+    --shadow:0 10px 24px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B1D2A;
+  --surface:#242739;
+  --surface-2:#2C2F45;
+  --ink:#EDEFF7;
+  --ink-soft:#B7BAD6;
+  --accent:#FF8A75;
+  --accent-ink:#1B1D2A;
+  --accent-2:#5FD1CA;
+  --accent-2-ink:#0E2C2A;
+  --line:#383B54;
+  --ok:#4ade80;
+  --shadow:0 10px 24px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);}
+#app{
+  font-family:'Gowun Dodum','Noto Sans KR',system-ui,sans-serif;
+  max-width:760px;
+  margin:0 auto;
+  padding-inline:16px;
+  padding-block:12px 40px;
+  min-height:100%;
+}
+h1,h2,h3{font-family:'Gaegu','Gowun Dodum',sans-serif;text-wrap:balance;margin:0;}
+#app svg{max-width:100%;height:auto;display:block;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);outline-offset:3px;}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;transition-duration:.01ms !important;}}
+
+/* ---------- top bars ---------- */
+.brandbar{
+  display:flex;align-items:center;gap:10px;
+  padding-block:6px;
+}
+.brand{
+  display:flex;align-items:center;gap:8px;
+  font-size:19px;font-weight:700;color:var(--ink);
+  padding:8px 10px;border-radius:var(--radius-sm);
+}
+.brand:active{background:var(--surface-2);}
+.brand svg{width:30px;height:30px;flex:none;}
+.spacer{flex:1;}
+.gear{
+  display:flex;align-items:center;gap:6px;
+  font-size:15px;font-weight:700;color:var(--ink-soft);
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:999px;padding:9px 14px;
+}
+.gear svg{width:20px;height:20px;}
+
+.subheader{
+  display:flex;align-items:center;gap:10px;
+  margin-top:6px;margin-bottom:6px;
+  min-height:44px;
+}
+.back{
+  display:flex;align-items:center;gap:4px;
+  font-size:16px;font-weight:700;color:var(--ink-soft);
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:999px;padding:9px 14px 9px 10px;flex:none;
+}
+.back svg{width:20px;height:20px;flex:none;}
+.subheader h2{font-size:22px;flex:1;}
+.dots{display:flex;gap:6px;flex:none;}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line);}
+.dot.done{background:var(--ok);}
+.dot.current{background:var(--accent);transform:scale(1.3);}
+
+/* ---------- home ---------- */
+.hero{
+  text-align:center;padding:18px 8px 6px;
+}
+.hero h1{font-size:34px;color:var(--accent);}
+.hero p{margin:6px 0 0;color:var(--ink-soft);font-size:17px;}
+
+.grid-cards{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px;
+}
+.subject-card{
+  background:var(--surface);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);padding:20px 14px 16px;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  border:2px solid transparent;
+  transition:transform .15s ease;
+}
+.subject-card:active{transform:scale(.97);}
+.subject-card .icon-wrap{
+  width:88px;height:88px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+}
+.subject-card .icon-wrap svg{width:56px;height:56px;}
+.subject-card span{font-size:20px;font-weight:700;}
+.subject-card small{color:var(--ink-soft);font-size:14px;margin-top:-6px;}
+.subject-card.soon{opacity:.55;}
+.subject-card.soon .icon-wrap{background:var(--surface-2) !important;}
+
+/* ---------- method menu ---------- */
+.method-list{display:flex;flex-direction:column;gap:14px;margin-top:8px;}
+.method-card{
+  background:var(--surface);border-radius:var(--radius-md);
+  box-shadow:var(--shadow);padding:18px;
+  display:flex;align-items:center;gap:16px;text-align:left;
+  width:100%;
+}
+.method-card .icon-wrap{
+  width:64px;height:64px;border-radius:18px;flex:none;
+  display:flex;align-items:center;justify-content:center;background:var(--surface-2);
+}
+.method-card .icon-wrap svg{width:38px;height:38px;}
+.method-card .txt strong{display:block;font-size:19px;}
+.method-card .txt span{display:block;color:var(--ink-soft);font-size:14.5px;margin-top:3px;}
+
+/* ---------- activity shell ---------- */
+.instruction{
+  background:var(--surface);border-radius:var(--radius-md);
+  box-shadow:var(--shadow);
+  padding:16px 18px;
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:16px;
+}
+.instruction p{font-size:19px;font-weight:700;flex:1;}
+.replay-btn{
+  flex:none;width:44px;height:44px;border-radius:50%;
+  background:var(--accent-2);color:var(--accent-2-ink);
+  display:flex;align-items:center;justify-content:center;
+}
+.replay-btn svg{width:22px;height:22px;}
+
+.board{
+  background:var(--surface);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow);padding:18px;
+}
+
+/* match engine */
+.match-cols{display:flex;gap:14px;}
+.match-col{flex:1;display:flex;flex-direction:column;gap:12px;}
+.match-item{
+  background:var(--surface-2);border-radius:var(--radius-sm);
+  border:3px solid transparent;
+  min-height:76px;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:8px;font-size:17px;font-weight:700;
+}
+.match-item svg{width:44px;height:44px;}
+.match-item.selected{border-color:var(--accent-2);background:var(--surface);}
+.match-item.matched{opacity:.45;border-color:var(--ok);}
+.match-item.shake{animation:shake .4s;}
+@keyframes shake{
+  0%,100%{transform:translateX(0);}
+  20%{transform:translateX(-8px);}
+  40%{transform:translateX(8px);}
+  60%{transform:translateX(-6px);}
+  80%{transform:translateX(6px);}
+}
+
+/* palette */
+.palette{
+  display:flex;flex-wrap:wrap;gap:12px;justify-content:center;
+  margin-top:18px;padding-top:16px;border-top:1px dashed var(--line);
+}
+.swatch{
+  width:56px;height:56px;border-radius:50%;
+  border:4px solid var(--surface);box-shadow:0 0 0 2px var(--line);
+  flex:none;
+}
+.swatch.active{box-shadow:0 0 0 3px var(--accent);}
+
+/* paint canvas */
+.paint-stage{display:flex;justify-content:center;}
+.paint-stage svg{width:min(100%,320px);height:auto;}
+.region{cursor:pointer;}
+
+/* size-target cards */
+.size-options{display:flex;gap:12px;justify-content:center;align-items:flex-end;flex-wrap:wrap;}
+.size-card{
+  background:var(--surface-2);border-radius:var(--radius-sm);
+  border:3px solid transparent;padding:10px;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.size-card.correct{border-color:var(--ok);}
+.size-card.shake{animation:shake .4s;}
+
+/* mosaic grid */
+.mosaic-grid{
+  display:grid;gap:6px;margin:0 auto;justify-content:center;
+}
+.cell{
+  aspect-ratio:1/1;
+  border-radius:6px;background:var(--surface-2);
+  border:2px solid var(--line);
+}
+.cell.target-cell{border-style:dashed;}
+.cell.selected{outline:3px solid var(--accent-2);outline-offset:-3px;}
+.cell.wrong{animation:shake .35s;}
+
+/* order slots */
+.order-row{display:flex;gap:14px;align-items:flex-end;justify-content:center;flex-wrap:wrap;min-height:130px;}
+.slot{
+  border:3px dashed var(--line);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface-2);
+}
+.slot.filled{border-style:solid;border-color:var(--ok);}
+.block-pool{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px dashed var(--line);}
+.block{
+  border-radius:14px;background:var(--accent);
+  border:3px solid transparent;
+}
+.block.selected{border-color:var(--accent-2);transform:translateY(-4px);}
+.block.used{visibility:hidden;}
+.block.shake{animation:shake .4s;}
+
+/* celebrate overlay */
+.celebrate-overlay{
+  position:fixed;inset:0;z-index:40;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(20,20,30,.45);
+  padding:24px;
+}
+.celebrate-card{
+  background:var(--surface);border-radius:var(--radius-lg);
+  padding:32px 24px;text-align:center;max-width:340px;width:100%;
+  box-shadow:var(--shadow);
+  animation:pop .35s ease;
+}
+@keyframes pop{from{transform:scale(.7);opacity:0;}to{transform:scale(1);opacity:1;}}
+.celebrate-card h2{font-size:30px;color:var(--accent);margin-bottom:6px;}
+.celebrate-card p{color:var(--ink-soft);font-size:16px;margin-bottom:18px;}
+.stars-row{display:flex;justify-content:center;gap:8px;margin-bottom:10px;}
+.stars-row svg{width:40px;height:40px;animation:starpop .5s ease backwards;}
+.stars-row svg:nth-child(1){animation-delay:.05s;}
+.stars-row svg:nth-child(2){animation-delay:.18s;}
+.stars-row svg:nth-child(3){animation-delay:.31s;}
+@keyframes starpop{from{transform:scale(0) rotate(-30deg);opacity:0;}to{transform:scale(1) rotate(0);opacity:1;}}
+.big-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--accent);color:var(--accent-ink);
+  font-size:18px;font-weight:700;border-radius:999px;
+  padding:14px 26px;width:100%;
+}
+.big-btn.secondary{background:var(--surface-2);color:var(--ink);margin-top:10px;}
+
+/* settings modal */
+.modal-overlay{
+  position:fixed;inset:0;z-index:50;background:rgba(20,20,30,.45);
+  display:flex;align-items:flex-end;justify-content:center;
+}
+@media (min-width:520px){.modal-overlay{align-items:center;}}
+.modal-card{
+  background:var(--surface);border-radius:24px 24px 0 0;
+  padding:22px 22px calc(22px + env(safe-area-inset-bottom,0px));
+  width:100%;max-width:440px;box-shadow:var(--shadow);
+}
+@media (min-width:520px){.modal-card{border-radius:var(--radius-lg);}}
+.modal-card h3{font-size:21px;margin-bottom:16px;}
+.setting-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid var(--line);
+}
+.setting-row:last-of-type{border-bottom:none;}
+.setting-row span{font-size:17px;font-weight:700;}
+.switch{
+  width:52px;height:30px;border-radius:999px;background:var(--surface-2);
+  border:2px solid var(--line);position:relative;flex:none;
+}
+.switch .knob{
+  position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;
+  background:var(--ink-soft);transition:left .15s ease;
+}
+.switch.on{background:var(--accent);border-color:var(--accent);}
+.switch.on .knob{left:24px;background:#fff;}
+.modal-card .close-row{margin-top:14px;}
+
+@media (max-width:420px){
+  .hero h1{font-size:28px;}
+  .grid-cards{gap:10px;}
+  .subject-card .icon-wrap{width:72px;height:72px;}
+  .subject-card .icon-wrap svg{width:44px;height:44px;}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= icon helpers ================= */
+function starPoly(cx,cy,rOuter,rInner){
+  const pts=[];
+  for(let i=0;i<10;i++){
+    const r=i%2===0?rOuter:rInner;
+    const ang=(-90+i*36)*Math.PI/180;
+    pts.push((cx+r*Math.cos(ang)).toFixed(1)+","+(cy+r*Math.sin(ang)).toFixed(1));
+  }
+  return pts.join(' ');
+}
+function svgWrap(inner,vb){return `<svg viewBox="0 0 ${vb||100} ${vb||100}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}</svg>`;}
+
+function shapeIcon(kind,color,outlineOnly){
+  const f=outlineOnly?'none':color;
+  const s=outlineOnly?color:'none';
+  const sw=outlineOnly?7:0;
+  let inner='';
+  if(kind==='circle') inner=`<circle cx="50" cy="50" r="36" fill="${f}" stroke="${s}" stroke-width="${sw}"/>`;
+  else if(kind==='triangle') inner=`<polygon points="50,14 90,86 10,86" fill="${f}" stroke="${s}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+  else if(kind==='square') inner=`<rect x="14" y="14" width="72" height="72" rx="12" fill="${f}" stroke="${s}" stroke-width="${sw}"/>`;
+  else if(kind==='star') inner=`<polygon points="${starPoly(50,52,38,16)}" fill="${f}" stroke="${s}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+  else if(kind==='heart') inner=`<path d="M50 87 C 8 58 6 28 27 18 C 42 11 50 24 50 32 C 50 24 58 11 73 18 C 94 28 92 58 50 87 Z" fill="${f}" stroke="${s}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+  return svgWrap(inner);
+}
+function objectIcon(kind,color){
+  let inner='';
+  if(kind==='apple') inner=`<circle cx="50" cy="58" r="30" fill="${color}"/><path d="M50 28 C 46 16 34 14 30 20" stroke="#6b4226" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M52 24 C 58 10 74 12 78 22 C 70 28 58 26 52 24 Z" fill="#3fae4e"/>`;
+  else if(kind==='banana') inner=`<path d="M22 80 C 18 40 44 16 80 20 C 82 30 78 37 68 39 C 46 42 34 58 34 84 C 30 86 24 84 22 80 Z" fill="${color}" stroke="#b8860b" stroke-width="3" stroke-linejoin="round"/>`;
+  else if(kind==='leaf') inner=`<path d="M50 90 C 18 70 18 24 60 10 C 80 40 70 80 50 90 Z" fill="${color}"/><path d="M50 88 C 50 58 50 32 60 12" stroke="#1f6b2e" stroke-width="4" fill="none"/>`;
+  else if(kind==='drop') inner=`<path d="M50 10 C 72 42 84 60 84 74 C 84 90 68 94 50 94 C 32 94 16 90 16 74 C 16 60 28 42 50 10 Z" fill="${color}"/>`;
+  else if(kind==='orange') inner=`<circle cx="50" cy="56" r="32" fill="${color}"/><path d="M50 22 v10 M42 25 l6 8 M58 25 l-6 8" stroke="#3fae4e" stroke-width="5" stroke-linecap="round"/>`;
+  else if(kind==='ball') inner=`<circle cx="50" cy="50" r="36" fill="${color}" stroke="rgba(0,0,0,.15)" stroke-width="2"/><path d="M14 50 Q50 68 86 50 M50 12 Q32 50 50 88" stroke="rgba(255,255,255,.55)" stroke-width="3" fill="none"/>`;
+  return svgWrap(inner);
+}
+function bigStarIcon(color){return svgWrap(`<polygon points="${starPoly(50,50,42,18)}" fill="${color||'#F5B301'}"/>`);}
+function paletteIcon(color){return svgWrap(`<ellipse cx="50" cy="55" rx="42" ry="32" fill="${color||'#fff'}" stroke="#00000022" stroke-width="4"/><circle cx="34" cy="45" r="7" fill="#E74C3C"/><circle cx="52" cy="38" r="7" fill="#F5B301"/><circle cx="68" cy="48" r="7" fill="#2E86DE"/><circle cx="60" cy="64" r="7" fill="#27AE60"/><circle cx="66" cy="70" r="9" fill="none"/>`);}
+function shapesGroupIcon(){return svgWrap(`<rect x="10" y="10" width="34" height="34" rx="8" fill="#2E86DE"/><polygon points="78,12 96,44 60,44" fill="#F5B301"/><circle cx="26" cy="76" r="18" fill="#27AE60"/><polygon points="${starPoly(78,76,17,8)}" fill="#E74C3C"/>`);}
+function rulerIcon(){return svgWrap(`<rect x="10" y="40" width="80" height="24" rx="6" fill="#F2884B"/><path d="M20 40v10M32 40v16M44 40v10M56 40v16M68 40v10M80 40v16" stroke="#fff" stroke-width="3"/>`);}
+function houseSvg(){
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <polygon class="region" data-region="roof" points="50,8 94,48 6,48" fill="#EEF2F7" stroke="#2B2E4A22" stroke-width="2"/>
+    <rect class="region" data-region="wall" x="16" y="48" width="68" height="44" fill="#EEF2F7" stroke="#2B2E4A22" stroke-width="2"/>
+    <rect x="42" y="64" width="16" height="28" fill="#6b4226"/>
+    <rect x="24" y="58" width="14" height="14" fill="#fff" opacity=".6"/>
+  </svg>`;
+}
+function icecreamSvg(){
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle class="region" data-region="scoop" cx="50" cy="36" r="26" fill="#EEF2F7" stroke="#2B2E4A22" stroke-width="2"/>
+    <polygon class="region" data-region="cone" points="28,50 72,50 50,94" fill="#EEF2F7" stroke="#2B2E4A22" stroke-width="2"/>
+    <path d="M32 56 L50 88 L68 56" stroke="#2B2E4A22" stroke-width="2" fill="none"/>
+  </svg>`;
+}
+function umbrellaSvg(){
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <path class="region" data-region="canopy" d="M8 52 A42 42 0 0 1 92 52 Z" fill="#EEF2F7" stroke="#2B2E4A22" stroke-width="2"/>
+    <path class="region" data-region="handle" d="M44 52 H56 V86 A6 6 0 0 1 44 86 Z" fill="#EEF2F7" stroke="#2B2E4A22" stroke-width="2"/>
+  </svg>`;
+}
+function tulipSvg(){
+  return `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <path class="region" data-region="flower" d="M50 55 C28 55 22 34 34 18 C40 29 45 33 50 33 C55 33 60 29 66 18 C78 34 72 55 50 55 Z" fill="#EEF2F7" stroke="#2B2E4A22" stroke-width="2"/>
+    <path class="region" data-region="stem" d="M44 52 H56 V88 A6 6 0 0 1 44 88 Z" fill="#EEF2F7" stroke="#2B2E4A22" stroke-width="2"/>
+  </svg>`;
+}
+
+/* ================= data ================= */
+const COLORS=[
+  {key:'red',   label:'빨강',  hex:'#E74C3C'},
+  {key:'yellow',label:'노랑',  hex:'#F5B301'},
+  {key:'blue',  label:'파랑',  hex:'#2E86DE'},
+  {key:'green', label:'초록',  hex:'#27AE60'},
+  {key:'orange',label:'주황',  hex:'#F2884B'},
+];
+const SHAPES=[
+  {key:'circle',  label:'원'},
+  {key:'triangle',label:'세모'},
+  {key:'square',  label:'네모'},
+  {key:'star',    label:'별'},
+  {key:'heart',   label:'하트'},
+];
+function colorHex(key){return (COLORS.find(c=>c.key===key)||{}).hex||'#999';}
+function hexToRgba(hex,alpha){
+  const h=hex.replace('#','');
+  const r=parseInt(h.substring(0,2),16), g=parseInt(h.substring(2,4),16), b=parseInt(h.substring(4,6),16);
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+const SUBJECTS={
+  colors:{
+    label:'색깔', sub:'예쁜 색을 배워요',
+    icon:paletteIcon('#F5B301'), tint:'#FFF3E0',
+    methods:{
+      connect:{label:'연결하기',sub:'같은 색끼리 이어보아요'},
+      paint:{label:'칠하기',sub:'그림에 색을 칠해요'},
+      mosaic:{label:'모자이크 완성하기',sub:'칸을 색칠해 그림을 완성해요'},
+    }
+  },
+  shapes:{
+    label:'모양', sub:'여러 모양을 배워요',
+    icon:shapesGroupIcon(), tint:'#E3F2FD',
+    methods:{
+      connect:{label:'연결하기',sub:'같은 모양끼리 이어보아요'},
+      paint:{label:'칠하기',sub:'모양 그림에 색을 칠해요'},
+      mosaic:{label:'모자이크 완성하기',sub:'점선을 따라 콕콕 채워요'},
+    }
+  },
+  sizes:{
+    label:'크기', sub:'크고 작은 것을 배워요',
+    icon:rulerIcon(), tint:'#E8F8F0',
+    methods:{
+      connect:{label:'연결하기',sub:'크기가 맞는 것끼리 이어보아요'},
+      paint:{label:'칠하기',sub:'알맞은 크기를 찾아 칠해요'},
+      mosaic:{label:'모자이크 완성하기',sub:'작은 것부터 순서대로 놓아요'},
+    }
+  }
+};
+const SUBJECT_ORDER=['colors','shapes','sizes'];
+
+/* ---- activity configs ---- */
+const ACTIVITIES={
+  colors:{
+    connect:{
+      type:'match',
+      instruction:'같은 색깔끼리 선으로 이어보아요',
+      rounds:[{
+        pairs:[
+          {id:'apple',  icon:objectIcon('apple',COLORS[0].hex), matchId:'red'},
+          {id:'banana', icon:objectIcon('banana',COLORS[1].hex), matchId:'yellow'},
+          {id:'drop',   icon:objectIcon('drop',COLORS[2].hex), matchId:'blue'},
+          {id:'leaf',   icon:objectIcon('leaf',COLORS[3].hex), matchId:'green'},
+          {id:'orange', icon:objectIcon('orange',COLORS[4].hex), matchId:'orange'},
+        ],
+        targets: COLORS.map(c=>({id:c.key, matchId:c.key, icon:svgWrap(`<circle cx="50" cy="50" r="38" fill="${c.hex}"/>`), label:c.label}))
+      }]
+    },
+    paint:{
+      type:'paintFree',
+      instruction:'예쁜 색으로 자유롭게 칠해보아요',
+      rounds:[
+        {name:'우산', svgFn:umbrellaSvg, regions:['canopy','handle']},
+        {name:'튤립', svgFn:tulipSvg, regions:['flower','stem']},
+      ]
+    },
+    mosaic:{
+      type:'mosaicColor',
+      instruction:'점선 칸에 알맞은 색을 칠해 그림을 완성해요',
+      rounds:[
+        {
+          name:'무지개',cols:5,
+          palette:['red','orange','yellow','green','blue'],
+          grid:(()=>{const rows=['red','orange','yellow','green','blue'];const g=[];for(let r=0;r<5;r++){const row=[];for(let c=0;c<5;c++)row.push(rows[r]);g.push(row);}return g;})()
+        },
+        {
+          name:'체크무늬',cols:4,
+          palette:['red','yellow'],
+          grid:(()=>{const g=[];for(let r=0;r<4;r++){const row=[];for(let c=0;c<4;c++)row.push((r+c)%2===0?'red':'yellow');g.push(row);}return g;})()
+        }
+      ]
+    }
+  },
+  shapes:{
+    connect:{
+      type:'match',
+      instruction:'같은 모양끼리 선으로 이어보아요',
+      rounds:[{
+        pairs: SHAPES.map(s=>({id:s.key+'_shape', icon:shapeIcon(s.key,'#8E9BCB',true), matchId:s.key})),
+        targets: SHAPES.map(s=>({id:s.key+'_name', matchId:s.key, icon:shapeIcon(s.key,'#3AAFA9'), label:s.label}))
+      }]
+    },
+    paint:{
+      type:'paintFree',
+      instruction:'모양을 알록달록 칠해보아요',
+      rounds:[
+        {name:'집 (네모+세모)', svgFn:houseSvg, regions:['wall','roof']},
+        {name:'아이스크림 (세모+동그라미)', svgFn:icecreamSvg, regions:['cone','scoop']},
+      ]
+    },
+    mosaic:{
+      type:'mosaicSingle',
+      instruction:'점선 모양대로 콕콕 눌러 채워요',
+      rounds:[
+        {name:'하트',cols:5,color:'#E74C3C',grid:[
+          [0,1,0,1,0],
+          [1,1,1,1,1],
+          [1,1,1,1,1],
+          [0,1,1,1,0],
+          [0,0,1,0,0],
+        ]},
+        {name:'별',cols:5,color:'#F5B301',grid:[
+          [0,0,1,0,0],
+          [0,1,1,1,0],
+          [1,1,1,1,1],
+          [0,1,0,1,0],
+          [1,0,0,0,1],
+        ]},
+        {name:'집',cols:5,color:'#3AAFA9',grid:[
+          [0,0,1,0,0],
+          [0,1,1,1,0],
+          [1,1,1,1,1],
+          [1,1,0,1,1],
+          [1,1,0,1,1],
+        ]},
+      ]
+    }
+  },
+  sizes:{
+    connect:{
+      type:'match',
+      instruction:'크기가 맞는 것끼리 선으로 이어보아요',
+      rounds:[
+        {
+          object:'ball', color:'#2E86DE',
+          pairs:[
+            {id:'s_small', size:38, matchId:'small'},
+            {id:'s_medium', size:58, matchId:'medium'},
+            {id:'s_large', size:78, matchId:'large'},
+          ],
+          targets:[
+            {id:'l_small', matchId:'small', label:'작은 것'},
+            {id:'l_medium', matchId:'medium', label:'중간 것'},
+            {id:'l_large', matchId:'large', label:'큰 것'},
+          ]
+        },
+        {
+          object:'star', color:'#E74C3C',
+          pairs:[
+            {id:'s_small', size:38, matchId:'small'},
+            {id:'s_medium', size:58, matchId:'medium'},
+            {id:'s_large', size:78, matchId:'large'},
+          ],
+          targets:[
+            {id:'l_small', matchId:'small', label:'작은 것'},
+            {id:'l_medium', matchId:'medium', label:'중간 것'},
+            {id:'l_large', matchId:'large', label:'큰 것'},
+          ]
+        }
+      ]
+    },
+    paint:{
+      type:'paintTarget',
+      instruction:'',
+      rounds:[
+        {ask:'가장 큰 사과를 찾아 칠해요', object:'apple', options:[38,58,78], correctIndex:2, fillHex:'#E74C3C'},
+        {ask:'가장 작은 사과를 찾아 칠해요', object:'apple', options:[38,58,78], correctIndex:0, fillHex:'#F5B301'},
+        {ask:'가장 큰 나뭇잎을 찾아 칠해요', object:'leaf', options:[38,58,78], correctIndex:2, fillHex:'#27AE60'},
+      ]
+    },
+    mosaic:{
+      type:'mosaicOrder',
+      instruction:'작은 것부터 큰 것까지 순서대로 놓아요',
+      rounds:[
+        {sizes:[36,54,72], color:'#3AAFA9'},
+        {sizes:[30,46,62,78], color:'#F2884B'},
+      ]
+    }
+  }
+};
+
+/* ================= app state ================= */
+let settings={voice:true,sound:true};
+try{
+  const saved=JSON.parse(localStorage.getItem('oksaem-settings')||'{}');
+  if(typeof saved.voice==='boolean') settings.voice=saved.voice;
+  if(typeof saved.sound==='boolean') settings.sound=saved.sound;
+}catch(e){}
+function saveSettings(){try{localStorage.setItem('oksaem-settings',JSON.stringify(settings));}catch(e){}}
+
+let route={view:'home', subject:null, method:null};
+let runtime=null; // per-activity mutable state
+let settingsOpen=false;
+
+/* ---------- audio ---------- */
+let actx=null;
+function getCtx(){
+  if(!actx){
+    try{actx=new (window.AudioContext||window.webkitAudioContext)();}catch(e){actx=null;}
+  }
+  return actx;
+}
+function tone(freq,start,dur,type,gainPeak){
+  const ctx=getCtx(); if(!ctx) return;
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.type=type||'sine';
+  osc.frequency.value=freq;
+  const t0=ctx.currentTime+start;
+  gain.gain.setValueAtTime(0,t0);
+  gain.gain.linearRampToValueAtTime(gainPeak||0.18,t0+0.02);
+  gain.gain.exponentialRampToValueAtTime(0.0001,t0+dur);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(t0);osc.stop(t0+dur+0.05);
+}
+function playSuccess(){
+  if(!settings.sound) return;
+  tone(523.25,0,0.22,'sine');
+  tone(659.25,0.12,0.22,'sine');
+  tone(783.99,0.24,0.32,'sine');
+}
+function playRetry(){
+  if(!settings.sound) return;
+  tone(300,0,0.16,'sine',0.12);
+}
+function playBigWin(){
+  if(!settings.sound) return;
+  [523.25,587.33,659.25,783.99,880].forEach((f,i)=>tone(f,i*0.11,0.28,'sine'));
+}
+
+/* ---------- speech ---------- */
+function speak(text){
+  if(!settings.voice) return;
+  try{
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='ko-KR';
+    u.rate=0.92;
+    u.pitch=1.05;
+    const voices=window.speechSynthesis.getVoices();
+    const kv=voices.find(v=>v.lang&&v.lang.startsWith('ko'));
+    if(kv) u.voice=kv;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+const PRAISE=['잘했어요!','최고예요!','정말 멋져요!','훌륭해요!','참 잘했어요!'];
+function randomPraise(){return PRAISE[Math.floor(Math.random()*PRAISE.length)];}
+
+/* ================= icons for chrome ================= */
+const ICON_BACK=svgWrap(`<path d="M62 20 L34 50 L62 80" stroke="currentColor" stroke-width="10" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
+const ICON_GEAR=svgWrap(`<circle cx="50" cy="50" r="14" fill="none" stroke="currentColor" stroke-width="8"/><path d="M50 8v10M50 82v10M8 50h10M82 50h10M20 20l7 7M73 73l7 7M80 20l-7 7M27 73l-7 7" stroke="currentColor" stroke-width="8" stroke-linecap="round"/>`);
+const ICON_SPEAKER=svgWrap(`<path d="M15 40 v20 h15 l20 18 V22 L30 40 Z" fill="currentColor"/><path d="M68 35 a20 20 0 0 1 0 30 M78 25 a34 34 0 0 1 0 50" stroke="currentColor" stroke-width="7" fill="none" stroke-linecap="round"/>`);
+const ICON_HOME=svgWrap(`<path d="M50 14 L88 46 V88 H60 V62 H40 V88 H12 V46 Z" fill="none" stroke="currentColor" stroke-width="8" stroke-linejoin="round"/>`);
+
+/* ================= render root ================= */
+const app=document.getElementById('app');
+
+function render(){
+  let html='';
+  html+=renderBrandbar();
+  if(route.view==='home') html+=renderHome();
+  else if(route.view==='methods') html+=renderMethods();
+  else if(route.view==='activity') html+=renderActivityShell();
+  html+= route.celebrateDone ? '' : '';
+  app.innerHTML=html;
+  wireGlobal();
+  if(route.view==='activity') wireActivity();
+  if(settingsOpen) renderSettingsModal();
+  if(runtime && runtime.celebrate) renderCelebrateOverlay(runtime.celebrate);
+}
+
+function renderBrandbar(){
+  return `
+  <div class="brandbar">
+    <button class="brand" data-action="go-home">${paletteIcon('#FF6F59')}<span>옥쌤의 즐거운 교실</span></button>
+    <div class="spacer"></div>
+    <button class="gear" data-action="open-settings">${ICON_GEAR}설정</button>
+  </div>`;
+}
+
+function renderHome(){
+  const cards=SUBJECT_ORDER.map(key=>{
+    const s=SUBJECTS[key];
+    return `<button class="subject-card" data-action="go-methods" data-subject="${key}">
+      <div class="icon-wrap" style="background:${s.tint}">${s.icon}</div>
+      <span>${s.label}</span>
+      <small>${s.sub}</small>
+    </button>`;
+  }).join('');
+  return `
+  <div class="hero">
+    <h1>옥쌤의 즐거운 교실</h1>
+    <p>미술 시간 · 색깔 · 모양 · 크기를 재미있게 배워요</p>
+  </div>
+  <div class="grid-cards">
+    ${cards}
+    <button class="subject-card soon" disabled>
+      <div class="icon-wrap">${svgWrap('<circle cx="50" cy="50" r="34" fill="none" stroke="#9AA0C0" stroke-width="8" stroke-dasharray="10 10"/><path d="M50 34v32M34 50h32" stroke="#9AA0C0" stroke-width="8" stroke-linecap="round"/>')}</div>
+      <span>준비중</span>
+      <small>새 수업을 만들고 있어요</small>
+    </button>
+  </div>`;
+}
+
+function renderMethods(){
+  const s=SUBJECTS[route.subject];
+  const methodKeys=['connect','paint','mosaic'];
+  const iconFor={
+    connect:svgWrap('<circle cx="28" cy="30" r="10" fill="#3AAFA9"/><circle cx="72" cy="70" r="10" fill="#FF6F59"/><path d="M34 36 L66 64" stroke="#8E9BCB" stroke-width="6" stroke-linecap="round" stroke-dasharray="2 10"/>'),
+    paint:svgWrap('<path d="M50 90 C20 90 12 68 22 50 C30 36 46 34 50 20 C54 34 70 36 78 50 C88 68 80 90 50 90 Z" fill="#F5B301"/><circle cx="50" cy="60" r="12" fill="#fff"/>'),
+    mosaic:svgWrap('<rect x="10" y="10" width="35" height="35" fill="#E74C3C"/><rect x="55" y="10" width="35" height="35" fill="#F5B301"/><rect x="10" y="55" width="35" height="35" fill="#2E86DE"/><rect x="55" y="55" width="35" height="35" fill="#27AE60"/>'),
+  };
+  const cards=methodKeys.map(mk=>{
+    const m=s.methods[mk];
+    return `<button class="method-card" data-action="go-activity" data-method="${mk}">
+      <div class="icon-wrap">${iconFor[mk]}</div>
+      <div class="txt"><strong>${m.label}</strong><span>${m.sub}</span></div>
+    </button>`;
+  }).join('');
+  return `
+  <div class="subheader">
+    <button class="back" data-action="go-home">${ICON_BACK}뒤로</button>
+    <h2>${s.label}</h2>
+    <div></div>
+  </div>
+  <div class="method-list">${cards}</div>`;
+}
+
+/* ---------- activity shell + dispatch ---------- */
+function ensureRuntime(){
+  if(runtime && runtime.subject===route.subject && runtime.method===route.method) return;
+  const cfg=ACTIVITIES[route.subject][route.method];
+  runtime={
+    subject:route.subject, method:route.method,
+    cfg, roundIndex:0, celebrate:null,
+    roundState:null
+  };
+  initRoundState();
+}
+function currentRoundCfg(){return runtime.cfg.rounds[runtime.roundIndex];}
+
+function initRoundState(){
+  const cfg=runtime.cfg;
+  const rc=currentRoundCfg();
+  if(cfg.type==='match'){
+    const left=(rc.pairs||[]).map(p=>({...p}));
+    const right=(rc.targets||[]).map(t=>({...t}));
+    runtime.roundState={left,right,selected:null,matchedCount:0,total:left.length};
+  } else if(cfg.type==='paintFree'){
+    runtime.roundState={filled:{}, total:rc.regions.length, currentColor:COLORS[0].hex};
+  } else if(cfg.type==='mosaicColor'){
+    runtime.roundState={fills:{}, selectedCell:null, currentColor:rc.palette[0]};
+  } else if(cfg.type==='mosaicSingle'){
+    runtime.roundState={fills:{}};
+  } else if(cfg.type==='paintTarget'){
+    runtime.roundState={done:false};
+  } else if(cfg.type==='mosaicOrder'){
+    const sizes=rc.sizes.slice();
+    const shuffled=sizes.map((sz,i)=>({id:'b'+i,size:sz})).sort(()=>Math.random()-0.5);
+    runtime.roundState={slots:sizes.map((sz,i)=>({id:'slot'+i,size:sz,filled:false})), blocks:shuffled, selectedBlock:null};
+  }
+}
+
+function totalRounds(){return runtime.cfg.rounds.length;}
+
+function renderActivityShell(){
+  ensureRuntime();
+  const s=SUBJECTS[route.subject];
+  const m=s.methods[route.method];
+  const dotsHtml=Array.from({length:totalRounds()}).map((_,i)=>{
+    let cls='dot';
+    if(i<runtime.roundIndex) cls+=' done';
+    else if(i===runtime.roundIndex) cls+=' current';
+    return `<span class="${cls}"></span>`;
+  }).join('');
+  const instructionText=activityInstructionText();
+  return `
+  <div class="subheader">
+    <button class="back" data-action="go-methods-from-activity">${ICON_BACK}뒤로</button>
+    <h2>${m.label}</h2>
+    <div class="dots">${dotsHtml}</div>
+  </div>
+  <div class="instruction">
+    <p id="instr-text">${instructionText}</p>
+    <button class="replay-btn" data-action="replay">${ICON_SPEAKER}</button>
+  </div>
+  <div class="board" id="board">${renderBoard()}</div>
+  `;
+}
+
+function activityInstructionText(){
+  const cfg=runtime.cfg, rc=currentRoundCfg();
+  if(cfg.type==='paintTarget') return rc.ask;
+  if(cfg.type==='paintFree') return cfg.instruction+' ('+rc.name+')';
+  return cfg.instruction;
+}
+
+function renderBoard(){
+  const cfg=runtime.cfg;
+  if(cfg.type==='match') return renderMatchBoard();
+  if(cfg.type==='paintFree') return renderPaintFreeBoard();
+  if(cfg.type==='mosaicColor') return renderMosaicColorBoard();
+  if(cfg.type==='mosaicSingle') return renderMosaicSingleBoard();
+  if(cfg.type==='paintTarget') return renderPaintTargetBoard();
+  if(cfg.type==='mosaicOrder') return renderMosaicOrderBoard();
+  return '';
+}
+
+/* ---- MATCH ---- */
+function renderMatchBoard(){
+  const rs=runtime.roundState;
+  const leftHtml=rs.left.map(item=>{
+    const matched=isMatched('left',item.id);
+    const selected=rs.selected&&rs.selected.side==='left'&&rs.selected.id===item.id;
+    return `<button class="match-item ${matched?'matched':''} ${selected?'selected':''}" data-side="left" data-id="${item.id}" ${matched?'disabled':''}>${item.icon}</button>`;
+  }).join('');
+  const rightHtml=rs.right.map(item=>{
+    const matched=isMatched('right',item.id);
+    const selected=rs.selected&&rs.selected.side==='right'&&rs.selected.id===item.id;
+    return `<button class="match-item ${matched?'matched':''} ${selected?'selected':''}" data-side="right" data-id="${item.id}" ${matched?'disabled':''}>${item.icon||''}<span>${item.label||''}</span></button>`;
+  }).join('');
+  return `<div class="match-cols"><div class="match-col">${leftHtml}</div><div class="match-col">${rightHtml}</div></div>`;
+}
+function isMatched(side,id){
+  const rs=runtime.roundState;
+  return (rs._matched||{})[side+':'+id]===true;
+}
+
+/* ---- PAINT FREE ---- */
+function renderPaintFreeBoard(){
+  const rc=currentRoundCfg();
+  const rs=runtime.roundState;
+  const svgMarkup=rc.svgFn();
+  const swatches=COLORS.map(c=>`<button class="swatch ${rs.currentColor===c.hex?'active':''}" style="background:${c.hex}" data-color="${c.hex}" title="${c.label}"></button>`).join('');
+  return `
+  <div class="paint-stage" id="paint-stage">${svgMarkup}</div>
+  <div class="palette">${swatches}</div>`;
+}
+
+/* ---- MOSAIC COLOR ---- */
+function renderMosaicColorBoard(){
+  const rc=currentRoundCfg();
+  const rs=runtime.roundState;
+  const rows=rc.grid.length, cols=rc.cols;
+  let cells='';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const key=r+'_'+c;
+      const target=rc.grid[r][c];
+      const filled=rs.fills[key];
+      const bg=filled?colorHex(filled):'';
+      const selected=rs.selectedCell===key;
+      cells+=`<div class="cell target-cell ${selected?'selected':''}" data-cell="${key}" style="${bg?`background:${bg};border-style:solid;`:''}"></div>`;
+    }
+  }
+  const swatches=rc.palette.map(k=>{
+    const c=COLORS.find(x=>x.key===k);
+    return `<button class="swatch ${rs.currentColor===k?'active':''}" style="background:${c.hex}" data-color="${k}" title="${c.label}"></button>`;
+  }).join('');
+  return `
+  <div class="mosaic-grid" style="grid-template-columns:repeat(${cols},44px)">${cells}</div>
+  <div class="palette">${swatches}</div>`;
+}
+
+/* ---- MOSAIC SINGLE ---- */
+function renderMosaicSingleBoard(){
+  const rc=currentRoundCfg();
+  const rs=runtime.roundState;
+  const rows=rc.grid.length, cols=rc.cols;
+  let cells='';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const key=r+'_'+c;
+      const isTarget=rc.grid[r][c]===1;
+      const filled=rs.fills[key];
+      const style=filled?`background:${rc.color};border-style:solid;`:(isTarget?`background:${hexToRgba(rc.color,0.22)};`:'');
+      cells+=`<div class="cell ${isTarget?'target-cell':''}" data-cell="${key}" data-target="${isTarget?1:0}" style="${style}"></div>`;
+    }
+  }
+  return `<div class="mosaic-grid" style="grid-template-columns:repeat(${cols},44px)">${cells}</div>`;
+}
+
+/* ---- PAINT TARGET (size) ---- */
+function renderPaintTargetBoard(){
+  const rc=currentRoundCfg();
+  const rs=runtime.roundState;
+  const opts=rc.options.map((sz,i)=>{
+    const icon=objectIcon(rc.object,'#C9CEDE');
+    const filled=rs.filledIndex===i;
+    const cls=filled?'correct':(rs.shakeIndex===i?'shake':'');
+    return `<button class="size-card ${cls}" data-idx="${i}" style="width:${sz+30}px;height:${sz+30}px">
+      <div style="width:${sz}px;height:${sz}px">${filled?objectIcon(rc.object,rc.fillHex):icon}</div>
+    </button>`;
+  }).join('');
+  return `<div class="size-options">${opts}</div>`;
+}
+
+/* ---- MOSAIC ORDER (size) ---- */
+function renderMosaicOrderBoard(){
+  const rc=currentRoundCfg();
+  const rs=runtime.roundState;
+  const slotsHtml=rs.slots.map(s=>{
+    const box=s.size+20;
+    const shakeCls=rs.shakeSlot===s.id?'wrong':'';
+    return `<button class="slot ${s.filled?'filled':''} ${shakeCls}" data-slot="${s.id}" style="width:${box}px;height:${box}px">
+      ${s.filled?`<div style="width:${s.size}px;height:${s.size}px;border-radius:12px;background:${rc.color}"></div>`:''}
+    </button>`;
+  }).join('');
+  const blocksHtml=rs.blocks.map(b=>{
+    const selected=rs.selectedBlock===b.id;
+    const used=b.placed;
+    return `<button class="block ${selected?'selected':''} ${used?'used':''}" data-block="${b.id}" style="width:${b.size}px;height:${b.size}px;background:${rc.color}"></button>`;
+  }).join('');
+  return `<div class="order-row">${slotsHtml}</div><div class="block-pool">${blocksHtml}</div>`;
+}
+
+/* ================= wiring ================= */
+function wireGlobal(){
+  app.querySelectorAll('[data-action]').forEach(el=>{
+    el.addEventListener('click',onGlobalAction);
+  });
+}
+function onGlobalAction(e){
+  const action=e.currentTarget.getAttribute('data-action');
+  if(action==='go-home'){ route={view:'home',subject:null,method:null}; runtime=null; render(); }
+  else if(action==='go-methods'){ route.view='methods'; route.subject=e.currentTarget.getAttribute('data-subject'); render(); }
+  else if(action==='go-activity'){ route.view='activity'; route.method=e.currentTarget.getAttribute('data-method'); runtime=null; render(); speakInstructionSoon(); }
+  else if(action==='go-methods-from-activity'){ route.view='methods'; route.method=null; runtime=null; render(); }
+  else if(action==='open-settings'){ settingsOpen=true; render(); }
+  else if(action==='replay'){ speak(activityInstructionText()); }
+}
+function speakInstructionSoon(){
+  setTimeout(()=>{ if(route.view==='activity') speak(activityInstructionText()); },250);
+}
+
+function wireActivity(){
+  const cfg=runtime.cfg;
+  if(cfg.type==='match') wireMatch();
+  else if(cfg.type==='paintFree') wirePaintFree();
+  else if(cfg.type==='mosaicColor') wireMosaicColor();
+  else if(cfg.type==='mosaicSingle') wireMosaicSingle();
+  else if(cfg.type==='paintTarget') wirePaintTarget();
+  else if(cfg.type==='mosaicOrder') wireMosaicOrder();
+}
+
+/* ---- match wiring ---- */
+function wireMatch(){
+  document.querySelectorAll('.match-item[data-side]').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const side=el.getAttribute('data-side');
+      const id=el.getAttribute('data-id');
+      const rs=runtime.roundState;
+      if(!rs.selected){ rs.selected={side,id}; render(); return; }
+      if(rs.selected.side===side){ rs.selected={side,id}; render(); return; }
+      const leftItem = side==='left'? findBy(rs.left,id) : findBy(rs.left,rs.selected.id);
+      const rightItem = side==='right'? findBy(rs.right,id) : findBy(rs.right,rs.selected.id);
+      if(leftItem && rightItem && leftItem.matchId===rightItem.matchId){
+        rs._matched=rs._matched||{};
+        rs._matched['left:'+leftItem.id]=true;
+        rs._matched['right:'+rightItem.id]=true;
+        rs.matchedCount++;
+        rs.selected=null;
+        playSuccess();
+        speak(randomPraise());
+        render();
+        if(rs.matchedCount>=rs.total){ setTimeout(finishRound,500); }
+      } else {
+        playRetry();
+        speak('다시 해볼까요?');
+        rs.shakeIds=[ (side==='left'?id:rs.selected.id), (side==='right'?id:rs.selected.id) ];
+        rs.selected=null;
+        render();
+        document.querySelectorAll('.match-item').forEach(elm=>{
+          const eid=elm.getAttribute('data-id');
+          if(rs.shakeIds.includes(eid)) elm.classList.add('shake');
+        });
+        setTimeout(()=>{ rs.shakeIds=null; },500);
+      }
+    });
+  });
+}
+function findBy(arr,id){return arr.find(x=>x.id===id);}
+
+/* ---- paint free wiring ---- */
+function wirePaintFree(){
+  const stage=document.getElementById('paint-stage');
+  document.querySelectorAll('.swatch').forEach(sw=>{
+    sw.addEventListener('click',()=>{
+      runtime.roundState.currentColor=sw.getAttribute('data-color');
+      render();
+    });
+  });
+  if(!stage) return;
+  stage.querySelectorAll('.region').forEach(region=>{
+    region.addEventListener('click',()=>{
+      const rs=runtime.roundState;
+      const key=region.getAttribute('data-region');
+      region.style.fill=rs.currentColor;
+      if(!rs.filled[key]){ rs.filled[key]=rs.currentColor; }
+      const doneCount=Object.keys(rs.filled).length;
+      if(doneCount>=rs.total){
+        playSuccess();
+        const rc=currentRoundCfg();
+        speak(rc.name+' 색칠을 다 했어요! '+randomPraise());
+        setTimeout(finishRound,600);
+      } else {
+        speak('잘 칠했어요');
+      }
+    });
+  });
+}
+
+/* ---- mosaic color wiring ---- */
+function wireMosaicColor(){
+  document.querySelectorAll('.swatch').forEach(sw=>{
+    sw.addEventListener('click',()=>{
+      runtime.roundState.currentColor=sw.getAttribute('data-color');
+      render();
+    });
+  });
+  document.querySelectorAll('.cell[data-cell]').forEach(cell=>{
+    cell.addEventListener('click',()=>{
+      const rs=runtime.roundState, rc=currentRoundCfg();
+      const key=cell.getAttribute('data-cell');
+      const [r,c]=key.split('_').map(Number);
+      const target=rc.grid[r][c];
+      if(rs.fills[key]) return;
+      if(target===rs.currentColor){
+        rs.fills[key]=rs.currentColor;
+        playSuccess();
+        const totalTarget=rc.grid.flat().length;
+        const filledCount=Object.keys(rs.fills).length;
+        render();
+        if(filledCount>=totalTarget){
+          speak(rc.name+' 완성! '+randomPraise());
+          setTimeout(finishRound,600);
+        }
+      } else {
+        playRetry();
+        speak('다른 색을 골라볼까요?');
+        cell.classList.add('wrong');
+        setTimeout(()=>cell.classList.remove('wrong'),400);
+      }
+    });
+  });
+}
+
+/* ---- mosaic single wiring ---- */
+function wireMosaicSingle(){
+  document.querySelectorAll('.cell[data-cell]').forEach(cell=>{
+    cell.addEventListener('click',()=>{
+      const rs=runtime.roundState, rc=currentRoundCfg();
+      const key=cell.getAttribute('data-cell');
+      const isTarget=cell.getAttribute('data-target')==='1';
+      if(rs.fills[key]) return;
+      if(isTarget){
+        rs.fills[key]=true;
+        playSuccess();
+        const totalTarget=rc.grid.flat().filter(v=>v===1).length;
+        const filledCount=Object.keys(rs.fills).length;
+        render();
+        if(filledCount>=totalTarget){
+          speak(rc.name+' 모양 완성! '+randomPraise());
+          setTimeout(finishRound,600);
+        }
+      } else {
+        playRetry();
+        cell.classList.add('wrong');
+        setTimeout(()=>cell.classList.remove('wrong'),400);
+      }
+    });
+  });
+}
+
+/* ---- paint target (size) wiring ---- */
+function wirePaintTarget(){
+  document.querySelectorAll('.size-card[data-idx]').forEach(card=>{
+    card.addEventListener('click',()=>{
+      const rc=currentRoundCfg(); const rs=runtime.roundState;
+      const idx=Number(card.getAttribute('data-idx'));
+      if(rs.done) return;
+      if(idx===rc.correctIndex){
+        rs.filledIndex=idx; rs.done=true;
+        playSuccess(); speak(randomPraise());
+        render();
+        setTimeout(finishRound,600);
+      } else {
+        playRetry(); speak('다시 골라볼까요?');
+        rs.shakeIndex=idx; render();
+        setTimeout(()=>{ rs.shakeIndex=null; render(); },400);
+      }
+    });
+  });
+}
+
+/* ---- mosaic order wiring ---- */
+function wireMosaicOrder(){
+  document.querySelectorAll('.block[data-block]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const rs=runtime.roundState;
+      const id=b.getAttribute('data-block');
+      const block=rs.blocks.find(x=>x.id===id);
+      if(block.placed) return;
+      rs.selectedBlock=id;
+      render();
+    });
+  });
+  document.querySelectorAll('.slot[data-slot]').forEach(s=>{
+    s.addEventListener('click',()=>{
+      const rs=runtime.roundState;
+      if(!rs.selectedBlock) return;
+      const slotId=s.getAttribute('data-slot');
+      const slot=rs.slots.find(x=>x.id===slotId);
+      const block=rs.blocks.find(x=>x.id===rs.selectedBlock);
+      if(slot.filled){ return; }
+      if(block.size===slot.size){
+        slot.filled=true; block.placed=true; rs.selectedBlock=null;
+        playSuccess(); speak(randomPraise());
+        render();
+        if(rs.slots.every(x=>x.filled)){
+          speak('순서대로 완성했어요! '+randomPraise());
+          setTimeout(finishRound,600);
+        }
+      } else {
+        playRetry(); speak('다른 크기를 놓아볼까요?');
+        rs.selectedBlock=null;
+        rs.shakeSlot=slotId;
+        render();
+        setTimeout(()=>{ rs.shakeSlot=null; render(); },400);
+      }
+    });
+  });
+}
+
+/* ================= round / activity completion ================= */
+function finishRound(){
+  if(runtime.celebrate) return;
+  playBigWin();
+  runtime.celebrate={
+    kind: runtime.roundIndex < totalRounds()-1 ? 'round' : 'final'
+  };
+  render();
+}
+function renderCelebrateOverlay(state){
+  const overlay=document.createElement('div');
+  overlay.className='celebrate-overlay';
+  const isFinal=state.kind==='final';
+  overlay.innerHTML=`
+    <div class="celebrate-card">
+      <div class="stars-row">${bigStarIcon('#F5B301')}${bigStarIcon('#FF6F59')}${bigStarIcon('#3AAFA9')}</div>
+      <h2>${isFinal?'다 완성했어요!':'참 잘했어요!'}</h2>
+      <p>${isFinal?'모든 활동을 끝냈어요. 정말 대단해요!':'다음으로 넘어가볼까요?'}</p>
+      <button class="big-btn" data-action="celebrate-next">${isFinal?'메뉴로 돌아가기':'다음으로'}</button>
+      ${isFinal?`<button class="big-btn secondary" data-action="celebrate-again">${'처음부터 다시하기'}</button>`:''}
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('[data-action="celebrate-next"]').addEventListener('click',()=>{
+    document.body.removeChild(overlay);
+    runtime.celebrate=null;
+    if(isFinal){
+      route.view='methods'; route.method=null; runtime=null;
+      render();
+    } else {
+      runtime.roundIndex++;
+      initRoundState();
+      render();
+      speakInstructionSoon();
+    }
+  });
+  const againBtn=overlay.querySelector('[data-action="celebrate-again"]');
+  if(againBtn){
+    againBtn.addEventListener('click',()=>{
+      document.body.removeChild(overlay);
+      runtime.celebrate=null;
+      runtime.roundIndex=0;
+      initRoundState();
+      render();
+      speakInstructionSoon();
+    });
+  }
+}
+
+/* ================= settings modal ================= */
+function renderSettingsModal(){
+  const overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.innerHTML=`
+    <div class="modal-card">
+      <h3>설정</h3>
+      <div class="setting-row">
+        <span>음성 안내</span>
+        <button class="switch ${settings.voice?'on':''}" data-toggle="voice"><span class="knob"></span></button>
+      </div>
+      <div class="setting-row">
+        <span>효과음</span>
+        <button class="switch ${settings.sound?'on':''}" data-toggle="sound"><span class="knob"></span></button>
+      </div>
+      <div class="close-row">
+        <button class="big-btn" data-action="close-settings">닫기</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',(e)=>{ if(e.target===overlay){ closeSettings(overlay); } });
+  overlay.querySelectorAll('[data-toggle]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const key=btn.getAttribute('data-toggle');
+      settings[key]=!settings[key];
+      saveSettings();
+      btn.classList.toggle('on',settings[key]);
+    });
+  });
+  overlay.querySelector('[data-action="close-settings"]').addEventListener('click',()=>closeSettings(overlay));
+  function closeSettings(ov){
+    document.body.removeChild(ov);
+    settingsOpen=false;
+  }
+}
+
+/* ================= boot ================= */
+if('speechSynthesis' in window){
+  window.speechSynthesis.onvoiceschanged=()=>{};
+}
+render();
+
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
