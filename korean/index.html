@@ -44,7 +44,7 @@ canvas{width:100%;height:240px;touch-action:none;display:block}.guidechar{positi
 <div class="teacher"><strong>🎮 게임 모드:</strong> 정글 점프처럼 움직이는 글자를 바구니로 받아요. 움직임이 어렵다면 큰 글자 선택 모드로 바꿀 수 있습니다.<div class="smallbar"><a class="action" href="catch.html" style="text-decoration:none">🌟 소리 별 글자 받기 게임 시작 →</a></div></div><div class="smallbar" style="align-items:center"><label for="writingConsonant" style="font-weight:850">✏️ 쓰기 별 시작 자음: </label><select id="writingConsonant" aria-label="쓰기 단계 시작 자음" style="font-size:19px;padding:10px;border:2px solid #b9dfcf;border-radius:12px"><option value="ㄱ">ㄱ</option><option value="ㄴ">ㄴ</option><option value="ㄷ">ㄷ</option><option value="ㄹ">ㄹ</option><option value="ㅁ">ㅁ</option><option value="ㅂ">ㅂ</option><option value="ㅅ">ㅅ</option><option value="ㅇ">ㅇ</option><option value="ㅈ">ㅈ</option><option value="ㅊ">ㅊ</option><option value="ㅋ">ㅋ</option><option value="ㅌ">ㅌ</option><option value="ㅍ">ㅍ</option><option value="ㅎ">ㅎ</option></select></div><div id="stages" class="stage-grid"></div></div>
 <div class="box hide" id="game"><div class="progress" id="progress"></div><h2 id="gameTitle"></h2><div id="stageContent"></div><div class="status" id="status" aria-live="polite">시작해요!</div>
 <div class="smallbar"><button class="action secondary" id="hear">🔊 다시 듣기</button><button class="action secondary" id="hint">💡 도움말</button><button class="action secondary" id="retry">↻ 다시 하기</button><button class="action" id="finish" disabled>⭐ 완료하고 돌아가기</button></div></div>
-<div class="teacher"><strong>📚 국어 → 일상생활 체험:</strong> 한글별에서 글자와 문장을 익힌 뒤 동물 친구 카페에서 주문을 듣고 인사하는 역할놀이를 해 보세요. 게임 간 기록·성취 판정은 아직 별도로 관리합니다.<div class="smallbar"><a class="action secondary" style="text-decoration:none" href="../career/cafe.html">☕ 동물 친구 카페로 이동</a></div></div>
+<div class="teacher"><strong>📚 국어 → 일상생활 체험:</strong> 한글별에서 글자와 문장을 익힌 뒤 동물 친구 카페에서 주문을 듣고 인사하는 역할놀이를 해 보세요. 게임 간 기록·성취 판정은 아직 별도로 관리합니다.<div class="smallbar"><a class="action secondary" style="text-decoration:none" href="../career/barista.html">☕ 동물 친구 카페로 이동</a></div></div>
 <div class="teacher"><strong>교사용 안내:</strong> 이 화면은 업로드한 워드 마스터의 학습 순서·기초 자료를 활용한 경량 연계 시범판입니다. 원본 React 게임을 그대로 이식한 것은 아닙니다. 학생의 인식·쓰기·조작 과정을 관찰해 평가하고, 정답이나 획득 별만으로 성취를 판정하지 마세요. 활동 기록은 이 기기에만 저장됩니다.</div>
 </main><script>
 (()=>{
@@ -154,7 +154,7 @@ function renderSentence(){
 }
 function complete(){
  done=true;$('progress').innerHTML=stageTasks.map(()=>'<span class="done"></span>').join('');
- $('stageContent').innerHTML='<div class="sentence">🌟 멋져요! '+INFO[stage].name+'을(를) 완성했어요!</div><p class="muted" style="text-align:center">교사가 필요한 지원과 학습 과정을 따로 관찰해 주세요.</p>'+(stage===4?'<div class="smallbar"><a class="action" style="text-decoration:none" href="../career/cafe.html">☕ 카페에서 주문 듣고 말하기 체험 →</a></div>':'');
+ $('stageContent').innerHTML='<div class="sentence">🌟 멋져요! '+INFO[stage].name+'을(를) 완성했어요!</div><p class="muted" style="text-align:center">교사가 필요한 지원과 학습 과정을 따로 관찰해 주세요.</p>'+(stage===4?'<div class="smallbar"><a class="action" style="text-decoration:none" href="../career/barista.html">☕ 카페에서 주문 듣고 말하기 체험 →</a></div>':'');
  $('finish').disabled=false;
  try{record.push({stage:stage,mode:mode,completed:true,tries:wrong,hints:hints,at:new Date().toISOString()});record=record.slice(-60);localStorage.setItem(KEY,JSON.stringify(record));}catch(e){}
  msg('별 한 개를 획득했어요!');say('모험을 완성했어요! 잘했어요!');
