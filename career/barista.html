@@ -1,0 +1,95 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>정글 바리스타 · 직업 체험 게임</title><meta name="theme-color" content="#90663d">
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:linear-gradient(#d4f3ed,#f5e6c8 65%,#e7ca97);font-family:system-ui,"Noto Sans KR",sans-serif;color:#3b453e}button,a{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:4px solid #2e9881;outline-offset:3px}a{text-decoration:none;color:inherit}
+main{width:min(1080px,98vw);margin:auto;padding:12px 10px 45px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.pill{border:2px solid #edd7b4;border-radius:99px;background:white;padding:11px 15px;min-height:47px;font-weight:850;color:#67442d}
+h1{text-align:center;color:#79513c;font-size:clamp(25px,4vw,37px);margin:9px 0}
+.hud{display:grid;grid-template-columns:1fr auto auto;gap:8px;margin:11px 0}.hud>*{border:3px solid #fff;background:#fff8ed;border-radius:17px;padding:10px;box-shadow:0 5px 11px #67463136;font-weight:900}
+.room{background:linear-gradient(#ffe8bc,#f6cf8e 62%,#b1743f 63%,#9d6235);border:7px solid #fff7e6;box-shadow:0 13px 23px #68503747;border-radius:28px;min-height:370px;padding:12px;position:relative;overflow:hidden}
+.scene{display:grid;grid-template-columns:25% 1fr 27%;gap:9px;align-items:center;min-height:245px}
+.person{text-align:center}.person img{width:100%;height:165px;object-fit:contain;filter:drop-shadow(0 8px 4px #774e3e60)}
+.talk{background:#fff;border:3px solid #a6d8c6;border-radius:20px;padding:10px;font-weight:900;text-align:center;min-height:58px;font-size:clamp(15px,2vw,20px)}
+.workstation{min-height:220px;border:6px solid #e7ba81;border-radius:23px;background:linear-gradient(#fcf1d9,#eed4ac);box-shadow:inset 0 -16px 0 #a36f49,0 8px 15px #63432b66;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;padding:11px}
+.workstation .glass{font-size:clamp(58px,7vw,105px);filter:drop-shadow(0 5px 4px #81604a60)}.workstation .ingredient{font-size:30px;min-height:42px}.workstation .counter{font-weight:900;color:#715137;font-size:18px}
+.receipt{background:#fffdf1;border:3px dashed #b39a6a;border-radius:8px;padding:13px 8px;min-height:190px;box-shadow:0 7px 8px #78543650;font-weight:800}.receipt h2{margin:0 0 8px;font-size:18px}.receipt p{font-size:14px;line-height:1.6}.receipt strong{display:block;color:#795139;font-size:clamp(17px,2vw,23px)}
+.mission{background:#ffffffd9;border-radius:20px;padding:13px;margin-top:10px;text-align:center;font-size:clamp(16px,2.4vw,22px);font-weight:900;color:#68472e}
+.steps{display:flex;gap:5px;margin:10px 0}.steps span{flex:1;height:11px;border-radius:100px;background:#d6af7e}.steps .on{background:#ffdd58}.steps .done{background:#4ab38c}
+.panel{background:#fffdf8;border:4px solid #fff;border-radius:25px;padding:16px;box-shadow:0 7px 22px #79582e32;margin-top:12px}
+.panel h2{margin:0 0 7px;font-size:22px}.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;margin:13px 0}
+.choice{background:linear-gradient(#fff,#fbeed9);min-height:105px;border:4px solid #e9d5b6;border-radius:21px;padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-weight:900;color:#715238;font-size:18px;box-shadow:0 6px 11px #73502e21}
+.choice img{height:90px;width:110px;object-fit:contain}.choice .emoji{font-size:51px}.choice:disabled{opacity:.5}
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.controls button,.controls a{padding:12px 16px;min-height:50px;background:#fff;border:2px solid #c8aa7a;border-radius:14px;font-weight:850;color:#644731}
+.controls .primary{background:#3b9d79;border-color:#3b9d79;color:white}
+.feedback{padding:10px;border-radius:14px;background:#fff2d6;color:#685326;min-height:43px;font-weight:850;line-height:1.5;margin:10px 0}
+.meter{margin:17px auto;max-width:700px;border-radius:99px;height:35px;border:5px solid #b98c50;background:linear-gradient(90deg,#f8d2b8 0 37%,#5ed49a 37% 63%,#f8d2b8 63% 100%);position:relative;box-shadow:inset 0 3px 7px #613b1c49}
+.needle{position:absolute;left:0;top:-11px;transform:translateX(-50%);height:46px;width:8px;border:3px solid white;background:#f1a432;border-radius:8px;box-shadow:0 2px 6px #734829}
+.note{font-size:12px;color:#766348;line-height:1.6}
+@media(max-width:650px){.scene{grid-template-columns:27% 1fr 28%;gap:5px}.person img{height:112px}.workstation{min-height:180px;padding:3px}.receipt{padding:7px 4px}.receipt h2{font-size:14px}.receipt p{font-size:12px}.room{padding:5px;min-height:300px}.talk{font-size:13px;padding:6px}.panel{padding:9px}.choices{grid-template-columns:repeat(2,minmax(0,1fr))}.choice{min-height:95px}.top{font-size:12px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head><body><main>
+<div class="top"><a class="pill" href="../index.html">🏡 학교 마을</a><a class="pill" href="cafe.html">📘 쉬운 선택형 카페</a><a class="pill" href="../curriculum/teacher-guide.html">⚙️ 교사 설정</a><button class="pill" id="voice" type="button" aria-pressed="true">🔊 음성 켜짐</button></div>
+<h1>☕ 정글 바리스타 직업 체험</h1><div class="hud"><div>🎯 <span id="hudTask">주문 대기</span></div><div>⭐ <span id="points">0</span></div><div>🪙 <span id="coins">0</span></div></div>
+<section class="room" aria-label="카페 주문 및 작업대"><div class="scene">
+<div class="person"><img id="customer" src="../art/stickers/monkey.png" alt="동물 손님"><div id="talk" class="talk">어서 와!</div></div>
+<div class="workstation"><div class="glass" id="glass" role="img" aria-label="작업대의 컵">🥛</div><div id="ing" class="ingredient"></div><div id="counter" class="counter">작업대 준비</div></div>
+<div class="receipt"><h2>📋 주문서</h2><p>동물 친구의 주문</p><strong id="receiptDrink">딸기 주스</strong><p id="receiptQty">1잔</p><p id="receiptPrice">1잔 1,000원</p></div></div>
+<div id="mission" class="mission" aria-live="polite">오늘의 카페를 열어 보아요!</div></section>
+<div class="steps" id="steps" aria-label="진행 단계"></div>
+<div class="panel"><h2 id="stageName">어서 오세요!</h2><div class="controls"><label for="mode" style="font-weight:850">활동 지원 단계</label><select id="mode" style="min-height:49px;border-radius:14px;border:2px solid #d0b994;padding:9px;background:white"><option value="explore">🌱 감각·탐색</option><option value="guided">🍀 선택·조작</option><option value="independent">🌳 문제 해결</option></select><button id="repeat">🔊 다시 듣기</button><button id="help">💡 도움</button><button id="reset">↻ 처음부터</button></div>
+<div id="choices" class="choices"></div><div id="timing" hidden><div id="meter" class="meter"><div id="needle" class="needle"></div></div><div class="controls" style="justify-content:center"><button class="primary" id="pour" type="button">🥤 여기서 붓기!</button></div><p class="note" style="text-align:center">가운데 초록색 구간에서 눌러 보아요. 잘못 눌러도 다시 해 볼 수 있습니다.</p></div>
+<div id="feedback" class="feedback" role="status" aria-live="polite">학습 수준을 선택하고 손님을 맞이해요.</div><div class="controls"><button class="primary" id="next" disabled>다음 단계 →</button><a href="../quests/index.html?quest=cafe">🗺️ 카페 통합 퀘스트</a></div>
+<p class="note">국어(인사·주문 확인), 수학(수량·가격), 사회(관계·선택), 진로와 직업(위생·외식서비스 순서)을 연결한 체험입니다. 조작 난도가 교육적 성취를 대신하지 않으며, 시간 제한·생명 감소는 없습니다.</p></div></main>
+<script>
+(function(){
+"use strict";
+var $=id=>document.getElementById(id),customers=['monkey','rabbit','penguin','bear','sloth'],customerNames=['원숭이','토끼','펭귄','곰','나무늘보'],drinks=[{name:'딸기 주스',file:'strawberry.png',emoji:'🍓'},{name:'수박 주스',file:'watermelon.png',emoji:'🍉'}];
+var steps=['손님 맞이','주문 확인','손 씻기','재료 준비','음료 만들기','서빙','계산'];
+var mode='guided',stage=0,score=0,coins=0,customerIndex=0,drinkIndex=0,qty=2,prepared=0,wrong=0,helps=0,ready=false,complete=false,voiceOn=true,meter=0,dir=1,raf=0,last=0,meterRunning=false;
+try{var p=JSON.parse(localStorage.getItem('oks_iep_config_v1')||'{}');if(['explore','guided','independent'].includes(p.mode))mode=p.mode}catch(e){}$('mode').value=mode;
+function say(text){if(!voiceOn||!('speechSynthesis' in window))return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(text);u.lang='ko-KR';u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+function msg(text){$('feedback').textContent=text}
+function setControls(list){$('choices').innerHTML='';list.forEach(function(x){var b=document.createElement('button');b.className='choice';b.type='button';if(x.file){var img=document.createElement('img');img.src='../art/stickers/'+x.file;img.alt='';img.onerror=function(){this.remove()};b.appendChild(img)}else if(x.emoji){var em=document.createElement('span');em.className='emoji';em.textContent=x.emoji;b.appendChild(em)}var txt=document.createElement('span');txt.textContent=x.label;b.appendChild(txt);b.onclick=x.fn;$('choices').appendChild(b)})}
+function finishStep(){ready=true;score+=10;$('points').textContent=score;$('next').disabled=false;$('next').textContent=stage===steps.length-1?'🏅 오늘의 일 끝내기':'다음 단계 →';msg('⭐ 좋아요! 다음 단계로 가 보아요.');say('잘했어요!')}
+function no(){wrong++;msg('괜찮아요. 다시 한번 해 봐요.');say('다시 살펴보아요.')}
+function instruction(){return [
+'손님에게 알맞은 인사말을 전해요.',
+customers.length+'명의 동물 친구가 있는 카페예요. 손님이 주문한 음료를 확인해요.',
+'음식을 준비하기 전에는 손을 씻어요.',
+'주문한 재료를 필요한 만큼 작업대에 놓아요.',
+'컵에 음료를 조심스럽게 부어요.',
+'완성한 음료를 주문한 손님에게 전달해요.',
+'한 잔에 1,000원이에요. 손님이 내야 할 금액을 골라요.'
+][stage]}
+function render(){
+ cancelAnimationFrame(raf);meterRunning=false;last=0;ready=false;$('next').disabled=true;$('timing').hidden=true;$('choices').hidden=false;$('stageName').textContent=(stage+1)+' / '+steps.length+' '+steps[stage];
+ $('steps').innerHTML=steps.map(function(s,i){return '<span class="'+(i<stage?'done':i===stage?'on':'')+'" title="'+s+'"></span>'}).join('');
+ $('hudTask').textContent=steps[stage]+' ('+(stage+1)+'/'+steps.length+')';
+ $('customer').src='../art/stickers/'+customers[customerIndex]+'.png';$('customer').alt=customerNames[customerIndex]+' 손님';
+ $('receiptDrink').textContent=drinks[drinkIndex].name;$('receiptQty').textContent=qty+'잔';$('receiptPrice').textContent='한 잔 1,000원';$('talk').textContent=stage===0?'안녕!':'저는 '+drinks[drinkIndex].name+' '+qty+'잔 주세요!';
+ $('glass').textContent=stage<4?'🥛':stage===4?'🫗':'🥤';$('ing').textContent=stage===3?Array(prepared).fill(drinks[drinkIndex].emoji).join(' '):'';
+ $('counter').textContent=stage===3?'재료 '+prepared+'/'+qty:stage===4?'음료 붓기':stage>=5?'음료 준비 완료':'작업대 준비';
+ $('mission').textContent=instruction();msg('차근차근 해보아요.');$('choices').innerHTML='';
+ var fewer=mode==='explore';
+ if(stage===0)setControls([{emoji:'👋',label:'어서 오세요!',fn:finishStep}].concat(fewer?[]:[{emoji:'🚪',label:'안녕히 가세요',fn:no}]));
+ if(stage===1)setControls([{file:drinks[drinkIndex].file,label:drinks[drinkIndex].name,fn:finishStep}].concat(fewer?[]:[{file:drinks[1-drinkIndex].file,label:drinks[1-drinkIndex].name,fn:no}]));
+ if(stage===2)setControls([{emoji:'🫧',label:'손 씻기',fn:finishStep}].concat(fewer?[]:[{emoji:'📱',label:'핸드폰 만지기',fn:no}]));
+ if(stage===3)setControls([{file:drinks[drinkIndex].file,label:drinks[drinkIndex].name+' 담기',fn:function(){if(ready)return;prepared++;$('ing').textContent=Array(prepared).fill(drinks[drinkIndex].emoji).join(' ');$('counter').textContent='재료 '+prepared+'/'+qty;if(prepared>=qty)finishStep();else msg('잘했어요! '+(qty-prepared)+'개 더 준비해요.')}}].concat(fewer?[]:[{file:drinks[1-drinkIndex].file,label:'다른 재료',fn:no}]));
+ if(stage===4){if(fewer){setControls([{emoji:'🥤',label:'천천히 컵에 붓기',fn:finishStep}]);}else{$('choices').hidden=true;$('timing').hidden=false;meter=0;dir=1;meterRunning=true;raf=requestAnimationFrame(frame)}}
+ if(stage===5)setControls([{emoji:'🥤',label:customerNames[customerIndex]+' 손님에게 드려요',fn:finishStep}].concat(fewer?[]:[{emoji:'🗑️',label:'음료를 버려요',fn:no}]));
+ if(stage===6){var correct=qty*1000;setControls([{emoji:'💵',label:correct.toLocaleString('ko-KR')+'원',fn:finishStep}].concat(fewer?[]:[{emoji:'💰',label:(correct+1000).toLocaleString('ko-KR')+'원',fn:no}]));}
+ say(instruction())
+}
+function frame(now){if(!meterRunning||ready)return;var dt=last?Math.min(.045,(now-last)/1000):0;last=now;meter+=dir*dt*(mode==='guided'?35:56);if(meter>=100){meter=100;dir=-1}if(meter<=0){meter=0;dir=1}$('needle').style.left=meter+'%';raf=requestAnimationFrame(frame)}
+$('pour').onclick=function(){if(ready)return;if(meter<29||meter>71){no();meter=0;dir=1;return}meterRunning=false;cancelAnimationFrame(raf);finishStep()};
+$('next').onclick=function(){if(!ready)return;if(stage===steps.length-1){complete=true;cancelAnimationFrame(raf);coins=qty*1000;$('coins').textContent=coins;try{var k='oks-career-cafe-v1',r=JSON.parse(localStorage.getItem(k)||'[]');if(!Array.isArray(r))r=[];r.unshift({date:new Date().toISOString(),mode,completed:true,customer:customers[customerIndex],drink:drinks[drinkIndex].name,count:qty,retries:wrong,hints:helps,score:score});localStorage.setItem(k,JSON.stringify(r.slice(0,30)))}catch(e){}
+ $('mission').textContent='🏅 오늘의 직업 체험 완료!';$('stageName').textContent='멋진 바리스타!';$('choices').hidden=true;$('timing').hidden=true;$('next').disabled=true;msg('별 '+score+'점과 '+coins+'코인을 획득했어요. 실제 활동 평가와는 별개입니다.');say('고마워요! 멋진 바리스타가 되었어요!');return;}stage++;render()};
+$('mode').onchange=function(){mode=this.value;stage=0;prepared=0;score=0;wrong=0;helps=0;complete=false;$('points').textContent=0;render()};
+$('repeat').onclick=function(){say(instruction())};
+$('help').onclick=function(){helps++;var hint=['어서 오세요!를 골라요.','주문서에 적힌 음료를 찾아요.','음식 만들기 전에는 손을 씻어요.','주문 잔 수만큼 재료를 담아 보아요.','초록색 구간에서 눌러 보아요.','손님에게 음료를 전달해요.','잔 수와 한 잔 가격을 확인해요.'][stage];msg(hint);say(hint)};
+$('reset').onclick=function(){stage=0;prepared=0;score=0;wrong=0;helps=0;coins=0;customerIndex=(customerIndex+1)%customers.length;drinkIndex=(drinkIndex+1)%drinks.length;qty=mode==='explore'?1:mode==='guided'?2:3;$('points').textContent=0;$('coins').textContent=0;render()};
+$('voice').onclick=function(){voiceOn=!voiceOn;this.textContent=voiceOn?'🔊 음성 켜짐':'🔇 음성 꺼짐';this.setAttribute('aria-pressed',String(voiceOn));if(!voiceOn&&'speechSynthesis'in window)speechSynthesis.cancel()};
+document.addEventListener('visibilitychange',function(){if(document.hidden){cancelAnimationFrame(raf);meterRunning=false}else if(stage===4&&!ready&&mode!=='explore'){meterRunning=true;last=0;raf=requestAnimationFrame(frame)}});
+qty=mode==='explore'?1:mode==='guided'?2:3;render();
+})();
+</script></body></html>
