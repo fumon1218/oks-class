@@ -311,17 +311,17 @@
       "games": [
         {
           "id": "art-01",
-          "title": "색깔 마을",
-          "activity": "색 탐색",
-          "status": "prototype",
+          "title": "마법 미술 공방 타이쿤",
+          "activity": "기본색 두 개 섞기, 주문 색·수량에 맞춘 모자이크 제작, 작품 전시와 공방 확장",
+          "status": "prototype-tycoon",
           "verifiedStandardCodes": [],
           "supportModes": [
             "explore",
             "guided",
             "independent"
           ],
-          "implementation": "minigames/index.html?subject=art",
-          "note": "공통 게임 엔진으로 작동하는 1차 활동입니다. 교과별 전용 그래픽과 정밀한 성취기준 연결은 후속 개선."
+          "implementation": "minigames/art-tycoon.html",
+          "note": "16종 주문 틀로 반복 플레이하는 1차 타이쿤 시범. 자유 미술 표현의 질을 정답 수로 평가하지 않음."
         },
         {
           "id": "art-02",
