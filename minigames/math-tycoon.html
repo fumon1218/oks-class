@@ -147,7 +147,7 @@ function persist(){try{localStorage.setItem(SAVE,JSON.stringify(state));saveFail
 function safeRestore(){
  try{const s=JSON.parse(localStorage.getItem(SAVE)||'null');if(!s||!Array.isArray(s.plots)||!s.stock||!Array.isArray(s.orders))return;
   state={...START(),...s,stock:{...START().stock,...s.stock},upgrades:{...START().upgrades,...s.upgrades}};
-  if(state.pending){(state.tray||[]).forEach(key=>{if(KEYS.includes(key))state.stock[key]++});state.pending=null;state.tray=[];} // refund half-packed goods after a reload
+  if(state.pending!==null){(state.tray||[]).forEach(key=>{if(KEYS.includes(key))state.stock[key]++});state.pending=null;state.tray=[];} // refund half-packed goods after a reload
   if(!KEYS.includes(state.selected))state.selected='strawberry';
   if(!['explore','guided','independent'].includes(state.mode))state.mode='guided';
   if(state.orders.length>2)state.orders=state.orders.slice(0,2);
@@ -182,7 +182,7 @@ function renderSeeds(){
 function playSound(){/* no automatic audio: teacher controls spoken cues */ }
 function emitBurst(el,message){const p=el?.getBoundingClientRect();if(!p)return;const e=document.createElement('div');e.className='burst';e.textContent=message;e.style.left=(p.left+p.width*.37)+'px';e.style.top=(p.top+p.height*.22)+'px';document.body.append(e);setTimeout(()=>e.remove(),760)}
 function tapPlot(index){
- if(state.pending)return;
+ if(state.pending!==null)return;
  const slot=state.plots[index],button=$('plots').querySelector('[data-index="'+index+'"]');
  if(!slot)return;
  if(slot.phase==='locked'){notice('새 밭을 구매하면 열려요.');return;}
@@ -213,7 +213,7 @@ function renderRack(){
  let o=activeOrder();$('rack').replaceChildren();
  KEYS.forEach(key=>{
   const c=CROPS[key],owned=state.stock[key],need=o?.ask[key]||0,left=Math.max(0,need-countTray(key));
-  const button=document.createElement('button');button.type='button';button.className='stock';button.disabled=owned<=0||!o||!left||Boolean(state.pending);
+  const button=document.createElement('button');button.type='button';button.className='stock';button.disabled=owned<=0||!o||!left||state.pending!==null;
   button.append(img(c.img,''),btext('span',c.name+' '+(left?'· 필요 '+left:'· 완료')),btext('b',owned+'개'));
   button.setAttribute('aria-label',c.name+' 재고 '+owned+'개, 필요 '+left+'개');
   button.onclick=()=>pack(key,button);
@@ -224,7 +224,7 @@ function orderCaption(o){return Object.entries(o.ask).map(([key,count])=>CROPS[k
 function renderOrders(){
  $('orders').replaceChildren();
  state.orders.forEach(order=>{
-  const button=document.createElement('button');button.type='button';button.className='order'+(order.id===state.active?' active':'');button.disabled=Boolean(state.pending);
+  const button=document.createElement('button');button.type='button';button.className='order'+(order.id===state.active?' active':'');button.disabled=state.pending!==null;
   button.append(btext('strong','🐾 '+ANIMALS.indexOf(order.visitor)+1+'번 손님 · 주문 '+(order.id+1)));
   const wanted=document.createElement('div');wanted.className='wanted';
   for(let [key,n] of Object.entries(order.ask)){wanted.append(img(CROPS[key].img,CROPS[key].name),btext('span','×'+n));}
@@ -241,14 +241,14 @@ function renderTray(){
  const tray=$('tray');tray.replaceChildren();
  if(!state.tray.length){let empty=btext('div','여기에 수확한 재료를 포장해요.');empty.className='empty';tray.append(empty);}
  state.tray.forEach((key)=>tray.append(img(CROPS[key].img,CROPS[key].name)));
- const o=activeOrder();$('deliver').disabled=!o||!orderComplete(o)||Boolean(state.pending);
- $('undo').disabled=!state.tray.length||Boolean(state.pending);
+ const o=activeOrder();$('deliver').disabled=!o||!orderComplete(o)||state.pending!==null;
+ $('undo').disabled=!state.tray.length||state.pending!==null;
 }
 function renderUpgrades(){
  const el=$('upgrades');el.replaceChildren();
  UPGRADES.forEach(u=>{
   const lv=state.upgrades[u.key],done=lv>=u.max;
-  const b=document.createElement('button');b.type='button';b.className='upgrade';b.disabled=done||state.coins<u.cost||Boolean(state.pending);
+  const b=document.createElement('button');b.type='button';b.className='upgrade';b.disabled=done||state.coins<u.cost||state.pending!==null;
   b.append(btext('strong',u.name),btext('small',u.desc),btext('small',done?'🏆 최고 단계':'🪙 '+u.cost+' · 현재 '+lv));
   b.onclick=()=>buyUpgrade(u);el.append(b);
  });
@@ -257,37 +257,37 @@ function render(){
  updateHUD();renderSeeds();renderPlots();renderRack();renderOrders();renderVisitor();renderTray();renderUpgrades();
 }
 function pack(key,source){
- if(state.pending)return;
+ if(state.pending!==null)return;
  const order=activeOrder();if(!order||!order.ask[key]||countTray(key)>=order.ask[key]||state.stock[key]<=0){notice('이 주문에 필요한 재료가 아니에요.');return;}
  state.stock[key]--;state.tray.push(key);notice(CROPS[key].name+'를 포장했어요! '+state.tray.length+'개 담았어요.');emitBurst(source,'🧺 +1');
  persist();render();
  if(orderComplete(order))notice('🎉 주문한 재료가 정확하게 준비됐어요! 이제 배달 버튼을 눌러요.',true);
 }
 function selectOrder(id){
- if(state.pending)return;
+ if(state.pending!==null)return;
  if(state.active===id)return;
  // Packing is returned before switching, so no inventory can disappear.
  state.tray.forEach(key=>{state.stock[key]++});state.tray=[];state.active=id;
  persist();render();let o=activeOrder();notice('새 손님의 주문! '+orderCaption(o),true);
 }
 function cancelPacking(){
- if(!state.tray.length||state.pending)return;
+ if(!state.tray.length||state.pending!==null)return;
  let key=state.tray.pop();state.stock[key]++;persist();render();notice(CROPS[key].name+' 한 개를 창고에 돌려놓았어요.');
 }
 function buyUpgrade(up){
- if(state.pending)return;
+ if(state.pending!==null)return;
  if(state.coins<up.cost||state.upgrades[up.key]>=up.max)return;
  state.coins-=up.cost;state.upgrades[up.key]++;
  if(up.key==='plots'){let slot=state.plots.find(p=>p.phase==='locked');if(slot){slot.phase='empty';slot.crop=null;}}
  persist();render();notice('🏡 농장을 확장했어요! '+up.name,true);
 }
 function autoWater(){
- if(state.pending)return;
+ if(state.pending!==null)return;
  let count=0;state.plots.forEach(p=>{if(p.phase==='seeded'){p.phase='ready';count++}});
  if(!count){notice('먼저 씨앗을 심어 주세요.');return;}persist();render();notice(count+'칸의 밭에 물을 줬어요. 이제 수확해 볼까요?',true);
 }
 function autoHarvest(){
- if(state.pending)return;
+ if(state.pending!==null)return;
  let total=0;state.plots.forEach(p=>{if(p.phase==='ready'){total+=state.upgrades.yield;state.stock[p.crop]+=state.upgrades.yield;p.crop=null;p.phase='empty';}});
  if(!total){notice('아직 수확할 작물이 없어요. 씨앗을 심고 물을 주세요.');return;}persist();render();notice('🧺 작물 '+total+'개를 수확해 창고에 보관했어요!',true);
 }
