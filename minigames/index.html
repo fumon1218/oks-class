@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>옥쌤의 즐거운 교실 · 5교과 미니게임 마을</title><meta name="theme-color" content="#268b80">
+<style>
+:root{font-family:"Noto Sans KR",system-ui,sans-serif;color:#25465a;background:#d8f8f0}*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:linear-gradient(#bceeff,#e7f9eb 45%,#fff4df)}
+button,a,select{font:inherit}button{cursor:pointer}a{text-decoration:none;color:inherit}
+button:focus-visible,a:focus-visible,select:focus-visible{outline:4px solid #d89a16;outline-offset:3px}
+main{width:min(1060px,96vw);margin:auto;padding:14px 0 58px}
+.top{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap}.top a,.top button{background:#fff;border:2px solid #dfefea;border-radius:99px;padding:10px 15px;min-height:50px;box-shadow:0 4px 15px #255b6b21;font-weight:850}
+h1{text-align:center;color:#2a6e6e;font-size:clamp(26px,5vw,40px);margin:10px 0 4px}
+.lead{text-align:center;color:#56707a;font-weight:700;font-size:14px;margin:0 0 12px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.hud>div{background:#fff;border:2px solid #fff;padding:10px 14px;border-radius:17px;font-weight:900;box-shadow:0 5px 13px #2c706631}
+.layout{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.panel{background:#fffefcf5;border:4px solid white;border-radius:25px;box-shadow:0 9px 24px #337b6b25;padding:17px}
+.subjects{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.subjects button{min-height:65px;border:3px solid #d8e9e5;border-radius:17px;background:#fff;font-size:clamp(13px,2vw,17px);font-weight:900;color:#245e56}
+.subjects button[aria-pressed="true"]{border-color:#309b78;background:#e1f8e8}
+.games{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px;margin:12px 0}
+.game{border:3px solid #d2e5dd;border-radius:20px;background:linear-gradient(#fff,#f2fbf7);box-shadow:0 5px 11px #517b6730;min-height:128px;text-align:left;padding:13px;display:flex;flex-direction:column;justify-content:center;gap:5px;color:#294d42}
+.game .num{font-size:12px;color:#759185;font-weight:800}.game strong{font-size:18px}.game .icon{font-size:32px}.game small{font-size:12px;color:#618276}.game.done{border-color:#50ac82;background:#f1fbed}
+.board{position:relative;min-height:325px;border:6px solid white;border-radius:29px;background:linear-gradient(#92d5f5,#e8f9ff 60%,#a2d9a6 61%,#7ab995);box-shadow:0 8px 25px #266f8b39;padding:19px;overflow:hidden}
+.board::before,.board::after{content:"";position:absolute;border-radius:50%;background:#ffffffa0;width:100px;height:40px;top:11%;left:7%;pointer-events:none}
+.board::after{width:145px;top:18%;left:auto;right:12%}
+.quest{position:relative;z-index:1;border:4px solid #fff;border-radius:22px;background:rgba(255,255,255,.94);padding:13px 16px;text-align:center;min-height:82px;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,3.2vw,27px);font-weight:900}
+.play{position:relative;z-index:2;min-height:145px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:11px;margin-top:16px}
+.tile{min-width:100px;min-height:75px;max-width:100%;border:3px solid #fff;border-radius:19px;background:linear-gradient(#fffefa,#fcecd9);padding:13px 17px;box-shadow:0 7px 13px #39735a30;font-size:clamp(18px,3vw,27px);font-weight:900;color:#2b5059;white-space:normal;text-align:center}
+.tile[disabled]{opacity:.47;cursor:default}.tile.selected{border-color:#358f6c;background:#ddf9dc}
+.current{font-size:clamp(23px,4vw,35px);font-weight:900;text-align:center;flex-basis:100%;min-height:45px;color:#245d63}
+.bin{min-width:150px;min-height:92px;background:#fff6d8;border:4px dashed #e2be62;border-radius:20px;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:24px;font-weight:900;padding:10px}
+.bin small{font-size:13px;color:#6a604c}
+.feedback{background:#fff7d8;color:#6e571f;border-radius:14px;min-height:47px;padding:11px;font-weight:850;line-height:1.5;margin-top:12px}
+.control{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:12px}.control button{min-height:52px;padding:12px 16px;border:2px solid #bad9cf;background:#ecf8f2;border-radius:15px;font-weight:850;color:#285f51}
+.control .go{background:#329b76;border-color:#329b76;color:white}
+.control button[disabled]{opacity:.47;cursor:default}
+.modes{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}.modes label{font-weight:850}.modes select{min-height:48px;background:white;border:2px solid #b3d6c9;border-radius:13px;padding:8px}
+.paintbox{width:min(100%,620px);border:4px solid #c1decf;background:#fff;border-radius:18px;touch-action:none;display:block;margin:0 auto;max-height:315px}
+.colors{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;width:100%}.color{width:52px;height:52px;border:4px solid white;border-radius:50%;box-shadow:0 0 0 2px #6a867e;padding:0}
+.color.selected{box-shadow:0 0 0 5px #2f946c}.counter{font-size:clamp(38px,7vw,64px);letter-spacing:.08em;max-width:100%;word-break:break-word;text-align:center}
+.progress{display:flex;gap:6px;align-items:center}.progress span{width:10px;height:10px;border-radius:50%;background:#c4dace}.progress span.on{background:#f5b74f}
+.note{color:#526d6a;font-size:13px;line-height:1.6}.hidden{display:none!important}
+@media(max-width:640px){.subjects{grid-template-columns:repeat(3,minmax(0,1fr))}.panel{padding:10px}.board{padding:9px}.play{gap:7px}.tile{padding:10px;min-width:88px}.games{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body><main><div class="top"><a href="../index.html">🏡 학교 마을</a><a href="../korean/index.html">📚 국어 도서관</a><a href="../curriculum/teacher-guide.html">⚙️ 교사용 교육과정</a><button id="voice" type="button" aria-pressed="true">🔊 음성 켜짐</button></div>
+<h1>🎮 오색 배움 마을</h1><p class="lead">국어·수학·미술·과학·사회 미니게임 · 교과별 10개 활동</p>
+<div class="hud"><div id="mission">오늘의 모험을 골라요</div><div id="stars">⭐ 0</div><div id="achievement">🏅 0 / 50</div></div>
+<section class="panel" id="lobby"><div class="subjects" id="subjects"></div><div id="games" class="games"></div>
+<p class="note">이곳의 50개 활동은 교육과정 해설서의 교과 영역 및 제공하신 학교 교육과정을 바탕으로 설계한 1차 게임형 콘텐츠입니다. 공식 성취기준별 최종 과제가 아니며, 교사는 학생의 개별 목표에 따라 선택해 주세요.</p></section>
+<section id="gamePanel" class="hidden"><div class="modes"><label for="mode">활동 지원</label><select id="mode"><option value="explore">🌱 탐색</option><option value="guided">🍀 선택·조작</option><option value="independent">🌳 문제 해결</option></select><button id="back" type="button" class="tile" style="font-size:15px;min-height:48px">← 다른 활동</button></div>
+<div class="board"><div id="question" class="quest">미션 시작!</div><div id="play" class="play"></div></div>
+<div class="panel" style="margin-top:12px"><div id="feedback" class="feedback" role="status" aria-live="polite">게임을 시작해요!</div><div class="control"><button id="repeat" type="button">🔊 다시 듣기</button><button id="help" type="button">💡 도움</button><button id="retry" type="button">↻ 다시 하기</button><button id="finish" class="go" type="button" disabled>⭐ 완료하기</button></div>
+<p class="note">그림·음성·큰 버튼을 지원합니다. 그림 그리기와 자기표현 게임에는 정해진 정답이 없습니다. 게임 완료 기록은 이 기기에서만 익명으로 저장되며 정식 교육평가는 교사가 관찰해 판단합니다.</p></div></section>
+</main><script src="packs.js"></script><script>
+(function(){
+"use strict";
+var PACK=window.OKS_MINIGAME_PACK;
+var SUBJECTS=[['korean','📚 국어'],['math','🔢 수학'],['art','🎨 미술'],['science','🔬 과학'],['social','🌎 사회']];
+var icons={choice:'🎯',match:'🔗',order:'🧩',count:'🧺',sort:'📦',draw:'🖍️',reflect:'💛',portal:'🚪'};
+var titles={korean:['소리 탐정','말해요! 말해요!','그림 속 낱말 찾기','글자 정글','낱말 조립 공방','이야기 보물찾기','또박또박 쓰기','친구와 대화하기','생활 속 읽기','이야기 무대'],math:['몇 개일까?','같은 만큼 모아요','누가 더 길까?','무거울까? 가벼울까?','모양 마을','규칙 블록','마트 계산대','시간 탐험대','길을 찾아라','숫자 탐정'],art:['색깔 마을','색깔 섞기 연구소','모양 조각가','선으로 여행하기','톡톡 찍어봐!','모자이크 공방','알록달록 색칠공방','나의 풍경 만들기','내 기분을 그려요','작품 전시회'],science:['관찰 탐정단','식물 키우기','동물 발자국 탐험','날씨 연구소','계절 변화 탐험','물의 여행','붙을까? 안 붙을까?','빛과 그림자 연구소','소리 실험실','지구를 지켜라'],social:['나는 누구일까?','우리 학교 탐험','우리 가족 이야기','우리 동네 탐험','동네 가게 탐험','안전한 길 건너기','대중교통 탐험','우리 동네 장보기','함께 사는 마을','우리나라 탐험대']};
+var $=id=>document.getElementById(id),subject='korean',item=null,index=-1,mode='guided',voice=true,helps=0,mistakes=0,completed=false,touched=false,drawColor='#f06292',drawing=false,selected=null,matches=new Set(),sorted=0,orderPos=0,collected=0;
+var KEY='oks_five_subjects_v1',records={};
+try{records=JSON.parse(localStorage.getItem(KEY)||'{}');if(!records||typeof records!=='object')records={};}catch(e){records={};}
+try{var saved=JSON.parse(localStorage.getItem('oks_iep_config_v1')||'{}');if(['explore','guided','independent'].includes(saved.mode))mode=saved.mode;}catch(e){}
+$('mode').value=mode;
+function speak(s){if(!voice||!('speechSynthesis' in window))return;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(s);u.lang='ko-KR';u.rate=.83;speechSynthesis.speak(u)}catch(e){}}
+function msg(s){$('feedback').textContent=s}
+function id(){return subject+'-'+String(index+1).padStart(2,'0')}
+function hud(){$('stars').textContent='⭐ '+Object.keys(records).length;$('achievement').textContent='🏅 '+Object.keys(records).length+' / 50';}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),v=a[i];a[i]=a[j];a[j]=v;}return a;}
+function create(tag,cls,label,fn){var b=document.createElement(tag);if(cls)b.className=cls;if(label!==undefined)b.textContent=label;if(fn)b.addEventListener('click',fn);return b;}
+function tile(text,fn){var b=create('button','tile',text,fn);b.type='button';return b}
+function goBack(){$('gamePanel').classList.add('hidden');$('lobby').classList.remove('hidden');item=null;index=-1;renderLobby();}
+function renderLobby(){
+ hud();$('mission').textContent='오늘의 모험을 골라요';
+ $('subjects').innerHTML='';SUBJECTS.forEach(function(s){var b=create('button','',s[1],function(){subject=s[0];renderLobby()});b.type='button';b.setAttribute('aria-pressed',String(subject===s[0]));$('subjects').appendChild(b)});
+ $('games').innerHTML='';
+ PACK[subject].forEach(function(g,i){var b=create('button','game'+(records[subject+'-'+String(i+1).padStart(2,'0')]?' done':''),undefined,function(){start(i)});b.type='button';var span=create('span','icon',icons[g.type]),num=create('span','num','미션 '+(i+1)),name=create('strong','',titles[subject][i]),sm=create('small','',records[subject+'-'+String(i+1).padStart(2,'0')]?'⭐ 완료 기록 있음':'누르면 모험 시작');b.append(span,num,name,sm);$('games').appendChild(b)});
+}
+function finishAvailable(){completed=true;$('finish').disabled=false;msg(item.type==='draw'||item.type==='reflect'?'좋아요! 활동을 마쳤다면 완료하기를 눌러요.':'성공했어요! 별을 받아요!');speak('잘했어요! 미션 완료!')}
+function start(i){index=i;item=PACK[subject][i];helps=0;mistakes=0;completed=false;touched=false;matches=new Set();selected=null;sorted=0;orderPos=0;collected=0;
+ $('lobby').classList.add('hidden');$('gamePanel').classList.remove('hidden');$('mission').textContent=SUBJECTS.find(x=>x[0]===subject)[1]+' · '+titles[subject][i];$('question').textContent=item.q;$('finish').disabled=true;$('play').innerHTML='';msg('미션을 수행해 보아요!');
+ renderGame();speak(item.q);}
+function renderGame(){
+ var p=$('play');p.innerHTML='';
+ if(item.type==='choice'){var opts=mode==='explore'?[item.items[item.answer],item.items[(item.answer+1)%item.items.length]]:item.items;
+   shuffle(opts).forEach(function(opt){p.appendChild(tile((item.emoji?item.emoji+' ':'')+opt,function(){if(opt===item.items[item.answer])finishAvailable();else{mistakes++;msg('다시 살펴보아요. 도움말을 눌러도 좋아요.');speak('다시 해 볼까요?')}}))})}
+ else if(item.type==='reflect'){item.items.forEach(function(choice){p.appendChild(tile(choice,function(){selected=choice;finishAvailable();msg('나의 선택: '+choice+' · 서로 다른 선택도 존중해요.')}))})}
+ else if(item.type==='count'){var current=create('div','counter','',null);p.appendChild(current);function update(){current.textContent=Array(collected).fill(item.emoji).join(' ')||'🧺'}update();
+ p.appendChild(tile(item.emoji+' 하나 담기',function(){if(collected<item.target)collected++;update();if(collected===item.target)finishAvailable()}));
+ p.appendChild(tile('↶ 하나 꺼내기',function(){if(completed)return;collected=Math.max(0,collected-1);update()}));}
+ else if(item.type==='match'){
+ var pairs=mode==='explore'?item.pairs.slice(0,2):item.pairs;var left=create('div','play',undefined),right=create('div','play',undefined);left.style.flexDirection='column';right.style.flexDirection='column';left.style.flex='1';right.style.flex='1';
+ p.append(left,right);shuffle(pairs.map((x,i)=>[x[0],i])).forEach(function(l){left.appendChild(tile(l[0],function(){selected=l[1];Array.from(left.children).forEach(b=>b.classList.remove('selected'));Array.from(left.children).find(b=>b.textContent===l[0]).classList.add('selected');msg(l[0]+'과 연결할 것을 오른쪽에서 찾아요.')}))});
+ shuffle(pairs.map((x,i)=>[x[1],i])).forEach(function(r){right.appendChild(tile(r[0],function(){if(selected===null){msg('왼쪽 그림부터 골라보세요.');return}if(selected!==r[1]){mistakes++;msg('다시 찾아보아요.');return}matches.add(r[1]);selected=null;Array.from(left.children).filter(b=>b.textContent===pairs[r[1]][0]).forEach(b=>{b.disabled=true;b.classList.remove('selected')});Array.from(right.children).filter(b=>b.textContent===r[0]).forEach(b=>{b.disabled=true;b.classList.add('selected')});if(matches.size===pairs.length)finishAvailable();else msg('맞았어요! 다음 연결을 해 보아요.')}))});
+ }
+ else if(item.type==='order'){
+ var list=item.items;var ans=create('div','current','순서대로 눌러 보세요.');p.appendChild(ans);
+ shuffle(list.map((v,i)=>({v,i}))).forEach(function(o){p.appendChild(tile(o.v,function(e){if(o.i!==orderPos){mistakes++;msg('차례를 다시 생각해 보아요.');return}orderPos++;ans.textContent=list.slice(0,orderPos).join(' → ');Array.from(p.querySelectorAll('button')).filter(b=>b.textContent===o.v).forEach(b=>b.disabled=true);if(orderPos===list.length)finishAvailable();else msg('좋아요! 다음 순서를 골라요.')}))});
+ }
+ else if(item.type==='sort'){
+ var val=create('div','current','',null);p.appendChild(val);
+ var bins=create('div','play');p.appendChild(bins);
+ function next(){if(sorted>=item.items.length){finishAvailable();return;}val.textContent=item.items[sorted][0];bins.innerHTML='';item.bins.forEach(function(b,i){bins.appendChild(tile('📦 '+b,function(){if(i===item.items[sorted][1]){sorted++;next()}else{mistakes++;msg('분류할 곳을 다시 살펴보아요.')}}))})}
+ next();
+ }
+ else if(item.type==='draw'){
+ var canvas=create('canvas','paintbox');canvas.width=620;canvas.height=300;canvas.setAttribute('aria-label','그림을 그리는 영역');p.appendChild(canvas);
+ var cs=create('div','colors');p.appendChild(cs);(item.colors||['#f06292','#edcc56','#61aa7b','#5297d7','#74569e','#303747']).forEach(function(color){var b=create('button','color'+(color===drawColor?' selected':''));b.type='button';b.style.backgroundColor=color;b.setAttribute('aria-label',color+' 색 선택');b.onclick=function(){drawColor=color;cs.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')};cs.appendChild(b)});
+ var ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.lineWidth=9;ctx.lineCap='round';ctx.lineJoin='round';
+ function xy(e){var r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};}
+ canvas.addEventListener('pointerdown',function(e){e.preventDefault();canvas.setPointerCapture(e.pointerId);drawing=true;touched=true;var z=xy(e);ctx.beginPath();ctx.moveTo(z.x,z.y);ctx.lineTo(z.x+.1,z.y+.1);ctx.strokeStyle=drawColor;ctx.stroke();finishAvailable()});
+ canvas.addEventListener('pointermove',function(e){if(!drawing)return;e.preventDefault();var z=xy(e);ctx.lineTo(z.x,z.y);ctx.stroke()});['pointerup','pointercancel'].forEach(x=>canvas.addEventListener(x,()=>drawing=false));
+ p.appendChild(tile('🧽 새 도화지',function(){ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);msg('새 도화지에 다시 그려 보아요.')}));p.appendChild(tile('📥 내 작품 저장',function(){var a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='옥쌤-'+titles[subject][index]+'.png';a.click();}));
+ }
+ else if(item.type==='portal'){
+ p.appendChild(tile('🚪 다른 게임으로 이동하기',function(){window.location.href=item.url}));
+ p.appendChild(create('p','note','이 학습은 연결된 국어 게임에서 진행됩니다. 이 화면에서는 별을 자동 지급하지 않습니다.'));
+ $('finish').disabled=true;
+ }
+}
+$('voice').onclick=function(){voice=!voice;this.setAttribute('aria-pressed',String(voice));this.textContent=voice?'🔊 음성 켜짐':'🔇 음성 꺼짐';if(!voice&&'speechSynthesis'in window)speechSynthesis.cancel()};
+$('back').onclick=goBack;$('mode').onchange=function(){mode=this.value;if(item)start(index)};
+$('repeat').onclick=function(){if(item)speak(item.q)};
+$('help').onclick=function(){if(!item)return;helps++;var hint=({choice:'그림과 내용을 살펴보세요.',reflect:'나의 생각을 자유롭게 선택해요.',count:'하나씩 세어 보세요.',match:'왼쪽과 오른쪽을 하나씩 연결해요.',sort:'해당하는 분류 통을 찾아보아요.',order:'첫 순서부터 차례로 선택해요.',draw:'원하는 색으로 자유롭게 표현해요.',portal:'연결된 국어 도서관에서 이어서 배워요.'})[item.type];msg(hint);speak(hint)};
+$('retry').onclick=function(){if(item)start(index)};
+$('finish').onclick=function(){if(!item||!completed||item.type==='portal')return;try{records[id()]={completedAt:new Date().toISOString(),supportMode:mode,mistakes,helps,task:titles[subject][index],type:item.type};localStorage.setItem(KEY,JSON.stringify(records));}catch(e){}
+ $('play').innerHTML='<div class="current">🏅 모험 완료!<br>⭐ 별을 획득했어요!</div>';$('finish').disabled=true;msg('활동을 끝냈어요. 다음 모험을 선택해 보아요.');hud();
+ var b=tile('🏡 다른 미니게임 고르기',goBack);$('play').appendChild(b);speak('미션을 마쳤어요! 다음 모험으로 가 볼까요?')};
+var params=new URLSearchParams(location.search),initial=params.get('subject');if(PACK[initial])subject=initial;renderLobby();
+})();
+</script></body></html>
