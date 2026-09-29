@@ -1,0 +1,175 @@
+/* Immersive lobby v3
+ * A single, centered 3:2 map coordinate plane sits behind a screen-sized HUD.
+ * 'cover' is achieved by cropping the coordinate plane, NOT stretching its hitboxes.
+ */
+body.is-world{
+  width:100%;height:100dvh;min-height:100dvh;
+  margin:0;overflow:hidden;
+  background:#a9e7e9!important;background-image:none!important;
+}
+body.is-world #app{
+  width:100vw;height:100dvh;min-height:100dvh;overflow:hidden!important;
+  position:relative;padding:0;margin:0;max-width:none;
+}
+body.is-world .world-hero{
+  position:absolute;inset:0;display:block;
+  width:100vw;height:100dvh;max-width:none;
+  min-height:0;aspect-ratio:auto;
+  margin:0;border:0;box-shadow:none;border-radius:0;
+  background:none!important;overflow:hidden;
+}
+.world-map-layer{
+  position:absolute;
+  top:50%;left:50%;
+  width:max(100vw,150dvh);
+  height:auto;aspect-ratio:3/2;
+  transform:translate(-50%,-50%);
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:100% 100%;
+  will-change:auto;
+}
+.world-map-layer .map-spot,
+.world-map-layer .map-avatar,
+.world-map-layer .joystick,
+.world-map-layer .joy-zone{position:absolute;}
+.world-map-layer .map-spot{z-index:5}
+.world-map-layer .map-avatar{z-index:4}
+.world-map-layer .joy-zone{z-index:2}
+.world-map-layer .joystick{z-index:9}
+body.is-world .hero-title{
+  z-index:30;position:fixed;left:50%;top:max(7px,env(safe-area-inset-top));
+  transform:translateX(-50%);width:max-content;min-width:0;
+  max-width:min(45vw,350px);padding:8px 17px;
+  border:1px solid rgba(255,255,255,.9);
+  background:rgba(255,255,255,.90);backdrop-filter:blur(12px);
+  pointer-events:none;
+}
+body.is-world .hud-row.hud-top{
+  z-index:20;position:fixed;inset:0 0 auto 0;
+  padding:12px clamp(12px,1.6vw,32px);align-items:flex-start;
+  justify-content:space-between;flex-wrap:nowrap;
+}
+body.is-world .hud-profile{
+  min-height:53px;padding:6px 16px 6px 6px;
+  border:1px solid #fff9;box-shadow:0 6px 20px #164b4a35;
+}
+body.is-world .hud-profile-name{font-size:15px}
+body.is-world .hud-profile-text{min-width:105px}
+body.is-world .hud-bar{width:105px;height:8px}
+body.is-world .hud-avatar{width:38px;height:38px;font-size:23px}
+body.is-world .season-pill{
+  min-height:49px;font-size:14px;font-weight:850;padding:7px 13px;
+  box-shadow:0 5px 14px #154c4530;
+}
+body.is-world .hud-stats{gap:7px}
+body.is-world .hud-pill{
+  font-size:15px;padding:12px 13px;
+  box-shadow:0 5px 14px #164b4a35;
+}
+body.is-world .hud-navbar{
+  bottom:max(12px,env(safe-area-inset-bottom));
+  max-width:min(96vw,820px);width:max-content;
+  gap:clamp(8px,1.2vw,19px);padding:7px 15px;
+  border:2px solid #fff9;box-shadow:0 10px 30px #205c4b52;
+  background:rgba(255,255,255,.94);
+  z-index:40;
+}
+body.is-world .navcircle{font-size:clamp(11px,1vw,13px);min-width:64px;gap:3px}
+body.is-world .navcircle span{width:50px;height:50px;font-size:23px}
+body.is-world .hud-mascot{
+  position:fixed;z-index:10;left:12px;bottom:109px;
+  max-width:min(34vw,225px);
+}
+body.is-world .hud-mascot-inner .speech-bubble{
+  font-size:clamp(11px,1vw,14px);padding:8px 11px;
+  max-width:170px;
+}
+body.is-world .hud-quest{
+  pointer-events:auto;position:fixed;right:14px;bottom:107px;z-index:25;
+  max-width:min(36vw,255px);width:225px;min-width:0;
+  border:2px solid rgba(255,255,255,.95);
+  border-radius:19px;padding:0;
+  background:rgba(255,255,255,.94);
+  box-shadow:0 8px 26px #22524662;backdrop-filter:blur(12px);
+}
+.world-quest-toggle{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  width:100%;min-height:60px;padding:10px 12px;border:0;
+  background:transparent;color:#285c4a;text-align:left;
+  font-size:14px;font-weight:900;cursor:pointer;
+}
+.world-quest-toggle:focus-visible{outline:4px solid #edbb45;outline-offset:3px}
+.world-quest-toggle small{font-weight:700;font-size:12px;color:#55746c;display:block}
+.world-quest-toggle .expander{font-size:21px;flex-shrink:0}
+.world-quest-detail{padding:0 12px 12px;border-top:1px solid #cde6d6}
+.world-quest-detail p{font-size:13px;line-height:1.5;margin:9px 0;color:#3a6050}
+.world-quest-detail a{
+  display:block;text-align:center;min-height:45px;padding:12px 7px;
+  background:#359d7d;color:white;text-decoration:none;
+  font-size:13px;font-weight:900;border-radius:13px;margin:7px 0;
+}
+.world-quest-detail .alt-link{background:#e2f5e9;color:#225f49}
+.world-map-layer .map-spot{width:clamp(75px,7.5%,155px);height:12%;transition:filter .18s}
+.world-map-layer .map-spot.active::before{animation:none!important;opacity:0}
+.world-map-layer .map-spot.is-quest::before{
+  opacity:1!important;animation:quest-soft-pulse 1.7s ease-in-out infinite!important;
+  box-shadow:0 0 0 4px #fff,0 0 0 9px rgba(255,191,47,.78)!important;
+}
+.world-map-layer .map-spot.is-quest .map-spot-label{
+  border-color:#ffd45c!important;background:#fff8d9!important;
+  box-shadow:0 5px 14px #9c753782;
+}
+.world-map-layer .map-spot.is-quest{filter:drop-shadow(0 0 12px #ffd253a0)}
+.world-map-layer .quest-sparkle{
+  position:absolute;top:-16%;left:50%;transform:translateX(-50%);
+  font-size:26px;filter:drop-shadow(0 0 7px white);
+  pointer-events:none;animation:quest-soft-pulse 1.7s ease-in-out infinite;
+}
+@keyframes quest-soft-pulse{0%,100%{opacity:.74}50%{opacity:1}}
+body.is-world .world-directory-panel{
+  z-index:45;max-height:min(66dvh,580px);
+  bottom:max(98px,calc(env(safe-area-inset-bottom) + 91px));
+}
+.world-map-layer .map-avatar{
+  height:10%;filter:drop-shadow(0 4px 8px #fff8);
+}
+.world-map-layer .map-avatar img{filter:drop-shadow(0 5px 4px #123b3580)}
+.world-map-layer .map-avatar.walking img{animation:avatar-bob .24s ease-in-out infinite}
+.world-map-layer .map-spot.active:focus-visible{
+  outline:4px solid #ffda42;outline-offset:4px;
+}
+@media(max-width:900px){
+  body.is-world .hero-title{top:65px;max-width:58vw}
+  body.is-world .hud-row.hud-top{padding:7px}
+  body.is-world .hud-stats .hud-pill{font-size:12px;padding:9px}
+  body.is-world .hud-quest{right:8px;bottom:96px}
+  body.is-world .hud-mascot{left:7px;bottom:96px}
+  body.is-world .hud-navbar{gap:5px;padding:5px 9px;width:max-content}
+  body.is-world .navcircle{min-width:49px;font-size:10px}
+  body.is-world .navcircle span{width:40px;height:40px;font-size:19px}
+}
+@media(max-width:560px){
+  body.is-world .hud-mascot{display:none}
+  body.is-world .hud-quest{width:170px;bottom:91px;max-width:48vw}
+  body.is-world .world-quest-toggle{font-size:12px;min-height:54px}
+  body.is-world .hud-profile-name{font-size:12px}
+  body.is-world .hud-profile-text{min-width:65px}
+  body.is-world .hud-bar{width:65px}
+  body.is-world .hero-title{font-size:16px;top:62px;max-width:80vw}
+  body.is-world .hud-navbar{max-width:99vw;overflow-x:auto;border-radius:20px}
+  body.is-world .navcircle span{width:36px;height:36px}
+}
+@media(max-aspect-ratio:4/5){
+  /* Portrait: keep the complete map visible and make classroom list accessible. */
+  .world-map-layer{width:100vw!important;top:43%}
+  body.is-world .hero-title{top:75px}
+  body.is-world .hud-quest{bottom:117px}
+  body.is-world .world-hero{background:linear-gradient(#a3def1,#e8f9ef)!important}
+}
+@media(prefers-reduced-motion:reduce){
+ .world-map-layer .map-spot.is-quest::before,
+ .world-map-layer .quest-sparkle,.world-map-layer .map-avatar.walking img{
+  animation:none!important;
+ }
+}
