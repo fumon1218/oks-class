@@ -101,6 +101,13 @@ console.log('PASS real planter base, integrated basket layers, customer style an
 assert(mockCss.includes('height:100dvh;min-height:0'),'Landscape stage must fit a single viewport');
 assert(mockCss.includes('flex:1 1 0;height:0'),'Arena must take remaining viewport space');
 assert(mockup.includes('const originalRackRender=renderRack'),'Warehouse should display ripe harvest artwork');
+const farmResponsive=fs.readFileSync(path.join(root,'minigames/farm-responsive-v5.css'),'utf8');
+for(const marker of ['grid-template-areas:"garden guests" "garden farmer" "store packing"','grid-area:farmer','grid-area:guests','grid-area:packing','grid-area:store','max-height:729px']){
+ assert(farmResponsive.includes(marker),'Responsive farmhouse layout missing '+marker);
+}
+assert(mockup.includes("farmer.src='../art/stickers/rabbit.png'"),'Incomplete bunny must be temporarily replaced with intact farmer');
+assert(fs.readFileSync(path.join(root,'sw.js'),'utf8').includes('farm-responsive-v5.css'),'New farm responsive CSS must be precached');
+console.log('PASS iPhone landscape collision prevention and intact bunny fallback');
 assert(mockup.includes('function styledFarmAnimal(name,alt)'),'User-provided premium animal asset resolver missing');
 assert(mockup.includes("'../art/farm/v4/'+name+'.webp'"),'Preferred user-provided animal image paths missing');
 
