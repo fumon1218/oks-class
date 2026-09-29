@@ -1,0 +1,45 @@
+.subjects{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:10px;}
+.subj{background:var(--glass);border-radius:22px;padding:10px 4px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:0 4px 12px rgba(80,55,30,.16);border:4px solid transparent;}
+.subj .ic{font-size:36px;line-height:1.1;} .subj b{font-weight:400;font-size:18px;}
+.subj.on{border-color:var(--c);background:#fff;transform:translateY(-3px);}
+.schools{display:flex;gap:8px;justify-content:center;margin-bottom:12px;}
+.sch{background:var(--glass);border-radius:999px;padding:9px 22px;font-size:18px;box-shadow:0 4px 12px rgba(80,55,30,.14);}
+.sch small{font-size:12px;color:var(--ink-soft);margin-left:4px;}
+.sch.on{background:var(--accent);color:#fff;} .sch.on small{color:#fff;}
+.unit{background:var(--glass);border-radius:var(--r-lg);padding:14px;margin-bottom:14px;box-shadow:var(--shadow);border-top:8px solid var(--c);}
+.unit h2{margin:0 0 10px;font-weight:400;font-size:22px;display:flex;align-items:center;gap:10px;}
+.unit h2 span{background:var(--c);color:#fff;border-radius:999px;padding:3px 12px;font-size:15px;}
+.lessons{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;}
+.lesson{background:#fffdf8;border-radius:22px;padding:12px;box-shadow:0 4px 10px rgba(80,55,30,.12);border:3px solid transparent;}
+.lesson.flash{border-color:var(--accent);}
+.lesson.plan{opacity:.92;background:#fbf7ef;}
+.lhead{display:flex;gap:10px;align-items:flex-start;}
+.lhead .no{flex:none;background:#ffe2a8;color:#8a6200;border-radius:14px;padding:6px 10px;font-size:18px;}
+.lhead h3{margin:0;font-weight:400;font-size:21px;}
+.lhead p{margin:2px 0 0;font-size:14px;color:var(--ink-soft);}
+.lvls{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0 6px;}
+.lv{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:74px;border-radius:16px;background:#f3ecdf;text-decoration:none;color:var(--ink);position:relative;padding:4px 2px;}
+.lv b{font-size:26px;font-weight:400;line-height:1;} .lv small{font-size:11px;text-align:center;line-height:1.15;}
+.lv i{font-style:normal;color:#f0a000;font-size:11px;position:absolute;top:3px;right:6px;}
+.lesson.ready .lv{background:#e8f5e9;} .lesson.ready .lv:nth-child(2){background:#e3f2fd;} .lesson.ready .lv:nth-child(3){background:#fff3e0;} .lesson.ready .lv:nth-child(4){background:#fce4ec;} .lesson.ready .lv:nth-child(5){background:#ede7f6;}
+.lv.cur{outline:3px solid var(--accent);}
+.lv:active{transform:scale(.95);}
+.lesson.plan .lv{opacity:.55;}
+.lfoot{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--ink-soft);}
+.lfoot .more{font-size:14px;color:var(--teal);padding:6px 8px;}
+.desc{display:none;margin:8px 0 0;padding-left:20px;font-size:14px;line-height:1.5;color:var(--ink);}
+.lesson.open .desc{display:block;} .desc b{font-weight:400;color:#e0612f;} .desc .rec{list-style:none;margin-left:-20px;color:var(--ink-soft);}
+.foot{font-size:12px;color:var(--ink-soft);text-align:center;background:rgba(255,255,255,.7);border-radius:14px;padding:8px;}
+.settings .set-rows{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.tog{display:flex;justify-content:space-between;align-items:center;background:#fff;border-radius:16px;padding:10px 14px;font-size:17px;}
+.tog span{background:#eee;border-radius:999px;padding:3px 10px;font-size:14px;} .tog.on span{background:var(--ok);color:#fff;}
+.set-lv{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:12px;}
+.lvpick{background:#fff;border-radius:999px;padding:7px 12px;font-size:14px;} .lvpick.on{background:var(--accent);color:#fff;}
+.records{max-width:900px;} .records p{font-size:14px;}
+.tbl{max-height:52vh;overflow:auto;margin-bottom:12px;background:#fff;border-radius:14px;}
+.tbl table{border-collapse:collapse;width:100%;font-size:13px;font-family:system-ui,sans-serif;} .tbl th,.tbl td{padding:6px 8px;border-bottom:1px solid #f0e6d6;text-align:left;white-space:nowrap;} .tbl th{position:sticky;top:0;background:#fff7e6;}
+@media (max-width:760px){
+  .subjects{grid-template-columns:repeat(4,1fr);} .subj .ic{font-size:28px;} .subj b{font-size:15px;}
+  .lessons{grid-template-columns:1fr;}
+  .lv small{display:none;} .lv{min-height:54px;}
+}

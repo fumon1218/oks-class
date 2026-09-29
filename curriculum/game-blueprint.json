@@ -173,7 +173,7 @@
             "guided",
             "independent"
           ],
-          "implementation": "minigames/farm-v8/index.html",
+          "implementation": "play/?id=02-01-01-01",
           "note": "46개의 개별 업로드 원본 객체 기반 온실형 체험 게임. 작물 재배, 포장, 배달, 계산을 실제로 조작."
         },
         {

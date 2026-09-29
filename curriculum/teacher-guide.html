@@ -18,7 +18,7 @@ button.secondary{background:#e8f4ed;color:#285b48}
 .choices{display:flex;flex-wrap:wrap;gap:8px}.choices label{border:2px solid #d4eadd;border-radius:13px;padding:9px 12px;cursor:pointer}
 .choices input{margin-right:6px}#standards .row label{font-weight:650}.muted{color:#61766c;font-size:14px}.warn{background:#fff7e4;padding:12px;border-radius:12px;color:#664b19}
 </style></head><body><main>
-<div class="toplinks"><a href="../index.html">← 마을로</a><a href="../career/barista.html">☕ 카페 체험으로</a><a href="../korean/index.html">📚 국어 도서관으로</a></div>
+<div class="toplinks"><a href="../index.html">← 마을로</a><a href="../career/barista.html">☕ 카페 체험으로</a><a href="../korean/index.html">📚 국어 도서관으로</a><a href="../learn/">🌱 배움 지도 · 기록</a></div>
 <h1>📘 교사용 교육과정 연결</h1><p>2025학년도 춘천계성학교 중·고등학교 기본 교육과정 기반의 게임 설계·수업 준비 공간입니다.</p>
 <div class="note">아래 성취기준은 첨부 학교 교육과정에 적힌 코드와 취지를 정리한 것입니다. 게임 이름과 연결은 개발 제안이며, 게임 점수는 교육적 평가를 대신하지 않습니다.</div>
 <section class="panel"><h2>1. 수업 대상 및 지원 방식</h2>
@@ -63,7 +63,7 @@ function renderPlan(){
  const subject=blueprint.subjectGroups.find(x=>x.key===$("subjectPlan").value);
  if(!subject){el.textContent="선택한 교과가 없습니다.";return;}
  el.innerHTML="<p class='muted'><strong>"+subject.name+"</strong> · "+subject.domain+"</p>"+
- subject.games.map((g,i)=>"<div class='row'><strong>"+(i+1)+". "+g.title+"</strong> <span class='badge'>"+(g.status.startsWith("prototype")?"게임형 시범":"개발 예정")+"</span><small>"+g.activity+"</small><a href='"+(g.implementation&&/(?:tycoon(?:-v\d+)?\.html|farm-v8\/index\.html)$/.test(g.implementation)?'../'+g.implementation:'../minigames/index.html?subject='+subject.key+'&game='+(i+1))+"' style='display:inline-block;margin-top:6px;padding:7px 13px;background:#e2f7eb;border-radius:12px;font-weight:850'>🎮 직접 실행</a></div>").join("");
+ subject.games.map((g,i)=>"<div class='row'><strong>"+(i+1)+". "+g.title+"</strong> <span class='badge'>"+(g.status.startsWith("prototype")?"게임형 시범":"개발 예정")+"</span><small>"+g.activity+"</small><a href='"+(g.implementation&&/(?:tycoon(?:-v\d+)?\.html|play\/\?id=[0-9-]+)$/.test(g.implementation)?'../'+g.implementation:'../minigames/index.html?subject='+subject.key+'&game='+(i+1))+"' style='display:inline-block;margin-top:6px;padding:7px 13px;background:#e2f7eb;border-radius:12px;font-weight:850'>🎮 직접 실행</a></div>").join("");
 }
 $("subjectPlan").addEventListener("change",renderPlan);renderPlan();
 

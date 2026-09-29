@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8bc34a">
+<title>배움 지도 · 옥쌤의 즐거운 교실</title>
+<link rel="manifest" href="../manifest.json">
+<link rel="icon" href="../icons/icon-192.png">
+<link rel="stylesheet" href="../core/oks-core.css">
+<link rel="stylesheet" href="learn.css">
+</head>
+<body class="oks">
+<div class="oks-app">
+  <div class="oks-top">
+    <a class="oks-pill" href="../index.html">🏡 <span>마을로</span></a>
+    <div class="oks-title"><b>배움 지도</b><span>7교과 · 126차시 · 수준 5단계</span></div>
+    <button class="oks-pill" id="recBtn" type="button">📋 기록</button>
+    <button class="oks-pill" id="setBtn" type="button">⚙️ 설정</button>
+  </div>
+  <div class="oks-ask"><img class="oks-mascot" src="../icons/mascot-idle.png" alt=""><div class="oks-ask-bubble"><span class="oks-ask-text" id="askText">오늘은 어떤 공부를 할까요? 교과를 골라요!</span></div></div>
+  <nav class="subjects" id="subjects"></nav>
+  <nav class="schools" id="schools"></nav>
+  <main id="main"></main>
+  <p class="foot" id="foot"></p>
+</div>
+<script src="../core/oks-core.js"></script>
+<script src="../curriculum/lessons.js"></script>
+<script src="../play/content.js"></script>
+<script src="learn.js"></script>
+</body>
+</html>

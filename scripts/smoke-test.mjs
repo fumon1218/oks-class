@@ -59,3 +59,21 @@ if (fs.existsSync(lessonsPath)) {
   }
   console.log('PASS 교육과정 126차시 · 5수준');
 }
+
+// 차시 게임 내용표: 활동ID가 교육과정에 있고, 엔진이 있고, 쓰는 그림 파일이 모두 있어야 합니다.
+const contentPath = path.join(root, 'play/content.js');
+if (fs.existsSync(contentPath)) {
+  const win = {};
+  vm.runInNewContext(fs.readFileSync(contentPath, 'utf8'), { window: win });
+  const engWin = { OKS: {}, OKS_ENGINES: {} };
+  for (const f of ['engines.js', 'engines2.js', 'farm.js']) vm.runInNewContext(fs.readFileSync(path.join(root, 'play', f), 'utf8'), { window: engWin, document: {} });
+  const data = JSON.parse(fs.readFileSync(lessonsPath, 'utf8'));
+  const ids = new Set(data.lessons.map(l => l.id));
+  let imgs = 0;
+  for (const [id, c] of Object.entries(win.OKS_CONTENT)) {
+    assert(ids.has(id), '내용표의 활동ID가 교육과정에 없음: ' + id);
+    for (const cfg of [c, ...Object.values(c.byLevel || {})]) if (cfg.engine) assert(engWin.OKS_ENGINES[cfg.engine], `엔진 없음 ${id}: ${cfg.engine}`);
+    for (const m of JSON.stringify(c).matchAll(/"img":"([^"]+)"/g)) { assert(fs.existsSync(path.join(root, m[1])), `그림 없음 ${id}: ${m[1]}`); imgs++; }
+  }
+  console.log(`PASS 차시 게임 ${Object.keys(win.OKS_CONTENT).length}개 · 그림 ${imgs}곳`);
+}

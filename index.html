@@ -1088,19 +1088,21 @@ const METHOD_ORDER=['connect','paint','mosaic'];
 
 /* ---- rooms (world map) ---- */
 const ROOMS={
-  word:{label:'국어 도서관',sub:'한글별 여행 · 소리·쓰기·단어·조립·이야기',unlocked:true,subjects:[]},
+  word:{label:'국어 도서관',sub:'소리 숲 · 낱말 우체국 · 심부름 가게',unlocked:true,subjects:[]},
   arts:{ label:'미술실', sub:'색깔 · 모양 · 크기 · 탐험 · 그리기 · 전시관', unlocked:true, subjects:SUBJECT_ORDER },
-  science:{label:'과학 연구소',sub:'탐구·관찰·실험 미니게임',unlocked:true,subjects:[]},
-  social:{label:'사회 마을회관',sub:'친구·안전·지역사회 미니게임',unlocked:true,subjects:[]},
-  number:{label:'수학 놀이터',sub:'수량·도형·시간·계산 미니게임',unlocked:true,subjects:[]},
+  science:{label:'과학 연구소',sub:'햇살 농장 · 물놀이 실험 · 분리수거',unlocked:true,subjects:[]},
+  social:{label:'영어 마을',sub:'Hello! · 동물 · 음식 · 좋아하는 것',unlocked:true,subjects:[]},
+  number:{label:'수학 놀이터',sub:'햇살 농장 · 블록 공장 · 규칙 기차',unlocked:true,subjects:[]},
+  space:{label:'사회 세계 마을',sub:'학교 · 마을 · 약속 · 길 찾기 · 축제',unlocked:true,subjects:[]},
+  music:{label:'음악실',sub:'소리 · 높낮이 · 리듬 · 노래',unlocked:true,subjects:[]},
 };
-const ROOM_ORDER=['arts','word','science','social','number'];
+const ROOM_ORDER=['arts','word','science','social','number','space','music'];
+/* 건물 → 배움 지도 교과 (미술실은 기존 미술 교실로 들어가고, 안에서 배움 지도로 이어짐) */
+const ROOM_SUBJECT={word:'korean',number:'math',science:'science',social:'english',space:'social',music:'music'};
 /* 마을 지도 속 각 건물 간판에 맞춘 교실들 — 콘텐츠는 차차 추가 예정 */
 const SOON_ROOMS=[
   {key:'story',   label:'이야기방',   sub:'곧 만나요'},
   {key:'pe',      label:'체육관',     sub:'곧 만나요'},
-  {key:'space',   label:'우주교실',   sub:'곧 만나요'},
-  {key:'music',   label:'음악실',     sub:'곧 만나요'},
 ];
 /* 마을 그림 속 건물 위치(%) — 간판(아이콘)은 이미 그림에 그려져 있어 버튼은 투명 히트박스 역할만 함 */
 const VILLAGE_SPOTS={
@@ -1841,13 +1843,15 @@ function renderBrandbar(){
 /* Local, anonymous five-subject completion is only a navigation hint, not an assessment. */
 function worldRecommendedQuest(){
   let progress={};
-  try{progress=JSON.parse(localStorage.getItem('oks_five_subjects_v1')||'{}')||{};}catch(e){}
+  try{progress=JSON.parse(localStorage.getItem('oks_learning_progress_v1')||'{}')||{};}catch(e){}
   const candidates=[
-    {key:'korean-01',room:'word',short:'국어 · 소리 탐정',label:'국어 도서관에서 소리 탐정',url:'minigames/index.html?subject=korean&game=1'},
-    {key:'math-01',room:'number',short:'수학 · 몇 개일까?',label:'수학 놀이터에서 수량 모으기',url:'minigames/index.html?subject=math&game=1'},
-    {key:'science-02',room:'science',short:'과학 · 식물 키우기',label:'과학 연구소에서 씨앗 관찰하기',url:'minigames/index.html?subject=science&game=2'},
-    {key:'social-04',room:'social',short:'사회 · 우리 동네',label:'사회 마을회관에서 지역사회 탐험하기',url:'minigames/index.html?subject=social&game=4'},
-    {key:'art-01',room:'arts',short:'미술 · 색깔 마을',label:'미술 공방에서 색 탐색하기',url:'minigames/index.html?subject=art&game=1'}
+    {key:'02-01-01-01',room:'number',short:'수학 · 햇살 농장',label:'햇살 농장에서 주문한 만큼 담기',url:'play/?id=02-01-01-01'},
+    {key:'01-01-01-01',room:'word',short:'국어 · 소리 숲',label:'소리 숲에서 생활 속 소리 찾기',url:'play/?id=01-01-01-01'},
+    {key:'04-01-01-01',room:'science',short:'과학 · 씨앗에서 식물로',label:'햇살 농장에서 식물 자라는 모습 보기',url:'play/?id=04-01-01-01'},
+    {key:'03-01-01-01',room:'space',short:'사회 · 학교 탐험',label:'학교 마을 지도에서 교실 찾기',url:'play/?id=03-01-01-01'},
+    {key:'05-01-01-01',room:'social',short:'영어 · Hello!',label:'영어 마을에서 인사하기',url:'play/?id=05-01-01-01'},
+    {key:'07-01-02-01',room:'music',short:'음악 · 리듬 산책',label:'박자 따라 걷기',url:'play/?id=07-01-02-01'},
+    {key:'06-01-01-02',room:'arts',short:'미술 · 색 섞기',label:'컬러 믹싱 실험실',url:'play/?id=06-01-01-02'}
   ];
   return candidates.find(c=>!Object.prototype.hasOwnProperty.call(progress,c.key))||candidates[0];
 }
@@ -1953,17 +1957,17 @@ function renderWorld(){
     </div>
     <div class="directory-actions">
       ${allRooms.map(r=>`<button type="button" class="${r.locked?'directory-soon':''}" data-action="${r.locked?'soon-room':'go-room'}" data-room="${r.key}">${r.locked?'🔒':'🏫'} ${r.label}</button>`).join('')}
+      <a href="learn/">🌱 배움 지도 (7교과 126차시)</a>
       <a href="career/barista.html">☕ 직업 체험 카페</a>
-      <a href="minigames/index.html?subject=art">🎨 미술 게임 10종</a>
-      <a href="minigames/index.html?subject=korean">📚 국어 게임 10종</a>
+      <a href="minigames/index.html">🎮 예전 미니게임 모음</a>
       <a href="quests/index.html">🌸 마을 통합 퀘스트</a>
     </div>
   </section>`:''}
   <div class="hud-navbar">
     <button class="navcircle active" data-action="go-world"><span>🗺️</span>지도</button>
     <button class="navcircle world-directory-toggle" data-action="toggle-directory" aria-expanded="${worldDirectoryOpen}"><span>🧭</span>교실 찾기</button>
+    <a class="navcircle" href="learn/" style="text-decoration:none"><span style="border-color:#8bc34a">🌱</span>배움 지도</a>
     <button class="navcircle" data-action="go-lessons"><span>📚</span>오늘의 수업</button>
-    <a class="navcircle" href="minigames/index.html" style="text-decoration:none"><span>🎮</span>미니게임</a>
     <a class="navcircle" href="quests/index.html" style="text-decoration:none"><span>🌸</span>마을 퀘스트</a>
     <a class="navcircle" href="career/barista.html" style="text-decoration:none"><span style="border-color:#3AAFA9">☕</span>직업 체험</a>
     <button class="navcircle" data-action="open-settings"><span>⚙️</span>설정</button>
@@ -2006,6 +2010,7 @@ function renderRoom(){
     <span class="lb-txt"><b>오늘의 수업</b><small>${LESSON_UNIT.title} · 8차시를 순서대로</small></span>
     <span class="card-arrow">${ICON_CHEVRON_R}</span>
   </button>
+  ${route.room==='arts'?'<div style="margin:13px auto;max-width:860px;border:4px solid white;background:#eaf6dcec;border-radius:24px;text-align:center;padding:15px"><b style="font-size:23px">🌱 미술 차시 게임 (수준 5단계)</b><p>색깔 정원 · 색 섞기 · 선 긋기 · 도형 동물 · 콜라주 · 작은 미술관</p><a href="learn/?subject=art&school=elem" style="display:inline-block;padding:13px 22px;background:#6aa84f;color:white;border-radius:18px;font-size:19px;font-weight:900">배움 지도에서 미술 고르기 →</a></div>':''}
   ${route.room==='arts'?'<div style="margin:13px auto;max-width:860px;border:4px solid white;background:#fff3ddec;border-radius:24px;text-align:center;padding:15px"><b style="font-size:23px">🎨 마법 미술 공방 타이쿤</b><p>물감 섞기 → 주문 그림 그리기 → 작품 판매 → 공방 확장</p><a href="minigames/art-tycoon.html" style="display:inline-block;padding:13px 22px;background:#b377bd;color:white;border-radius:18px;font-size:19px;font-weight:900">체험형 공방 입장 →</a></div>':''}
   <div class="grid-cards">${cards}</div>`;
 }
@@ -2716,7 +2721,7 @@ function onGlobalAction(e){
   else if(action==='go-room'){
     const btn=e.currentTarget;
     const room=btn.getAttribute('data-room')||route.room;
-    const doNav=()=>{ if(room==='word'){window.location.href='korean/index.html';return;}if(room==='number'){window.location.href='minigames/farm-v8/index.html';return;}if(room==='science'||room==='social'){const subject={science:'science',social:'social'}[room];window.location.href='minigames/index.html?subject='+subject;return;}worldDirectoryOpen=false;route.view='room'; route.room=room; route.subject=null; route.method=null; runtime=null; render(); };
+    const doNav=()=>{ if(ROOM_SUBJECT[room]){window.location.href='learn/?subject='+ROOM_SUBJECT[room]+'&school=elem';return;}worldDirectoryOpen=false;route.view='room'; route.room=room; route.subject=null; route.method=null; runtime=null; render(); };
     if(btn.closest('.world-hero')) walkAvatarTo(btn, doNav); else doNav();
   }
   else if(action==='go-path'){ route.view='path'; route.subject=e.currentTarget.getAttribute('data-subject'); route.method=null; runtime=null; render(); }
@@ -3592,6 +3597,15 @@ function renderSettingsModal(){
 /* ================= boot ================= */
 // 학생이 화면을 만지면 촉진 타이머를 처음부터 다시 잰다
 document.addEventListener('pointerdown',()=>{ if(route.view==='activity') armHints(); },true);
+/* 배움 지도에서 미술실 활동으로 바로 들어오기: index.html?go=draw:sticker&level=easy */
+try{
+  const q=new URLSearchParams(location.search), go=q.get('go');
+  if(go){ const [gs,gm]=go.split(':');
+    if(SUBJECTS[gs] && SUBJECTS[gs].methods && SUBJECTS[gs].methods[gm]){
+      const lv=q.get('level'); if(lv && LEVELS[lv]){ settings.level=lv; saveSettings(); }
+      route={view:'activity',room:'arts',subject:gs,method:gm}; setTimeout(()=>{ if(route.view==='activity') speak(activityInstructionText()); },400);
+    } }
+}catch(e){}
 if('speechSynthesis' in window){
   window.speechSynthesis.onvoiceschanged=()=>{};
 }
