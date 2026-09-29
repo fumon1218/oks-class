@@ -57,6 +57,12 @@ assert(lobbyCss.includes('width:max(100vw,150dvh)'),'Map cover scaling may break
 assert(lobbyCss.includes('body.is-world .hud-navbar'),'Accessible navigation dock lost');
 console.log('PASS single-image map plane, walk coordinates and immersive HUD');
 const mathFruit=fs.readFileSync(path.join(root,'minigames/math-fruit.html'),'utf8');
+assert(mathFruit.includes('const bin=m.kind===\'share\'?binCounts.indexOf(Math.min(...binCounts)):targetFor(type)'),'Tap must auto-select basket');
+assert(mathFruit.includes('drop(bin);'),'Tap must directly dispatch drop');
+assert(mathFruit.includes('animateIntoBasket(type,source,target'),'Fruit should fly into selected basket');
+assert(mathFruit.includes("target.querySelector('.basket-count').textContent"),'Basket must display a live count');
+assert(mathFruit.includes("contents.append(im(type,''))"),'Basket must visually fill');
+console.log('PASS direct tap, animated basket fill and live fruit count');
 assert(mathFruit.includes("const MISSIONS=[")&&mathFruit.includes("m.kind==='share'")&&mathFruit.includes("m.kind==='sort'"),"Immersive 12-stage game systems missing");
 assert(mathFruit.includes("art/stickers/rabbit.png")&&mathFruit.includes("art/stickers/strawberry.png"),"Existing 3D animal or produce art integration missing");
 assert(fs.readFileSync(path.join(root,'minigames/index.html'),'utf8').includes('href="math-fruit.html"'),"Math workshop entry not linked");
