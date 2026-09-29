@@ -74,9 +74,10 @@
       "key": "career",
       "name": "직업 체험",
       "status": "pilot",
-      "url": "career/cafe.html",
+      "url": "career/barista.html",
       "games": [
-        "동물 친구 카페"
+        "동물 친구 카페",
+        "정글 바리스타 작업대: 주문→위생→재료→붓기→서빙→계산"
       ]
     },
     {
@@ -324,6 +325,19 @@
       "path": "korean/catch.html",
       "source": "사용자 업로드 word-master-main.zip - components/Stage1Game.tsx + constants.ts",
       "note": "원본의 낙하 글자+이동 바구니 게임 동작을 참고해 독립 HTML로 재구현. 시각적 강조, 정적 탭 대안, 힌트, 무제한 재도전은 특수교육 접근성 확장; 학생의 교육 성취 자동 판정 아님."
+    },
+    {
+      "id": "barista-workstation",
+      "status": "pilot",
+      "subjects": [
+        "국어",
+        "수학",
+        "사회",
+        "진로와 직업",
+        "일상생활 활동"
+      ],
+      "path": "career/barista.html",
+      "note": "7단계 역할놀이 및 선택형 대안 제공. 게임 타이밍 조작과 실제 직업 기능 성취는 분리 평가 필요."
     }
   ]
 }
