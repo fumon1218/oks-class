@@ -447,6 +447,19 @@ stageStep('plant');
 $('seedShelf').hidden=true;
 
 
+/* Prepared user-supplied 3D farmer/customer WebPs are preferred when
+ * present in the GitHub repo; current production stickers remain a safe
+ * fallback until the binary artwork has been uploaded to art/farm/v4. */
+const farmArtAvailability={};
+function styledFarmAnimal(name,alt){
+ const el=document.createElement('img');el.alt=alt;
+ const fallback='../art/stickers/'+name+'.png';
+ if(farmArtAvailability[name]===false){el.src=fallback;return el;}
+ el.onload=()=>{farmArtAvailability[name]=true};
+ el.onerror=()=>{farmArtAvailability[name]=false;el.onerror=null;el.onload=null;el.src=fallback};
+ el.src='../art/farm/v4/'+name+'.webp';
+ return el;
+}
 /* Farm v4: all crop states share the SAME fitted wooden planter artwork.
  * Source sprout/crop sprites include their own dirt mound, so the lower part
  * is clipped and the plant grows from the soil surface of the planter. */
@@ -537,7 +550,13 @@ pack=function(key,source){
  * create phantom sellable orders. */
 renderVisitor=function(){
  const order=activeOrder(),queue=$('customerLine');if(!order)return;
- $('visitor').src='../art/stickers/rabbit.png';$('visitor').alt='토끼 농부';
+ const farmer=$('visitor');farmer.alt='토끼 농부';
+ if(farmArtAvailability.rabbit===false)farmer.src='../art/stickers/rabbit.png';
+ else {
+  farmer.onload=()=>{farmArtAvailability.rabbit=true};
+  farmer.onerror=()=>{farmArtAvailability.rabbit=false;farmer.onerror=null;farmer.onload=null;farmer.src='../art/stickers/rabbit.png'};
+  farmer.src='../art/farm/v4/rabbit.webp';
+ }
  $('speech').textContent=orderCaption(order)+' 담아 볼까요?';
  queue.replaceChildren();
  const active=state.orders.find(o=>o.id===state.active);
@@ -553,7 +572,7 @@ renderVisitor=function(){
   const el=document.createElement('div'),fresh=!knownCustomerIds.has(o.id);
   el.className='customer-actor'+(!preview&&o.id===state.active?' active':'')+(fresh?' entering':'');
   el.style.animationDelay=(i*.15)+'s';
-  el.append(extraImage('../art/stickers/'+guest+'.png',guest+' 귀여운 동물 손님'));
+  el.append(styledFarmAnimal(guest,guest+' 귀여운 3D 동물 손님'));
   const bubble=document.createElement('div');bubble.className='order-bubble';
   const name=btext('strong',preview?'🐵 다음 손님':o.id===state.active?'💚 내 차례!':'기다리는 중');
   const icons=document.createElement('div');icons.className='bubble-icons';
