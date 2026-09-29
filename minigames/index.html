@@ -97,7 +97,7 @@ function renderGame(){
  }
  else if(item.type==='order'){
  var list=item.items;var ans=create('div','current','순서대로 눌러 보세요.');p.appendChild(ans);
- shuffle(list.map((v,i)=>({v,i}))).forEach(function(o){p.appendChild(tile(o.v,function(e){if(o.i!==orderPos){mistakes++;msg('차례를 다시 생각해 보아요.');return}orderPos++;ans.textContent=list.slice(0,orderPos).join(' → ');Array.from(p.querySelectorAll('button')).filter(b=>b.textContent===o.v).forEach(b=>b.disabled=true);if(orderPos===list.length)finishAvailable();else msg('좋아요! 다음 순서를 골라요.')}))});
+ shuffle(list.map((v,i)=>({v,i}))).forEach(function(o){var b=tile(o.v,function(){if(o.i!==orderPos){mistakes++;msg('차례를 다시 생각해 보아요.');return}orderPos++;ans.textContent=list.slice(0,orderPos).join(' → ');b.disabled=true;if(orderPos===list.length)finishAvailable();else msg('좋아요! 다음 순서를 골라요.')});p.appendChild(b)});
  }
  else if(item.type==='sort'){
  var val=create('div','current','',null);p.appendChild(val);
