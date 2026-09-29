@@ -187,3 +187,7 @@ body.is-world .world-directory-panel{
 @media(prefers-reduced-motion:reduce){
  .world-map-layer .map-spot.entering::after{display:none}
 }
+
+/* Higher specificity than legacy high-resolution hotspot rules. */
+.world-hero.lobby-hd .world-map-layer .map-spot.active:not(.is-quest)::before{opacity:0!important;animation:none!important}
+.world-hero.lobby-hd .world-map-layer .map-spot.active.is-quest::before{opacity:1!important;animation:quest-soft-pulse 1.7s ease-in-out infinite!important}
