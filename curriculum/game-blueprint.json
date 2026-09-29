@@ -173,8 +173,8 @@
             "guided",
             "independent"
           ],
-          "implementation": "minigames/math-tycoon.html",
-          "note": "완료 시 5교과 활동 기록에 연동하는 다회 플레이형 농장 타이쿤 1차 구현. 16개 주문 템플릿의 반복/변형이며 공식 16개 성취기준과 동일하지 않음."
+          "implementation": "minigames/math-tycoon-v2.html",
+          "note": "몰입형 3D 스타일 농장 무대와 애니메이션으로 개편, 재배·포장·배달·정산 반복. 실시간 3D 엔진이 아닌 3D 이미지 기반 게임."
         },
         {
           "id": "math-02",
