@@ -118,6 +118,11 @@ for(const marker of ['grid-template-areas:"garden guests" "garden farmer" "store
 }
 assert(mockup.includes('href="farm-clean-v6.css"'),'Farm screen must load final clean grid');
 assert(fs.readFileSync(path.join(root,'sw.js'),'utf8').includes('./minigames/farm-clean-v6.css'),'Farm clean grid must precache');
+const pricesCss=fs.readFileSync(path.join(root,'minigames/farm-prices-v7.css'),'utf8');
+for(const m of ["class=\"unit-prices\"","function renderPriceSign(){","💰 물건값","판매 금액과 성공 보상은 달라요","나는 농장 도우미야!"])assert(mockup.includes(m),'Missing farm pricing or staff clarification '+m);
+assert(pricesCss.includes('.price-chip')&&pricesCss.includes('#checkoutQuestion'),'Price UI stylesheet missing');
+assert(fs.readFileSync(path.join(root,'sw.js'),'utf8').includes('./minigames/farm-prices-v7.css'),'Price sign not PWA cached');
+console.log('PASS farmer no longer repeats a customer order, unit prices visible and checkout itemized');
 console.log('PASS cleaned farm layout replaces absolute positioning');
 console.log('PASS iPhone landscape collision prevention and intact bunny fallback');
 assert(mockup.includes('function styledFarmAnimal(name,alt)'),'User-provided premium animal asset resolver missing');

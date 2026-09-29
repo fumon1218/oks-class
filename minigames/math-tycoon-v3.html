@@ -43,9 +43,9 @@
 @media(max-width:830px){.arena{padding:4px 5px 130px;min-height:790px}.garden-wrap{width:100%;padding:5px;max-width:none}.plots{gap:2px}.plot{min-height:clamp(100px,23vw,170px)}.customer-zone{top:43%;right:0;width:44%;height:28%}.helper{left:42%;top:43%;width:120px}.pack-station{top:68%;right:0;width:48%;min-height:122px}.warehouse{bottom:0;width:50%}.warehouse .stock{min-height:72px}.warehouse .stock img{height:42px}.action-dock{margin:0}.action{min-height:70px;min-width:96px}.action img{height:38px}.basket-layout{min-height:96px}.basket-layout .basket-art>img{height:89px}.customer-actor .order-bubble{top:-16px;min-width:65px;padding:3px;font-size:10px}.customer-zone .counter{height:28%}}
 @media(max-width:540px){.hud{gap:4px;padding:3px}.hud>*{padding:6px}.hud .brand{font-size:18px}.hud .stats span{font-size:11px;padding:5px}.mission-bar{font-size:13px;padding:5px}.arena{min-height:690px}.plot{min-height:100px}.plot .plot-label{font-size:10px;padding:1px 4px}.helper{width:91px;top:45%;left:34%}.helper .speech{min-width:100px;font-size:10px}.customer-zone{top:44%;width:57%}.pack-station{top:68%;width:49%;border-width:5px}.warehouse{width:50%;padding:2px;border-width:3px}.warehouse h2{font-size:12px}.rack{gap:1px}.stock{border-width:2px;font-size:10px}.stock img{height:34px}.action{min-width:calc(29vw);min-height:64px;font-size:14px}.action img{height:32px}.action-mini{min-width:91px;min-height:61px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.fly-sprite{transition:none!important}}
-</style><link rel="stylesheet" href="farm-mockup-v3.css"><link rel="stylesheet" href="farm-props-v4.css"><link rel="stylesheet" href="farm-responsive-v5.css"><link rel="stylesheet" href="farm-clean-v6.css"></head><body><div class="game-shell">
+</style><link rel="stylesheet" href="farm-mockup-v3.css"><link rel="stylesheet" href="farm-props-v4.css"><link rel="stylesheet" href="farm-responsive-v5.css"><link rel="stylesheet" href="farm-clean-v6.css"><link rel="stylesheet" href="farm-prices-v7.css"></head><body><div class="game-shell">
 <header class="hud"><a class="brand" href="../index.html">🌱 내 농장</a><div class="stats"><span>☀️ <b id="day">1</b>일째</span><span>🪙 <b id="coins">10</b></span><span>⭐ <b id="stars">0</b></span><span>🎁 <b id="served">0</b>건</span></div><button class="xbtn" id="toggleSound" type="button" aria-pressed="true">🔊 음성 켜짐</button></header>
-<div class="mission-bar">🎯 <b id="farmTask">손님 주문을 준비해 볼까요?</b><small class="tiny">심기 → 물주기 → 수확 → 포장 → 배달</small></div>
+<div class="mission-bar">🎯 <b id="farmTask">손님 주문을 준비해 볼까요?</b><small class="tiny">심기 → 물주기 → 수확 → 포장 → 배달</small><div id="unitPrices" class="unit-prices" aria-label="농장 채소와 과일의 개당 판매 가격"></div></div>
 <main class="arena" id="arena"><div class="farm-flowers" aria-hidden="true"></div><div class="farm-chalk" aria-hidden="true">🌼 오늘도<br>맛있는 채소를<br>키워볼까요? 🌱</div><div class="farm-sign" aria-hidden="true">🌿 쑥쑥 농장</div>
 <section class="garden-wrap" aria-label="직접 조작하는 여섯 칸의 농장"><h1 class="garden-header">🥕 쑥쑥 농장 · 밭을 터치해요!</h1><div class="plots" id="plots"></div></section>
 <section class="customer-zone" aria-label="주문하는 동물 손님"><div class="customer-line" id="customerLine"></div><div class="counter">🧾 오늘의 동물 손님</div></section>
@@ -270,13 +270,14 @@ function checkout(){
  let o=activeOrder();if(!o||!orderComplete(o))return;
  state.pending=o.id;persist();
  $('checkoutVisitor').src=ASSET+o.visitor+'.png';
- $('checkoutQuestion').textContent=orderCaption(o)+' · 기본 판매 금액은 몇 코인일까요?';
+ const breakdown=Object.entries(o.ask).map(([key,n])=>CROPS[key].name+' '+n+'개 × '+CROPS[key].price+'코인 = '+(n*CROPS[key].price)+'코인').join('\n');
+ $('checkoutQuestion').textContent=breakdown+'\n\n모두 얼마일까요? 판매 금액과 성공 보상은 달라요.';
  $('checkout').hidden=false;checkoutLock=false;
  const options=state.mode==='explore'?[o.price]:[o.price,o.price+3,Math.max(1,o.price-3)].filter((v,i,a)=>a.indexOf(v)===i);
  for(let i=options.length-1;i>0;i--){const j=(i*7+o.id*3)% (i+1);[options[i],options[j]]=[options[j],options[i]];}
  const area=$('checkoutButtons');area.replaceChildren();
  options.forEach(value=>{let b=document.createElement('button');b.type='button';b.className='btn primary';b.textContent='🪙 '+value+'코인';b.onclick=()=>checkoutAnswer(value,o);area.append(b)});
- $('checkoutHint').textContent=state.mode==='explore'?'금액을 눌러 계산을 완료해요.':'농산물 수량과 가격을 생각해 볼까요?';
+ $('checkoutHint').textContent='물건값 '+o.price+'코인 · 주문 완료 시 받는 코인 '+o.reward+'코인 (추가 보상 포함)';
  speak('계산대입니다. '+o.price+'코인을 찾아 보아요.');
 }
 function checkoutAnswer(value,o){
@@ -559,7 +560,7 @@ renderVisitor=function(){
    farmer.onerror=()=>{farmArtAvailability.rabbitFull=false;farmer.onerror=null;farmer.onload=null;farmer.src='../art/stickers/rabbit.png'};
    farmer.src='../art/farm/v4/rabbit_full.webp';
  }
- $('speech').textContent=orderCaption(order)+' 담아 볼까요?';
+ $('speech').textContent='나는 농장 도우미야! 주문은 위 손님에게서 확인하고 가격표를 참고해 줘!';
  queue.replaceChildren();
  const active=state.orders.find(o=>o.id===state.active);
  const waiting=state.orders.find(o=>o.id!==state.active);
@@ -583,7 +584,12 @@ renderVisitor=function(){
    icon.style.cssText='width:31px;height:31px;object-fit:contain;position:static;';
    icons.append(icon,btext('span','×'+n));
   });
-  bubble.append(name,icons);if(!preview)bubble.append(btext('span','🪙 '+o.reward));
+  bubble.append(name,icons);
+  if(!preview){
+   const sale=Object.entries(o.ask).reduce((sum,[key,n])=>sum+CROPS[key].price*n,0);
+   bubble.append(btext('span','💰 물건값 '+sale+'코인'));
+   bubble.append(btext('small','성공 시 '+o.reward+'코인 (보너스 포함)'));
+  }
   el.append(bubble);queue.append(el);
   if(!preview){
    el.tabIndex=0;el.style.pointerEvents='auto';el.setAttribute('role','button');
@@ -596,6 +602,16 @@ renderVisitor=function(){
  knownCustomerIds=new Set(positions.filter(p=>p.order).map(p=>p.order.id));
 };
 
+/* Public, fixed per-unit selling prices; visible even before a customer arrives. */
+function renderPriceSign(){
+ const el=$('unitPrices');el.replaceChildren();
+ const emojis={strawberry:'🍓',tomato:'🍅',carrot:'🥕',lettuce:'🥬'};
+ KEYS.forEach(key=>{
+  const c=CROPS[key],price=btext('span',emojis[key]+' '+c.name+' 1개 = '+c.price+'코인');
+  price.className='price-chip';el.append(price);
+ });
+}
+renderPriceSign();
 safeRestore();restockOrders();persist();render();
 })();
 </script></body></html>
