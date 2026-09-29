@@ -1489,12 +1489,12 @@ function retryFeedback(msg){
 }
 
 /* ---------- mascot (옥쌤) — placeholder art, swap ART.mascot* with real files later ---------- */
-const SPRING_HD='art/scenes/town_spring_hd.webp';
+const SPRING_HD='art/scenes/town_spring_hd.avif';
 let hdLobbyReady=false;
 const VILLAGE_SPOTS_HD={
-  arts:{left:'16%',top:'34%'}, word:{left:'29%',top:'47%'}, science:{left:'32%',top:'27%'},
-  story:{left:'65%',top:'29%'}, pe:{left:'87%',top:'50%'}, space:{left:'69%',top:'55%'},
-  social:{left:'49%',top:'41%'}, music:{left:'78%',top:'40%'}, number:{left:'12%',top:'48%'}
+  arts:{left:'15%',top:'33%'}, science:{left:'30%',top:'26%'}, word:{left:'64%',top:'31%'},
+  music:{left:'77%',top:'40%'}, pe:{left:'88%',top:'49%'}, space:{left:'64%',top:'59%'},
+  social:{left:'27%',top:'49%'}, number:{left:'10%',top:'51%'}
 };
 const ART={
   mascotIdle:'icons/mascot-idle.png', mascotCheer:'icons/mascot-cheer.png', mascotSoft:'icons/mascot-soft.png',
@@ -1518,15 +1518,16 @@ function todayKey(){ const d=new Date(); return `${d.getFullYear()}${String(d.ge
 function saveWorldSeason(season){
   try{ localStorage.setItem('oks_world_season', JSON.stringify({day:todayKey(), season})); }catch(e){}
 }
+/* New high-resolution spring village is the stable lobby default.
+   Existing seasonal art remains reachable via the season-switch button.
+   We do not randomly replace the selected master illustration each day. */
 function pickWorldSeason(){
-  const seasons=Object.keys(ART.worldSeasons);
-  let saved=null;
-  try{ saved=JSON.parse(localStorage.getItem('oks_world_season')||'null'); }catch(e){}
-  if(saved && saved.day===todayKey() && seasons.includes(saved.season)) return saved.season;
-  const pool=seasons.filter(s=>!saved || s!==saved.season);
-  const season=pool[Math.floor(Math.random()*pool.length)];
-  saveWorldSeason(season);
-  return season;
+  try{
+    const saved=JSON.parse(localStorage.getItem('oks_world_season')||'null');
+    if(saved && saved.day===todayKey() && ART.worldSeasons[saved.season]) return saved.season;
+  }catch(e){}
+  saveWorldSeason('spring');
+  return 'spring';
 }
 function cycleWorldSeason(current){
   const seasons=Object.keys(ART.worldSeasons);
@@ -1862,7 +1863,7 @@ function renderWorld(){
   const spots=useHd?VILLAGE_SPOTS_HD:VILLAGE_SPOTS;
   const sm=SEASON_META[season];
   const featured=worldRecommendedQuest();
-  const nodes=allRooms.filter(r=>!(useHd && r.key==='social')).map(r=>{
+  const nodes=allRooms.filter(r=>!(useHd && r.key==='story')).map(r=>{
     const slot=spots[r.key]||{left:'50%',top:'50%'};
     const action = r.locked ? 'soon-room' : 'go-room';
     const roomAttr = r.key ? `data-room="${r.key}"` : '';
