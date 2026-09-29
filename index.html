@@ -1087,12 +1087,12 @@ const METHOD_ORDER=['connect','paint','mosaic'];
 
 /* ---- rooms (world map) ---- */
 const ROOMS={
+  word:{label:'국어 도서관',sub:'한글별 여행 · 소리·쓰기·단어·조립·이야기',unlocked:true,subjects:[]},
   arts:{ label:'미술실', sub:'색깔 · 모양 · 크기 · 탐험 · 그리기 · 전시관', unlocked:true, subjects:SUBJECT_ORDER },
 };
-const ROOM_ORDER=['arts'];
+const ROOM_ORDER=['arts','word'];
 /* 마을 지도 속 각 건물 간판에 맞춘 교실들 — 콘텐츠는 차차 추가 예정 */
 const SOON_ROOMS=[
-  {key:'word',    label:'글자놀이방', sub:'곧 만나요'},
   {key:'science', label:'과학실',     sub:'곧 만나요'},
   {key:'story',   label:'이야기방',   sub:'곧 만나요'},
   {key:'pe',      label:'체육관',     sub:'곧 만나요'},
@@ -2666,7 +2666,7 @@ function onGlobalAction(e){
   else if(action==='go-room'){
     const btn=e.currentTarget;
     const room=btn.getAttribute('data-room')||route.room;
-    const doNav=()=>{ worldDirectoryOpen=false;route.view='room'; route.room=room; route.subject=null; route.method=null; runtime=null; render(); };
+    const doNav=()=>{ if(room==='word'){window.location.href='korean/index.html';return;}worldDirectoryOpen=false;route.view='room'; route.room=room; route.subject=null; route.method=null; runtime=null; render(); };
     if(btn.closest('.world-hero')) walkAvatarTo(btn, doNav); else doNav();
   }
   else if(action==='go-path'){ route.view='path'; route.subject=e.currentTarget.getAttribute('data-subject'); route.method=null; runtime=null; render(); }
