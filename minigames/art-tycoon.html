@@ -194,7 +194,7 @@ function makeImage(){
 function drawGallery(){
  let g=$('gallery');g.replaceChildren();
  if(!state.gallery.length){g.textContent='아직 전시 작품이 없어요. 첫 작품을 판매하면 전시됩니다.';return;}
- state.gallery.slice(0,8).forEach(item=>{let i=document.createElement('img');i.src=item;i.alt='완성한 색깔 모자이크 작품';g.append(i)});
+ state.gallery.slice(0,8).forEach(item=>{let i=document.createElement('img');i.src=item;i.alt='완성한 색깔 모자이크 작품';i.style.borderColor=state.upgrades.frames===1?'#c49059':state.upgrades.frames===2?'#c2bec2':'#edc95c';i.style.borderWidth=(5+state.upgrades.frames*2)+'px';g.append(i)});
 }
 function upgrades(){
  let u=$('upgrades');u.replaceChildren();const entries=[
