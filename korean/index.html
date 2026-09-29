@@ -61,7 +61,7 @@ const INFO=[
  {name:'이야기 별',icon:'🏰',desc:'문장 읽기·문장 구성하기',goal:'짧은 문장의 의미와 어순 알아보기'}
 ];
 const $=id=>document.getElementById(id),KEY='oks_korean_play_v1';
-let mode='guided',voice=true,record=[],stage=-1,turn=0,done=false,traceCount=0,wrong=0,hints=0,syllables=[],chosen=[],currentSentence=[],currentItem=null,stageTasks=[];
+let soundKind='consonant';let mode='guided',voice=true,record=[],stage=-1,turn=0,done=false,traceCount=0,wrong=0,hints=0,syllables=[],chosen=[],currentSentence=[],currentItem=null,stageTasks=[];
 try{record=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(record))record=[];}catch(e){record=[];}
 try{const p=JSON.parse(localStorage.getItem('oks_iep_config_v1')||'{}');if(LEVELS[p.mode])mode=p.mode;}catch(e){}
 function msg(s){$('status').textContent=s;}
@@ -71,13 +71,13 @@ function completedCount(s){return record.filter(r=>r.stage===s&&r.completed).len
 function makeMenu(){
  $('modeLabel').textContent=LEVELS[mode].label;
  $('stars').textContent='⭐ '+record.filter(r=>r.completed).length;
- $('stages').innerHTML=INFO.map((x,i)=>'<button class="stage-card '+(completedCount(i)?'completed':'')+'" data-stage="'+i+'"><span class="emoji">'+x.icon+'</span>'+x.name+'<small>'+x.desc+'</small>'+(completedCount(i)?'<span class="badge">⭐ 도전 완료</span>':'')+'</button>').join('');
- $('stages').querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>start(Number(b.dataset.stage)));
+ $('stages').innerHTML=INFO.map((x,i)=>'<button class="stage-card '+(completedCount(i)?'completed':'')+'" data-stage="'+i+'"><span class="emoji">'+x.icon+'</span>'+x.name+'<small>'+x.desc+'</small>'+(completedCount(i)?'<span class="badge">⭐ 도전 완료</span>':'')+'</button>').join('')+'<button class="stage-card" data-vowels="true"><span class="emoji">🎵</span>모음 소리 별<small>ㅏ·ㅑ·ㅓ부터 듣고 찾아요</small></button>';
+ $('stages').querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{soundKind='consonant';start(Number(b.dataset.stage))});$('stages').querySelector('[data-vowels]').onclick=()=>{soundKind='vowel';start(0)};
 }
 function stageIntro(){return INFO[stage].goal;}
 function start(i){
  stage=i;turn=0;wrong=0;hints=0;done=false;traceCount=0;syllables=[];chosen=[];
- if(i===0)stageTasks=shuffle(CONSONANTS).slice(0,mode==='explore'?3:5);
+ if(i===0)stageTasks=shuffle(soundKind==='vowel'?VOWELS:CONSONANTS).slice(0,mode==='explore'?3:5);
  if(i===1)stageTasks=['가','나','다'].slice(0,mode==='explore'?1:mode==='guided'?2:3);
  if(i===2)stageTasks=['나비','오리','나무'].slice(0,mode==='explore'?1:mode==='guided'?2:3);
  if(i===3)stageTasks=['나비','오리','나무'].slice(0,mode==='explore'?1:mode==='guided'?2:3);
@@ -102,7 +102,7 @@ function buttonOptions(choices,callback,style=''){
 function success(){msg('잘했어요! 다음으로 갑니다.');say('정말 잘했어요!');setTimeout(()=>{turn++;renderTurn()},400)}
 function renderSound(){
  const target=currentItem;
- const distract=shuffle(CONSONANTS.filter(x=>x!==target)).slice(0,LEVELS[mode].opts-1);
+ const distract=shuffle((soundKind==='vowel'?VOWELS:CONSONANTS).filter(x=>x!==target)).slice(0,LEVELS[mode].opts-1);
  buttonOptions(shuffle([target,...distract]),(pick,b)=>{if(pick===target){b.classList.add('correct');success();}else{wrong++;msg('다시 살펴보아요. 소리를 다시 들어도 좋아요.')}})
  say(target+' 소리를 찾아보세요.');
 }
