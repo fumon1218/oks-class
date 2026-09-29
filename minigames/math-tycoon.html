@@ -135,7 +135,7 @@ const START=()=>({
  upgrades:{plots:3,yield:1,bonus:1},stock:{strawberry:0,tomato:0,carrot:0,lettuce:0},
  sequence:0,orders:[],active:null,tray:[],pending:null
 });
-let state=START(),busy=false,saveFailed=false,checkoutLock=false;
+let state=START(),saveFailed=false,checkoutLock=false;
 try{const preset=JSON.parse(localStorage.getItem('oks_iep_config_v1')||'{}');if(['explore','guided','independent'].includes(preset.mode))state.mode=preset.mode}catch(e){}
 function clamp(x,min,max){return Math.max(min,Math.min(max,x))}
 function speak(message){if(!('speechSynthesis'in window))return;try{speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(message);u.lang='ko-KR';u.rate=.88;speechSynthesis.speak(u)}catch(e){}}
@@ -147,7 +147,7 @@ function persist(){try{localStorage.setItem(SAVE,JSON.stringify(state));saveFail
 function safeRestore(){
  try{const s=JSON.parse(localStorage.getItem(SAVE)||'null');if(!s||!Array.isArray(s.plots)||!s.stock||!Array.isArray(s.orders))return;
   state={...START(),...s,stock:{...START().stock,...s.stock},upgrades:{...START().upgrades,...s.upgrades}};
-  if(state.pending){state.pending=null;state.tray=[];} // never restore half-settled checkout
+  if(state.pending){(state.tray||[]).forEach(key=>{if(KEYS.includes(key))state.stock[key]++});state.pending=null;state.tray=[];} // refund half-packed goods after a reload
   if(!KEYS.includes(state.selected))state.selected='strawberry';
   if(!['explore','guided','independent'].includes(state.mode))state.mode='guided';
   if(state.orders.length>2)state.orders=state.orders.slice(0,2);
@@ -182,7 +182,7 @@ function renderSeeds(){
 function playSound(){/* no automatic audio: teacher controls spoken cues */ }
 function emitBurst(el,message){const p=el?.getBoundingClientRect();if(!p)return;const e=document.createElement('div');e.className='burst';e.textContent=message;e.style.left=(p.left+p.width*.37)+'px';e.style.top=(p.top+p.height*.22)+'px';document.body.append(e);setTimeout(()=>e.remove(),760)}
 function tapPlot(index){
- if(busy||state.pending)return;
+ if(state.pending)return;
  const slot=state.plots[index],button=$('plots').querySelector('[data-index="'+index+'"]');
  if(!slot)return;
  if(slot.phase==='locked'){notice('새 밭을 구매하면 열려요.');return;}
@@ -239,7 +239,7 @@ function renderVisitor(){
 }
 function renderTray(){
  const tray=$('tray');tray.replaceChildren();
- if(!state.tray.length)tray.append(btext('div','여기에 수확한 재료를 포장해요.')).firstChild.className='empty';
+ if(!state.tray.length){let empty=btext('div','여기에 수확한 재료를 포장해요.');empty.className='empty';tray.append(empty);}
  state.tray.forEach((key)=>tray.append(img(CROPS[key].img,CROPS[key].name)));
  const o=activeOrder();$('deliver').disabled=!o||!orderComplete(o)||Boolean(state.pending);
  $('undo').disabled=!state.tray.length||Boolean(state.pending);
@@ -257,7 +257,7 @@ function render(){
  updateHUD();renderSeeds();renderPlots();renderRack();renderOrders();renderVisitor();renderTray();renderUpgrades();
 }
 function pack(key,source){
- if(busy||state.pending)return;
+ if(state.pending)return;
  const order=activeOrder();if(!order||!order.ask[key]||countTray(key)>=order.ask[key]||state.stock[key]<=0){notice('이 주문에 필요한 재료가 아니에요.');return;}
  state.stock[key]--;state.tray.push(key);notice(CROPS[key].name+'를 포장했어요! '+state.tray.length+'개 담았어요.');emitBurst(source,'🧺 +1');
  persist();render();
