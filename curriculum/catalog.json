@@ -1,0 +1,303 @@
+{
+  "project": "옥쌤의 즐거운 교실",
+  "schemaVersion": 1,
+  "evidence": "춘천계성학교 2025학년도 중학교·고등학교 교육과정(사용자 제공 PDF)",
+  "note": "성취기준 코드와 뜻은 첨부 문서에 적힌 항목 중 확인한 것만 기재. 게임 연결·난이도·교육 방법은 별도의 개발 제안이며 공식 평가 판정이 아님.",
+  "year2025": {
+    "middle": {
+      "grade1": "2022 revised special basic curriculum",
+      "grade2": "2015 revised special basic curriculum",
+      "grade3": "2015 revised special basic curriculum"
+    },
+    "high": {
+      "grade1": "2022 revised special basic curriculum",
+      "grade2": "2015 revised special basic curriculum",
+      "grade3": "2015 revised special basic curriculum"
+    }
+  },
+  "rooms": [
+    {
+      "key": "arts",
+      "name": "미술 공방",
+      "status": "active",
+      "games": [
+        "색깔 연결",
+        "그림 꾸미기",
+        "작품 전시"
+      ]
+    },
+    {
+      "key": "word",
+      "name": "국어 도서관",
+      "status": "planned",
+      "games": [
+        "인사말 배달부",
+        "안내 방송",
+        "이야기 순서"
+      ]
+    },
+    {
+      "key": "number",
+      "name": "수학 놀이터",
+      "status": "planned",
+      "games": [
+        "수량 대응",
+        "실생활 계산",
+        "용량 측정"
+      ]
+    },
+    {
+      "key": "science",
+      "name": "과학 연구소",
+      "status": "planned",
+      "games": [
+        "저울",
+        "액체 연구소",
+        "힘과 마찰"
+      ]
+    },
+    {
+      "key": "social",
+      "name": "사회 마을회관",
+      "status": "planned",
+      "games": [
+        "자기소개",
+        "내가 선택해요",
+        "역할 수행"
+      ]
+    },
+    {
+      "key": "career",
+      "name": "직업 체험",
+      "status": "pilot",
+      "url": "career/cafe.html",
+      "games": [
+        "동물 친구 카페"
+      ]
+    },
+    {
+      "key": "daily",
+      "name": "생활 체험 거리",
+      "status": "planned",
+      "games": [
+        "위생과 정리",
+        "안전한 이동",
+        "마트 장보기"
+      ]
+    }
+  ],
+  "confirmedStandards": [
+    {
+      "school": "middle",
+      "grade": 1,
+      "subject": "국어",
+      "code": "9국어01-05",
+      "meaning": "인사말과 높임 표현을 상황과 상대에 맞게 사용",
+      "pdfPage": 12,
+      "game": "동물 카페: 인사"
+    },
+    {
+      "school": "middle",
+      "grade": 1,
+      "subject": "국어",
+      "code": "9국어01-01",
+      "meaning": "상대방의 이야기를 듣고 주요 내용 파악",
+      "pdfPage": 12,
+      "game": "국어 도서관: 안내 듣기"
+    },
+    {
+      "school": "middle",
+      "grade": 1,
+      "subject": "사회",
+      "code": "9사회01-01",
+      "meaning": "자기 특성 파악과 자신 존중",
+      "pdfPage": 16,
+      "game": "사회: 자기소개"
+    },
+    {
+      "school": "middle",
+      "grade": 1,
+      "subject": "사회",
+      "code": "9사회01-02",
+      "meaning": "일상 선택과 자기결정",
+      "pdfPage": 16,
+      "game": "사회: 스스로 선택"
+    },
+    {
+      "school": "middle",
+      "grade": 1,
+      "subject": "수학",
+      "code": "9수학01-01",
+      "meaning": "100의 개념과 몇백 세기",
+      "pdfPage": 20,
+      "game": "수학: 수량 묶음(제안)"
+    },
+    {
+      "school": "middle",
+      "grade": 1,
+      "subject": "미술",
+      "code": "9미술02-03",
+      "meaning": "조형 요소 탐색 및 표현",
+      "pdfPage": 14,
+      "game": "미술: 꾸미기·조형 탐색"
+    },
+    {
+      "school": "middle",
+      "grade": 1,
+      "subject": "과학",
+      "code": "9과학01-04",
+      "meaning": "수평 잡기로 물체 무게 비교",
+      "pdfPage": 10,
+      "game": "과학: 저울"
+    },
+    {
+      "school": "middle",
+      "grade": 1,
+      "subject": "과학",
+      "code": "9과학02-02",
+      "meaning": "생활 주변 액체의 성질 조사",
+      "pdfPage": 10,
+      "game": "과학: 액체 실험"
+    },
+    {
+      "school": "middle",
+      "grade": 1,
+      "subject": "진로와 직업",
+      "code": "9진로01-02",
+      "meaning": "자기 특성 파악과 소개",
+      "pdfPage": 30,
+      "game": "직업 체험: 역할 선택(예정)"
+    },
+    {
+      "school": "middle",
+      "grade": 1,
+      "subject": "진로와 직업",
+      "code": "9진로02-01",
+      "meaning": "직업의 사회적·경제적 의미와 일의 소중함",
+      "pdfPage": 30,
+      "game": "직업 체험: 카페와 직무 탐색(예정)"
+    },
+    {
+      "school": "high",
+      "grade": 1,
+      "subject": "국어",
+      "code": "12국어01-02",
+      "meaning": "상대의 말에 적절히 반응하며 공감하는 대화",
+      "pdfPage": 12,
+      "game": "동물 카페: 주문 응대"
+    },
+    {
+      "school": "high",
+      "grade": 1,
+      "subject": "사회",
+      "code": "12사회01-02",
+      "meaning": "요구와 권리를 상황에 맞게 표현하며 자기결정",
+      "pdfPage": 16,
+      "game": "사회: 나의 선택"
+    },
+    {
+      "school": "high",
+      "grade": 1,
+      "subject": "수학",
+      "code": "12수학03-2",
+      "meaning": "들이 단위 활용 측정 참여",
+      "pdfPage": 18,
+      "game": "카페: 용량 측정(예정)"
+    },
+    {
+      "school": "high",
+      "grade": 1,
+      "subject": "미술",
+      "code": "12미술02-02",
+      "meaning": "상상한 주제 표현 및 작품 존중",
+      "pdfPage": 14,
+      "game": "미술: 상상 공방"
+    },
+    {
+      "school": "high",
+      "grade": 1,
+      "subject": "과학",
+      "code": "12과학01-04",
+      "meaning": "중력과 마찰력 관찰",
+      "pdfPage": 10,
+      "game": "과학: 미끄럼틀"
+    },
+    {
+      "school": "high",
+      "grade": 1,
+      "subject": "과학",
+      "code": "12과학02-02",
+      "meaning": "여러 용액의 상대적 진하기 비교",
+      "pdfPage": 10,
+      "game": "과학: 용액 연구소"
+    },
+    {
+      "school": "high",
+      "grade": 1,
+      "subject": "진로와 직업",
+      "code": "12진로01-03",
+      "meaning": "자기 특성을 직업과 연결해 강점 탐색",
+      "pdfPage": 28,
+      "game": "직업 체험: 내 역할 찾기(예정)"
+    },
+    {
+      "school": "high",
+      "grade": 1,
+      "subject": "진로와 직업",
+      "code": "12진로04-02",
+      "meaning": "근무와 휴식 등 시간 관리",
+      "pdfPage": 28,
+      "game": "직업 체험: 카페 근무표(예정)"
+    }
+  ],
+  "designRules": {
+    "supportModes": [
+      "감각·탐색",
+      "선택·조작",
+      "문제 해결"
+    ],
+    "accessibility": [
+      "짧은 음성 안내",
+      "큰 터치 영역",
+      "시각적 힌트",
+      "반응 시간 조절",
+      "교사 지원 기록",
+      "감각 과부하 최소화"
+    ],
+    "evaluation": [
+      "참여 여부",
+      "과제 수행 단계",
+      "힌트 요청 횟수",
+      "도움 수준",
+      "실제 생활에서 전이 여부는 교사 별도 기록"
+    ],
+    "privacy": "브라우저 로컬 저장만 사용, 학습 기록은 학생 이름 없이 보관"
+  },
+  "missionLinks": [
+    {
+      "id": "career-cafe",
+      "status": "pilot",
+      "subjects": [
+        "국어",
+        "수학",
+        "사회",
+        "진로와 직업",
+        "일상생활 활동"
+      ],
+      "path": "career/cafe.html",
+      "note": "파일의 성취기준과 미니게임 각 단계가 1:1 대응한다는 뜻은 아니며 교사의 학습목표 설정 필요"
+    },
+    {
+      "id": "spring-festival",
+      "status": "planned",
+      "subjects": [
+        "국어",
+        "수학",
+        "미술",
+        "과학",
+        "사회",
+        "창의적 체험활동"
+      ]
+    }
+  ]
+}
