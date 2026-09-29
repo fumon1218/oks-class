@@ -1791,7 +1791,7 @@ function copyText(text){
 const app=document.getElementById('app');
 /* 이미지가 저장소에 아직 업로드되지 않았거나 로드에 실패하면 기존 봄 마을을 유지합니다. */
 const hdVillageProbe=new Image();
-hdVillageProbe.onload=()=>{hdLobbyReady=true; if(route.view==='world'){avatarPos={left:49,top:64};render();}};
+hdVillageProbe.onload=()=>{hdLobbyReady=true; if(route.view==='world' && pickWorldSeason()==='spring'){avatarPos={left:49,top:64};render();}};
 hdVillageProbe.src=SPRING_HD;
 
 function render(){
@@ -2694,6 +2694,7 @@ function onGlobalAction(e){
   else if(action==='cycle-season'){
     const cur=e.currentTarget.getAttribute('data-season');
     const next=cycleWorldSeason(cur);
+    if(hdLobbyReady) avatarPos=next==='spring'?{left:49,top:64}:{left:48,top:41};
     const sm=SEASON_META[next];
     speak(`${sm.label}으로 바뀌었어요!`);
     render();
