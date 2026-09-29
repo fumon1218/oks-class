@@ -14,7 +14,7 @@ label{font-weight:750;display:block}input,select,textarea{width:100%;min-height:
 <div class="top"><a href="../index.html">🏡 학교 마을</a><a href="teacher-guide.html">⚙️ 교육과정 설정</a><a href="../minigames/index.html">🎮 교과 게임</a></div>
 <h1>📊 교사용 활동 관찰 기록</h1><div class="notice">이 보고서는 <strong>이 브라우저에 저장된 익명 게임 활동 기록만</strong> 읽습니다. 공유 태블릿에서 여러 학생이 사용하면 기록이 섞일 수 있습니다. 학생 이름·장애·의료정보 같은 개인정보를 입력하지 마세요. 게임 완료는 교과 성취 인증이 아니며 실제 성취는 교사의 관찰로 판단합니다.</div>
 <section class="panel"><h2>1. 새 게임 참여 현황</h2><div class="stats" id="stats"></div><div class="tools">
-<label for="filter">기록 선택 <select id="filter"><option value="all">전체</option><option value="five">5교과 미니게임</option><option value="korean">국어 한글별</option><option value="catch">국어 글자 받기</option><option value="cafe">카페 직업 체험</option><option value="observe">교사 직접 관찰</option></select></label>
+<label for="filter">기록 선택 <select id="filter"><option value="all">전체</option><option value="five">5교과 미니게임</option><option value="korean">국어 한글별</option><option value="catch">국어 글자 받기</option><option value="cafe">카페 직업 체험</option><option value="tycoon">수학 농장 타이쿤</option><option value="observe">교사 직접 관찰</option></select></label>
 <button id="export" class="mainbtn" type="button">⬇ CSV 내려받기</button><button id="refresh" type="button">🔄 새로고침</button></div>
 <div class="tablewrap"><table><thead><tr><th>날짜</th><th>구분</th><th>활동</th><th>지원 단계</th><th>재시도 / 힌트</th><th>비고</th></tr></thead><tbody id="rows"></tbody></table></div>
 <p id="summary" class="muted"></p></section>
@@ -28,7 +28,7 @@ label{font-weight:750;display:block}input,select,textarea{width:100%;min-height:
 </main><script>
 (function(){
 "use strict";
-const $=id=>document.getElementById(id),manualKey='oks_teacher_observations_v1',fiveKey='oks_five_subjects_v1',cafeKey='oks-career-cafe-v1',koreanKey='oks_korean_play_v1',catchKey='oks_literacy_catch_v1';
+const $=id=>document.getElementById(id),manualKey='oks_teacher_observations_v1',fiveKey='oks_five_subjects_v1',cafeKey='oks-career-cafe-v1',koreanKey='oks_korean_play_v1',catchKey='oks_literacy_catch_v1',tycoonKey='oks_math_tycoon_v1';
 function read(key,fallback){try{const x=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));return x===null?fallback:x}catch(e){return fallback}}
 function text(x){return String(x===undefined||x===null?'':x)}
 function time(x){if(!x)return'';const d=new Date(x);return isNaN(d.getTime())?'':d.toLocaleString('ko-KR')}
@@ -37,14 +37,15 @@ function entries(){
  let korean=read(koreanKey,[]);if(Array.isArray(korean))korean.forEach(x=>{if(!x)return;output.push({at:x.at||'',source:'korean',kind:'국어 한글별',title:'한글별 단계 '+(Number(x.stage)+1),mode:x.mode||'',retry:x.tries??'',hints:x.hints??'',note:'단계 번호는 앱 내 단계 순서'})});
  let catches=read(catchKey,[]);if(Array.isArray(catches))catches.forEach(x=>{if(!x)return;output.push({at:x.at||'',source:'catch',kind:'국어 글자 받기',title:x.type==='vowel'?'모음':'자음',mode:x.mode||'',retry:x.wrong??'',hints:x.helps??'',note:'놀이 점수 '+text(x.score)})});
  let cafes=read(cafeKey,[]);if(Array.isArray(cafes))cafes.forEach(x=>{if(!x)return;output.push({at:x.at||x.date||'',source:'cafe',kind:'카페 직업 체험',title:x.drink||'카페 손님 응대',mode:x.mode||'',retry:x.retries??'',hints:x.hints??'',note:'완료 '+(x.completed?'예':'아니오')})});
+ let farm=read(tycoonKey,{});if(farm&&Array.isArray(farm.completed))farm.completed.forEach(x=>{if(!x)return;output.push({at:x.date||'',source:'tycoon',kind:'수학 농장 타이쿤',title:'주문 '+(Number(x.order)+1)+' 배송 및 가격 계산',mode:x.mode||'',retry:'',hints:'',note:'판매금액 '+text(x.amount)+'코인 · 작물 '+Object.entries(x.items||{}).map(([k,n])=>k+':'+n).join(', ')})});
  let obs=read(manualKey,[]);if(Array.isArray(obs))obs.forEach(x=>{if(!x)return;output.push({at:x.at||'',source:'observe',kind:'교사 직접 관찰',title:x.goal||'',mode:x.support||'',retry:'',hints:'',note:(x.generalize||'')+(x.memo?' · '+x.memo:'')})});
  return output.sort((a,b)=>String(b.at).localeCompare(String(a.at)));
 }
 function chosen(){let all=entries();return $('filter').value==='all'?all:all.filter(x=>x.source===$('filter').value)}
 function stat(label,value){const box=document.createElement('div');box.className='stat';const n=document.createElement('strong');n.textContent=value;const t=document.createElement('span');t.textContent=label;box.append(n,t);return box}
 function render(){
- const all=entries();const five=all.filter(x=>x.source==='five'),korean=all.filter(x=>x.source==='korean'||x.source==='catch'),cafe=all.filter(x=>x.source==='cafe'),obs=all.filter(x=>x.source==='observe');
- $('stats').replaceChildren(stat('5교과 완료 활동 기록',five.length),stat('국어 연습 기록',korean.length),stat('카페 체험 기록',cafe.length),stat('교사 관찰 기록',obs.length));
+ const all=entries();const five=all.filter(x=>x.source==='five'),korean=all.filter(x=>x.source==='korean'||x.source==='catch'),cafe=all.filter(x=>x.source==='cafe'),farm=all.filter(x=>x.source==='tycoon'),obs=all.filter(x=>x.source==='observe');
+ $('stats').replaceChildren(stat('5교과 완료 활동 기록',five.length),stat('국어 연습 기록',korean.length),stat('카페 체험 기록',cafe.length),stat('농장 타이쿤 주문',farm.length),stat('교사 관찰 기록',obs.length));
  $('rows').innerHTML='';const rows=chosen();rows.slice(0,100).forEach(x=>{
  const tr=document.createElement('tr');[time(x.at),x.kind,x.title,x.mode,text(x.retry)+' / '+text(x.hints),x.note].forEach(y=>{let td=document.createElement('td');td.textContent=text(y);tr.appendChild(td)});$('rows').appendChild(tr)});
  if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=6;td.textContent='아직 저장된 기록이 없습니다.';tr.appendChild(td);$('rows').appendChild(tr)}
@@ -57,7 +58,7 @@ $('export').onclick=function(){
 $('filter').onchange=render;$('refresh').onclick=render;
 $('save').onclick=function(){const goal=$('goal').value.trim(),memo=$('memo').value.trim();if(!goal){$('feedback').textContent='학습 목표를 입력해 주세요.';return;}
  const r=read(manualKey,[]);const out=Array.isArray(r)?r:[];out.unshift({at:new Date().toISOString(),goal,support:$('support').value,generalize:$('generalize').value,memo});try{localStorage.setItem(manualKey,JSON.stringify(out.slice(0,100)));$('feedback').textContent='익명 관찰 기록을 이 브라우저에 저장했습니다.';$('goal').value='';$('memo').value='';render()}catch(e){$('feedback').textContent='브라우저 저장 기능을 사용할 수 없습니다.'}};
-$('clear').onclick=function(){if(!confirm('주의: 이 브라우저의 새 게임 참여 및 교사 직접 관찰 기록을 삭제합니다. 별도의 백업이 없다면 복구할 수 없습니다. 삭제할까요?'))return;[fiveKey,cafeKey,koreanKey,catchKey,manualKey].forEach(k=>localStorage.removeItem(k));$('feedback').textContent='해당 게임과 관찰 기록을 지웠습니다. 기존 미술실 데이터와 교사 설정은 그대로 유지됩니다.';render()};
+$('clear').onclick=function(){if(!confirm('주의: 이 브라우저의 새 게임 참여 기록과 수학 타이쿤 농장 운영 상황(코인·밭·작물 포함), 교사 직접 관찰 기록을 모두 삭제합니다. 별도 백업이 없다면 복구할 수 없습니다. 정말 삭제할까요?'))return;[fiveKey,cafeKey,koreanKey,catchKey,tycoonKey,manualKey].forEach(k=>localStorage.removeItem(k));$('feedback').textContent='해당 게임과 관찰 기록을 지웠습니다. 기존 미술실 데이터와 교사 설정은 그대로 유지됩니다.';render()};
 render();
 })();
 </script></body></html>

@@ -6,7 +6,7 @@ import vm from 'node:vm';
 // GitHub Pages game smoke checks: no npm dependencies and no generated content.
 // This checks parse-time errors and local link targets, not touch/visual behavior.
 const root=path.resolve(import.meta.dirname,'..');
-const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','curriculum/reports.html','minigames/index.html','minigames/math-fruit.html','quests/index.html'];
+const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','curriculum/reports.html','minigames/index.html','minigames/math-fruit.html','minigames/math-tycoon.html','quests/index.html'];
 let parsed=0,links=0;
 for(const relative of pages){
   const src=fs.readFileSync(path.join(root,relative),'utf8');
@@ -65,7 +65,16 @@ assert(mathFruit.includes("contents.append(im(type,''))"),'Basket must visually 
 console.log('PASS direct tap, animated basket fill and live fruit count');
 assert(mathFruit.includes("const MISSIONS=[")&&mathFruit.includes("m.kind==='share'")&&mathFruit.includes("m.kind==='sort'"),"Immersive 12-stage game systems missing");
 assert(mathFruit.includes("art/stickers/rabbit.png")&&mathFruit.includes("art/stickers/strawberry.png"),"Existing 3D animal or produce art integration missing");
-assert(fs.readFileSync(path.join(root,'minigames/index.html'),'utf8').includes('href="math-fruit.html"'),"Math workshop entry not linked");
+assert(fs.readFileSync(path.join(root,'minigames/index.html'),'utf8').includes('href="math-tycoon.html"'),'Math tycoon entry not linked');
+const tycoon=fs.readFileSync(path.join(root,'minigames/math-tycoon.html'),'utf8');
+for(const marker of ["function tapPlot(index)","function autoWater()","function autoHarvest()","function checkoutAnswer(value,o)","function buyUpgrade(up)","function pack(key,source)","function safeRestore()","ORDER_TEMPLATES=[","localStorage.setItem(SAVE"]){
+ assert(tycoon.includes(marker),'Missing tycoon loop: '+marker);
+}
+assert(tycoon.includes('href="math-fruit.html"'),'Original 12-stage practice must remain available');
+assert(tycoon.includes('if(state.pending!==null)'),'Checkout must guard customer order zero as an active pending order');
+assert(!tycoon.includes('Boolean(state.pending)'),'Never rely on falsy first-order ID zero');
+assert(fs.readFileSync(path.join(root,'quests/index.html'),'utf8').includes("link:'../minigames/math-tycoon.html'"),'Integrated math quest must link tycoon');
+console.log('PASS new tycoon: planting, watering, harvesting, packing, checkout, upgrades and saved progress');
 console.log('PASS immersive math workshop linked and core systems present');
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 for(const page of pages.slice(1)){assert(sw.includes("'./"+page+"'"),'Not precached: '+page);}

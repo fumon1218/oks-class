@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>옥쌤 과일 농장 타이쿤 · 수학 체험실</title>
+<meta name="theme-color" content="#338e68"/>
+<style>
+*{box-sizing:border-box}
+:root{--soil:#91623d;--cream:#fff6de;--ink:#62482d;--green:#349b69;--gold:#ffd46a}
+body{margin:0;min-height:100dvh;background:#bcebc5;font:800 16px/1.4 system-ui,"Noto Sans KR",sans-serif;color:var(--ink)}
+button,select,a{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:4px solid #ffd455;outline-offset:3px}
+button:disabled{cursor:not-allowed;opacity:.55}a{text-decoration:none;color:inherit}
+[hidden]{display:none!important}
+.world{min-height:100dvh;background:linear-gradient(180deg,#80c4e954,#a9e0ac55 60%,#5f9b4b60),url("https://fumon1218.github.io/jungle-jump/assets/wj/farm/bg_farm.jpg") center top / cover fixed}
+.header{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap;padding:9px clamp(8px,2vw,28px);background:#fefbf0ed;border-bottom:4px solid #ffe4b1}
+.header a{background:#fff;border:2px solid #ead5a6;border-radius:99px;padding:10px 13px;min-height:47px}
+.header h1{margin:0;font-size:clamp(19px,2.4vw,30px);color:#6d4b2b;text-shadow:0 2px #fff}
+.huds{display:flex;gap:8px;flex-wrap:wrap}.pill{border:3px solid #fff;border-radius:19px;padding:8px 11px;min-height:46px;background:#fff9e6ed;box-shadow:0 4px 9px #3e664f47;font-size:clamp(13px,1.5vw,18px)}
+.layout{max-width:1530px;margin:auto;padding:11px;display:grid;grid-template-columns:minmax(0,1.72fr) minmax(260px,.84fr);gap:11px}
+.room{background:linear-gradient(#fffdf1d9,#fff5d5ec);border:5px solid #fff9e9;border-radius:25px;padding:12px;box-shadow:0 13px 22px #47705a65}
+.room h2{font-size:clamp(19px,2vw,26px);margin:0 0 6px;color:#795536}
+.strip{background:#fffdf4;border:3px solid #e8c88d;border-radius:17px;padding:9px;text-align:center;min-height:55px;font-size:clamp(15px,1.8vw,21px);font-weight:950}
+.garden{position:relative;background:linear-gradient(135deg,#a9d981ad,#6aa94d8a);border:7px solid #fff5cb;border-radius:25px;min-height:300px;margin:9px 0;padding:10px}
+.garden::before{content:"";position:absolute;inset:0;z-index:0;pointer-events:none;background:radial-gradient(circle at 50% 30%,#ffefb750,transparent 70%)}
+.plots{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;z-index:1}
+.plot{position:relative;background:radial-gradient(ellipse at 50% 65%,#bd864d 7%,#8d5d34 69%,#5e7b2b 73%);border:5px solid #fce5aa;border-radius:25px;min-height:clamp(133px,17vw,211px);box-shadow:inset 0 -13px #70431c82,0 7px 11px #244a2575;color:#fff;padding:6px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:2px;transition:filter .2s}
+.plot img{height:clamp(70px,9.5vw,115px);max-width:92%;object-fit:contain;filter:drop-shadow(0 8px 4px #643c2385)}
+.plot label,.plot strong{background:#fff7dbe9;color:#77502a;padding:4px 9px;border-radius:99px;font-size:clamp(12px,1.3vw,15px)}
+.plot.ready{border-color:#ffe05b;box-shadow:0 0 18px #fff4aa,inset 0 -13px #714d27}
+.plot.pulse{animation:plot-pulse .33s ease}
+.plot.locked{background:#5b7d458a;border-style:dashed}
+.seed-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:7px 0}
+.seed{border:4px solid #fffaf0;background:linear-gradient(#fffdf3,#eddaa9);border-radius:17px;padding:6px;color:#6d4a2c;min-height:117px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;box-shadow:0 5px 10px #82623750}
+.seed img{height:clamp(60px,7vw,91px);max-width:90%;object-fit:contain}
+.seed.active{border-color:#4cb47e;transform:translateY(-4px);background:#e6ffe5}.seed span{font-size:14px}
+.rack{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:7px}
+.stock{border:3px solid #f2deb4;border-radius:16px;background:linear-gradient(#fffef7,#ffe9bf);min-height:85px;padding:6px;display:flex;align-items:center;flex-direction:column;justify-content:center;color:#684824}
+.stock img{height:48px;max-width:78px;object-fit:contain;pointer-events:none}
+.stock b{border-radius:99px;background:#3f9d72;color:#fff;padding:1px 9px}
+.missions{display:grid;gap:8px}.order{background:#fffdf1;border:4px solid #ebd3a7;border-radius:19px;padding:9px;color:#735139;text-align:left;min-height:110px}
+.order.active{border-color:#46b785;box-shadow:0 0 0 3px #d9ffcd}.order strong{display:block;font-size:18px}
+.order .wanted{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:7px 0}.order img{width:53px;height:53px;object-fit:contain}
+.order .hint{font-size:13px;color:#936a44}.order .done{color:#278c57;font-weight:950}
+.customer{display:flex;align-items:center;gap:8px;min-height:115px;background:#fff3d9;border:4px solid white;border-radius:19px;padding:8px;margin:9px 0}
+.customer img{height:103px;width:108px;object-fit:contain;filter:drop-shadow(0 6px 4px #654b3475)}
+.customer p{flex:1;margin:0;background:#fff;border:2px solid #eecb81;border-radius:16px;padding:9px;font-size:clamp(15px,1.7vw,20px);font-weight:950}
+.assembly{border:4px solid #e8c68f;background:linear-gradient(#ffeece,#dfbb8d);border-radius:21px;min-height:125px;padding:9px;box-shadow:inset 0 -12px #98684084}
+.assembly h3{text-align:center;margin:0;font-size:18px}.tray{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;min-height:68px;align-items:center;padding:6px}
+.tray img{height:58px;width:63px;object-fit:contain;animation:pop .24s ease}.tray .empty{font-size:15px;color:#795531}
+.tools{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-top:8px}
+.btn{min-height:51px;padding:9px 13px;border-radius:15px;border:3px solid #d8c49d;background:#fffcf0;color:#79512d;box-shadow:0 3px 6px #81653f37;font-weight:950}
+.btn.go{background:#369f71;border-color:#fff;color:white}
+.btn.primary{background:#ffcd66;border-color:#fff;color:#684225}
+.btn.warn{background:#ffe1cf}
+.btn:active,.plot:active,.stock:active{transform:translateY(2px)}
+.status{margin:12px auto 0;max-width:1530px;padding:14px 18px;min-height:52px;border:4px solid #fff8ce;border-radius:22px;background:#fffae4ee;color:#684c30;text-align:center;font-size:clamp(15px,1.7vw,21px);font-weight:950;box-shadow:0 7px 15px #4869484c}
+.upgrades{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:7px}
+.upgrade{border:3px solid #f6dfb7;border-radius:16px;background:#fff9e9;color:#77502d;padding:9px 5px;min-height:93px}
+.upgrade strong{display:block;font-size:16px}.upgrade small{display:block;margin-top:3px}
+.footnote{font-size:12px;font-weight:700;line-height:1.6;color:#5b6a52;margin:6px 0}
+.checkout{position:fixed;inset:0;background:#2a4736b0;z-index:100;display:grid;place-items:center;padding:13px}
+.checkout-box{width:min(590px,96vw);border-radius:28px;border:7px solid #fff4c7;background:linear-gradient(#fffef0,#ffe2ab);padding:24px;text-align:center;box-shadow:0 24px 55px #142e1d80}
+.checkout-box h2{font-size:clamp(23px,4vw,33px);margin:4px 0}
+.checkout-box img{width:105px;height:105px;object-fit:contain}
+.checkout-buttons{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.checkout-buttons button{font-size:22px;padding:13px 17px;min-width:115px}
+.burst{position:fixed;z-index:200;pointer-events:none;font-size:31px;animation:flyscore .7s ease forwards}
+@keyframes pop{0%{transform:scale(.5)}90%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes plot-pulse{50%{filter:brightness(1.27)}}
+@keyframes flyscore{to{transform:translateY(-75px) scale(1.3);opacity:0}}
+@media(max-width:890px){.layout{grid-template-columns:1fr}.customer{min-height:90px}.customer img{height:84px}.plots{grid-template-columns:repeat(3,1fr)}.plot{min-height:150px}.room{padding:9px}}
+@media(max-width:500px){.huds{width:100%;justify-content:space-between}.seed-row,.rack{grid-template-columns:repeat(4,1fr)}.seed{min-height:91px}.seed img{height:53px}.plots{gap:4px}.plot{min-height:118px;border-width:3px}.plot img{height:64px}.plot label{font-size:11px}.upgrades{grid-template-columns:1fr 1fr}.header{justify-content:center}.world{background-attachment:scroll}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body><div class="world">
+<header><a href="../index.html">🏡 학교 마을</a><h1>🥕 옥쌤 과일 농장 타이쿤</h1><div class="huds"><span class="pill">☀️ <span id="day">1</span>일째</span><span class="pill">🪙 <span id="coins">10</span></span><span class="pill">⭐ <span id="stars">0</span></span><span class="pill">🏅 <span id="served">0</span>건 판매</span></div></header>
+<main class="layout">
+<section class="room" aria-label="재배와 수확 공간">
+<h2>🌱 내 농장</h2>
+<div class="strip" id="farmTask">씨앗을 고르고 밭을 터치하세요!</div>
+<div class="seed-row" id="seeds" aria-label="심을 씨앗 종류"></div>
+<div class="garden"><div class="plots" id="plots" aria-label="농장 밭 6칸"></div></div>
+<div class="tools"><button class="btn primary" id="plantTips">💡 어떻게 키울까요?</button><button class="btn" id="waterReady">💧 물주기 일괄 실행</button><button class="btn go" id="harvestReady">🧺 준비된 작물 수확</button></div>
+<h2 style="margin-top:15px">📦 내 창고 · 재료를 눌러 주문에 담아요</h2>
+<div class="rack" id="rack" aria-label="현재 가지고 있는 작물 수량"></div>
+</section>
+<aside class="room" aria-label="가게 손님과 주문서">
+<h2>🧾 오늘의 손님 주문</h2><div class="customer"><img id="visitor" src="../art/stickers/rabbit.png" alt="가게에 방문한 동물 손님"><p id="speech">어서 와요! 농장을 열어 주세요!</p></div>
+<div class="missions" id="orders" aria-label="고객 주문 목록"></div>
+<div class="assembly"><h3>🧺 포장 작업대</h3><div class="tray" id="tray" aria-live="polite"></div></div>
+<div class="tools" style="justify-content:center"><button class="btn" id="undo" type="button">↶ 재료 하나 돌려놓기</button><button class="btn go" id="deliver" type="button">🚚 주문 배달하기</button></div>
+<h2 style="margin-top:16px">🏡 농장 꾸미기 · 번 돈으로 확장!</h2>
+<div class="upgrades" id="upgrades"></div>
+<div class="tools"><label for="mode">활동 지원</label><select id="mode" class="btn"><option value="explore">🌱 탐색 · 쉬운 주문</option><option value="guided">🍀 선택·조작</option><option value="independent">🌳 혼자 해결</option></select><button class="btn" id="speak">🔊 다시 듣기</button><button class="btn" id="help">💡 도움</button><button class="btn" id="reset">↻ 내 농장 처음부터</button><a class="btn" href="math-fruit.html">📚 기존 12단계 연습</a></div>
+</aside></main>
+<div class="status" id="status" role="status" aria-live="polite">오늘도 즐거운 농장! 씨앗을 고르고 밭을 터치해 보아요.</div>
+<p class="footnote" style="text-align:center;background:#fffbebdc;padding:9px;margin:12px">게임은 제한 시간이나 생명 감소가 없습니다. 재료와 화폐를 직접 조작하면서 수량·분류·덧셈·경제생활을 익혀요. 별과 코인은 게임용이며 정식 교육평가 결과가 아닙니다. 저장은 현재 기기에만 이루어집니다.</p>
+<div class="checkout" id="checkout" hidden role="dialog" aria-modal="true" aria-labelledby="checkoutTitle"><div class="checkout-box"><h2 id="checkoutTitle">💰 계산대</h2><img id="checkoutVisitor" src="../art/stickers/rabbit.png" alt=""><p id="checkoutQuestion" style="font-size:21px">모두 얼마일까요?</p><div class="checkout-buttons" id="checkoutButtons"></div><p id="checkoutHint">가격을 세어 보아요.</p></div></div>
+</div>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id),SAVE='oks_math_tycoon_v1',
+ASSET='../art/stickers/',CROPS={
+ strawberry:{name:'딸기',img:'strawberry.png',seed:0,price:3},
+ tomato:{name:'토마토',img:'tomato.png',seed:0,price:4},
+ carrot:{name:'당근',img:'carrot.png',seed:0,price:5},
+ lettuce:{name:'상추',img:'lettuce.png',seed:0,price:4}
+},
+KEYS=Object.keys(CROPS),ANIMALS=['rabbit','monkey','cat','panda','bear','sloth','penguin','fox'],
+UPGRADES=[
+ {key:'plots',name:'🌱 새 밭',desc:'농장 밭 +1',cost:12,max:6},
+ {key:'yield',name:'💧 풍성한 수확',desc:'수확량 +1',cost:22,max:3},
+ {key:'bonus',name:'🏪 인기 가게',desc:'주문 보상 +2코인',cost:18,max:3}
+],
+ORDER_TEMPLATES=[
+ {ask:{strawberry:2},label:'딸기 두 개를 담아줘!'},
+ {ask:{carrot:3},label:'당근 세 개를 준비해 줘!'},
+ {ask:{tomato:2,lettuce:1},label:'토마토 둘, 상추 하나!'},
+ {ask:{strawberry:3,tomato:1},label:'딸기 셋, 토마토 하나!'},
+ {ask:{carrot:2,lettuce:2},label:'당근과 상추를 각각 두 개씩!'},
+ {ask:{strawberry:1,tomato:2,carrot:1},label:'세 종류를 골고루 포장해 줘!'},
+ {ask:{tomato:4},label:'토마토 네 개가 필요해!'},
+ {ask:{lettuce:3},label:'상추 세 개 주세요!'},
+ {ask:{strawberry:2,carrot:2},label:'딸기 두 개와 당근 두 개!'},
+ {ask:{lettuce:2,carrot:1,tomato:2},label:'건강 채소 세트로 주세요!'},
+ {ask:{strawberry:4,lettuce:2},label:'봄 축제 꾸러미를 부탁해!'},
+ {ask:{tomato:3,carrot:2},label:'토마토와 당근을 나눠 담아줘!'},
+ {ask:{strawberry:1,carrot:1,tomato:1,lettuce:1},label:'모든 작물을 하나씩 모아줘!'},
+ {ask:{carrot:4,lettuce:3},label:'큰 채소 상자가 필요해!'},
+ {ask:{strawberry:5},label:'딸기 다섯 개를 준비해 줘!'},
+ {ask:{tomato:2,strawberry:2,lettuce:2},label:'세 가지를 각각 두 개씩!'}
+];
+const START=()=>({
+ day:1,coins:10,stars:0,served:0,level:1,completed:[],selected:'strawberry',
+ mode:'guided',plots:Array.from({length:6},(_,i)=>i<3?{phase:'empty',crop:null}:{phase:'locked',crop:null}),
+ upgrades:{plots:3,yield:1,bonus:1},stock:{strawberry:0,tomato:0,carrot:0,lettuce:0},
+ sequence:0,orders:[],active:null,tray:[],pending:null
+});
+let state=START(),saveFailed=false,checkoutLock=false;
+try{const preset=JSON.parse(localStorage.getItem('oks_iep_config_v1')||'{}');if(['explore','guided','independent'].includes(preset.mode))state.mode=preset.mode}catch(e){}
+function clamp(x,min,max){return Math.max(min,Math.min(max,x))}
+function speak(message){if(!('speechSynthesis'in window))return;try{speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(message);u.lang='ko-KR';u.rate=.88;speechSynthesis.speak(u)}catch(e){}}
+function notice(message,audio=false){$('status').textContent=message;if(audio)speak(message)}
+function img(file,alt='',cls=''){let i=document.createElement('img');i.src=ASSET+file;i.alt=alt;if(cls)i.className=cls;return i}
+function btext(kind,value){let x=document.createElement(kind);x.textContent=value;return x}
+function htmlNoStorage(){notice('현재 기기에 저장할 수 없지만 게임은 계속할 수 있습니다.')}
+function persist(){try{localStorage.setItem(SAVE,JSON.stringify(state));saveFailed=false}catch(e){if(!saveFailed){saveFailed=true;htmlNoStorage()}}}
+function safeRestore(){
+ try{const s=JSON.parse(localStorage.getItem(SAVE)||'null');if(!s||!Array.isArray(s.plots)||!s.stock||!Array.isArray(s.orders))return;
+  state={...START(),...s,stock:{...START().stock,...s.stock},upgrades:{...START().upgrades,...s.upgrades}};
+  if(state.pending!==null){(state.tray||[]).forEach(key=>{if(KEYS.includes(key))state.stock[key]++});state.pending=null;state.tray=[];} // refund half-packed goods after a reload
+  if(!KEYS.includes(state.selected))state.selected='strawberry';
+  if(!['explore','guided','independent'].includes(state.mode))state.mode='guided';
+  if(state.orders.length>2)state.orders=state.orders.slice(0,2);
+ }catch(e){}
+}
+function produceOrder(){
+ const n=state.sequence++,base=ORDER_TEMPLATES[n%ORDER_TEMPLATES.length];
+ const ask=Object.fromEntries(Object.entries(base.ask).map(([type,count])=>[type,state.mode==='explore'?Math.min(2,count):state.mode==='independent'?count+(state.served>=5?1:0):count]));
+ const visitor=ANIMALS[n%ANIMALS.length],price=Object.entries(ask).reduce((sum,[k,v])=>sum+CROPS[k].price*v,0),reward=price+3+(state.upgrades.bonus-1)*2;
+ return {id:n,ask,label:base.label,visitor,price,reward};
+}
+function restockOrders(){
+ while(state.orders.length<2)state.orders.push(produceOrder());
+ if(!state.orders.some(o=>o.id===state.active))state.active=state.orders[0]?.id??null;
+}
+function activeOrder(){return state.orders.find(o=>o.id===state.active)}
+function countTray(type){return state.tray.filter(k=>k===type).length}
+function orderComplete(o){return Object.entries(o.ask).every(([k,n])=>countTray(k)===n)&&state.tray.length===Object.values(o.ask).reduce((a,b)=>a+b,0)}
+function updateHUD(){
+ $('coins').textContent=state.coins;$('stars').textContent=state.stars;$('day').textContent=state.day;$('served').textContent=state.served;
+ $('mode').value=state.mode;
+}
+function renderSeeds(){
+ const box=$('seeds');box.replaceChildren();KEYS.forEach(key=>{
+  const c=CROPS[key],button=document.createElement('button');button.type='button';button.className='seed'+(state.selected===key?' active':'');
+  button.append(img(c.img,c.name),btext('span',c.name));
+  button.setAttribute('aria-pressed',String(state.selected===key));
+  button.onclick=()=>{state.selected=key;notice(c.name+' 씨앗을 선택했어요. 빈 밭을 터치해요.');persist();renderSeeds()};
+  box.append(button);
+ });
+}
+function playSound(){/* no automatic audio: teacher controls spoken cues */ }
+function emitBurst(el,message){const p=el?.getBoundingClientRect();if(!p)return;const e=document.createElement('div');e.className='burst';e.textContent=message;e.style.left=(p.left+p.width*.37)+'px';e.style.top=(p.top+p.height*.22)+'px';document.body.append(e);setTimeout(()=>e.remove(),760)}
+function tapPlot(index){
+ if(state.pending!==null)return;
+ const slot=state.plots[index],button=$('plots').querySelector('[data-index="'+index+'"]');
+ if(!slot)return;
+ if(slot.phase==='locked'){notice('새 밭을 구매하면 열려요.');return;}
+ if(slot.phase==='empty'){slot.crop=state.selected;slot.phase='seeded';notice(CROPS[slot.crop].name+' 씨앗을 심었어요! 밭을 다시 눌러 물을 주세요.',true);emitBurst(button,'🌱');}
+ else if(slot.phase==='seeded'){slot.phase='ready';notice('쑥쑥 자랐어요! 다시 눌러 수확해요.');emitBurst(button,'💦');}
+ else if(slot.phase==='ready'){
+  let n=state.upgrades.yield;state.stock[slot.crop]+=n;emitBurst(button,'+'+n+' 🧺');
+  notice(CROPS[slot.crop].name+' '+n+'개를 수확했어요! 창고에서 확인해요.',true);
+  slot.phase='empty';slot.crop=null;
+ }
+ persist();render();
+}
+function renderPlots(){
+ $('plots').replaceChildren();state.plots.forEach((slot,index)=>{
+  const button=document.createElement('button');button.type='button';button.className='plot '+(slot.phase==='ready'?'ready':'')+(slot.phase==='locked'?' locked':'');button.dataset.index=index;
+  let title='';
+  if(slot.phase==='empty'){button.append(btext('span','🌱'));title='빈 밭';}
+  if(slot.phase==='locked'){button.append(btext('span','🔒'));title='잠긴 밭';}
+  if(slot.phase==='seeded'){button.append(img('sprout.png','싹이 올라오는 '+CROPS[slot.crop].name));title='💧 물주기';}
+  if(slot.phase==='ready'){button.append(img(CROPS[slot.crop].img,'수확할 '+CROPS[slot.crop].name));title='🧺 수확하기';}
+  button.append(btext('strong',title),btext('label',String(index+1)+'번 밭'));
+  button.setAttribute('aria-label',String(index+1)+'번 밭 '+title);button.onclick=()=>tapPlot(index);$('plots').append(button);
+ });
+ const plots=state.plots,empty=plots.filter(p=>p.phase==='empty').length,growing=plots.filter(p=>p.phase==='seeded').length,ready=plots.filter(p=>p.phase==='ready').length;
+ $('farmTask').textContent=ready?'🧺 수확할 작물이 '+ready+'칸 있어요!':growing?'💧 새싹 '+growing+'칸에 물을 주세요!':empty?'🌱 씨앗을 골라 빈 밭에 심어 보세요!':'🏪 손님의 주문도 확인해요!';
+}
+function renderRack(){
+ let o=activeOrder();$('rack').replaceChildren();
+ KEYS.forEach(key=>{
+  const c=CROPS[key],owned=state.stock[key],need=o?.ask[key]||0,left=Math.max(0,need-countTray(key));
+  const button=document.createElement('button');button.type='button';button.className='stock';button.disabled=owned<=0||!o||!left||state.pending!==null;
+  button.append(img(c.img,''),btext('span',c.name+' '+(left?'· 필요 '+left:'· 완료')),btext('b',owned+'개'));
+  button.setAttribute('aria-label',c.name+' 재고 '+owned+'개, 필요 '+left+'개');
+  button.onclick=()=>pack(key,button);
+  $('rack').append(button);
+ });
+}
+function orderCaption(o){return Object.entries(o.ask).map(([key,count])=>CROPS[key].name+' '+count+'개').join(' + ')}
+function renderOrders(){
+ $('orders').replaceChildren();
+ state.orders.forEach(order=>{
+  const button=document.createElement('button');button.type='button';button.className='order'+(order.id===state.active?' active':'');button.disabled=state.pending!==null;
+  button.append(btext('strong','🐾 '+ANIMALS.indexOf(order.visitor)+1+'번 손님 · 주문 '+(order.id+1)));
+  const wanted=document.createElement('div');wanted.className='wanted';
+  for(let [key,n] of Object.entries(order.ask)){wanted.append(img(CROPS[key].img,CROPS[key].name),btext('span','×'+n));}
+  button.append(wanted,btext('span',orderCaption(order)),btext('div','🪙 주문 완료 보상 '+order.reward+'코인'));
+  button.onclick=()=>selectOrder(order.id);$('orders').append(button);
+ });
+}
+function renderVisitor(){
+ const order=activeOrder();if(!order)return;
+ $('visitor').src=ASSET+order.visitor+'.png';$('visitor').alt=order.visitor+' 손님';
+ $('speech').textContent='안녕! '+orderCaption(order)+' 부탁해요!';
+}
+function renderTray(){
+ const tray=$('tray');tray.replaceChildren();
+ if(!state.tray.length){let empty=btext('div','여기에 수확한 재료를 포장해요.');empty.className='empty';tray.append(empty);}
+ state.tray.forEach((key)=>tray.append(img(CROPS[key].img,CROPS[key].name)));
+ const o=activeOrder();$('deliver').disabled=!o||!orderComplete(o)||state.pending!==null;
+ $('undo').disabled=!state.tray.length||state.pending!==null;
+}
+function renderUpgrades(){
+ const el=$('upgrades');el.replaceChildren();
+ UPGRADES.forEach(u=>{
+  const lv=state.upgrades[u.key],done=lv>=u.max;
+  const b=document.createElement('button');b.type='button';b.className='upgrade';b.disabled=done||state.coins<u.cost||state.pending!==null;
+  b.append(btext('strong',u.name),btext('small',u.desc),btext('small',done?'🏆 최고 단계':'🪙 '+u.cost+' · 현재 '+lv));
+  b.onclick=()=>buyUpgrade(u);el.append(b);
+ });
+}
+function render(){
+ updateHUD();renderSeeds();renderPlots();renderRack();renderOrders();renderVisitor();renderTray();renderUpgrades();
+}
+function pack(key,source){
+ if(state.pending!==null)return;
+ const order=activeOrder();if(!order||!order.ask[key]||countTray(key)>=order.ask[key]||state.stock[key]<=0){notice('이 주문에 필요한 재료가 아니에요.');return;}
+ state.stock[key]--;state.tray.push(key);notice(CROPS[key].name+'를 포장했어요! '+state.tray.length+'개 담았어요.');emitBurst(source,'🧺 +1');
+ persist();render();
+ if(orderComplete(order))notice('🎉 주문한 재료가 정확하게 준비됐어요! 이제 배달 버튼을 눌러요.',true);
+}
+function selectOrder(id){
+ if(state.pending!==null)return;
+ if(state.active===id)return;
+ // Packing is returned before switching, so no inventory can disappear.
+ state.tray.forEach(key=>{state.stock[key]++});state.tray=[];state.active=id;
+ persist();render();let o=activeOrder();notice('새 손님의 주문! '+orderCaption(o),true);
+}
+function cancelPacking(){
+ if(!state.tray.length||state.pending!==null)return;
+ let key=state.tray.pop();state.stock[key]++;persist();render();notice(CROPS[key].name+' 한 개를 창고에 돌려놓았어요.');
+}
+function buyUpgrade(up){
+ if(state.pending!==null)return;
+ if(state.coins<up.cost||state.upgrades[up.key]>=up.max)return;
+ state.coins-=up.cost;state.upgrades[up.key]++;
+ if(up.key==='plots'){let slot=state.plots.find(p=>p.phase==='locked');if(slot){slot.phase='empty';slot.crop=null;}}
+ persist();render();notice('🏡 농장을 확장했어요! '+up.name,true);
+}
+function autoWater(){
+ if(state.pending!==null)return;
+ let count=0;state.plots.forEach(p=>{if(p.phase==='seeded'){p.phase='ready';count++}});
+ if(!count){notice('먼저 씨앗을 심어 주세요.');return;}persist();render();notice(count+'칸의 밭에 물을 줬어요. 이제 수확해 볼까요?',true);
+}
+function autoHarvest(){
+ if(state.pending!==null)return;
+ let total=0;state.plots.forEach(p=>{if(p.phase==='ready'){total+=state.upgrades.yield;state.stock[p.crop]+=state.upgrades.yield;p.crop=null;p.phase='empty';}});
+ if(!total){notice('아직 수확할 작물이 없어요. 씨앗을 심고 물을 주세요.');return;}persist();render();notice('🧺 작물 '+total+'개를 수확해 창고에 보관했어요!',true);
+}
+function checkout(){
+ let o=activeOrder();if(!o||!orderComplete(o))return;
+ state.pending=o.id;persist();
+ $('checkoutVisitor').src=ASSET+o.visitor+'.png';
+ $('checkoutQuestion').textContent=orderCaption(o)+' · 기본 판매 금액은 몇 코인일까요?';
+ $('checkout').hidden=false;checkoutLock=false;
+ const options=state.mode==='explore'?[o.price]:[o.price,o.price+3,Math.max(1,o.price-3)].filter((v,i,a)=>a.indexOf(v)===i);
+ for(let i=options.length-1;i>0;i--){const j=(i*7+o.id*3)% (i+1);[options[i],options[j]]=[options[j],options[i]];}
+ const area=$('checkoutButtons');area.replaceChildren();
+ options.forEach(value=>{let b=document.createElement('button');b.type='button';b.className='btn primary';b.textContent='🪙 '+value+'코인';b.onclick=()=>checkoutAnswer(value,o);area.append(b)});
+ $('checkoutHint').textContent=state.mode==='explore'?'금액을 눌러 계산을 완료해요.':'농산물 수량과 가격을 생각해 볼까요?';
+ speak('계산대입니다. '+o.price+'코인을 찾아 보아요.');
+}
+function checkoutAnswer(value,o){
+ if(checkoutLock||state.pending!==o.id)return;
+ if(value!==o.price){$('checkoutHint').textContent='괜찮아요! 주문서의 수량과 물건 가격을 다시 살펴봐요.';return;}
+ checkoutLock=true;$('checkout').hidden=true;
+ state.coins+=o.reward;state.stars+=3;state.served++;state.completed.push({order:o.id,date:new Date().toISOString(),amount:o.price,items:o.ask,mode:state.mode});
+ state.completed=state.completed.slice(-60);state.day=1+Math.floor(state.served/3);
+ state.orders=state.orders.filter(x=>x.id!==o.id);state.tray=[];state.pending=null;
+ if(state.served%3===0){state.stars+=5;notice('🎊 영업일 완료! 특별 보너스 별 다섯 개! 다음 날도 운영해 보아요.',true);}
+ else notice('🎉 주문 배달 성공! '+o.reward+'코인과 별 3개를 얻었어요!',true);
+ restockOrders();persist();render();
+ try{let k='oks_five_subjects_v1',previous=JSON.parse(localStorage.getItem(k)||'{}');previous['math-01']={completedAt:new Date().toISOString(),task:'농장 타이쿤 주문·수량·가격 계산',supportMode:state.mode,mistakes:0,helps:0};localStorage.setItem(k,JSON.stringify(previous))}catch(e){}
+}
+$('waterReady').onclick=autoWater;$('harvestReady').onclick=autoHarvest;$('undo').onclick=cancelPacking;$('deliver').onclick=checkout;
+$('plantTips').onclick=()=>notice('씨앗 선택 → 빈 밭 터치 → 새싹에 물 주기 → 작물 수확 → 창고에서 주문 포장 → 배달·계산 순서로 해요!',true);
+$('speak').onclick=()=>{let o=activeOrder();if(o)speak(orderCaption(o)+' 주문해 주세요. 지금은 '+state.coins+'코인 있어요.')};
+$('help').onclick=()=>{
+ let o=activeOrder();if(!o)return;
+ let lacking=Object.entries(o.ask).filter(([k,n])=>state.stock[k]<n-countTray(k));
+ if(lacking.length){notice('💡 '+lacking.map(([k,n])=>CROPS[k].name+' '+(n-countTray(k)-state.stock[k])+'개').join(', ')+' 더 키워 볼까요?',true);}
+ else notice('💡 필요한 재료가 창고에 있어요! 아래 그림을 한 번씩 눌러 포장해요.',true);
+};
+$('mode').onchange=function(){
+ state.tray.forEach(k=>state.stock[k]++);state.tray=[];state.mode=this.value;
+ // Existing orders remain stable to avoid deleting earned or growing supplies.
+ persist();render();notice('활동 지원을 변경했어요. 새로운 주문부터 난도가 적용됩니다.');
+};
+$('reset').onclick=function(){
+ if(!confirm('현재 농장의 코인, 작물, 주문 기록을 모두 지우고 처음부터 시작할까요?'))return;
+ const mode=state.mode;state=START();state.mode=mode;restockOrders();persist();render();notice('새로운 농장이 열렸어요! 씨앗을 심어 보아요.');
+};
+safeRestore();restockOrders();persist();render();
+})();
+</script></body></html>
