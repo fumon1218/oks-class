@@ -1,0 +1,46 @@
+name: Visual QA - Farm Tycoon
+on:
+  push:
+    branches: [qa/farm-preview]
+    paths: [.github/workflows/farm-preview.yml]
+permissions:
+  contents: write
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - name: Screenshot interactive farm scene
+        run: |
+          python3 -m http.server 8877 >/tmp/oks-preview-server.log 2>&1 &
+          node <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+            const page=await browser.newPage({viewport:{width:1536,height:960},deviceScaleFactor:1});
+            let errs=[];page.on('pageerror',e=>errs.push(String(e)));
+            await page.goto('http://127.0.0.1:8877/minigames/math-tycoon-v3.html',{waitUntil:'domcontentloaded'});
+            await page.waitForFunction(()=>document.querySelectorAll('.plot').length===6,{timeout:10000});
+            await page.waitForTimeout(5500);
+            await page.screenshot({path:'qa/farm-tycoon-v3-preview.png',fullPage:true});
+            console.log('VISUAL_QA',{plots:await page.locator('.plot').count(),customers:await page.locator('.customer-actor').count(),screen:await page.locator('.game-shell').boundingBox(),pageErrors:errs});
+            await browser.close();
+            if(errs.length) process.exit(1);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: farm-tycoon-v3-screenshot
+          path: qa/farm-tycoon-v3-preview.png
+      - name: Publish visual QA screenshot on QA branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add qa/farm-tycoon-v3-preview.png
+          git commit -m 'qa: capture farm tycoon layout at desktop resolution'
+          git push origin HEAD:qa/farm-preview
