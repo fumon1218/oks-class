@@ -3,7 +3,7 @@
    교사는 학년별 기준과 개별화교육 목표를 확인 후 활용하세요. */
 window.OKS_MINIGAME_PACK={
   korean:[
-    {type:"choice",q:"상대가 '안녕하세요?'라고 인사했어요. 어떻게 답할까요?",items:["안녕하세요!","안녕히 가세요","모르겠어요"],answer:0,emoji:"👋"},
+    {type:"choice",q:"기역(ㄱ) 글자를 찾아보아요.",items:["ㄱ","ㅁ","ㄴ"],answer:0,emoji:"🎧"},
     {type:"choice",q:"선생님께 처음 인사할 때 적절한 표현을 골라요.",items:["안녕하세요!","잘 가!","싫어!"],answer:0,emoji:"🙋"},
     {type:"match",q:"그림에 맞는 낱말을 연결해요.",pairs:[["🍎","사과"],["🐰","토끼"],["🚗","자동차"]]},
     {type:"portal",q:"움직이는 글자를 받아 보아요!",url:"../korean/catch.html",emoji:"🌟"},
