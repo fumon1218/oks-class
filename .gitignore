@@ -1,2 +1,4 @@
 # 원본 이미지(용량 큰 소스 파일) - 실제 사용되는 파일은 icons/ 폴더에 있음
-# Keep unused source assets ignored, but publish the real illustrated farm game.\nassets/\n!minigames/farm-v8/assets/
+# Ignore unused asset directories, except the 52 farm illustrations used by the live game.
+assets/
+!minigames/farm-v8/assets/
