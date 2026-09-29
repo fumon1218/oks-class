@@ -854,6 +854,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
 }
 </style>
 <link rel="stylesheet" href="lobby/lobby-v2.css">
+<link rel="stylesheet" href="lobby/lobby-v3.css">
 </head>
 <body>
 <div id="app"></div>
@@ -1421,9 +1422,10 @@ let runtime=null; // per-activity mutable state
 let lessonCtx=null; // 오늘의 수업 진행 중이면 {id, step, results}
 let settingsOpen=false;
 let worldDirectoryOpen=false;
+let worldQuestExpanded=false;
 let accessBigTaps=false;
 try{accessBigTaps=localStorage.getItem('oks_access_big_targets')==='1';}catch(e){}
-let avatarPos={left:48, top:41}; // 지도 위 학생 캐릭터의 현재 위치(%) - 다시 그려도 유지됨
+let avatarPos={left:50, top:61}; // 지도 위 학생 캐릭터의 현재 위치(%) - 다시 그려도 유지됨
 let avatarFacing=1; // 1=오른쪽, -1=왼쪽
 
 /* ---------- audio ---------- */
@@ -1791,7 +1793,7 @@ function copyText(text){
 const app=document.getElementById('app');
 /* 이미지가 저장소에 아직 업로드되지 않았거나 로드에 실패하면 기존 봄 마을을 유지합니다. */
 const hdVillageProbe=new Image();
-hdVillageProbe.onload=()=>{hdLobbyReady=true; if(route.view==='world' && pickWorldSeason()==='spring'){avatarPos={left:49,top:64};render();}};
+hdVillageProbe.onload=()=>{hdLobbyReady=true; if(route.view==='world' && pickWorldSeason()==='spring'){avatarPos={left:50,top:61};render();}};
 hdVillageProbe.src=SPRING_HD;
 
 function render(){
@@ -1820,7 +1822,8 @@ function render(){
 
 function updateSceneBackground(){
   document.documentElement.classList.toggle('access-big-taps',accessBigTaps);
-  let img=(route.view==='world') ? (pickWorldSeason()==='spring'&&hdLobbyReady?SPRING_HD:ART.worldSeasons[pickWorldSeason()]) : null;
+  // The map image is painted exactly once on the scaled map plane, never on body.
+  let img=null;
   if(['room','path','activity','lessons','lessonIntro','lessonOutro'].includes(route.view)) img=ART.bgArtRoom;
   document.body.style.backgroundImage = img ? `url('${img}')` : '';
 }
@@ -1834,6 +1837,20 @@ function renderBrandbar(){
   </div>`;
 }
 
+/* Local, anonymous five-subject completion is only a navigation hint, not an assessment. */
+function worldRecommendedQuest(){
+  let progress={};
+  try{progress=JSON.parse(localStorage.getItem('oks_five_subjects_v1')||'{}')||{};}catch(e){}
+  const candidates=[
+    {key:'korean-01',room:'word',short:'국어 · 소리 탐정',label:'국어 도서관에서 소리 탐정',url:'minigames/index.html?subject=korean&game=1'},
+    {key:'math-01',room:'number',short:'수학 · 몇 개일까?',label:'수학 놀이터에서 수량 모으기',url:'minigames/index.html?subject=math&game=1'},
+    {key:'science-02',room:'science',short:'과학 · 식물 키우기',label:'과학 연구소에서 씨앗 관찰하기',url:'minigames/index.html?subject=science&game=2'},
+    {key:'social-04',room:'social',short:'사회 · 우리 동네',label:'사회 마을회관에서 지역사회 탐험하기',url:'minigames/index.html?subject=social&game=4'},
+    {key:'art-01',room:'arts',short:'미술 · 색깔 마을',label:'미술 공방에서 색 탐색하기',url:'minigames/index.html?subject=art&game=1'}
+  ];
+  return candidates.find(c=>!Object.prototype.hasOwnProperty.call(progress,c.key))||candidates[0];
+}
+
 function renderWorld(){
   const allRooms=[
     ...ROOM_ORDER.map(key=>({key, ...ROOMS[key], locked:false})),
@@ -1844,12 +1861,15 @@ function renderWorld(){
   const bgUrl=useHd?SPRING_HD:ART.worldSeasons[season];
   const spots=useHd?VILLAGE_SPOTS_HD:VILLAGE_SPOTS;
   const sm=SEASON_META[season];
+  const featured=worldRecommendedQuest();
   const nodes=allRooms.filter(r=>!(useHd && r.key==='social')).map(r=>{
     const slot=spots[r.key]||{left:'50%',top:'50%'};
     const action = r.locked ? 'soon-room' : 'go-room';
     const roomAttr = r.key ? `data-room="${r.key}"` : '';
     const aboveCls = VILLAGE_LABEL_ABOVE.has(r.key) ? ' label-above' : '';
-    return `<button class="map-spot ${r.locked?'soon':'active'}${aboveCls}" style="left:${slot.left};top:${slot.top}" data-action="${action}" ${roomAttr} aria-label="${r.label}">
+    const questCls = !r.locked && featured.room===r.key ? ' is-quest' : '';
+    return `<button class="map-spot ${r.locked?'soon':'active'}${aboveCls}${questCls}" style="left:${slot.left};top:${slot.top}" data-action="${action}" ${roomAttr} aria-label="${r.label}">
+      ${featured.room===r.key?'<span class="quest-sparkle" aria-hidden="true">✨</span>':''}
       ${r.locked?'<span class="spot-lock">🔒</span>':''}
       <span class="map-spot-label">${r.label}</span>
     </button>`;
@@ -1858,6 +1878,8 @@ function renderWorld(){
   const lv=explorerLevel(), starsN=totalStarsEarned(), starsMax=totalStarsPossible();
   const lvFloor=(lv-1)*6, lvPct=Math.min(100, Math.round((starsN-lvFloor)/6*100));
   const done=completedActivityCount(), totalAct=totalActivityCount();
+  let arcadeCompleted=0;
+  try{const p=JSON.parse(localStorage.getItem('oks_five_subjects_v1')||'{}');arcadeCompleted=Object.keys(p||{}).length;}catch(e){}
 
   const methodRows=METHOD_ORDER.map(m=>{
     const n=CORE_SUBJECT_ORDER.reduce((sum,s)=>sum+(starsFor(s,m)>0?1:0),0);
@@ -1874,8 +1896,9 @@ function renderWorld(){
     <h1>옥쌤의 즐거운 교실</h1>
     <p>어느 교실로 들어가볼까요?</p>
   </div>
-  <div class="world-hero ${useHd?'lobby-hd':''}" id="world-hero" style="background-image:url('${bgUrl}')">
-    <div class="joy-zone" id="joyZone"></div>
+  <div class="world-hero ${useHd?'lobby-hd':''}" id="world-hero">
+    <div class="world-map-layer" id="world-map-layer" style="background-image:url('${bgUrl}')">
+      <div class="joy-zone" id="joyZone"></div>
     <div class="hud-row hud-top">
       <div class="hud-profile">
         <span class="hud-avatar">🧑‍🎨</span>
@@ -1890,6 +1913,7 @@ function renderWorld(){
       <div class="hud-stats">
         <span class="hud-pill">⭐ ${starsN}/${starsMax}</span>
         <span class="hud-pill">🏫 ${done}/${totalAct}</span>
+        <span class="hud-pill" title="5교과 활동 시도 기록">🎮 ${Math.min(50,arcadeCompleted)}/50</span>
       </div>
     </div>
 
@@ -1899,13 +1923,23 @@ function renderWorld(){
       <img src="${ART.charWalk[0]}" alt="" style="transform:scaleX(${avatarFacing})">
     </div>
     <div class="joystick" id="joystick"><div class="joy-knob" id="joyKnob"></div></div>
+    </div><!-- end single map + hitbox coordinate plane -->
 
     <div class="hud-mascot">${mascotBlock('cheer','반짝이는 교실을 찾아가요!','hud-mascot-inner')}</div>
 
-    <div class="hud-quest">
-      <div class="hud-quest-head">🎨 미술실 학습 현황</div>
-      ${methodRows}
-    </div>
+    <section class="hud-quest" aria-label="오늘의 마을 퀘스트">
+      <button class="world-quest-toggle" type="button" data-action="toggle-quest" aria-expanded="${worldQuestExpanded}" aria-controls="world-quest-detail">
+        <span>🎯 오늘의 퀘스트<small>${featured.short}</small></span>
+        <span class="expander" aria-hidden="true">${worldQuestExpanded?'▾':'▴'}</span>
+      </button>
+      ${worldQuestExpanded?`
+      <div class="world-quest-detail" id="world-quest-detail">
+        <p><b>✨ 추천:</b> ${featured.label}</p>
+        <a href="${featured.url}">🎮 도전하러 가기</a>
+        <a class="alt-link" href="quests/index.html">🌸 통합 퀘스트</a>
+        <details><summary>🎨 기존 미술 학습 현황</summary>${methodRows}</details>
+      </div>`:''}
+    </section>
   </div>
   ${worldDirectoryOpen?`
   <section class="world-directory-panel" aria-label="교실 바로 선택하기">
@@ -2572,7 +2606,7 @@ function renderMosaicOrderBoard(){
 /* ================= wiring ================= */
 function walkAvatarTo(targetEl, callback){
   const avatar=document.getElementById('map-avatar');
-  const stage=document.getElementById('world-hero');
+  const stage=document.getElementById('world-map-layer');
   if(!avatar || !stage){ callback(); return; }
   const stageRect=stage.getBoundingClientRect();
   const targetRect=targetEl.getBoundingClientRect();
@@ -2585,10 +2619,18 @@ function walkAvatarTo(targetEl, callback){
   avatar.style.top=topPct+'%';
   avatar.querySelector('img').style.transform=`scaleX(${avatarFacing})`;
   avatar.classList.add('walking');
+  const reducedMotion=window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const walkingTime=reducedMotion?0:650;
+  // The door animates at arrival; only after that do we open the classroom.
   setTimeout(()=>{
     avatar.classList.remove('walking');
-    callback();
-  }, 650);
+    targetEl.classList.add('entering');
+    if(!reducedMotion) playSuccess();
+    setTimeout(()=>{
+      targetEl.classList.remove('entering');
+      callback();
+    },reducedMotion?0:220);
+  },walkingTime);
 }
 
 /* ---- 조이스틱: 평소엔 숨어 있다가 지도(빈 곳)를 누르면 그 자리에 나타나 캐릭터를 자유롭게 움직임 ---- */
@@ -2601,7 +2643,7 @@ function wireJoystick(){
   const stick=document.getElementById('joystick');
   const knob=document.getElementById('joyKnob');
   const avatar=document.getElementById('map-avatar');
-  const stage=document.getElementById('world-hero');
+  const stage=document.getElementById('world-map-layer');
   if(!zone || !stick || !knob || !avatar || !stage) return;
 
   function placeStick(clientX, clientY){
@@ -2667,6 +2709,7 @@ function onGlobalAction(e){
   const action=e.currentTarget.getAttribute('data-action');
   if(action==='go-world'){ worldDirectoryOpen=false;route={view:'world',room:null,subject:null,method:null}; runtime=null; render(); }
   else if(action==='toggle-directory'){ worldDirectoryOpen=!worldDirectoryOpen; render(); }
+  else if(action==='toggle-quest'){ worldQuestExpanded=!worldQuestExpanded; render(); }
   else if(action==='toggle-big-taps'){ accessBigTaps=!accessBigTaps;try{localStorage.setItem('oks_access_big_targets',accessBigTaps?'1':'0');}catch(e){} render(); }
   else if(action==='go-room'){
     const btn=e.currentTarget;
@@ -2700,7 +2743,7 @@ function onGlobalAction(e){
   else if(action==='cycle-season'){
     const cur=e.currentTarget.getAttribute('data-season');
     const next=cycleWorldSeason(cur);
-    if(hdLobbyReady) avatarPos=next==='spring'?{left:49,top:64}:{left:48,top:41};
+    if(hdLobbyReady) avatarPos={left:50,top:61};
     const sm=SEASON_META[next];
     speak(`${sm.label}으로 바뀌었어요!`);
     render();
