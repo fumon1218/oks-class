@@ -106,3 +106,6 @@ html.access-big-taps .navcircle span{width:57px;height:57px}
 @media(prefers-reduced-motion:reduce){
   .world-hero .map-spot.active:before{animation:none!important}
 }
+
+.world-hero.lobby-hd .central-school{z-index:7;width:13%;height:13%;}
+.world-hero.lobby-hd .central-school .map-spot-label{background:#fff9df;border-color:#f5cb61;}
