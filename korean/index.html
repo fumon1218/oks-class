@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>국어 도서관 · 한글별 여행</title>
+<style>
+:root{font-family:"Noto Sans KR","Gowun Dodum",system-ui,sans-serif;color:#2c3b52;background:#e6f8f3}*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:radial-gradient(circle at 30% 0%,#fff8d8,#ddf5fc 45%,#f7e5f2)}
+main{max-width:980px;padding:15px;margin:auto}button,a{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:4px solid #087a6e;outline-offset:3px}
+a{text-decoration:none;color:inherit}.top{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.pill{border:0;border-radius:999px;background:white;padding:11px 17px;box-shadow:0 5px 15px #40756830;font-weight:850;color:#265e54;min-height:48px}
+h1{text-align:center;color:#39549b;font-size:clamp(26px,4.8vw,39px);margin:8px 0 3px}
+.lead{text-align:center;margin:0 0 15px;color:#4c6573;font-weight:700}
+.hud{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;margin:12px 0}
+.hud>*{background:rgba(255,255,255,.93);border-radius:18px;padding:11px 14px;font-weight:850;min-width:0;box-shadow:0 3px 10px #456b7030}
+.world{position:relative;display:grid;grid-template-columns:minmax(110px,24%) 1fr;align-items:center;gap:12px;padding:16px;background:linear-gradient(145deg,#c7eeff,#e9fbe6);border:5px solid white;border-radius:27px;box-shadow:0 12px 24px #26578328;margin-bottom:14px}
+.world img{max-width:100%;max-height:190px;object-fit:contain;filter:drop-shadow(0 8px 6px #48695740)}.speech{border-radius:24px;background:white;padding:18px;font-size:clamp(18px,3vw,26px);font-weight:850;border:3px solid #d5e8fd;line-height:1.6;min-height:105px;display:flex;align-items:center}
+.box{background:rgba(255,255,255,.97);border-radius:25px;padding:20px;box-shadow:0 8px 22px #547d8d2b;margin-bottom:13px}
+.box h2{font-size:24px;margin:0 0 7px}.muted{font-size:14px;color:#526978;line-height:1.5}
+.stage-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.stage-card{background:linear-gradient(#fff,#f0f9f4);min-height:145px;border:3px solid #d2e5db;border-radius:20px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:19px;font-weight:850;color:#34584f;text-align:center;box-shadow:0 5px 11px #345f5b1e}
+.stage-card .emoji{font-size:44px}.stage-card small{font-size:12px;font-weight:700}.stage-card.completed{border-color:#4aae89}
+.smallbar{display:flex;flex-wrap:wrap;gap:8px;margin:13px 0}.action{background:#3d9a79;color:white;border:0;border-radius:16px;padding:13px 17px;min-height:52px;font-weight:850}.action.secondary{background:#e8f6f1;color:#245b4e;border:2px solid #b4dfca}
+.options{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:10px}
+.option{background:linear-gradient(#fff,#eefaf5);border:3px solid #c6e4d8;border-radius:19px;min-height:90px;padding:12px;font-size:clamp(22px,4vw,36px);font-weight:900;color:#34546a}
+.option:disabled{opacity:.63;cursor:default}.option.correct{border-color:#318f63;background:#e0fbe5}
+.progress{display:flex;gap:5px;margin:10px 0}.progress span{height:10px;border-radius:100px;background:#dbe5e7;flex:1}.progress span.on{background:#f5b648}.progress span.done{background:#42ac85}
+.canvaswrap{position:relative;max-width:520px;margin:auto;border:4px dashed #b9d9c9;border-radius:24px;overflow:hidden;touch-action:none;background:#fff}
+canvas{width:100%;height:240px;touch-action:none;display:block}.guidechar{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:155px;font-weight:850;color:#e9e4d8;pointer-events:none}
+.canvaswrap canvas{position:relative;z-index:1}.word{font-size:clamp(40px,7vw,78px);font-weight:900;text-align:center;letter-spacing:.13em;margin:14px 0}
+.badge{display:inline-block;background:#ebf8e5;color:#326040;border-radius:15px;padding:5px 10px;font-size:13px;font-weight:850}
+.sentence{font-size:clamp(21px,4vw,32px);font-weight:850;background:#fff9dc;border-radius:18px;padding:13px;text-align:center;line-height:1.65}
+.chosen{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;min-height:76px;border:3px dashed #b7dac9;border-radius:19px;padding:9px}
+.chosen span{font-size:clamp(22px,4vw,31px);padding:9px;background:#f1f7ee;border-radius:12px;font-weight:850}
+.status{background:#fff4d6;color:#634e22;border-radius:15px;padding:11px 15px;margin-top:12px;font-weight:750;min-height:46px}
+.teacher{font-size:13px;background:#eef6ff;border-left:5px solid #75a4df;padding:12px;margin:15px 0;border-radius:9px;line-height:1.6}
+.hide{display:none!important}@media(max-width:510px){.hud{grid-template-columns:1fr 1fr}.hud>:first-child{grid-column:span 2}.world{grid-template-columns:90px 1fr;padding:9px}.speech{padding:10px}.box{padding:14px}.stage-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stage-card{min-height:138px}.guidechar{font-size:130px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style></head>
+<body><main>
+<header class="top"><a class="pill" href="../index.html">🏡 학교 마을</a><a class="pill" href="../curriculum/teacher-guide.html">📘 교사 설정</a><button class="pill" id="voice" aria-pressed="true">🔊 음성 켜짐</button></header>
+<h1>📚 국어 도서관</h1><p class="lead">워드 마스터의 다섯 단계 학습을 학교 마을과 연결한 첫 번째 국어 게임</p>
+<div class="hud"><div id="stageLabel">🏫 어느 별로 갈까요?</div><div id="stars">⭐ 0</div><div id="modeLabel">🍀 선택·조작</div></div>
+<div class="world"><img src="../art/stickers/fox.png" alt="국어 도서관을 안내하는 여우 친구"><div class="speech" id="speech" aria-live="polite">안녕! 한글별을 탐험해 볼까?</div></div>
+<div id="home" class="box"><h2>🌟 오늘의 한글별 모험</h2><p class="muted">학생은 어느 단계에서나 시작할 수 있어요. 학년이 아니라 현재 학습 목표와 접근 방법에 맞춰 선택하세요.</p>
+<div class="teacher"><strong>🎮 게임 모드:</strong> 정글 점프처럼 움직이는 글자를 바구니로 받아요. 움직임이 어렵다면 큰 글자 선택 모드로 바꿀 수 있습니다.<div class="smallbar"><a class="action" href="catch.html" style="text-decoration:none">🌟 소리 별 글자 받기 게임 시작 →</a></div></div><div class="smallbar" style="align-items:center"><label for="writingConsonant" style="font-weight:850">✏️ 쓰기 별 시작 자음: </label><select id="writingConsonant" aria-label="쓰기 단계 시작 자음" style="font-size:19px;padding:10px;border:2px solid #b9dfcf;border-radius:12px"><option value="ㄱ">ㄱ</option><option value="ㄴ">ㄴ</option><option value="ㄷ">ㄷ</option><option value="ㄹ">ㄹ</option><option value="ㅁ">ㅁ</option><option value="ㅂ">ㅂ</option><option value="ㅅ">ㅅ</option><option value="ㅇ">ㅇ</option><option value="ㅈ">ㅈ</option><option value="ㅊ">ㅊ</option><option value="ㅋ">ㅋ</option><option value="ㅌ">ㅌ</option><option value="ㅍ">ㅍ</option><option value="ㅎ">ㅎ</option></select></div><div id="stages" class="stage-grid"></div></div>
+<div class="box hide" id="game"><div class="progress" id="progress"></div><h2 id="gameTitle"></h2><div id="stageContent"></div><div class="status" id="status" aria-live="polite">시작해요!</div>
+<div class="smallbar"><button class="action secondary" id="hear">🔊 다시 듣기</button><button class="action secondary" id="hint">💡 도움말</button><button class="action secondary" id="retry">↻ 다시 하기</button><button class="action" id="finish" disabled>⭐ 완료하고 돌아가기</button></div></div>
+<div class="teacher"><strong>📚 국어 → 일상생활 체험:</strong> 한글별에서 글자와 문장을 익힌 뒤 동물 친구 카페에서 주문을 듣고 인사하는 역할놀이를 해 보세요. 게임 간 기록·성취 판정은 아직 별도로 관리합니다.<div class="smallbar"><a class="action secondary" style="text-decoration:none" href="../career/barista.html">☕ 동물 친구 카페로 이동</a></div></div>
+<div class="teacher"><strong>교사용 안내:</strong> 이 화면은 업로드한 워드 마스터의 학습 순서·기초 자료를 활용한 경량 연계 시범판입니다. 원본 React 게임을 그대로 이식한 것은 아닙니다. 학생의 인식·쓰기·조작 과정을 관찰해 평가하고, 정답이나 획득 별만으로 성취를 판정하지 마세요. 활동 기록은 이 기기에만 저장됩니다.</div>
+</main><script>
+(()=>{
+"use strict";
+const CONSONANTS=['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const VOWELS=['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ'];
+const INITIAL_INDEX={'ㄱ':0,'ㄴ':2,'ㄷ':3,'ㄹ':5,'ㅁ':6,'ㅂ':7,'ㅅ':9,'ㅇ':11,'ㅈ':12,'ㅊ':14,'ㅋ':15,'ㅌ':16,'ㅍ':17,'ㅎ':18};
+const MEDIAL_INDEX={'ㅏ':0,'ㅑ':1,'ㅓ':2,'ㅕ':3,'ㅗ':4,'ㅛ':5,'ㅜ':6,'ㅠ':7,'ㅡ':18,'ㅣ':20};
+function consonantSyllables(c){return VOWELS.map(v=>String.fromCharCode(0xAC00+INITIAL_INDEX[c]*588+MEDIAL_INDEX[v]*28));}
+
+const WORDS=['가구','고기','나비','누나','다리','도구','마차','모자','바지','부모','사자','소수','아가','오리','자두','주사','차도','치즈','카드','코피','타조','토마토','파도','포도','하루','허리','기차','나무','머리','보리'];
+const SENTENCES=['하늘이 매우 푸릅니다.','학교에 가서 공부를 해요.','친구와 사이좋게 지내요.','맛있는 밥을 먹습니다.','어머니 사랑해요.'];
+const LEVELS={explore:{label:'🌱 탐색',opts:2},guided:{label:'🍀 선택·조작',opts:3},independent:{label:'🌳 문제 해결',opts:4}};
+const INFO=[
+ {name:'소리 별',icon:'🎧',desc:'자음·모음 알아보기',goal:'글자의 소리 듣고 구별하기'},
+ {name:'쓰기 별',icon:'✏️',desc:'글자 따라 쓰기',goal:'기초 음절 보고 쓰기'},
+ {name:'단어 별',icon:'📖',desc:'친숙한 낱말 쓰기',goal:'생활 낱말 읽고 쓰기'},
+ {name:'조립 별',icon:'🧩',desc:'음절을 모아 낱말 만들기',goal:'낱말 구조와 글자 순서 알아보기'},
+ {name:'이야기 별',icon:'🏰',desc:'문장 읽기·문장 구성하기',goal:'짧은 문장의 의미와 어순 알아보기'}
+];
+const $=id=>document.getElementById(id),KEY='oks_korean_play_v1';
+let recommendedStage='';let soundKind='consonant';let mode='guided',voice=true,record=[],stage=-1,turn=0,done=false,traceCount=0,wrong=0,hints=0,syllables=[],chosen=[],currentSentence=[],currentItem=null,stageTasks=[];
+try{record=JSON.parse(localStorage.getItem(KEY)||'[]');if(!Array.isArray(record))record=[];}catch(e){record=[];}
+try{const p=JSON.parse(localStorage.getItem('oks_iep_config_v1')||'{}');if(LEVELS[p.mode])mode=p.mode;if(['0','1','2','3','4'].includes(String(p.koreanStage)))recommendedStage=String(p.koreanStage);}catch(e){}
+function msg(s){$('status').textContent=s;}
+function say(s){$('speech').textContent=s;if(!voice||!('speechSynthesis' in window))return;window.speechSynthesis.cancel();const utter=new SpeechSynthesisUtterance(s);utter.lang='ko-KR';utter.rate=.82;window.speechSynthesis.speak(utter);}
+function shuffle(arr){let a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function completedCount(s){return record.filter(r=>r.stage===s&&r.completed).length}
+function makeMenu(){
+ $('modeLabel').textContent=LEVELS[mode].label;
+ $('stars').textContent='⭐ '+record.filter(r=>r.completed).length;
+ $('stages').innerHTML=INFO.map((x,i)=>'<button class="stage-card '+(completedCount(i)?'completed':'')+'" data-stage="'+i+'"><span class="emoji">'+x.icon+'</span>'+x.name+'<small>'+x.desc+'</small>'+(completedCount(i)?'<span class="badge">⭐ 도전 완료</span>':'')+(recommendedStage===String(i)?'<span class="badge">👩‍🏫 추천</span>':'')+'</button>').join('')+'<button class="stage-card" data-vowels="true"><span class="emoji">🎵</span>모음 소리 별<small>ㅏ·ㅑ·ㅓ부터 듣고 찾아요</small></button>';
+ $('stages').querySelectorAll('[data-stage]').forEach(b=>b.onclick=()=>{soundKind='consonant';start(Number(b.dataset.stage))});$('stages').querySelector('[data-vowels]').onclick=()=>{soundKind='vowel';start(0)};
+}
+function stageIntro(){return INFO[stage].goal;}
+function start(i){
+ stage=i;turn=0;wrong=0;hints=0;done=false;traceCount=0;syllables=[];chosen=[];
+ if(i===0)stageTasks=shuffle(soundKind==='vowel'?VOWELS:CONSONANTS).slice(0,mode==='explore'?3:5);
+ if(i===1)stageTasks=consonantSyllables($('writingConsonant').value).slice(0,mode==='explore'?3:mode==='guided'?5:10);
+ if(i===2)stageTasks=['나비','오리','나무'].slice(0,mode==='explore'?1:mode==='guided'?2:3);
+ if(i===3)stageTasks=['나비','오리','나무'].slice(0,mode==='explore'?1:mode==='guided'?2:3);
+ if(i===4)stageTasks=SENTENCES.slice(0,mode==='explore'?1:mode==='guided'?2:3);
+ $('home').classList.add('hide');$('game').classList.remove('hide');$('gameTitle').textContent=INFO[i].icon+' '+INFO[i].name;
+ $('stageLabel').textContent=(i+1)+'/5 '+INFO[i].name;
+ say(INFO[i].name+'에 왔어요. '+stageIntro());renderTurn();
+}
+function renderTurn(){
+ done=false;$('finish').disabled=true;$('progress').innerHTML=stageTasks.map((x,i)=>'<span class="'+(i<turn?'done':i===turn?'on':'')+'"></span>').join('');
+ if(turn>=stageTasks.length){complete();return;}
+ currentItem=stageTasks[turn];traceCount=0;chosen=[];
+ if(stage===0)renderSound();
+ if(stage===1||stage===2)renderTrace();
+ if(stage===3)renderBuild();
+ if(stage===4)renderSentence();
+}
+function buttonOptions(choices,callback,style=''){
+ $('stageContent').innerHTML='<div class="options" '+style+'>'+choices.map((s,i)=>'<button type="button" class="option" data-i="'+i+'">'+s+'</button>').join('')+'</div>';
+ $('stageContent').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>callback(choices[Number(b.dataset.i)],b));
+}
+function success(){msg('잘했어요! 다음으로 갑니다.');say('정말 잘했어요!');setTimeout(()=>{turn++;renderTurn()},400)}
+function renderSound(){
+ const target=currentItem;
+ const distract=shuffle((soundKind==='vowel'?VOWELS:CONSONANTS).filter(x=>x!==target)).slice(0,LEVELS[mode].opts-1);
+ buttonOptions(shuffle([target,...distract]),(pick,b)=>{if(pick===target){b.classList.add('correct');success();}else{wrong++;msg('다시 살펴보아요. 소리를 다시 들어도 좋아요.')}})
+ say(target+' 소리를 찾아보세요.');
+}
+let canvas=null,ctx=null,painting=false,painted=false;
+function renderTrace(){
+ let target=currentItem;
+ $('stageContent').innerHTML='<div class="word" aria-label="따라 쓸 글자">'+target+'</div><div class="canvaswrap"><div class="guidechar" style="font-size:'+(target.length>1?'78':'150')+'px">'+target+'</div><canvas id="write" width="520" height="240" aria-label="손가락 또는 마우스로 글자를 쓰는 영역"></canvas></div><p class="muted" style="text-align:center">손가락이나 마우스로 점선을 따라 그려요. 손 움직임이 어려우면 교사의 지원을 받아 진행할 수 있어요.</p><button type="button" id="traceDone" class="action secondary">✋ 쓰기 활동 마쳤어요</button>';
+ canvas=$('write');ctx=canvas.getContext('2d');ctx.lineWidth=11;ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#347aba';painting=false;painted=false;
+ const pos=e=>{const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}};
+ canvas.addEventListener('pointerdown',e=>{e.preventDefault();canvas.setPointerCapture(e.pointerId);painting=true;painted=true;let p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+.1,p.y+.1);ctx.stroke()});
+ canvas.addEventListener('pointermove',e=>{if(!painting)return;e.preventDefault();const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke()});
+ ['pointerup','pointercancel'].forEach(x=>canvas.addEventListener(x,()=>{painting=false}));
+ $('traceDone').onclick=()=>{if(!painted){msg('쓰기 활동을 해 보세요. 운동 접근이 어려우면 교사 도움으로 완료할 수 있어요.');return;}traceCount++;success()};
+ say(target+'를 따라 써 보아요.');
+}
+function renderBuild(){
+ const target=currentItem,parts=[...target]; // 한글 음절 단위
+ const extras=shuffle(['가','오','바','모','사','도','하'].filter(x=>!parts.includes(x))).slice(0,mode==='explore'?0:mode==='guided'?1:2);
+ let pool=shuffle([...parts,...extras]);
+ $('stageContent').innerHTML='<div class="sentence" style="margin-bottom:12px">'+target+'</div><div class="chosen" id="chosen" aria-label="선택한 글자"></div><p class="muted">아래에서 글자를 순서대로 골라 낱말을 만들어요.</p><div class="options" id="wordTiles">'+pool.map((x,i)=>'<button type="button" class="option" data-i="'+i+'">'+x+'</button>').join('')+'</div><div class="smallbar"><button type="button" class="action secondary" id="undo">↶ 하나 지우기</button></div>';
+ let selected=[];
+ function drawSelected(){$('chosen').innerHTML=selected.map(x=>'<span>'+x.v+'</span>').join('')};
+ $('wordTiles').querySelectorAll('button').forEach(btn=>btn.onclick=()=>{
+ const i=Number(btn.dataset.i),v=pool[i],need=parts[selected.length];if(v!==need){wrong++;msg('글자 순서를 다시 살펴보세요.');return}
+ selected.push({i,v});btn.disabled=true;drawSelected();msg('맞아요! '+selected.map(x=>x.v).join(''));
+ if(selected.length===parts.length){success();}
+ });
+ $('undo').onclick=()=>{const last=selected.pop();if(last){$('wordTiles').querySelector('[data-i="'+last.i+'"]').disabled=false;drawSelected();}};
+ say(target+'를 만들어 보아요.');
+}
+function renderSentence(){
+ const text=currentItem,words=text.split(' ');
+ let indices=shuffle(words.map((v,i)=>i));
+ if(mode==='explore')indices=[...words.keys()]; // 탐색 단계: 자연 순서, 글자 고르기 부담 줄임
+ $('stageContent').innerHTML='<div class="sentence">'+text+'</div><div class="chosen" id="chosen" aria-label="완성 중인 문장"></div><p class="muted">문장을 읽거나 들은 뒤, 단어 카드를 순서대로 눌러 보세요.</p><div class="options" id="sentenceTiles">'+indices.map(i=>'<button type="button" class="option" style="font-size:clamp(17px,3vw,24px)" data-i="'+i+'">'+words[i]+'</button>').join('')+'</div><div class="smallbar"><button class="action secondary" type="button" id="undo">↶ 하나 지우기</button></div>';
+ let selected=[];function display(){$('chosen').innerHTML=selected.map(x=>'<span>'+words[x]+'</span>').join('')};
+ $('sentenceTiles').querySelectorAll('button').forEach(btn=>btn.onclick=()=>{
+ const i=Number(btn.dataset.i);
+ if(i!==selected.length){wrong++;msg('앞에서부터 문장을 완성해요.');return}
+ selected.push(i);btn.disabled=true;display();if(selected.length===words.length)success();
+ });
+ $('undo').onclick=()=>{const last=selected.pop();if(last!==undefined){$('sentenceTiles').querySelector('[data-i="'+last+'"]').disabled=false;display()}};
+ say('문장을 듣고 순서대로 만들어 보아요. '+text);
+}
+function complete(){
+ done=true;$('progress').innerHTML=stageTasks.map(()=>'<span class="done"></span>').join('');
+ $('stageContent').innerHTML='<div class="sentence">🌟 멋져요! '+INFO[stage].name+'을(를) 완성했어요!</div><p class="muted" style="text-align:center">교사가 필요한 지원과 학습 과정을 따로 관찰해 주세요.</p>'+(stage===4?'<div class="smallbar"><a class="action" style="text-decoration:none" href="../career/barista.html">☕ 카페에서 주문 듣고 말하기 체험 →</a></div>':'');
+ $('finish').disabled=false;
+ try{record.push({stage:stage,mode:mode,completed:true,tries:wrong,hints:hints,at:new Date().toISOString()});record=record.slice(-60);localStorage.setItem(KEY,JSON.stringify(record));}catch(e){}
+ msg('별 한 개를 획득했어요!');say('모험을 완성했어요! 잘했어요!');
+}
+$('voice').onclick=()=>{voice=!voice;$('voice').textContent=voice?'🔊 음성 켜짐':'🔇 음성 꺼짐';$('voice').setAttribute('aria-pressed',String(voice));if(!voice&&'speechSynthesis'in window)window.speechSynthesis.cancel()};
+$('hear').onclick=()=>say(stage===0?currentItem+' 소리를 찾아보세요.':stage===1||stage===2?currentItem+'를 따라 써 보아요.':stage===3?currentItem+'를 만들어 보아요.':currentItem);
+$('hint').onclick=()=>{hints++;msg(stage===0?'말소리를 다시 듣고 같은 글자를 찾아요.':stage===1||stage===2?'글자를 눈으로 따라가며 천천히 써요.':stage===3?'첫 글자부터 하나씩 골라요.':'문장을 앞에서부터 읽어 보아요.')};
+$('retry').onclick=()=>renderTurn();
+$('finish').onclick=()=>{$('game').classList.add('hide');$('home').classList.remove('hide');$('stageLabel').textContent='🏫 어느 별로 갈까요?';say('다음 한글별에도 도전해요!');makeMenu()};
+makeMenu();
+})();
+</script></body></html>

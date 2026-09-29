@@ -1,0 +1,111 @@
+/* 옥쌤의 즐거운 교실 · 몰입형 로비 1단계
+   배경 그림의 비율(3:2)을 유지하여 건물 버튼 좌표가 어긋나지 않도록 함 */
+body.is-world{
+  min-height:100dvh;background-color:#93d8ee;
+  background-position:center center;background-size:cover;background-attachment:fixed;
+}
+body.is-world #app{padding:0;max-width:none;overflow-x:hidden;min-height:100dvh}
+body.is-world .hero-title{
+  position:absolute;top:9px;left:50%;transform:translateX(-50%);z-index:9;
+  padding:8px 20px;min-width:270px;max-width:calc(100% - 300px);
+  background:rgba(255,255,255,.89);border-radius:25px;
+  box-shadow:0 6px 16px rgba(32,84,82,.17);backdrop-filter:blur(8px)
+}
+body.is-world .hero-title h1{font-size:clamp(22px,2.4vw,32px);line-height:1.1}
+body.is-world .hero-title p{font-size:clamp(12px,1.1vw,14px);margin:2px 0 0}
+body.is-world .world-hero{
+  width:min(100vw,150dvh);max-width:1600px;aspect-ratio:3/2;
+  border-radius:0;margin:0 auto;background-size:100% 100%;
+  background-position:center;box-shadow:0 8px 40px rgba(14,67,91,.3)
+}
+body.is-world .hud-navbar{
+  position:fixed;bottom:max(8px,env(safe-area-inset-bottom));
+  left:50%;transform:translateX(-50%);z-index:20;
+  background:rgba(255,255,255,.83);backdrop-filter:blur(12px);
+  box-shadow:0 6px 24px rgba(26,62,65,.25);border-radius:100px;
+  gap:clamp(10px,2vw,25px);padding:8px 14px 5px;max-width:96%;margin:0;
+}
+body.is-world .navcircle{font-size:12px;color:#27494a}
+body.is-world .navcircle span{width:47px;height:47px;font-size:20px}
+body.is-world .map-spot-label{
+  font-size:clamp(12px,1.18vw,15px);font-weight:850;
+  padding:5px 11px;border:2px solid rgba(255,255,255,.86);
+  background:rgba(255,255,255,.94);color:#2a4d47;
+  box-shadow:0 4px 12px rgba(22,51,49,.30)
+}
+.world-hero.lobby-hd .map-spot{
+  width:11%;height:13%;border-radius:24px;justify-content:center;
+}
+.world-hero.lobby-hd .map-spot.active:focus-visible{
+  outline:5px solid #ffad25;outline-offset:2px;
+  background:rgba(255,234,138,.2)
+}
+.world-hero.lobby-hd .map-spot.active::before{
+  width:45%;top:74%;box-shadow:0 0 0 3px #fff,0 0 0 6px rgba(48,189,133,.6)
+}
+.world-hero.lobby-hd .map-spot-label{transform:translateY(3.6em)}
+.world-hero.lobby-hd .map-spot.label-above .map-spot-label{transform:translateY(-4em)}
+body.is-world .hud-profile,body.is-world .season-pill,body.is-world .hud-pill{
+  background:rgba(255,255,255,.94);backdrop-filter:blur(8px)
+}
+body.is-world .hud-row.hud-top{padding:10px 16px}
+body.is-world .hud-mascot{bottom:92px;left:15px}
+body.is-world .hud-quest{
+  right:14px;bottom:92px;min-width:155px;max-width:190px;
+  padding:9px 12px;background:rgba(255,255,255,.89);backdrop-filter:blur(10px)
+}
+body.is-world .hud-quest-head{font-size:12px}
+.world-directory-toggle{border-color:#3aaFA9!important}
+.world-directory-panel{
+  position:fixed;z-index:30;left:50%;bottom:94px;transform:translateX(-50%);
+  width:min(94vw,610px);max-height:min(70dvh,580px);overflow-y:auto;
+  border:3px solid white;border-radius:23px;
+  background:rgba(245,255,252,.97);backdrop-filter:blur(16px);
+  box-shadow:0 20px 40px rgba(7,40,44,.35);padding:16px;color:#25443e
+}
+.world-directory-panel h2{font-size:23px}
+.world-directory-panel p{font-size:13px;margin:6px 0 10px}
+.directory-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.directory-actions button,.directory-actions a{
+  min-height:60px;background:#fff;display:flex;align-items:center;justify-content:center;
+  border:2px solid #c4e9d8;border-radius:15px;text-decoration:none;color:#214c3c;
+  font-size:16px;font-weight:850;padding:10px;text-align:center;gap:6px
+}
+.directory-actions .directory-soon{border-style:dashed;color:#687c70}
+.directory-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.directory-header button{min-width:48px;min-height:48px;border-radius:50%;background:#e4f3ea;font-size:24px}
+.directory-access{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}
+.directory-access button,.directory-access a{
+  border:2px solid #8ccbb1;border-radius:13px;background:white;
+  padding:11px 15px;font-weight:850;color:#205544;text-decoration:none
+}
+html.access-big-taps .map-spot{min-width:85px;min-height:70px}
+html.access-big-taps .directory-actions button,
+html.access-big-taps .directory-actions a{min-height:80px;font-size:18px}
+html.access-big-taps .navcircle span{width:57px;height:57px}
+@media(max-width:760px){
+  body.is-world .hero-title{max-width:70%;min-width:0;top:55px}
+  body.is-world .hero-title h1{font-size:20px}
+  body.is-world .hero-title p{font-size:11px}
+  body.is-world .hud-row.hud-top{padding:5px;gap:4px}
+  body.is-world .hud-profile{padding:2px 8px 2px 2px}
+  body.is-world .hud-pill{padding:4px 7px;font-size:11px}
+  body.is-world .hud-quest{right:8px;bottom:40px;max-width:142px;min-width:120px;padding:5px}
+  body.is-world .hud-mascot{bottom:35px;max-width:40%}
+  body.is-world .hud-mascot-inner .speech-bubble{font-size:11px}
+  body.is-world .hud-navbar{gap:8px;padding:5px 9px 2px}
+  body.is-world .navcircle{font-size:10px}
+  body.is-world .navcircle span{width:43px;height:43px}
+}
+@media(max-aspect-ratio:4/5){
+  body.is-world #app{overflow-x:auto}
+  body.is-world .world-hero{width:max(100vw,640px);max-width:none}
+  body.is-world .hero-title{position:fixed;z-index:22;top:49px;pointer-events:none}
+  body.is-world .hud-navbar{width:max-content}
+}
+@media(prefers-reduced-motion:reduce){
+  .world-hero .map-spot.active:before{animation:none!important}
+}
+
+.world-hero.lobby-hd .central-school{z-index:7;width:13%;height:13%;}
+.world-hero.lobby-hd .central-school .map-spot-label{background:#fff9df;border-color:#f5cb61;}

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#2b9a7b"><title>교사용 교육과정 · 옥쌤의 즐거운 교실</title>
+<style>
+*{box-sizing:border-box}body{font-family:"Noto Sans KR",system-ui,sans-serif;margin:0;color:#273d39;background:linear-gradient(135deg,#e7f8f2,#f8f6e8);line-height:1.58}
+main{width:min(900px,94vw);margin:20px auto 60px}h1{font-size:clamp(25px,4vw,36px);margin:12px 0 2px}
+a,button,input,select{font:inherit}a{color:#226d55}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #e59924;outline-offset:3px}
+.panel{padding:21px;background:white;border-radius:22px;margin-top:15px;box-shadow:0 8px 25px #2764491d}
+.toplinks{display:flex;gap:12px;flex-wrap:wrap}.toplinks a{background:white;border-radius:15px;padding:12px;text-decoration:none;font-weight:800}
+.note{border-left:5px solid #6db89c;background:#f0faf4;padding:12px;border-radius:10px;font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+label{font-weight:700;display:block;margin:7px 0}select{width:100%;padding:12px;border:2px solid #bad8c8;border-radius:11px}
+.row{padding:10px 0;border-bottom:1px solid #e4efe8}
+.row:last-child{border-bottom:none}.row small{display:block;color:#647268}
+button{border:0;border-radius:13px;padding:13px 16px;background:#328b69;color:white;font-weight:800;cursor:pointer;min-height:48px}
+button.secondary{background:#e8f4ed;color:#285b48}
+.badge{border-radius:10px;padding:3px 8px;font-size:12px;background:#e7f3ec;color:#20553e}
+.choices{display:flex;flex-wrap:wrap;gap:8px}.choices label{border:2px solid #d4eadd;border-radius:13px;padding:9px 12px;cursor:pointer}
+.choices input{margin-right:6px}#standards .row label{font-weight:650}.muted{color:#61766c;font-size:14px}.warn{background:#fff7e4;padding:12px;border-radius:12px;color:#664b19}
+</style></head><body><main>
+<div class="toplinks"><a href="../index.html">← 마을로</a><a href="../career/barista.html">☕ 카페 체험으로</a><a href="../korean/index.html">📚 국어 도서관으로</a></div>
+<h1>📘 교사용 교육과정 연결</h1><p>2025학년도 춘천계성학교 중·고등학교 기본 교육과정 기반의 게임 설계·수업 준비 공간입니다.</p>
+<div class="note">아래 성취기준은 첨부 학교 교육과정에 적힌 코드와 취지를 정리한 것입니다. 게임 이름과 연결은 개발 제안이며, 게임 점수는 교육적 평가를 대신하지 않습니다.</div>
+<section class="panel"><h2>1. 수업 대상 및 지원 방식</h2>
+<div class="grid"><div><label for="school">학교급</label><select id="school"><option value="middle">중학교</option><option value="high">고등학교</option></select></div>
+<div><label for="grade">학년</label><select id="grade"><option value="1">1학년</option><option value="2">2학년</option><option value="3">3학년</option></select></div></div>
+<p class="muted" id="curriculumYear"></p>
+<p><strong>학생의 활동 지원 수준</strong> (학년과 별개로 설정)</p>
+<div class="choices" role="radiogroup" aria-label="활동 지원 단계">
+<label><input type="radio" name="mode" value="explore">🌱 감각·탐색</label>
+<label><input type="radio" name="mode" value="guided" checked>🍀 선택·조작</label>
+<label><input type="radio" name="mode" value="independent">🌳 문제 해결</label></div>
+<label for="koreanStage">국어 도서관에서 먼저 할 활동</label>
+<select id="koreanStage"><option value="">학생이 자유롭게 선택</option><option value="0">1. 소리 별</option><option value="1">2. 쓰기 별</option><option value="2">3. 단어 별</option><option value="3">4. 조립 별</option><option value="4">5. 이야기 별</option></select>
+<p class="muted">업로드한 워드 마스터의 다섯 단계 학습 순서입니다. 개인별 권장 활동으로 표시하되 다른 활동도 선택할 수 있습니다.</p>
+<p class="muted">지원 수준은 고정된 학생 등급이 아닙니다. 활동별로 교사가 언제든 변경할 수 있습니다. 현재 설정은 카페 시범 게임에만 반영됩니다.</p>
+</section>
+<section class="panel"><h2>2. 확인된 성취기준과 연결 게임</h2>
+<p class="muted">2025 학교 교육과정의 1학년 2022 개정 편성 기준입니다. 2·3학년은 2015 개정 교육과정을 별도로 매핑할 예정입니다.</p>
+<div id="standards" aria-live="polite">자료를 읽고 있습니다…</div></section>
+<section class="panel"><h2>3. 마을 콘텐츠 개발 현황</h2><div id="rooms">자료를 읽고 있습니다…</div></section>
+<section class="panel"><h2>5교과 미니게임 개발 목차</h2>
+<p class="muted">2022 개정 특수교육 기본 교육과정의 교과 영역과 학교 편제를 바탕으로 작성한 개발 제안입니다. 개별 성취기준과 연결을 확정한 공식 단원 목록이 아닙니다.</p>
+<label for="subjectPlan">교과 선택</label><select id="subjectPlan" aria-label="교과별 게임 목차">
+<option value="korean">국어</option><option value="math">수학</option><option value="art">미술</option><option value="science">과학</option><option value="social">사회</option>
+</select>
+<div id="planList" aria-live="polite">게임 개발 목차를 읽고 있습니다…</div></section>
+<section class="panel"><h2>4. 교사가 관찰할 내용</h2>
+<div class="grid"><div><h3>수행 과정</h3><p>과제 참여, 행동 선택, 과제 수행 단계, 스스로 수행한 부분을 관찰합니다.</p></div><div><h3>사용한 지원</h3><p>음성·시각 힌트, 큰 버튼, 반응 시간, 교사의 실제 도움을 구별하여 기록합니다.</p></div><div><h3>일상생활 적용</h3><p>게임에서 배운 행동을 실제 상황에서 시도했는지 별도로 관찰합니다.</p></div></div>
+<div class="warn">게임의 자동 점수와 교사의 성취 판단을 구별합니다. 개인식별정보를 입력하지 않고, 공유 기기에서는 설정과 게임 기록을 교사가 관리하세요.</div>
+<div style="display:flex;flex-wrap:wrap;gap:9px;margin-top:18px"><button type="button" id="save">이 기기에 설정 저장</button><button type="button" id="clear" class="secondary">설정 초기화</button></div>
+<p id="feedback" role="status" aria-live="polite"></p></section>
+</main><script>
+(async function(){
+"use strict";
+const $=id=>document.getElementById(id), savedKey="oks_iep_config_v1";
+let data=null;let saved={};
+let blueprint=null;
+try{const b=await fetch("game-blueprint.json");if(!b.ok)throw Error("HTTP "+b.status);blueprint=await b.json();}catch(e){document.getElementById("planList").textContent="목차 데이터를 불러올 수 없습니다. game-blueprint.json을 확인해 주세요.";}
+function renderPlan(){
+ const el=document.getElementById("planList");if(!blueprint)return;
+ const subject=blueprint.subjectGroups.find(x=>x.key===$("subjectPlan").value);
+ if(!subject){el.textContent="선택한 교과가 없습니다.";return;}
+ el.innerHTML="<p class='muted'><strong>"+subject.name+"</strong> · "+subject.domain+"</p>"+
+ subject.games.map((g,i)=>"<div class='row'><strong>"+(i+1)+". "+g.title+"</strong> <span class='badge'>"+(g.status.startsWith("prototype")?"게임형 시범":"개발 예정")+"</span><small>"+g.activity+"</small><a href='../minigames/index.html?subject="+subject.key+"&game="+(i+1)+"' style='display:inline-block;margin-top:6px;padding:7px 13px;background:#e2f7eb;border-radius:12px;font-weight:850'>🎮 직접 실행</a></div>").join("");
+}
+$("subjectPlan").addEventListener("change",renderPlan);renderPlan();
+
+try{saved=JSON.parse(localStorage.getItem(savedKey)||"{}");}catch(e){}
+$("koreanStage").value=saved.koreanStage===undefined?"":String(saved.koreanStage);$("school").value=saved.school||"middle";$("grade").value=String(saved.grade||1);
+document.querySelectorAll('[name="mode"]').forEach(el=>el.checked=el.value===(saved.mode||"guided"));
+try{const response=await fetch("catalog.json");if(!response.ok)throw Error("HTTP "+response.status);data=await response.json();}catch(e){$("standards").textContent="교육과정 데이터에 접근하지 못했습니다. 온라인 상태나 catalog.json 파일을 확인해 주세요.";$("rooms").textContent="마을을 다시 연 후 시도해 주세요.";return;}
+function refresh(){
+ const school=$("school").value,grade=Number($("grade").value);
+ $("curriculumYear").textContent="2025학년도 적용: "+(grade===1?"2022 개정 특수교육 기본 교육과정":"2015 개정 특수교육 기본 교육과정 (성취기준 별도 검토 예정)");
+ const selected=new Set(saved.codes||[]);
+ const standards=grade===1?data.confirmedStandards.filter(s=>s.school===school&&s.grade===grade):[];
+ $("standards").innerHTML=standards.length?standards.map(s=>{const id=s.code.replace(/[^0-9a-zA-Z가-힣-]/g,"");
+ return '<div class="row"><label><input type="checkbox" data-code="'+s.code+'" '+(selected.has(s.code)?'checked':'')+'> <strong>'+s.code+'</strong> '+s.meaning+'</label><small>게임 아이디어: '+s.game+' · 학교 교육과정 PDF '+s.pdfPage+'쪽</small></div>';}).join(""):'<p class="warn">이 학년의 성취기준은 아직 정확히 연결하지 않았습니다. 해당 학년의 2015 개정 교육과정 문서를 교사가 확인해 주세요.</p>';
+ $("rooms").innerHTML=data.rooms.map(r=>'<div class="row"><strong>'+r.name+'</strong> <span class="badge">'+({active:"기존 운영",pilot:"시범 운영",planned:"개발 예정"})[r.status]+'</span><small>'+r.games.join(" · ")+'</small></div>').join("");
+}
+$("school").addEventListener("change",refresh);$("grade").addEventListener("change",refresh);refresh();
+$("save").addEventListener("click",()=>{
+ const obj={school:$("school").value,grade:Number($("grade").value),mode:document.querySelector('[name="mode"]:checked').value,koreanStage:$("koreanStage").value,codes:Array.from(document.querySelectorAll("[data-code]:checked")).map(el=>el.dataset.code)};
+ try{localStorage.setItem(savedKey,JSON.stringify(obj));saved=obj;$("feedback").textContent="저장했습니다. 카페 체험의 초기 활동 지원 단계에 적용됩니다.";}catch(e){$("feedback").textContent="브라우저 저장을 사용할 수 없습니다.";}
+});
+$("clear").addEventListener("click",()=>{localStorage.removeItem(savedKey);saved={};$("school").value="middle";$("grade").value="1";$("koreanStage").value="";document.querySelector('[value="guided"]').checked=true;refresh();$("feedback").textContent="설정을 초기화했습니다.";});
+})();
+</script></body></html>

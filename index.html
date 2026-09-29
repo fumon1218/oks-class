@@ -853,6 +853,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--accent-2);
   .subject-card .icon-wrap img{width:56px;height:56px;}
 }
 </style>
+<link rel="stylesheet" href="lobby/lobby-v2.css">
 </head>
 <body>
 <div id="app"></div>
@@ -1086,19 +1087,19 @@ const METHOD_ORDER=['connect','paint','mosaic'];
 
 /* ---- rooms (world map) ---- */
 const ROOMS={
+  word:{label:'국어 도서관',sub:'한글별 여행 · 소리·쓰기·단어·조립·이야기',unlocked:true,subjects:[]},
   arts:{ label:'미술실', sub:'색깔 · 모양 · 크기 · 탐험 · 그리기 · 전시관', unlocked:true, subjects:SUBJECT_ORDER },
+  science:{label:'과학 연구소',sub:'탐구·관찰·실험 미니게임',unlocked:true,subjects:[]},
+  social:{label:'사회 마을회관',sub:'친구·안전·지역사회 미니게임',unlocked:true,subjects:[]},
+  number:{label:'수학 놀이터',sub:'수량·도형·시간·계산 미니게임',unlocked:true,subjects:[]},
 };
-const ROOM_ORDER=['arts'];
+const ROOM_ORDER=['arts','word','science','social','number'];
 /* 마을 지도 속 각 건물 간판에 맞춘 교실들 — 콘텐츠는 차차 추가 예정 */
 const SOON_ROOMS=[
-  {key:'word',    label:'글자놀이방', sub:'곧 만나요'},
-  {key:'science', label:'과학실',     sub:'곧 만나요'},
   {key:'story',   label:'이야기방',   sub:'곧 만나요'},
   {key:'pe',      label:'체육관',     sub:'곧 만나요'},
   {key:'space',   label:'우주교실',   sub:'곧 만나요'},
-  {key:'social',  label:'사회교실',   sub:'곧 만나요'},
   {key:'music',   label:'음악실',     sub:'곧 만나요'},
-  {key:'number',  label:'숫자놀이터', sub:'곧 만나요'},
 ];
 /* 마을 그림 속 건물 위치(%) — 간판(아이콘)은 이미 그림에 그려져 있어 버튼은 투명 히트박스 역할만 함 */
 const VILLAGE_SPOTS={
@@ -1419,6 +1420,9 @@ let route={view:'world', room:null, subject:null, method:null};
 let runtime=null; // per-activity mutable state
 let lessonCtx=null; // 오늘의 수업 진행 중이면 {id, step, results}
 let settingsOpen=false;
+let worldDirectoryOpen=false;
+let accessBigTaps=false;
+try{accessBigTaps=localStorage.getItem('oks_access_big_targets')==='1';}catch(e){}
 let avatarPos={left:48, top:41}; // 지도 위 학생 캐릭터의 현재 위치(%) - 다시 그려도 유지됨
 let avatarFacing=1; // 1=오른쪽, -1=왼쪽
 
@@ -1483,6 +1487,13 @@ function retryFeedback(msg){
 }
 
 /* ---------- mascot (옥쌤) — placeholder art, swap ART.mascot* with real files later ---------- */
+const SPRING_HD='art/scenes/town_spring_hd.webp';
+let hdLobbyReady=false;
+const VILLAGE_SPOTS_HD={
+  arts:{left:'16%',top:'34%'}, word:{left:'29%',top:'47%'}, science:{left:'32%',top:'27%'},
+  story:{left:'65%',top:'29%'}, pe:{left:'87%',top:'50%'}, space:{left:'69%',top:'55%'},
+  social:{left:'49%',top:'41%'}, music:{left:'78%',top:'40%'}, number:{left:'12%',top:'48%'}
+};
 const ART={
   mascotIdle:'icons/mascot-idle.png', mascotCheer:'icons/mascot-cheer.png', mascotSoft:'icons/mascot-soft.png',
   bgArtRoom:'icons/bg-artroom.jpg',
@@ -1778,6 +1789,10 @@ function copyText(text){
 
 /* ================= render root ================= */
 const app=document.getElementById('app');
+/* 이미지가 저장소에 아직 업로드되지 않았거나 로드에 실패하면 기존 봄 마을을 유지합니다. */
+const hdVillageProbe=new Image();
+hdVillageProbe.onload=()=>{hdLobbyReady=true; if(route.view==='world' && pickWorldSeason()==='spring'){avatarPos={left:49,top:64};render();}};
+hdVillageProbe.src=SPRING_HD;
 
 function render(){
   let html='';
@@ -1804,7 +1819,8 @@ function render(){
 }
 
 function updateSceneBackground(){
-  let img=null;
+  document.documentElement.classList.toggle('access-big-taps',accessBigTaps);
+  let img=(route.view==='world') ? (pickWorldSeason()==='spring'&&hdLobbyReady?SPRING_HD:ART.worldSeasons[pickWorldSeason()]) : null;
   if(['room','path','activity','lessons','lessonIntro','lessonOutro'].includes(route.view)) img=ART.bgArtRoom;
   document.body.style.backgroundImage = img ? `url('${img}')` : '';
 }
@@ -1824,10 +1840,12 @@ function renderWorld(){
     ...SOON_ROOMS.map(r=>({...r, locked:true})),
   ];
   const season=pickWorldSeason();
-  const bgUrl=ART.worldSeasons[season];
+  const useHd=season==='spring' && hdLobbyReady;
+  const bgUrl=useHd?SPRING_HD:ART.worldSeasons[season];
+  const spots=useHd?VILLAGE_SPOTS_HD:VILLAGE_SPOTS;
   const sm=SEASON_META[season];
-  const nodes=allRooms.map(r=>{
-    const slot=VILLAGE_SPOTS[r.key]||{left:'50%',top:'50%'};
+  const nodes=allRooms.filter(r=>!(useHd && r.key==='social')).map(r=>{
+    const slot=spots[r.key]||{left:'50%',top:'50%'};
     const action = r.locked ? 'soon-room' : 'go-room';
     const roomAttr = r.key ? `data-room="${r.key}"` : '';
     const aboveCls = VILLAGE_LABEL_ABOVE.has(r.key) ? ' label-above' : '';
@@ -1856,7 +1874,7 @@ function renderWorld(){
     <h1>옥쌤의 즐거운 교실</h1>
     <p>어느 교실로 들어가볼까요?</p>
   </div>
-  <div class="world-hero" id="world-hero" style="background-image:url('${bgUrl}')">
+  <div class="world-hero ${useHd?'lobby-hd':''}" id="world-hero" style="background-image:url('${bgUrl}')">
     <div class="joy-zone" id="joyZone"></div>
     <div class="hud-row hud-top">
       <div class="hud-profile">
@@ -1876,21 +1894,43 @@ function renderWorld(){
     </div>
 
     ${nodes}
+    ${useHd?`<button class="map-spot active central-school" style="left:49%;top:41%" data-action="toggle-directory" aria-label="중앙 학교 - 교실 목록 열기"><span class="map-spot-label">🏫 중앙 학교</span></button>`:''}
     <div class="map-avatar" id="map-avatar" style="left:${avatarPos.left}%;top:${avatarPos.top}%">
       <img src="${ART.charWalk[0]}" alt="" style="transform:scaleX(${avatarFacing})">
     </div>
     <div class="joystick" id="joystick"><div class="joy-knob" id="joyKnob"></div></div>
 
-    <div class="hud-mascot">${mascotBlock('cheer','안녕! 지도에서 교실을 골라봐!','hud-mascot-inner')}</div>
+    <div class="hud-mascot">${mascotBlock('cheer','반짝이는 교실을 찾아가요!','hud-mascot-inner')}</div>
 
     <div class="hud-quest">
       <div class="hud-quest-head">🎨 미술실 학습 현황</div>
       ${methodRows}
     </div>
   </div>
+  ${worldDirectoryOpen?`
+  <section class="world-directory-panel" aria-label="교실 바로 선택하기">
+    <div class="directory-header"><h2>🧭 어디로 갈까요?</h2>
+      <button type="button" data-action="toggle-directory" aria-label="교실 목록 닫기">×</button></div>
+    <p>건물을 직접 찾기 어려울 때는 아래에서 선택할 수 있어요.</p>
+    <div class="directory-access">
+      <button type="button" data-action="toggle-big-taps" aria-pressed="${accessBigTaps}">${accessBigTaps?'✓ ':''}큰 선택 버튼</button>
+      <a href="curriculum/teacher-guide.html">📘 교육과정 · 교사용</a>
+    </div>
+    <div class="directory-actions">
+      ${allRooms.map(r=>`<button type="button" class="${r.locked?'directory-soon':''}" data-action="${r.locked?'soon-room':'go-room'}" data-room="${r.key}">${r.locked?'🔒':'🏫'} ${r.label}</button>`).join('')}
+      <a href="career/barista.html">☕ 직업 체험 카페</a>
+      <a href="minigames/index.html?subject=art">🎨 미술 게임 10종</a>
+      <a href="minigames/index.html?subject=korean">📚 국어 게임 10종</a>
+      <a href="quests/index.html">🌸 마을 통합 퀘스트</a>
+    </div>
+  </section>`:''}
   <div class="hud-navbar">
     <button class="navcircle active" data-action="go-world"><span>🗺️</span>지도</button>
+    <button class="navcircle world-directory-toggle" data-action="toggle-directory" aria-expanded="${worldDirectoryOpen}"><span>🧭</span>교실 찾기</button>
     <button class="navcircle" data-action="go-lessons"><span>📚</span>오늘의 수업</button>
+    <a class="navcircle" href="minigames/index.html" style="text-decoration:none"><span>🎮</span>미니게임</a>
+    <a class="navcircle" href="quests/index.html" style="text-decoration:none"><span>🌸</span>마을 퀘스트</a>
+    <a class="navcircle" href="career/barista.html" style="text-decoration:none"><span style="border-color:#3AAFA9">☕</span>직업 체험</a>
     <button class="navcircle" data-action="open-settings"><span>⚙️</span>설정</button>
   </div>`;
 }
@@ -2625,11 +2665,13 @@ function wireGlobal(){
 }
 function onGlobalAction(e){
   const action=e.currentTarget.getAttribute('data-action');
-  if(action==='go-world'){ route={view:'world',room:null,subject:null,method:null}; runtime=null; render(); }
+  if(action==='go-world'){ worldDirectoryOpen=false;route={view:'world',room:null,subject:null,method:null}; runtime=null; render(); }
+  else if(action==='toggle-directory'){ worldDirectoryOpen=!worldDirectoryOpen; render(); }
+  else if(action==='toggle-big-taps'){ accessBigTaps=!accessBigTaps;try{localStorage.setItem('oks_access_big_targets',accessBigTaps?'1':'0');}catch(e){} render(); }
   else if(action==='go-room'){
     const btn=e.currentTarget;
     const room=btn.getAttribute('data-room')||route.room;
-    const doNav=()=>{ route.view='room'; route.room=room; route.subject=null; route.method=null; runtime=null; render(); };
+    const doNav=()=>{ if(room==='word'){window.location.href='korean/index.html';return;}if(room==='science'||room==='social'||room==='number'){const subject={science:'science',social:'social',number:'math'}[room];window.location.href='minigames/index.html?subject='+subject;return;}worldDirectoryOpen=false;route.view='room'; route.room=room; route.subject=null; route.method=null; runtime=null; render(); };
     if(btn.closest('.world-hero')) walkAvatarTo(btn, doNav); else doNav();
   }
   else if(action==='go-path'){ route.view='path'; route.subject=e.currentTarget.getAttribute('data-subject'); route.method=null; runtime=null; render(); }
@@ -2652,11 +2694,13 @@ function onGlobalAction(e){
   else if(action==='locked-node'){ speak('먼저 앞 단계를 완성해볼까요?'); }
   else if(action==='soon-room'){
     const btn=e.currentTarget;
-    walkAvatarTo(btn, ()=>speak('이 교실은 곧 열려요!'));
+    if(btn.closest('.world-hero')) walkAvatarTo(btn, ()=>speak('이 교실은 곧 열려요!'));
+    else speak('이 교실은 곧 열려요!');
   }
   else if(action==='cycle-season'){
     const cur=e.currentTarget.getAttribute('data-season');
     const next=cycleWorldSeason(cur);
+    if(hdLobbyReady) avatarPos=next==='spring'?{left:49,top:64}:{left:48,top:41};
     const sm=SEASON_META[next];
     speak(`${sm.label}으로 바뀌었어요!`);
     render();
