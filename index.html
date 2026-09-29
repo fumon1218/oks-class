@@ -1844,7 +1844,7 @@ function renderWorld(){
   const bgUrl=useHd?SPRING_HD:ART.worldSeasons[season];
   const spots=useHd?VILLAGE_SPOTS_HD:VILLAGE_SPOTS;
   const sm=SEASON_META[season];
-  const nodes=allRooms.map(r=>{
+  const nodes=allRooms.filter(r=>!(useHd && r.key==='social')).map(r=>{
     const slot=spots[r.key]||{left:'50%',top:'50%'};
     const action = r.locked ? 'soon-room' : 'go-room';
     const roomAttr = r.key ? `data-room="${r.key}"` : '';
@@ -1894,6 +1894,7 @@ function renderWorld(){
     </div>
 
     ${nodes}
+    ${useHd?`<button class="map-spot active central-school" style="left:49%;top:41%" data-action="toggle-directory" aria-label="중앙 학교 - 교실 목록 열기"><span class="map-spot-label">🏫 중앙 학교</span></button>`:''}
     <div class="map-avatar" id="map-avatar" style="left:${avatarPos.left}%;top:${avatarPos.top}%">
       <img src="${ART.charWalk[0]}" alt="" style="transform:scaleX(${avatarFacing})">
     </div>
