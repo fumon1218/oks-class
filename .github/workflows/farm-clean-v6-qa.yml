@@ -1,0 +1,55 @@
+name: Farm clean layout visual QA
+on:
+  push:
+    branches: [fix/farm-clean-stage-v6]
+    paths:
+      - '.github/workflows/farm-clean-v6-qa.yml'
+permissions: {contents: read}
+jobs:
+  geometry:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - name: Screenshot and verify stage region collisions
+        run: |
+          mkdir -p qa
+          python3 -m http.server 8877 >/tmp/farm-v6.log 2>&1 &
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const b=await chromium.launch({headless:true,args:['--no-sandbox']});
+            let hasErrors=false;
+            for(const d of [{w:1536,h:960,name:'desktop'},{w:844,h:390,name:'iphone-landscape'},{w:390,h:844,name:'iphone-portrait'},{w:1024,h:768,name:'tablet'}]){
+              const p=await b.newPage({viewport:{width:d.w,height:d.h},deviceScaleFactor:1});
+              const errors=[];p.on('pageerror',x=>errors.push(x.message));
+              await p.goto('http://127.0.0.1:8877/minigames/math-tycoon-v3.html',{waitUntil:'domcontentloaded'});
+              await p.waitForFunction(()=>document.querySelectorAll('.plot').length===6&&document.querySelectorAll('.customer-actor').length===3,{timeout:12000});
+              await p.waitForTimeout(350);
+              const result=await p.evaluate(()=>{
+                const qs=['.garden-wrap','.customer-zone','.helper','.pack-station','.warehouse','.action-dock'];
+                const a=qs.map(q=>{const r=document.querySelector(q).getBoundingClientRect();return {q,x:r.x,y:r.y,right:r.right,bottom:r.bottom,w:r.width,h:r.height}});
+                const clashes=[];for(let i=0;i<5;i++)for(let j=i+1;j<5;j++){
+                  let x=Math.max(0,Math.min(a[i].right,a[j].right)-Math.max(a[i].x,a[j].x));
+                  let y=Math.max(0,Math.min(a[i].bottom,a[j].bottom)-Math.max(a[i].y,a[j].y));
+                  if(x*y>50)clashes.push([a[i].q,a[j].q,Math.round(x*y)]);
+                }
+                return {regions:a,clashes,bodyWidth:document.body.scrollWidth,screenWidth:innerWidth};
+              });
+              await p.screenshot({path:'qa/farm-v6-'+d.name+'.png',fullPage:true});
+              const good=!errors.length&&!result.clashes.length&&result.bodyWidth<=d.w+3&&result.regions.every(x=>x.h>60);
+              console.log('FARM_V6_GEOMETRY',JSON.stringify({name:d.name,good,errors,...result}));
+              if(!good)hasErrors=true;
+              await p.close();
+            }
+            await b.close();if(hasErrors)process.exit(1);
+          })().catch(x=>{console.error(x);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: farm-clean-v6-four-devices
+          path: qa/farm-v6-*.png
