@@ -1,0 +1,128 @@
+{
+  "title": "Word Master → 국어 도서관",
+  "source": {
+    "uploadedArchive": "word-master-main.zip",
+    "originalType": "React 19 + Vite 6 + TypeScript",
+    "originalFiles": [
+      "App.tsx",
+      "components/Stage1Game.tsx",
+      "components/Stage2Tracing.tsx",
+      "components/Stage3WordTracing.tsx",
+      "components/Stage4WordBuilder.tsx",
+      "components/Stage5Sentence.tsx",
+      "constants.ts",
+      "services/geminiService.ts"
+    ],
+    "disclaimer": "경량 시범판은 원본의 진행 구조와 기초 자료를 차용한 별도 HTML 구현이며, 원본 React 앱을 그대로 이식하지 않았음."
+  },
+  "curriculumBasis": {
+    "source": "사용자가 제공한 2022 개정 특수교육 총론 해설서, 2025 춘천계성학교 중학교·고등학교 교육과정",
+    "approach": "교육과정 교과 영역 및 실생활 의사소통 목표와 게임을 기능별로 연결. 학년/개별화교육 목표별 정확한 성취기준 매핑은 교사의 검토 후 확정.",
+    "contexts": [
+      "국어(듣기·말하기, 읽기, 쓰기)",
+      "일상생활 활동(의사소통)",
+      "창의적 체험활동 연계 가능"
+    ],
+    "caution": "글자 쓰기 완료 버튼은 필기 정확도 자동 판정이 아니며, 장애 정도 분류·성취 판단과 무관함."
+  },
+  "stages": [
+    {
+      "id": 0,
+      "source": "Stage1Game",
+      "title": "소리 별",
+      "sub": [
+        "자음",
+        "모음"
+      ],
+      "activity": "말소리 듣고 글자 카드 고르기",
+      "target": "음운·글자 소리 구별, 선택반응",
+      "application": "마을에서 표지 글자의 첫소리 찾기",
+      "evaluation": [
+        "소리 자극 반응",
+        "글자 식별",
+        "지원 방식"
+      ],
+      "status": "pilot-adapted"
+    },
+    {
+      "id": 1,
+      "source": "Stage2Tracing",
+      "title": "쓰기 별",
+      "activity": "기초 음절 따라 그리기",
+      "target": "글자 인식과 기초 필기 참여",
+      "application": "내 이름·생활 글자 익히기(추후)",
+      "evaluation": [
+        "시선 추적·터치·필기 참여",
+        "사용 보조도구",
+        "선택 반응"
+      ],
+      "status": "pilot-adapted"
+    },
+    {
+      "id": 2,
+      "source": "Stage3WordTracing",
+      "title": "단어 별",
+      "activity": "친숙한 생활 낱말 보고 따라 쓰기",
+      "target": "낱말 인식, 글자 조합과 쓰기",
+      "application": "카페 메뉴·마트 물건 이름",
+      "evaluation": [
+        "관련 그림 인식",
+        "낱말 읽기 반응",
+        "쓰기 참여"
+      ],
+      "status": "pilot-adapted"
+    },
+    {
+      "id": 3,
+      "source": "Stage4WordBuilder",
+      "title": "조립 별",
+      "activity": "한글 음절 카드로 낱말 구성",
+      "target": "음절 순서와 낱말 의미 연결",
+      "application": "동물 친구 주문서 만들기",
+      "evaluation": [
+        "음절 순서",
+        "보조 단서",
+        "반복 학습"
+      ],
+      "status": "pilot-adapted"
+    },
+    {
+      "id": 4,
+      "source": "Stage5Sentence",
+      "title": "이야기 별",
+      "activity": "짧은 문장을 듣고 단어 카드로 문장 구성",
+      "target": "문장 이해, 어순, 표현",
+      "application": "마을 친구와 이야기, 안내문 읽기",
+      "evaluation": [
+        "문장 듣고 반응",
+        "어순 선택",
+        "생활 속 활용"
+      ],
+      "status": "pilot-adapted"
+    }
+  ],
+  "support": {
+    "explore": "선택지 최소화, 음성 안내, 교사의 시각·감각 보조",
+    "guided": "그림·소리와 함께 글자·낱말 구성",
+    "independent": "상대적으로 많은 선택지와 문장 구성",
+    "featuresInPilot": [
+      "세 단계 교사 설정 읽기",
+      "음성 다시 듣기",
+      "터치 기반 선택",
+      "터치/펜 필기 캔버스",
+      "도움 요청 횟수, 오답 횟수 로컬 기록"
+    ],
+    "planned": [
+      "사용자 이름 없는 교사 과제 배정",
+      "AAC·스위치 접근 별도 검토",
+      "학교 수업 성취기준 정밀 매핑",
+      "원본 React/타이밍 게임과 통합"
+    ]
+  },
+  "integration": {
+    "mainEntry": "국어 도서관(마을의 책/글자 건물)",
+    "route": "korean/index.html",
+    "returnToVillage": "../index.html",
+    "teacherPanel": "../curriculum/teacher-guide.html"
+  }
+}
