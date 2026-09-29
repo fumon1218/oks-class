@@ -21,6 +21,52 @@ jobs:
         run: |
           node --check minigames/farm-v8/game.js
           node scripts/smoke-test.mjs
+      - name: Browser-test real scene and save a reference screenshot
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          mkdir -p qa
+          python3 -m http.server 8877 >/tmp/farm-v8-http.log 2>&1 &
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const b=await chromium.launch({headless:true,args:['--no-sandbox']});
+            const p=await b.newPage({viewport:{width:1672,height:1000},deviceScaleFactor:1});
+            const errors=[];p.on('pageerror',e=>errors.push(e.message));
+            await p.goto('http://127.0.0.1:8877/minigames/farm-v8/index.html',{waitUntil:'domcontentloaded'});
+            await p.waitForFunction(()=>document.querySelectorAll('#farm-field .plot').length===6);
+            await p.waitForTimeout(1000);
+            const before=await p.evaluate(()=>{
+              const imageList=[...document.images];
+              const loaded=imageList.filter(x=>x.complete&&x.naturalWidth>0).length;
+              const box=s=>{let r=document.querySelector(s).getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height}};
+              return {loaded,total:imageList.length,plots:document.querySelectorAll('#farm-field .plot').length,
+                guests:document.querySelectorAll('#customers .guest').length,
+                basketLayers:document.querySelectorAll('#basket-area > img').length,
+                field:box('#farm-field'),packing:box('#pack-station'),
+                xOverflow:document.documentElement.scrollWidth-innerWidth};
+            });
+            await p.screenshot({path:'qa/farm-v8-real-render.png',fullPage:true});
+            await p.locator('#farm-field .plot[data-index="0"]').click();
+            const harvested=await p.locator('#stock-tray button[data-crop="tomato"] small').textContent();
+            await p.locator('[data-action="pack"]').click();
+            await p.locator('#stock-tray button[data-crop="tomato"]').click();
+            const packed=await p.locator('#basket-fill img.harvest').count();
+            await p.reload({waitUntil:'domcontentloaded'});
+            const saved=await p.locator('#basket-fill img.harvest').count();
+            console.log('FARM_V8_REAL_QA',JSON.stringify({before,harvested,packed,saved,errors}));
+            await b.close();
+            if(errors.length||before.loaded<11||before.plots!==6||before.guests!==3||
+                before.basketLayers!==2||before.xOverflow>2||harvested!=='1'||packed!==1||saved!==1){
+              process.exit(1);
+            }
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: illustrated-farm-v8-browser-preview
+          path: qa/farm-v8-real-render.png
       - name: Commit verified game and all original sprites to main
         run: |
           git config user.name 'github-actions[bot]'
