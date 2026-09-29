@@ -550,10 +550,15 @@ pack=function(key,source){
  * create phantom sellable orders. */
 renderVisitor=function(){
  const order=activeOrder(),queue=$('customerLine');if(!order)return;
- // The uploaded rabbit crop has no complete arms: temporarily display the
- // existing complete full-body bunny, rather than a visibly amputated sprite.
- const farmer=$('visitor');farmer.alt='양팔이 온전히 보이는 토끼 농장 도우미';
- farmer.onerror=null;farmer.onload=null;farmer.src='../art/stickers/rabbit.png';
+ // Only use the newly approved complete-armed rabbit asset. The prior
+ // rabbit.webp remains untouched until the new image is installed.
+ const farmer=$('visitor');farmer.alt='밀짚모자와 멜빵바지를 입은 양팔이 온전한 토끼 농부';
+ if(farmArtAvailability.rabbitFull===false)farmer.src='../art/stickers/rabbit.png';
+ else {
+   farmer.onload=()=>{farmArtAvailability.rabbitFull=true};
+   farmer.onerror=()=>{farmArtAvailability.rabbitFull=false;farmer.onerror=null;farmer.onload=null;farmer.src='../art/stickers/rabbit.png'};
+   farmer.src='../art/farm/v4/rabbit_full.webp';
+ }
  $('speech').textContent=orderCaption(order)+' 담아 볼까요?';
  queue.replaceChildren();
  const active=state.orders.find(o=>o.id===state.active);
