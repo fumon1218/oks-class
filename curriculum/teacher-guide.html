@@ -30,6 +30,9 @@ button.secondary{background:#e8f4ed;color:#285b48}
 <label><input type="radio" name="mode" value="explore">🌱 감각·탐색</label>
 <label><input type="radio" name="mode" value="guided" checked>🍀 선택·조작</label>
 <label><input type="radio" name="mode" value="independent">🌳 문제 해결</label></div>
+<label for="koreanStage">국어 도서관에서 먼저 할 활동</label>
+<select id="koreanStage"><option value="">학생이 자유롭게 선택</option><option value="0">1. 소리 별</option><option value="1">2. 쓰기 별</option><option value="2">3. 단어 별</option><option value="3">4. 조립 별</option><option value="4">5. 이야기 별</option></select>
+<p class="muted">업로드한 워드 마스터의 다섯 단계 학습 순서입니다. 개인별 권장 활동으로 표시하되 다른 활동도 선택할 수 있습니다.</p>
 <p class="muted">지원 수준은 고정된 학생 등급이 아닙니다. 활동별로 교사가 언제든 변경할 수 있습니다. 현재 설정은 카페 시범 게임에만 반영됩니다.</p>
 </section>
 <section class="panel"><h2>2. 확인된 성취기준과 연결 게임</h2>
@@ -47,7 +50,7 @@ button.secondary{background:#e8f4ed;color:#285b48}
 const $=id=>document.getElementById(id), savedKey="oks_iep_config_v1";
 let data=null;let saved={};
 try{saved=JSON.parse(localStorage.getItem(savedKey)||"{}");}catch(e){}
-$("school").value=saved.school||"middle";$("grade").value=String(saved.grade||1);
+$("koreanStage").value=saved.koreanStage===undefined?"":String(saved.koreanStage);$("school").value=saved.school||"middle";$("grade").value=String(saved.grade||1);
 document.querySelectorAll('[name="mode"]').forEach(el=>el.checked=el.value===(saved.mode||"guided"));
 try{const response=await fetch("catalog.json");if(!response.ok)throw Error("HTTP "+response.status);data=await response.json();}catch(e){$("standards").textContent="교육과정 데이터에 접근하지 못했습니다. 온라인 상태나 catalog.json 파일을 확인해 주세요.";$("rooms").textContent="마을을 다시 연 후 시도해 주세요.";return;}
 function refresh(){
@@ -61,9 +64,9 @@ function refresh(){
 }
 $("school").addEventListener("change",refresh);$("grade").addEventListener("change",refresh);refresh();
 $("save").addEventListener("click",()=>{
- const obj={school:$("school").value,grade:Number($("grade").value),mode:document.querySelector('[name="mode"]:checked').value,codes:Array.from(document.querySelectorAll("[data-code]:checked")).map(el=>el.dataset.code)};
+ const obj={school:$("school").value,grade:Number($("grade").value),mode:document.querySelector('[name="mode"]:checked').value,koreanStage:$("koreanStage").value,codes:Array.from(document.querySelectorAll("[data-code]:checked")).map(el=>el.dataset.code)};
  try{localStorage.setItem(savedKey,JSON.stringify(obj));saved=obj;$("feedback").textContent="저장했습니다. 카페 체험의 초기 활동 지원 단계에 적용됩니다.";}catch(e){$("feedback").textContent="브라우저 저장을 사용할 수 없습니다.";}
 });
-$("clear").addEventListener("click",()=>{localStorage.removeItem(savedKey);saved={};$("school").value="middle";$("grade").value="1";document.querySelector('[value="guided"]').checked=true;refresh();$("feedback").textContent="설정을 초기화했습니다.";});
+$("clear").addEventListener("click",()=>{localStorage.removeItem(savedKey);saved={};$("school").value="middle";$("grade").value="1";$("koreanStage").value="";document.querySelector('[value="guided"]').checked=true;refresh();$("feedback").textContent="설정을 초기화했습니다.";});
 })();
 </script></body></html>
