@@ -1,0 +1,743 @@
+{
+  "version": 1,
+  "name": "옥쌤의 즐거운 교실 — 5교과 50미니게임 개발 목차",
+  "scope": "2022 개정 특수교육 기본 교육과정의 교과(군) 및 2025 춘천계성학교 중·고등학교 편제에 맞춘 개발 초안",
+  "warning": "게임명·세부 활동은 개발자가 만든 제안. 교육과정 해설서의 공식 단원명이나 모든 학년별 성취기준을 그대로 복제한 것이 아님. 각 게임의 실제 성취기준은 학년과 개별화교육 목표에 따라 담당 교사가 검증·지정해야 함.",
+  "sourceNames": [
+    "2022 개정 교육과정 총론 해설_특수교육.pdf",
+    "2025학년도 춘천계성학교 중학교 교육과정.pdf",
+    "2025학년도 춘천계성학교 고등학교 교육과정.pdf",
+    "word-master-main.zip (국어 연결용)"
+  ],
+  "subjectGroups": [
+    {
+      "key": "korean",
+      "name": "국어",
+      "domain": "듣기·말하기 / 읽기 / 쓰기 / 일상생활 의사소통",
+      "games": [
+        {
+          "id": "korean-01",
+          "title": "소리 탐정",
+          "activity": "말소리를 듣고 구별",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "korean-02",
+          "title": "말해요! 말해요!",
+          "activity": "상황별 의사소통",
+          "status": "partial",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "korean-03",
+          "title": "그림 속 낱말 찾기",
+          "activity": "그림과 낱말 연결",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "korean-04",
+          "title": "글자 정글",
+          "activity": "자음·모음 구별 및 낙하 글자 받기",
+          "status": "partial",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "korean-05",
+          "title": "낱말 조립 공방",
+          "activity": "음절 배열로 낱말 구성",
+          "status": "partial",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "korean-06",
+          "title": "이야기 보물찾기",
+          "activity": "짧은 이야기 순서와 내용",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "korean-07",
+          "title": "또박또박 쓰기",
+          "activity": "낱말을 보고 따라 쓰기",
+          "status": "partial",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "korean-08",
+          "title": "친구와 대화하기",
+          "activity": "경청·응답·인사",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "korean-09",
+          "title": "생활 속 읽기",
+          "activity": "카페 주문서·마트 안내문",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "korean-10",
+          "title": "이야기 무대",
+          "activity": "이야기를 듣고 말·AAC·그림으로 표현",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "math",
+      "name": "수학",
+      "domain": "수와 연산 / 변화와 관계 / 도형과 측정 / 자료와 가능성 / 실생활 문제 해결",
+      "games": [
+        {
+          "id": "math-01",
+          "title": "몇 개일까?",
+          "activity": "실물·그림의 개수 세기",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "math-02",
+          "title": "같은 만큼 모아요",
+          "activity": "일대일 대응",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "math-03",
+          "title": "누가 더 길까?",
+          "activity": "길이 비교",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "math-04",
+          "title": "무거울까? 가벼울까?",
+          "activity": "무게 비교",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "math-05",
+          "title": "모양 마을",
+          "activity": "생활 도형 찾기",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "math-06",
+          "title": "규칙 블록",
+          "activity": "간단한 패턴",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "math-07",
+          "title": "마트 계산대",
+          "activity": "물건 값과 돈 계산",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "math-08",
+          "title": "시간 탐험대",
+          "activity": "시각·생활 시간표",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "math-09",
+          "title": "길을 찾아라",
+          "activity": "방향·위치",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "math-10",
+          "title": "숫자 탐정",
+          "activity": "자료 분류·비교",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "art",
+      "name": "미술",
+      "domain": "감각적 탐색 / 표현 / 감상",
+      "games": [
+        {
+          "id": "art-01",
+          "title": "색깔 마을",
+          "activity": "색 탐색",
+          "status": "partial",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "art-02",
+          "title": "색깔 섞기 연구소",
+          "activity": "색 혼합",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "art-03",
+          "title": "모양 조각가",
+          "activity": "형태 탐색",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "art-04",
+          "title": "선으로 여행하기",
+          "activity": "선 표현",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "art-05",
+          "title": "톡톡 찍어봐!",
+          "activity": "점·찍기",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "art-06",
+          "title": "모자이크 공방",
+          "activity": "구성·배치",
+          "status": "partial",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "art-07",
+          "title": "알록달록 색칠공방",
+          "activity": "채색",
+          "status": "partial",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "art-08",
+          "title": "나의 풍경 만들기",
+          "activity": "생활환경 표현",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "art-09",
+          "title": "내 기분을 그려요",
+          "activity": "감정 표현",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "art-10",
+          "title": "작품 전시회",
+          "activity": "작품 감상·의견 표현",
+          "status": "partial",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "science",
+      "name": "과학",
+      "domain": "생명 / 물질 / 운동과 에너지 / 지구와 우주 / 생활 탐구",
+      "games": [
+        {
+          "id": "science-01",
+          "title": "관찰 탐정단",
+          "activity": "감각기관과 관찰",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "science-02",
+          "title": "식물 키우기",
+          "activity": "식물 변화 관찰",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "science-03",
+          "title": "동물 발자국 탐험",
+          "activity": "동물 특징",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "science-04",
+          "title": "날씨 연구소",
+          "activity": "날씨 관찰",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "science-05",
+          "title": "계절 변화 탐험",
+          "activity": "계절과 환경",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "science-06",
+          "title": "물의 여행",
+          "activity": "물의 상태·생활 이용",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "science-07",
+          "title": "붙을까? 안 붙을까?",
+          "activity": "자석 탐구",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "science-08",
+          "title": "빛과 그림자 연구소",
+          "activity": "빛과 그림자",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "science-09",
+          "title": "소리 실험실",
+          "activity": "소리의 발생",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "science-10",
+          "title": "지구를 지켜라",
+          "activity": "환경 보전",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        }
+      ]
+    },
+    {
+      "key": "social",
+      "name": "사회",
+      "domain": "자기 이해 / 자기 결정 / 사회적 관계 / 지역사회 참여",
+      "games": [
+        {
+          "id": "social-01",
+          "title": "나는 누구일까?",
+          "activity": "자기 특성 탐색",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "social-02",
+          "title": "우리 학교 탐험",
+          "activity": "학교와 역할",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "social-03",
+          "title": "우리 가족 이야기",
+          "activity": "다양한 가족·관계",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "social-04",
+          "title": "우리 동네 탐험",
+          "activity": "지역사회 시설",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "social-05",
+          "title": "동네 가게 탐험",
+          "activity": "시설의 기능",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "social-06",
+          "title": "안전한 길 건너기",
+          "activity": "교통안전",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "social-07",
+          "title": "대중교통 탐험",
+          "activity": "버스 이용",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "social-08",
+          "title": "우리 동네 장보기",
+          "activity": "소비·자기결정",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "social-09",
+          "title": "함께 사는 마을",
+          "activity": "공동체와 규칙",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        },
+        {
+          "id": "social-10",
+          "title": "우리나라 탐험대",
+          "activity": "우리나라와 문화",
+          "status": "planned",
+          "verifiedStandardCodes": [],
+          "supportModes": [
+            "explore",
+            "guided",
+            "independent"
+          ]
+        }
+      ]
+    }
+  ],
+  "crossCurricular": [
+    {
+      "id": "spring-festival",
+      "title": "봄맞이 마을 축제",
+      "tasks": [
+        {
+          "subject": "국어",
+          "action": "축제 초대장 듣기·읽기"
+        },
+        {
+          "subject": "수학",
+          "action": "꽃과 장식의 수량 세기"
+        },
+        {
+          "subject": "미술",
+          "action": "축제 포스터와 장식 만들기"
+        },
+        {
+          "subject": "과학",
+          "action": "봄 식물 변화 관찰하기"
+        },
+        {
+          "subject": "사회",
+          "action": "역할 분담과 약속 지키기"
+        },
+        {
+          "subject": "일상생활 활동",
+          "action": "준비물 정리·인사하기"
+        }
+      ],
+      "status": "planned"
+    },
+    {
+      "id": "animal-cafe",
+      "title": "동물 친구 카페",
+      "tasks": [
+        {
+          "subject": "국어",
+          "action": "인사·주문 듣기·요청 표현"
+        },
+        {
+          "subject": "수학",
+          "action": "재료 수량·금액·용량"
+        },
+        {
+          "subject": "사회",
+          "action": "손님의 요구 이해·자기 결정"
+        },
+        {
+          "subject": "진로와 직업",
+          "action": "외식서비스 절차 체험"
+        },
+        {
+          "subject": "일상생활 활동",
+          "action": "손 씻기·정리·안전"
+        }
+      ],
+      "status": "pilot"
+    }
+  ],
+  "inclusiveDesign": {
+    "principles": [
+      "교과 진도와 무관하게 개별화교육 목표에 따라 단계 변경",
+      "음성·그림·텍스트 중 지원 방식 선택",
+      "큰 터치 목표와 선택식 상호작용",
+      "실패를 처벌하지 않는 피드백",
+      "정답률과 관찰 평가 분리",
+      "교사의 실제 생활 전이 관찰"
+    ],
+    "supportModes": [
+      {
+        "id": "explore",
+        "label": "감각·탐색",
+        "detail": "실물·소리·그림 탐색, 단순 반응"
+      },
+      {
+        "id": "guided",
+        "label": "선택·조작",
+        "detail": "2~3개 선택지 및 시각 단서"
+      },
+      {
+        "id": "independent",
+        "label": "문제 해결",
+        "detail": "과제 계획·순서·선택을 스스로 수행"
+      }
+    ]
+  },
+  "yearRule": {
+    "schoolYear": 2025,
+    "grade1": "2022 개정",
+    "grade2and3": "2015 개정",
+    "note": "학년도 변화 시 규칙을 무조건 재사용하지 말고 학교별 편제 검토"
+  },
+  "assessmentRule": "게임 내 점수로 장애 정도나 교과 성취를 자동 판단하지 말 것."
+}
