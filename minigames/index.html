@@ -46,7 +46,7 @@ h1{text-align:center;color:#2a6e6e;font-size:clamp(26px,5vw,40px);margin:10px 0 
 <body><main><div class="top"><a href="../index.html">🏡 학교 마을</a><a href="../korean/index.html">📚 국어 도서관</a><a href="../curriculum/teacher-guide.html">⚙️ 교사용 교육과정</a><button id="voice" type="button" aria-pressed="true">🔊 음성 켜짐</button></div>
 <h1>🎮 오색 배움 마을</h1><p class="lead">국어·수학·미술·과학·사회 미니게임 · 교과별 10개 활동</p>
 <div class="hud"><div id="mission">오늘의 모험을 골라요</div><div id="stars">⭐ 0</div><div id="achievement">🏅 0 / 50</div></div>
-<section class="panel" id="lobby"><div class="subjects" id="subjects"></div><div id="games" class="games"></div>
+<section class="panel" id="lobby"><div class="subjects" id="subjects"></div><div id="mathFeature" class="hidden" style="margin:14px 0;padding:13px;background:linear-gradient(120deg,#e3fcdf,#fff0c9);border:3px solid #bce6ce;border-radius:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap"><img src="../art/stickers/rabbit.png" alt="토끼 도우미" style="height:105px;width:100px;object-fit:contain"><div style="flex:1;min-width:190px"><strong style="font-size:23px">🧺 과일·채소 배달 대작전</strong><p style="font-size:14px">정글 점프 농장 이미지로 수량 세기·분류·공평하게 나누기를 12개의 연속 미션으로 즐겨요.</p><a href="math-fruit.html" style="display:inline-block;border-radius:18px;background:#37976c;color:white;font-weight:900;padding:14px 21px">🎮 12단계 체험형 게임 시작 →</a></div></div><div id="games" class="games"></div>
 <p class="note">이곳의 50개 활동은 교육과정 해설서의 교과 영역 및 제공하신 학교 교육과정을 바탕으로 설계한 1차 게임형 콘텐츠입니다. 공식 성취기준별 최종 과제가 아니며, 교사는 학생의 개별 목표에 따라 선택해 주세요.</p></section>
 <section id="gamePanel" class="hidden"><div class="modes"><label for="mode">활동 지원</label><select id="mode"><option value="explore">🌱 탐색</option><option value="guided">🍀 선택·조작</option><option value="independent">🌳 문제 해결</option></select><button id="back" type="button" class="tile" style="font-size:15px;min-height:48px">← 다른 활동</button></div>
 <div class="board"><div id="question" class="quest">미션 시작!</div><div id="play" class="play"></div></div>
@@ -74,12 +74,13 @@ function tile(text,fn){var b=create('button','tile',text,fn);b.type='button';ret
 function goBack(){$('gamePanel').classList.add('hidden');$('lobby').classList.remove('hidden');item=null;index=-1;renderLobby();}
 function renderLobby(){
  hud();$('mission').textContent='오늘의 모험을 골라요';
+ $('mathFeature').classList.toggle('hidden',subject!=='math');
  $('subjects').innerHTML='';SUBJECTS.forEach(function(s){var b=create('button','',s[1],function(){subject=s[0];renderLobby()});b.type='button';b.setAttribute('aria-pressed',String(subject===s[0]));$('subjects').appendChild(b)});
  $('games').innerHTML='';
  PACK[subject].forEach(function(g,i){var b=create('button','game'+(records[subject+'-'+String(i+1).padStart(2,'0')]?' done':''),undefined,function(){start(i)});b.type='button';var span=create('span','icon',icons[g.type]),num=create('span','num','미션 '+(i+1)),name=create('strong','',titles[subject][i]),sm=create('small','',records[subject+'-'+String(i+1).padStart(2,'0')]?'⭐ 완료 기록 있음':'누르면 모험 시작');b.append(span,num,name,sm);$('games').appendChild(b)});
 }
 function finishAvailable(){completed=true;$('finish').disabled=false;msg(item.type==='draw'||item.type==='reflect'?'좋아요! 활동을 마쳤다면 완료하기를 눌러요.':'성공했어요! 별을 받아요!');speak('잘했어요! 미션 완료!')}
-function start(i){index=i;item=PACK[subject][i];helps=0;mistakes=0;completed=false;touched=false;matches=new Set();selected=null;sorted=0;orderPos=0;collected=0;
+function start(i){if(subject==='math'&&i===0){window.location.href='math-fruit.html';return;}index=i;item=PACK[subject][i];helps=0;mistakes=0;completed=false;touched=false;matches=new Set();selected=null;sorted=0;orderPos=0;collected=0;
  $('lobby').classList.add('hidden');$('gamePanel').classList.remove('hidden');$('mission').textContent=SUBJECTS.find(x=>x[0]===subject)[1]+' · '+titles[subject][i];$('question').textContent=item.q;$('finish').disabled=true;$('play').innerHTML='';msg('미션을 수행해 보아요!');
  renderGame();speak(item.q);}
 function renderGame(){

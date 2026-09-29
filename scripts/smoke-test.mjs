@@ -6,7 +6,7 @@ import vm from 'node:vm';
 // GitHub Pages game smoke checks: no npm dependencies and no generated content.
 // This checks parse-time errors and local link targets, not touch/visual behavior.
 const root=path.resolve(import.meta.dirname,'..');
-const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','curriculum/reports.html','minigames/index.html','quests/index.html'];
+const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','curriculum/reports.html','minigames/index.html','minigames/math-fruit.html','quests/index.html'];
 let parsed=0,links=0;
 for(const relative of pages){
   const src=fs.readFileSync(path.join(root,relative),'utf8');
@@ -56,6 +56,11 @@ assert(lobby.includes('let img=null;'),'Duplicate page-wide village wallpaper ma
 assert(lobbyCss.includes('width:max(100vw,150dvh)'),'Map cover scaling may break image/hotspot alignment');
 assert(lobbyCss.includes('body.is-world .hud-navbar'),'Accessible navigation dock lost');
 console.log('PASS single-image map plane, walk coordinates and immersive HUD');
+const mathFruit=fs.readFileSync(path.join(root,'minigames/math-fruit.html'),'utf8');
+assert(mathFruit.includes("const MISSIONS=[")&&mathFruit.includes("m.kind==='share'")&&mathFruit.includes("m.kind==='sort'"),"Immersive 12-stage game systems missing");
+assert(mathFruit.includes("art/stickers/rabbit.png")&&mathFruit.includes("art/stickers/strawberry.png"),"Existing 3D animal or produce art integration missing");
+assert(fs.readFileSync(path.join(root,'minigames/index.html'),'utf8').includes('href="math-fruit.html"'),"Math workshop entry not linked");
+console.log('PASS immersive math workshop linked and core systems present');
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 for(const page of pages.slice(1)){assert(sw.includes("'./"+page+"'"),'Not precached: '+page);}
 console.log('PASS '+parsed+' script parse checks, '+links+' static links/assets, curriculum registration & cache references');
