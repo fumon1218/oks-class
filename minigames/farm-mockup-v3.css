@@ -213,3 +213,56 @@ body{background:#352218!important}
 .customer-actor .bubble-icons{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:3px}
 .customer-actor .bubble-icons img{position:static;width:29px;height:32px;filter:drop-shadow(0 3px 3px #5e492b77)}
 @media(min-width:941px){.garden-wrap .plots{transform:perspective(1200px) rotateX(1deg);transform-origin:center bottom}}
+
+/* Visual-QA correction: the landscape layout must be a SINGLE viewport.
+   Original browser shot at 1536×960 produced 1393px of content. */
+@media(min-width:1100px) and (min-height:730px) and (orientation:landscape){
+ html,body{height:100%;overflow:hidden}
+ .game-shell{
+   box-sizing:border-box;height:100dvh;min-height:0;
+   display:flex;flex-direction:column;
+ }
+ .hud{flex:0 0 auto;width:100%;padding:3px 10px 1px}
+ .hud .brand{padding:6px 13px;font-size:clamp(21px,2vw,28px)}
+ .hud .stats span{font-size:clamp(14px,1.25vw,18px);padding:4px 12px}
+ .hud .xbtn{min-height:39px;padding:4px 10px}
+ .mission-bar{flex:0 0 auto;margin:2px auto;padding:3px 13px;border-width:3px;font-size:clamp(15px,1.5vw,21px)}
+ .mission-bar .tiny{font-size:11px}
+ .arena{
+   width:100%;flex:1 1 0;height:0;min-height:0;
+   padding:4px 8px;overflow:visible;
+ }
+ .garden-wrap{height:69%;top:9%}
+ .garden-header{top:-4px;font-size:clamp(17px,1.4vw,21px);padding:8px 15px}
+ .plots{inset:36px 0 0}
+ .plot .plant{height:92%}
+ .customer-zone{top:7%;height:47%}
+ .helper{top:26%;width:clamp(118px,13vw,204px)}
+ .farm-chalk{height:105px;top:1%;width:148px;font-size:14px}
+ .farm-sign{height:60px;min-width:180px}
+ .pack-station{top:53%;min-height:0;height:42%;border-width:8px;padding:3px}
+ .pack-station h2{font-size:clamp(16px,1.4vw,22px)}
+ .basket-layout{min-height:0;height:calc(100% - 72px)}
+ .basket-layout .basket-art{min-height:0;height:100%;display:flex;align-items:center}
+ .basket-layout .basket-art>img{height:100%;max-height:148px}
+ .pack-footer{position:absolute;bottom:5px;left:5px;right:5px}
+ .pack-footer .panel-btn{min-height:35px;padding:3px 10px}
+ .warehouse{bottom:1%;padding:3px 7px;border-width:6px}
+ .warehouse .stock{min-height:60px;padding:1px}
+ .warehouse .stock img{height:clamp(48px,5vw,74px)}
+ .warehouse h2{margin:0;font-size:clamp(14px,1.35vw,20px)}
+ .action-dock{
+   width:98%;max-width:1510px;flex:0 0 auto;margin:-5px auto 0;
+   border-width:5px;border-radius:25px;padding:3px 5px 8px
+ }
+ .action{min-height:clamp(68px,6.5vw,91px);padding:2px;border-width:4px;border-radius:24px;font-size:clamp(15px,1.4vw,21px)}
+ .action img{height:clamp(34px,3.5vw,51px)}
+ .action-mini{min-height:66px;padding:3px 5px;border-width:3px}
+ .status{flex:0 0 auto;min-height:0;width:min(100%,1140px);margin:2px auto;padding:4px 10px;border-width:3px;font-size:14px}
+ .hidden-controls{flex:0 0 auto;margin:2px auto 1px;gap:4px}
+ .hidden-controls .panel-btn{min-height:34px;padding:3px 9px;font-size:13px;border-width:2px}
+ .help-line{flex:0 0 auto;padding:1px 5px;margin:0 auto 2px;font-size:10px;line-height:1.3}
+ .seeds{position:absolute;top:auto;bottom:1.5%;left:2%;width:54%;z-index:35}
+ .seeds .seed{min-height:69px}
+ .seeds .seed img{height:41px}
+}

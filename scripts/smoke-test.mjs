@@ -88,6 +88,10 @@ for(const marker of ['farm-mockup-v3.css','class="farm-chalk"','class="farm-sign
 }
 assert(mockup.includes("SAVE='oks_math_tycoon_v1'"),'Farm v3 must preserve previous currency and fields');
 assert(mockCss.includes('farm-floral-v3.svg'),'Lush custom foliage is not shown');
+assert(mockCss.includes('height:100dvh;min-height:0'),'Landscape stage must fit a single viewport');
+assert(mockCss.includes('flex:1 1 0;height:0'),'Arena must take remaining viewport space');
+assert(mockup.includes('const originalRackRender=renderRack'),'Warehouse should display ripe harvest artwork');
+assert(mockup.includes("i===0?{phase:'ready',crop:'strawberry'}"),'Fresh players should see interactive live crops');
 assert(botanical.includes('viewBox="0 0 1536 880"'),'Custom farm floral illustration missing');
 assert(fs.readFileSync(path.join(root,'sw.js'),'utf8').includes("./minigames/farm-floral-v3.svg"),'Custom scene art not cached');
 console.log('PASS v3 screenshot-composition scene, decorative art, queue labels and original tycoon save key');

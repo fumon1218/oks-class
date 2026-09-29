@@ -106,8 +106,8 @@ ORDER_TEMPLATES=[
 ];
 const START=()=>({
  day:1,coins:10,stars:0,served:0,level:1,completed:[],selected:'strawberry',
- mode:'guided',plots:Array.from({length:6},(_,i)=>i<3?{phase:'empty',crop:null}:{phase:'locked',crop:null}),
- upgrades:{plots:3,yield:1,bonus:1},stock:{strawberry:0,tomato:0,carrot:0,lettuce:0},
+ mode:'guided',plots:Array.from({length:6},(_,i)=>i===0?{phase:'ready',crop:'strawberry'}:i===1?{phase:'ready',crop:'tomato'}:i===2?{phase:'ready',crop:'carrot'}:i===3?{phase:'empty',crop:null}:{phase:'locked',crop:null}),
+ upgrades:{plots:4,yield:1,bonus:1},stock:{strawberry:0,tomato:0,carrot:0,lettuce:0},
  sequence:0,orders:[],active:null,tray:[],pending:null
 });
 let state=START(),saveFailed=false,checkoutLock=false;
@@ -360,6 +360,19 @@ tapPlot=function(index){
  if(before.phase==='empty'){motion(source,destination,REMOTE_FARM+'seed_bag.png');}
  if(before.phase==='seeded'){motion(source,destination,REMOTE_FARM+'can.png');$('helper').classList.add('celebrating');setTimeout(()=>$('helper').classList.remove('celebrating'),850);}
  if(before.phase==='ready'){motion(destination,$('warehouse'),REMOTE_FARM+(FARM_ASSETS[before.crop]||'basket.png'));}
+};
+// The foreground crates show harvested produce, not seedlings planted in mud.
+const originalRackRender=renderRack;
+renderRack=function(){
+ originalRackRender();
+ $('rack').querySelectorAll('button.stock').forEach((card,i)=>{
+  const type=KEYS[i],picture=card.querySelector('img');
+  if(!picture)return;
+  const fallback=picture.src;
+  picture.src=REMOTE_FARM+'ripe_'+type+'.png';
+  picture.onerror=()=>{picture.onerror=null;picture.src=fallback;};
+  picture.alt=CROPS[type].name+' 수확한 열매';
+ });
 };
 renderVisitor=function(){
  const order=activeOrder(),queue=$('customerLine');if(!order)return;
