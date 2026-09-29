@@ -173,3 +173,17 @@ body.is-world .world-directory-panel{
   animation:none!important;
  }
 }
+
+/* Classroom entry is a short visual confirmation, with no flashing screen. */
+.world-map-layer .map-spot.entering{
+  filter:drop-shadow(0 0 16px #fff1a9)!important;
+}
+.world-map-layer .map-spot.entering::after{
+  content:"✨";position:absolute;left:50%;top:31%;
+  transform:translate(-50%,-50%) scale(1.35);
+  font-size:40px;pointer-events:none;
+  filter:drop-shadow(0 0 15px white);
+}
+@media(prefers-reduced-motion:reduce){
+ .world-map-layer .map-spot.entering::after{display:none}
+}
