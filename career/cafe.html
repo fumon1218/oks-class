@@ -64,7 +64,7 @@ try{
  if(["explore","guided","independent"].includes(iepPreset.mode)) mode=iepPreset.mode;
 }catch(e){}
 var amounts={explore:1,guided:2,independent:3};
-var cupUrl="https://fumon1218.github.io/jungle-jump/assets/coffee/cup_iced.png";
+var cupUrl="../art/jj/coffee/cup_iced.webp";
 var el=function(id){return document.getElementById(id);};
 var amount=function(){return amounts[mode];};
 var q=function(){return amount()===1?"한":amount()===2?"두":"세";};

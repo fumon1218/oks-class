@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v41';
+const CACHE_NAME = 'oks-class-v42';
 const ASSETS = [
   './',
   './index.html',
@@ -13,10 +13,6 @@ const ASSETS = [
   './curriculum/catalog.json',
   './curriculum/game-blueprint.json',
   './minigames/index.html',
-  './minigames/math-fruit.html',
-  './minigames/math-tycoon.html',
-  './minigames/math-tycoon-v2.html',
-  './minigames/math-tycoon-v3.html',
   './minigames/farm-v8/index.html',
   './minigames/farm-v8/game.css',
   './minigames/farm-v8/game.js',
@@ -72,17 +68,6 @@ const ASSETS = [
   './minigames/farm-v8/assets/tomato_plant.webp',
   './minigames/farm-v8/assets/watering_can.webp',
   './minigames/farm-v8/assets/young_plant.webp',
-  './minigames/farm-mockup-v3.css',
-  './minigames/farm-props-v4.css',
-  './art/farm/v4/rabbit_full.webp',
-  './minigames/farm-responsive-v5.css',
-  './minigames/farm-clean-v6.css',
-  './minigames/farm-prices-v7.css',
-  './art/farm/v4/panda.webp',
-  './art/farm/v4/cat.webp',
-  './art/farm/v4/monkey.webp',
-  './art/farm/v4/rabbit.webp',
-  './minigames/farm-floral-v3.svg',
   './minigames/art-tycoon.html',
   './minigames/packs.js',
   './quests/index.html',
