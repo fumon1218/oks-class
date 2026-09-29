@@ -43,12 +43,13 @@
     {
       "key": "number",
       "name": "수학 놀이터",
-      "status": "planned",
+      "status": "pilot",
       "games": [
-        "수량 대응",
-        "실생활 계산",
-        "용량 측정"
-      ]
+        "농장 타이쿤: 재배→수확→주문 포장→계산→확장",
+        "12단계 과일·채소 배달 연습",
+        "기존 수학 공통 활동 10종"
+      ],
+      "url": "minigames/math-tycoon.html"
     },
     {
       "key": "science",
@@ -338,6 +339,17 @@
       ],
       "path": "career/barista.html",
       "note": "7단계 역할놀이 및 선택형 대안 제공. 게임 타이밍 조작과 실제 직업 기능 성취는 분리 평가 필요."
+    },
+    {
+      "id": "math-farm-tycoon",
+      "status": "pilot",
+      "subjects": [
+        "수학",
+        "사회",
+        "진로와 직업"
+      ],
+      "path": "minigames/math-tycoon.html",
+      "note": "자유 재배와 16개 고객 주문 템플릿, 화폐 계산, 밭/수확/가게 보상 강화; 공식 개별 성취기준 1:1 자동 매핑이나 학생별 평가 아님."
     }
   ]
 }
