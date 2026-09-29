@@ -1489,7 +1489,7 @@ function retryFeedback(msg){
 }
 
 /* ---------- mascot (옥쌤) — placeholder art, swap ART.mascot* with real files later ---------- */
-const SPRING_HD='art/scenes/town_spring_hd.avif';
+const SPRING_HD='art/scenes/town_spring_hd.webp';
 let hdLobbyReady=false;
 const VILLAGE_SPOTS_HD={
   arts:{left:'15%',top:'33%'}, science:{left:'30%',top:'26%'}, word:{left:'64%',top:'31%'},
@@ -1515,8 +1515,8 @@ const SEASON_META={
   winter:{emoji:'⛄', label:'겨울날'},
 };
 function todayKey(){ const d=new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; }
-function saveWorldSeason(season){
-  try{ localStorage.setItem('oks_world_season', JSON.stringify({day:todayKey(), season})); }catch(e){}
+function saveWorldSeason(season, manual=false){
+  try{ localStorage.setItem('oks_world_season', JSON.stringify({day:todayKey(), season, manual})); }catch(e){}
 }
 /* New high-resolution spring village is the stable lobby default.
    Existing seasonal art remains reachable via the season-switch button.
@@ -1524,7 +1524,7 @@ function saveWorldSeason(season){
 function pickWorldSeason(){
   try{
     const saved=JSON.parse(localStorage.getItem('oks_world_season')||'null');
-    if(saved && saved.day===todayKey() && ART.worldSeasons[saved.season]) return saved.season;
+    if(saved && saved.manual===true && saved.day===todayKey() && ART.worldSeasons[saved.season]) return saved.season;
   }catch(e){}
   saveWorldSeason('spring');
   return 'spring';
@@ -1533,7 +1533,7 @@ function cycleWorldSeason(current){
   const seasons=Object.keys(ART.worldSeasons);
   const pool=seasons.filter(s=>s!==current);
   const season=pool[Math.floor(Math.random()*pool.length)];
-  saveWorldSeason(season);
+  saveWorldSeason(season,true);
   return season;
 }
 function mascotSVG(pose){
