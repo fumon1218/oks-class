@@ -128,6 +128,6 @@ $('retry').onclick=function(){if(item)start(index)};
 $('finish').onclick=function(){if(!item||!completed||item.type==='portal')return;try{records[id()]={completedAt:new Date().toISOString(),supportMode:mode,mistakes,helps,task:titles[subject][index],type:item.type};localStorage.setItem(KEY,JSON.stringify(records));}catch(e){}
  $('play').innerHTML='<div class="current">🏅 모험 완료!<br>⭐ 별을 획득했어요!</div>';$('finish').disabled=true;msg('활동을 끝냈어요. 다음 모험을 선택해 보아요.');hud();
  var b=tile('🏡 다른 미니게임 고르기',goBack);$('play').appendChild(b);speak('미션을 마쳤어요! 다음 모험으로 가 볼까요?')};
-var params=new URLSearchParams(location.search),initial=params.get('subject');if(PACK[initial])subject=initial;renderLobby();
+var params=new URLSearchParams(location.search),initial=params.get('subject');if(PACK[initial])subject=initial;renderLobby();var gameNum=Number(params.get('game'));if(Number.isInteger(gameNum)&&gameNum>=1&&gameNum<=10)start(gameNum-1);
 })();
 </script></body></html>
