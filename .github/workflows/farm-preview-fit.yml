@@ -1,0 +1,58 @@
+name: Visual QA - One-screen Farm Stage
+on:
+  push:
+    branches: [qa/farm-preview-fit]
+    paths: [.github/workflows/farm-preview-fit.yml]
+permissions:
+  contents: write
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - name: Verify mockup layout fits one landscape viewport
+        run: |
+          python3 -m http.server 8877 >/tmp/farm-preview-server.log 2>&1 &
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const b=await chromium.launch({headless:true,args:['--no-sandbox']});
+            const page=await b.newPage({viewport:{width:1536,height:960},deviceScaleFactor:1});
+            const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+            await page.goto('http://127.0.0.1:8877/minigames/math-tycoon-v3.html',{waitUntil:'domcontentloaded'});
+            await page.waitForFunction(()=>document.querySelectorAll('.plot').length===6,{timeout:12000});
+            await page.waitForTimeout(6500);
+            const data=await page.evaluate(()=>{
+              const box=s=>{const r=document.querySelector(s)?.getBoundingClientRect();return r?{x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom}:null;};
+              return {
+                screen:box('.game-shell'),arena:box('.arena'),dock:box('.action-dock'),warehouse:box('.warehouse'),packing:box('.pack-station'),
+                plots:document.querySelectorAll('.plot').length,customers:document.querySelectorAll('.customer-actor').length,
+                loadedImages:[...document.images].filter(i=>i.complete&&i.naturalWidth>0).length,
+                brokenImages:[...document.images].filter(i=>i.complete&&!i.naturalWidth).map(i=>i.currentSrc).slice(0,6)
+              };
+            });
+            require('node:fs').mkdirSync('qa',{recursive:true});
+            await page.screenshot({path:'qa/farm-tycoon-v3-fit.png',fullPage:true});
+            console.log('VIEWPORT_QA',JSON.stringify({data,errors},null,2));
+            await b.close();
+            if(errors.length||data.plots!==6||data.customers!==3||data.arena.height<300||data.dock.bottom>941||data.dock.y>900){console.error('Stage too tall or missing game elements');process.exit(1);}
+          })().catch(e=>{console.error(e);process.exit(1);});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: farm-tycoon-v3-fit
+          path: qa/farm-tycoon-v3-fit.png
+      - name: Publish QA snapshot
+        if: success()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add qa/farm-tycoon-v3-fit.png
+          git commit -m 'qa: confirm farm stage fits landscape viewport'
+          git push origin HEAD:qa/farm-preview-fit
