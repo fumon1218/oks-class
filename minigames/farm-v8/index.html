@@ -1,0 +1,16 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#e6a954"><title>햇살 농장 | 옥쌤의 즐거운 교실</title><link rel="stylesheet" href="game.css"></head><body>
+<div id="viewport"><div id="scene-wrap"><main id="scene" aria-label="햇살 농장 체험형 수학 게임">
+ <div id="scenic" aria-hidden="true"></div>
+ <header id="topbar"><div id="title-sign"><img src="assets/shop_home.webp" alt=""><span>햇살 농장</span></div>
+ <div id="level-line"><img src="assets/sprout_pot.webp" alt=""><b id="level">Lv. 3</b><span id="level-track"><b id="level-fill"></b></span><img src="assets/parcel.webp" alt="경험 보상"></div>
+ <div id="price-strip" aria-label="작물 한 개 가격표"><span>🍓 딸기 3</span><span>🍅 토마토 4</span><span>🥕 당근 5</span><span>🥬 상추 4</span><small>코인 / 1개</small></div>
+ <div id="score"><div class="pill"><img src="assets/coin.webp" alt=""><b id="coins">1,240</b></div><button id="plus" type="button" aria-label="농장 상점 열기">+</button><button id="settings" type="button" aria-label="설정">⚙</button><button id="home" type="button" aria-label="마을로 돌아가기">⌂</button></div></header>
+ <section id="farm-field" aria-label="화분 여섯 칸"></section>
+ <div id="customer-counter" aria-hidden="true"></div><section id="customers" aria-label="동물 손님들의 주문"></section>
+ <div id="farmer" aria-hidden="true"><img src="assets/rabbit_farmer.webp" alt=""></div><div id="farmer-message" aria-live="polite"></div>
+ <section id="pack-station" aria-label="수확물을 포장하는 바구니"><h2 id="pack-title">🧺 수확한 작물을 담아 포장해요!</h2><div id="basket-area"><img class="basket-back" src="assets/basket.webp" alt="빈 수확 바구니"><div class="basket-fill" id="basket-fill" aria-live="polite"></div><div class="basket-placeholder" id="basket-placeholder">바구니가 비어 있어요</div><img class="basket-front" src="assets/basket_front.webp" alt=""></div></section>
+ <div id="stock-tray" aria-label="수확한 작물 창고"></div>
+ <nav id="actions" aria-label="농장 체험 단계"><button type="button" data-action="plant"><img src="assets/sprout_pot.webp" alt="">씨앗 심기 ›</button><button type="button" data-action="water"><img src="assets/watering_can.webp" alt="">물 주기 ›</button><button type="button" data-action="harvest"><img src="assets/tomato_plant.webp" alt="">수확하기 ›</button><button type="button" data-action="pack"><img src="assets/basket.webp" alt="">포장하기 ›</button><button type="button" data-action="deliver"><img src="assets/parcel.webp" alt="">배달하기 ›</button></nav>
+ <div id="toast" role="status" aria-live="polite"></div><div id="seed-menu" role="dialog" aria-label="씨앗 선택하기"></div><div id="shop-menu" role="dialog" aria-label="농장 업그레이드"></div><div id="calc-menu" role="dialog" aria-label="물건값 계산하기"></div>
+ </main></div><aside id="access" aria-label="학습 지원"><button type="button" id="sound">🔊 음성 켜짐</button><button type="button" id="help">💡 도움</button><label for="mode">학습 지원</label><select id="mode"><option value="guided">🍀 선택·조작</option><option value="explore">🌱 탐색</option><option value="independent">🌳 스스로</option></select><span class="tip">터치만 해도 좋아요. 시간 제한이나 생명 감소는 없어요.</span><a href="../math-tycoon-v3.html" style="color:#fff8d1">↶ 기존 농장</a></aside></div>
+<script src="game.js"></script></body></html>

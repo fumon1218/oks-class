@@ -6,7 +6,7 @@ import vm from 'node:vm';
 // GitHub Pages game smoke checks: no npm dependencies and no generated content.
 // This checks parse-time errors and local link targets, not touch/visual behavior.
 const root=path.resolve(import.meta.dirname,'..');
-const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','curriculum/reports.html','minigames/index.html','minigames/math-fruit.html','minigames/math-tycoon.html','minigames/math-tycoon-v2.html','minigames/math-tycoon-v3.html','minigames/art-tycoon.html','quests/index.html'];
+const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','curriculum/reports.html','minigames/index.html','minigames/math-fruit.html','minigames/math-tycoon.html','minigames/math-tycoon-v2.html','minigames/math-tycoon-v3.html','minigames/farm-v8/index.html','minigames/art-tycoon.html','quests/index.html'];
 let parsed=0,links=0;
 for(const relative of pages){
   const src=fs.readFileSync(path.join(root,relative),'utf8');
@@ -65,7 +65,7 @@ assert(mathFruit.includes("contents.append(im(type,''))"),'Basket must visually 
 console.log('PASS direct tap, animated basket fill and live fruit count');
 assert(mathFruit.includes("const MISSIONS=[")&&mathFruit.includes("m.kind==='share'")&&mathFruit.includes("m.kind==='sort'"),"Immersive 12-stage game systems missing");
 assert(mathFruit.includes("art/stickers/rabbit.png")&&mathFruit.includes("art/stickers/strawberry.png"),"Existing 3D animal or produce art integration missing");
-assert(fs.readFileSync(path.join(root,'minigames/index.html'),'utf8').includes('href="math-tycoon-v3.html"'),'Approved mockup-layout math tycoon entry not linked');
+assert(fs.readFileSync(path.join(root,'minigames/index.html'),'utf8').includes('href="farm-v8/index.html"'),'Approved mockup-layout math tycoon entry not linked');
 const tycoon=fs.readFileSync(path.join(root,'minigames/math-tycoon.html'),'utf8');
 for(const marker of ["function tapPlot(index)","function autoWater()","function autoHarvest()","function checkoutAnswer(value,o)","function buyUpgrade(up)","function pack(key,source)","function safeRestore()","ORDER_TEMPLATES=[","localStorage.setItem(SAVE"]){
  assert(tycoon.includes(marker),'Missing tycoon loop: '+marker);
@@ -73,13 +73,13 @@ for(const marker of ["function tapPlot(index)","function autoWater()","function 
 assert(tycoon.includes('href="math-fruit.html"'),'Original 12-stage practice must remain available');
 assert(tycoon.includes('if(state.pending!==null)'),'Checkout must guard customer order zero as an active pending order');
 assert(!tycoon.includes('Boolean(state.pending)'),'Never rely on falsy first-order ID zero');
-assert(fs.readFileSync(path.join(root,'quests/index.html'),'utf8').includes("link:'../minigames/math-tycoon-v3.html'"),'Integrated math quest must link tycoon');
+assert(fs.readFileSync(path.join(root,'quests/index.html'),'utf8').includes("link:'../minigames/farm-v8/index.html'"),'Integrated math quest must link tycoon');
 const immersive=fs.readFileSync(path.join(root,'minigames/math-tycoon-v2.html'),'utf8');
 for(const marker of ['class="game-shell"','class="customer-line"','class="pack-station"','id="seedShelf"','renderPlots=function()','renderVisitor=function()','renderTray=function()','checkoutAnswer=function(value,o)']){
  assert(immersive.includes(marker),'Immersive scene missing: '+marker);
 }
 assert(immersive.includes("SAVE='oks_math_tycoon_v1'"),'Existing farm progress storage key must stay compatible');
-assert(fs.readFileSync(path.join(root,'index.html'),'utf8').includes("minigames/math-tycoon-v3.html"),'Village maths building must open new game');
+assert(fs.readFileSync(path.join(root,'index.html'),'utf8').includes("minigames/farm-v8/index.html"),'Village maths building must open new game');
 const mockup=fs.readFileSync(path.join(root,'minigames/math-tycoon-v3.html'),'utf8');
 const mockCss=fs.readFileSync(path.join(root,'minigames/farm-mockup-v3.css'),'utf8');
 const botanical=fs.readFileSync(path.join(root,'minigames/farm-floral-v3.svg'),'utf8');
@@ -144,3 +144,6 @@ console.log('PASS 16-template art paint-shop tycoon: mixing, drawing, selling, g
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 for(const page of pages.slice(1)){assert(sw.includes("'./"+page+"'"),'Not precached: '+page);}
 console.log('PASS '+parsed+' script parse checks, '+links+' static links/assets, curriculum registration & cache references');
+
+for (const f of ['minigames/farm-v8/index.html','minigames/farm-v8/game.css','minigames/farm-v8/game.js','minigames/farm-v8/assets/greenhouse.webp','minigames/farm-v8/assets/empty_planter.webp','minigames/farm-v8/assets/basket_front.webp']) if (!fs.existsSync(path.join(root,f))) throw new Error('Missing farm v8: '+f);
+console.log('PASS individual illustration farm v8 bundle');

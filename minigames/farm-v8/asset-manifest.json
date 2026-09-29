@@ -1,0 +1,501 @@
+{
+  "source": "user uploaded 46-asset ZIP, prior individual character uploads",
+  "assets": {
+    "btn_green": {
+      "source_index": 1,
+      "dimensions": [
+        2172,
+        724
+      ],
+      "size": [
+        800,
+        215
+      ]
+    },
+    "btn_pink": {
+      "source_index": 2,
+      "dimensions": [
+        1942,
+        809
+      ],
+      "size": [
+        800,
+        239
+      ]
+    },
+    "reward_coins": {
+      "source_index": 3,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "size": [
+        800,
+        541
+      ]
+    },
+    "coin": {
+      "source_index": 4,
+      "dimensions": [
+        1310,
+        1200
+      ],
+      "size": [
+        790,
+        800
+      ]
+    },
+    "stand": {
+      "source_index": 5,
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "size": [
+        1120,
+        949
+      ]
+    },
+    "title_wood": {
+      "source_index": 6,
+      "dimensions": [
+        1774,
+        887
+      ],
+      "size": [
+        1120,
+        549
+      ]
+    },
+    "chalkboard": {
+      "source_index": 7,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        709
+      ]
+    },
+    "pointer": {
+      "source_index": 8,
+      "dimensions": [
+        1430,
+        1100
+      ],
+      "size": [
+        800,
+        603
+      ]
+    },
+    "basket": {
+      "source_index": 9,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "size": [
+        1120,
+        608
+      ]
+    },
+    "strawberry_single": {
+      "source_index": 10,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        772,
+        800
+      ]
+    },
+    "rabbit_face": {
+      "source_index": 11,
+      "dimensions": [
+        1293,
+        1216
+      ],
+      "size": [
+        800,
+        791
+      ]
+    },
+    "greenhouse": {
+      "source_index": 13,
+      "dimensions": [
+        1672,
+        941
+      ]
+    },
+    "carrots": {
+      "source_index": 14,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        758,
+        800
+      ]
+    },
+    "tomato_plant": {
+      "source_index": 15,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        736
+      ]
+    },
+    "btn_orange": {
+      "source_index": 16,
+      "dimensions": [
+        1942,
+        809
+      ],
+      "size": [
+        800,
+        240
+      ]
+    },
+    "order_bubble": {
+      "source_index": 17,
+      "dimensions": [
+        1983,
+        793
+      ],
+      "size": [
+        1120,
+        409
+      ]
+    },
+    "carrot_cluster": {
+      "source_index": 18,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        739
+      ]
+    },
+    "speaker": {
+      "source_index": 19,
+      "dimensions": [
+        1305,
+        1205
+      ],
+      "size": [
+        800,
+        634
+      ]
+    },
+    "parcel": {
+      "source_index": 20,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        734
+      ]
+    },
+    "sprout_pot": {
+      "source_index": 21,
+      "dimensions": [
+        1216,
+        1294
+      ],
+      "size": [
+        722,
+        800
+      ]
+    },
+    "btn_purple": {
+      "source_index": 22,
+      "dimensions": [
+        1942,
+        809
+      ],
+      "size": [
+        800,
+        278
+      ]
+    },
+    "watering_can": {
+      "source_index": 23,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        707
+      ]
+    },
+    "strawberry_plant": {
+      "source_index": 24,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        682
+      ]
+    },
+    "lettuce_plant": {
+      "source_index": 25,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        708
+      ]
+    },
+    "sprout": {
+      "source_index": 26,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "size": [
+        800,
+        583
+      ]
+    },
+    "young_plant": {
+      "source_index": 27,
+      "dimensions": [
+        1297,
+        1213
+      ],
+      "size": [
+        800,
+        718
+      ]
+    },
+    "parcel_seed": {
+      "source_index": 28,
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "size": [
+        800,
+        775
+      ]
+    },
+    "basket_front": {
+      "source_index": 29,
+      "dimensions": [
+        1983,
+        793
+      ],
+      "size": [
+        1120,
+        468
+      ]
+    },
+    "progress_bar": {
+      "source_index": 30,
+      "dimensions": [
+        2172,
+        724
+      ],
+      "size": [
+        1120,
+        216
+      ]
+    },
+    "sparkles": {
+      "source_index": 31,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "size": [
+        800,
+        595
+      ]
+    },
+    "growth_series": {
+      "source_index": 32,
+      "dimensions": [
+        2172,
+        724
+      ],
+      "size": [
+        1120,
+        351
+      ]
+    },
+    "lettuce_icons": {
+      "source_index": 33,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        695
+      ]
+    },
+    "rabbit_farmer": {
+      "source_index": 34,
+      "dimensions": [
+        1145,
+        1374
+      ],
+      "size": [
+        529,
+        800
+      ]
+    },
+    "star": {
+      "source_index": 35,
+      "dimensions": [
+        1278,
+        1230
+      ],
+      "size": [
+        800,
+        743
+      ]
+    },
+    "coffee_bean": {
+      "source_index": 36,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        752
+      ]
+    },
+    "btn_green_alt": {
+      "source_index": 37,
+      "dimensions": [
+        1942,
+        809
+      ],
+      "size": [
+        800,
+        239
+      ]
+    },
+    "star_gold": {
+      "source_index": 38,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        731
+      ]
+    },
+    "coffee_bean_alt": {
+      "source_index": 39,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        701
+      ]
+    },
+    "soil_pot": {
+      "source_index": 40,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        738
+      ]
+    },
+    "empty_planter": {
+      "source_index": 41,
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "size": [
+        1120,
+        733
+      ]
+    },
+    "shop_home": {
+      "source_index": 42,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        697
+      ]
+    },
+    "btn_blue": {
+      "source_index": 43,
+      "dimensions": [
+        1942,
+        809
+      ],
+      "size": [
+        800,
+        235
+      ]
+    },
+    "lock": {
+      "source_index": 44,
+      "dimensions": [
+        1281,
+        1228
+      ],
+      "size": [
+        786,
+        800
+      ]
+    },
+    "tomato_icons": {
+      "source_index": 45,
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "size": [
+        800,
+        713
+      ]
+    },
+    "arrow_down": {
+      "source_index": 46,
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "size": [
+        544,
+        800
+      ]
+    }
+  },
+  "supplied_customers": [
+    "cat",
+    "panda",
+    "monkey"
+  ]
+}
