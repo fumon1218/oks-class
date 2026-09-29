@@ -1,0 +1,63 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>교사용 활동 관찰 기록 · 옥쌤의 즐거운 교실</title>
+<style>*{box-sizing:border-box}body{margin:0;background:linear-gradient(135deg,#e5f7ef,#fdf3dc);font-family:system-ui,"Noto Sans KR",sans-serif;color:#2e4d44}
+main{max-width:1020px;width:95%;margin:15px auto 45px}a,button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:#215d4c;text-decoration:none}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #b17c11;outline-offset:3px}
+h1{font-size:clamp(26px,4vw,36px);color:#287e68}.top{display:flex;flex-wrap:wrap;gap:9px}.top a{border-radius:99px;padding:12px 15px;background:white;box-shadow:0 3px 9px #3068542a;font-weight:850}
+.panel{background:white;border-radius:22px;box-shadow:0 7px 18px #3c76532c;padding:18px;margin:14px 0}.panel h2{margin:0 0 10px;font-size:23px}
+.notice{background:#fff2d6;color:#6d522c;border-left:6px solid #dbb363;padding:14px;border-radius:9px;line-height:1.55}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.stat{border:2px solid #cde7d7;background:#f0faf2;padding:14px;border-radius:15px}.stat strong{display:block;font-size:28px;color:#287b5b}.stat span{font-size:13px;font-weight:850;color:#527565}
+.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:620px;font-size:13px}th{text-align:left;background:#e6f5ec;padding:10px}td{border-bottom:1px solid #e4e9e4;padding:10px}
+.tools{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}button{border:2px solid #bfdeca;border-radius:13px;background:#e9f7ee;color:#256347;font-weight:850;padding:12px 15px;min-height:48px}.mainbtn{background:#328e68;color:white;border-color:#328e68}.warnbtn{background:#fff1eb;color:#a54c36;border-color:#eebea9}
+label{font-weight:750;display:block}input,select,textarea{width:100%;min-height:47px;padding:10px;border:2px solid #c3dcd0;border-radius:12px;margin:5px 0 13px}textarea{min-height:78px;resize:vertical}.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px}.muted{font-size:13px;color:#637b6d;line-height:1.6}
+</style></head><body><main>
+<div class="top"><a href="../index.html">🏡 학교 마을</a><a href="teacher-guide.html">⚙️ 교육과정 설정</a><a href="../minigames/index.html">🎮 교과 게임</a></div>
+<h1>📊 교사용 활동 관찰 기록</h1><div class="notice">이 보고서는 <strong>이 브라우저에 저장된 익명 게임 활동 기록만</strong> 읽습니다. 공유 태블릿에서 여러 학생이 사용하면 기록이 섞일 수 있습니다. 학생 이름·장애·의료정보 같은 개인정보를 입력하지 마세요. 게임 완료는 교과 성취 인증이 아니며 실제 성취는 교사의 관찰로 판단합니다.</div>
+<section class="panel"><h2>1. 새 게임 참여 현황</h2><div class="stats" id="stats"></div><div class="tools">
+<label for="filter">기록 선택 <select id="filter"><option value="all">전체</option><option value="five">5교과 미니게임</option><option value="korean">국어 한글별</option><option value="catch">국어 글자 받기</option><option value="cafe">카페 직업 체험</option><option value="observe">교사 직접 관찰</option></select></label>
+<button id="export" class="mainbtn" type="button">⬇ CSV 내려받기</button><button id="refresh" type="button">🔄 새로고침</button></div>
+<div class="tablewrap"><table><thead><tr><th>날짜</th><th>구분</th><th>활동</th><th>지원 단계</th><th>재시도 / 힌트</th><th>비고</th></tr></thead><tbody id="rows"></tbody></table></div>
+<p id="summary" class="muted"></p></section>
+<section class="panel"><h2>2. 수업 중 교사의 관찰 메모</h2><p class="muted">게임 안에서 측정하기 어려운 자발적 참여, 요구 표현, 실제 생활에서의 전이 여부를 교사가 직접 기록합니다. 학생을 식별할 수 있는 내용을 적지 마세요.</p>
+<div class="fields"><div><label for="goal">학습 목표(예: 상황에 맞게 인사하기)</label><input id="goal" maxlength="100" placeholder="수업 목표"></div>
+<div><label for="support">제공한 지원</label><select id="support"><option>지원 없이 참여</option><option>구두 안내</option><option>그림/음성 단서</option><option>교사와 함께 조작</option><option>참여 방법 조정</option></select></div>
+<div><label for="generalize">실생활 적용 관찰</label><select id="generalize"><option>아직 관찰하지 않음</option><option>연습 상황에서 시도</option><option>익숙한 일상에서 시도</option><option>다른 상황에서도 관찰</option></select></div></div>
+<label for="memo">개별화교육 관련 관찰(개인식별정보 제외)</label><textarea id="memo" maxlength="500" placeholder="학생 이름을 쓰지 않고 수행 과정·교사 도움·실생활 적용을 기록하세요."></textarea>
+<div class="tools"><button id="save" class="mainbtn" type="button">관찰 기록 저장</button><button id="clear" class="warnbtn" type="button">이 페이지에서 읽는 게임·관찰 기록 모두 삭제</button></div>
+<p id="feedback" aria-live="polite"></p></section>
+</main><script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id),manualKey='oks_teacher_observations_v1',fiveKey='oks_five_subjects_v1',cafeKey='oks-career-cafe-v1',koreanKey='oks_korean_play_v1',catchKey='oks_literacy_catch_v1';
+function read(key,fallback){try{const x=JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback));return x===null?fallback:x}catch(e){return fallback}}
+function text(x){return String(x===undefined||x===null?'':x)}
+function time(x){if(!x)return'';const d=new Date(x);return isNaN(d.getTime())?'':d.toLocaleString('ko-KR')}
+function entries(){
+ let output=[],f=read(fiveKey,{});if(f&&typeof f==='object'&&!Array.isArray(f))Object.entries(f).forEach(([id,x])=>{if(!x||!x.completedAt)return;output.push({at:x.completedAt,source:'five',kind:'5교과',title:x.task||id,mode:x.supportMode||'',retry:x.mistakes??'',hints:x.helps??'',note:id})});
+ let korean=read(koreanKey,[]);if(Array.isArray(korean))korean.forEach(x=>{if(!x)return;output.push({at:x.at||'',source:'korean',kind:'국어 한글별',title:'한글별 단계 '+(Number(x.stage)+1),mode:x.mode||'',retry:x.tries??'',hints:x.hints??'',note:'단계 번호는 앱 내 단계 순서'})});
+ let catches=read(catchKey,[]);if(Array.isArray(catches))catches.forEach(x=>{if(!x)return;output.push({at:x.at||'',source:'catch',kind:'국어 글자 받기',title:x.type==='vowel'?'모음':'자음',mode:x.mode||'',retry:x.wrong??'',hints:x.helps??'',note:'놀이 점수 '+text(x.score)})});
+ let cafes=read(cafeKey,[]);if(Array.isArray(cafes))cafes.forEach(x=>{if(!x)return;output.push({at:x.at||x.date||'',source:'cafe',kind:'카페 직업 체험',title:x.drink||'카페 손님 응대',mode:x.mode||'',retry:x.retries??'',hints:x.hints??'',note:'완료 '+(x.completed?'예':'아니오')})});
+ let obs=read(manualKey,[]);if(Array.isArray(obs))obs.forEach(x=>{if(!x)return;output.push({at:x.at||'',source:'observe',kind:'교사 직접 관찰',title:x.goal||'',mode:x.support||'',retry:'',hints:'',note:(x.generalize||'')+(x.memo?' · '+x.memo:'')})});
+ return output.sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+}
+function chosen(){let all=entries();return $('filter').value==='all'?all:all.filter(x=>x.source===$('filter').value)}
+function stat(label,value){const box=document.createElement('div');box.className='stat';const n=document.createElement('strong');n.textContent=value;const t=document.createElement('span');t.textContent=label;box.append(n,t);return box}
+function render(){
+ const all=entries();const five=all.filter(x=>x.source==='five'),korean=all.filter(x=>x.source==='korean'||x.source==='catch'),cafe=all.filter(x=>x.source==='cafe'),obs=all.filter(x=>x.source==='observe');
+ $('stats').replaceChildren(stat('5교과 완료 활동 기록',five.length),stat('국어 연습 기록',korean.length),stat('카페 체험 기록',cafe.length),stat('교사 관찰 기록',obs.length));
+ $('rows').innerHTML='';const rows=chosen();rows.slice(0,100).forEach(x=>{
+ const tr=document.createElement('tr');[time(x.at),x.kind,x.title,x.mode,text(x.retry)+' / '+text(x.hints),x.note].forEach(y=>{let td=document.createElement('td');td.textContent=text(y);tr.appendChild(td)});$('rows').appendChild(tr)});
+ if(!rows.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=6;td.textContent='아직 저장된 기록이 없습니다.';tr.appendChild(td);$('rows').appendChild(tr)}
+ $('summary').textContent='이 브라우저에서 현재 확인 가능한 기록 '+rows.length+'건 · 최대 최근 100건 표시';
+}
+function csvCell(v){let s=text(v);if(/^[\s]*[=+@-]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"'}
+$('export').onclick=function(){
+ const rows=chosen();const header=['일시','구분','활동','지원 단계','재시도','도움 요청','비고'];const lines=[header,...rows.map(x=>[time(x.at),x.kind,x.title,x.mode,x.retry,x.hints,x.note])].map(r=>r.map(csvCell).join(','));const csv='\uFEFF'+lines.join('\r\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='oks-class-activities.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
+};
+$('filter').onchange=render;$('refresh').onclick=render;
+$('save').onclick=function(){const goal=$('goal').value.trim(),memo=$('memo').value.trim();if(!goal){$('feedback').textContent='학습 목표를 입력해 주세요.';return;}
+ const r=read(manualKey,[]);const out=Array.isArray(r)?r:[];out.unshift({at:new Date().toISOString(),goal,support:$('support').value,generalize:$('generalize').value,memo});try{localStorage.setItem(manualKey,JSON.stringify(out.slice(0,100)));$('feedback').textContent='익명 관찰 기록을 이 브라우저에 저장했습니다.';$('goal').value='';$('memo').value='';render()}catch(e){$('feedback').textContent='브라우저 저장 기능을 사용할 수 없습니다.'}};
+$('clear').onclick=function(){if(!confirm('주의: 이 브라우저의 새 게임 참여 및 교사 직접 관찰 기록을 삭제합니다. 별도의 백업이 없다면 복구할 수 없습니다. 삭제할까요?'))return;[fiveKey,cafeKey,koreanKey,catchKey,manualKey].forEach(k=>localStorage.removeItem(k));$('feedback').textContent='해당 게임과 관찰 기록을 지웠습니다. 기존 미술실 데이터와 교사 설정은 그대로 유지됩니다.';render()};
+render();
+})();
+</script></body></html>
