@@ -2006,6 +2006,7 @@ function renderRoom(){
     <span class="lb-txt"><b>오늘의 수업</b><small>${LESSON_UNIT.title} · 8차시를 순서대로</small></span>
     <span class="card-arrow">${ICON_CHEVRON_R}</span>
   </button>
+  ${route.room==='arts'?'<div style="margin:13px auto;max-width:860px;border:4px solid white;background:#fff3ddec;border-radius:24px;text-align:center;padding:15px"><b style="font-size:23px">🎨 마법 미술 공방 타이쿤</b><p>물감 섞기 → 주문 그림 그리기 → 작품 판매 → 공방 확장</p><a href="minigames/art-tycoon.html" style="display:inline-block;padding:13px 22px;background:#b377bd;color:white;border-radius:18px;font-size:19px;font-weight:900">체험형 공방 입장 →</a></div>':''}
   <div class="grid-cards">${cards}</div>`;
 }
 

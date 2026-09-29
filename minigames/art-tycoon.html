@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>옥쌤 마법 미술 공방 타이쿤</title><meta name="theme-color" content="#e58a6d">
+<style>
+*{box-sizing:border-box}
+:root{font-family:system-ui,"Noto Sans KR",sans-serif;color:#604835}
+body{margin:0;min-height:100dvh;background:linear-gradient(#c9e9d69c,#ffe6b39e),url("../icons/bg-artroom.jpg") center/cover fixed}
+button,a,select{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible,select:focus-visible{outline:4px solid #4c97be;outline-offset:3px}
+button:disabled{opacity:.48;cursor:default}a{text-decoration:none;color:inherit}h1,h2,h3,p{margin:0 0 8px}
+.top{display:flex;gap:8px;justify-content:space-between;align-items:center;flex-wrap:wrap;padding:8px 13px;background:#fffbf6e8;border-bottom:4px solid #f1cea1}
+.top h1{font-size:clamp(20px,2.3vw,30px)}.top a,.pill{border-radius:24px;background:#fff9e9;border:3px solid white;padding:9px 14px;font-weight:950;min-height:48px;box-shadow:0 4px 13px #7551343d}
+.huds{display:flex;gap:8px;flex-wrap:wrap}
+.layout{width:min(1490px,98vw);margin:10px auto;display:grid;grid-template-columns:minmax(0,1.52fr) minmax(265px,.9fr);gap:12px}
+.panel{border:5px solid #fff9eb;background:linear-gradient(#fffbedec,#fff1d5ee);box-shadow:0 11px 23px #7f634970;border-radius:27px;padding:13px}
+.title{font-size:clamp(21px,2.2vw,30px);color:#865c43;text-shadow:0 2px #fff}
+.easels{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.canvas-wrap{border:14px ridge #cb9466;border-radius:17px;padding:9px;background:linear-gradient(#c78e58,#a36c43);box-shadow:0 13px 10px #614a3080}
+.canvas-board{display:grid;grid-template-columns:repeat(var(--grid),minmax(0,1fr));gap:6px;aspect-ratio:1/1;border:6px solid #fffaeb;background:#fffdf2;padding:7px;box-shadow:inset 0 0 14px #c4bfa8}
+.cell{border:2px solid #f3eddd;background:#fffcf4;border-radius:11px;min-width:0;transition:background .18s,transform .18s;box-shadow:inset 0 3px 4px #ccbfa844}
+.cell.filled{box-shadow:inset 0 3px 7px #0002,0 2px #fff9}
+.cell:active{transform:scale(.95)}
+.rightside{background:#ffedcc;border:5px solid #f7dfb6;border-radius:18px;padding:7px}
+.rightside p{font-weight:900;text-align:center}.art-stencil{height:110px;margin:4px auto;display:block;max-width:96%;object-fit:contain;filter:drop-shadow(0 6px 5px #684d4e55)}
+.needed{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.needed span{border:2px solid white;border-radius:15px;background:#fffaf0;padding:6px 11px;font-weight:950;min-width:75px;text-align:center}
+.color-chip{width:22px;height:22px;display:inline-block;vertical-align:middle;border-radius:50%;border:3px solid #fff;box-shadow:0 1px 4px #3e3c3890;margin-right:5px}
+.palette{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
+.paint{width:clamp(70px,12%,101px);min-height:93px;border:5px solid white;border-radius:24px;background:linear-gradient(#fff,#fce4b9);box-shadow:0 7px 0 #ae926e,0 8px 9px #63553b46;font-weight:950}
+.paint.selected{outline:4px solid #58aa99;transform:translateY(-3px)}
+.paint-pot{display:block;position:relative;border-radius:7px 7px 15px 15px;width:44px;height:43px;margin:0 auto 3px;border:4px solid #fffaee;box-shadow:inset 4px 1px #fff9,0 4px 5px #826b5b80;transform:perspective(70px) rotateX(-9deg)}
+.paint-pot:before{content:"";display:block;border-radius:50%;position:absolute;top:-8px;left:-4px;right:-4px;height:15px;background:inherit;border:4px solid #fff8e5}
+.mixer{background:linear-gradient(#f9eadb,#e7d0bb);border:4px solid white;border-radius:20px;padding:9px;margin:10px 0}
+.mixer label{font-weight:950;display:block;margin-bottom:7px}
+.mix-picks{display:flex;gap:7px;flex-wrap:wrap;align-items:center;justify-content:center}
+.mix-picks button{border-radius:99px;width:51px;height:51px;border:5px solid #fff;box-shadow:0 3px 8px #72593a66}
+.mix-picks .picked{outline:4px solid #3e996d}
+.mix-btn{min-height:53px;background:#b785cc;color:white;border:4px solid #fff;border-radius:15px;padding:9px 15px;font-weight:950}
+.btn{border:3px solid #f6d8b0;border-radius:15px;background:#fffdf3;padding:9px 13px;min-height:48px;font-weight:900;color:#785231}
+.btn.go{background:#43a37d;color:#fff;border-color:#fff}
+.btn.special{background:#ffd37d}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.bubble{display:flex;gap:8px;align-items:center;padding:8px;background:#fff8de;border:4px solid #fff;border-radius:20px;margin:10px 0;min-height:107px}
+.bubble img{height:99px;width:95px;object-fit:contain;filter:drop-shadow(0 6px 5px #816b5073)}
+.bubble strong{background:#fff;border:2px solid #efc47e;border-radius:18px;padding:9px;flex:1;font-size:clamp(15px,1.7vw,21px)}
+.order{border:4px solid #ead1a5;border-radius:18px;background:#fffcf1;min-height:89px;padding:9px;width:100%;text-align:left;margin-bottom:8px;color:#75513d}
+.order.active{border-color:#42ac7b;box-shadow:0 0 0 3px #d5f8d5}
+.order strong{display:block}.order small{font-size:12px}.order .colors{display:flex;gap:6px;margin:6px 0;flex-wrap:wrap}
+.order .colors span{border-radius:99px;background:#f6e9d8;padding:4px 7px;font-size:12px}
+.status{max-width:1490px;margin:8px auto 0;text-align:center;background:#fffce8ef;border:4px solid #fff;border-radius:18px;box-shadow:0 6px 13px #7d5f4568;font-weight:950;padding:13px;min-height:55px}
+.upgrades{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.upgrade{min-height:97px;background:#fff4e1;border:4px solid #f0d8b6;border-radius:17px;color:#745039;font-weight:950;padding:8px}
+.upgrade small{display:block;margin-top:4px}
+.gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.gallery img{aspect-ratio:1;width:100%;border:7px ridge #c49059;box-shadow:0 6px 7px #71573e59;background:white}
+.note{font-weight:700;color:#6c6a5b;font-size:12px;line-height:1.6}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.palette .paint{min-width:67px}.gallery img{border-width:4px}}
+@media(max-width:460px){.easels{grid-template-columns:1fr}.rightside{order:-1}.art-stencil{height:77px}.paint{min-height:80px}.paint-pot{height:34px;width:37px}.canvas-wrap{border-width:9px}body{background-attachment:scroll}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style></head>
+<body><header class="top"><a href="../index.html">🏡 마을</a><h1>🎨 마법 미술 공방 타이쿤</h1><div class="huds"><span class="pill">🪙 <span id="coins">0</span></span><span class="pill">⭐ <span id="stars">0</span></span><span class="pill">🖼️ <span id="sold">0</span>작품</span></div></header>
+<main class="layout">
+<section class="panel"><h2 class="title">🖌️ 손님의 그림을 그려요</h2>
+<div class="easels"><div class="canvas-wrap"><div id="board" class="canvas-board" role="group" aria-label="물감으로 색칠할 캔버스"></div></div>
+<div class="rightside"><h3 style="text-align:center">📋 주문 팔레트</h3><img id="stencil" class="art-stencil" src="../art/stickers/rabbit.png" alt="동물 친구"><p id="request">친구가 원하는 색을 칠해요.</p><div id="needed" class="needed"></div>
+<div class="actions" style="justify-content:center"><button class="btn" id="erase">🧽 지우개</button><button class="btn" id="clear">↻ 도화지 비우기</button></div><p class="note">색을 선택하고 하얀 칸을 누르면 물감이 칠해져요. 다시 칠하거나 지울 수도 있어요.</p></div></div>
+<h2 class="title" style="margin-top:14px">🎨 내 물감 상자</h2><div class="palette" id="palette"></div>
+<div class="mixer"><label>🧪 색깔 섞기: 색 두 가지를 고르면 새로운 물감이 생겨요!</label><div id="mixPicks" class="mix-picks"></div><div class="actions" style="justify-content:center"><button class="mix-btn" id="mix">🎨 두 색 섞어보기</button></div></div>
+<div class="actions"><button class="btn" id="saveImage">📥 내 그림 저장</button><label for="mode">활동 지원</label><select class="btn" id="mode"><option value="explore">🌱 탐색</option><option value="guided">🍀 선택·조작</option><option value="independent">🌳 스스로 완성</option></select><button class="btn" id="repeat">🔊 다시 듣기</button><button class="btn" id="hint">💡 도움</button></div>
+</section>
+<aside class="panel"><h2 class="title">🐾 오늘의 그림 의뢰</h2>
+<div class="bubble"><img id="visitor" src="../art/stickers/cat.png" alt="그림을 주문한 동물 친구"><strong id="speech">새 그림을 부탁해!</strong></div>
+<div id="orders"></div>
+<div class="actions" style="justify-content:center"><button class="btn go" id="deliver">🖼️ 작품 완성·판매하기</button></div>
+<p class="note">정확한 색과 수량을 준비하면 판매할 수 있어요. 틀리게 칠해도 코인을 잃지 않습니다.</p>
+<h2 class="title" style="margin-top:20px">🏡 공방 꾸미기</h2><div class="upgrades" id="upgrades"></div>
+<h2 class="title" style="margin-top:20px">🏛️ 우리 공방 전시관</h2><div class="gallery" id="gallery"></div>
+<p class="note">게임 결과는 현재 기기에 익명으로 저장합니다. 실제 미술 표현에는 하나의 정답만 있는 것은 아닙니다. 이 게임은 요청된 색과 수량을 맞추는 역할놀이이며, 자유 표현은 미술실의 별도 그리기 활동에서 진행할 수 있습니다.</p>
+</aside>
+</main><div id="status" class="status" role="status" aria-live="polite">그림을 주문받았어요! 색을 골라 칠해 보아요.</div><p class="note" style="text-align:center;background:#fffaf1cf;margin:9px;padding:9px">시간 제한이나 생명 감소는 없습니다. 정답 선택뿐 아니라 색 섞기, 실제 캔버스 칠하기, 손님 응대, 미술관 확장을 반복합니다.</p>
+<script>
+(function(){
+'use strict';
+const $=id=>document.getElementById(id),SAVE='oks_art_tycoon_v1',
+COLORS={red:{hex:'#ed5d65',name:'빨강'},yellow:{hex:'#ffcb57',name:'노랑'},blue:{hex:'#5b9eea',name:'파랑'},green:{hex:'#66bb80',name:'초록'},orange:{hex:'#f69f57',name:'주황'},purple:{hex:'#ac87cf',name:'보라'}},
+BASE=['red','yellow','blue'],MIX={'red+yellow':'orange','blue+yellow':'green','blue+red':'purple'},
+ANIMALS=['cat','rabbit','panda','monkey','bear','sloth','penguin','fox'],
+DESIGNS=[
+ {red:2,yellow:1},{blue:2,red:2},{yellow:3},{red:2,blue:1,yellow:2},
+ {green:2,blue:1},{orange:2,yellow:1},{purple:2,red:1},{green:1,purple:1,orange:1},
+ {red:3,green:2},{orange:3,blue:1},{yellow:2,purple:2},{red:1,blue:2,green:2},
+ {purple:3,orange:1},{orange:2,green:2,red:1},{blue:1,green:1,purple:1,orange:1},
+ {red:2,yellow:2,blue:2}
+];
+const blank=()=>Array(25).fill(null);
+const START=()=>({coins:0,stars:0,sold:0,selected:'red',mode:'guided',palette:['red','yellow','blue'],mixPicks:[],board:blank(),size:3,upgrades:{frames:1,bonus:1,size:3},orders:[],sequence:0,active:null,gallery:[]});
+let state=START();
+try{let config=JSON.parse(localStorage.getItem('oks_iep_config_v1')||'{}');if(['explore','guided','independent'].includes(config.mode))state.mode=config.mode}catch(e){}
+function speak(s){if(!('speechSynthesis'in window))return;try{speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(s);u.lang='ko-KR';u.rate=.87;speechSynthesis.speak(u)}catch(e){}}
+function notice(s,audio=false){$('status').textContent=s;if(audio)speak(s)}
+function persist(){try{localStorage.setItem(SAVE,JSON.stringify(state))}catch(e){notice('저장 공간 부족: 현재 게임은 계속할 수 있습니다.')}}
+function restore(){try{let a=JSON.parse(localStorage.getItem(SAVE)||'null');if(!a||!Array.isArray(a.orders)||!Array.isArray(a.board))return;state={...START(),...a,upgrades:{...START().upgrades,...a.upgrades}};if(!COLORS[state.selected])state.selected='red';if(!['explore','guided','independent'].includes(state.mode))state.mode='guided';}catch(e){}}
+function want(id){
+ let source=DESIGNS[id%DESIGNS.length];
+ if(state.mode==='explore')source=Object.fromEntries(Object.entries(source).filter(([k])=>BASE.includes(k)).slice(0,2));
+ if(!Object.keys(source).length)source={red:2,yellow:1};
+ return {id,ask:{...source},visitor:ANIMALS[id%ANIMALS.length]};
+}
+function fillOrders(){while(state.orders.length<2){state.orders.push(want(state.sequence++))}if(!state.orders.some(x=>x.id===state.active))state.active=state.orders[0].id}
+function current(){return state.orders.find(x=>x.id===state.active)}
+function used(key){return state.board.slice(0,state.size*state.size).filter(x=>x===key).length}
+function niceAsk(o){return Object.entries(o.ask).map(([k,n])=>COLORS[k].name+' '+n+'칸').join(', ')}
+function ready(){
+ let o=current();if(!o)return false;let total=0;
+ for(let [k,n] of Object.entries(o.ask)){if(used(k)!==n)return false;total+=n;}
+ return state.board.slice(0,state.size*state.size).filter(Boolean).length===total;
+}
+function drawBoard(){
+ let el=$('board');el.replaceChildren();el.style.setProperty('--grid',state.size);
+ for(let i=0;i<state.size*state.size;i++){
+  let key=state.board[i],btn=document.createElement('button');btn.type='button';btn.className='cell'+(key?' filled':'');
+  if(key)btn.style.background=COLORS[key].hex;
+  btn.setAttribute('aria-label',(i+1)+'번 칸 '+(key?COLORS[key].name:'빈 칸'));
+  btn.onclick=()=>paint(i);el.append(btn);
+ }
+ $('deliver').disabled=!ready();
+}
+function paint(i){
+ let selected=state.selected;
+ if(selected!=='erase'&&!state.palette.includes(selected)){notice('물감을 두 가지 섞어서 '+COLORS[selected].name+'을 만들어 보아요.');return;}
+ state.board[i]=selected==='erase'?null:selected;persist();drawBoard();drawNeeds();
+ if(ready())notice('🎉 손님이 원하는 색을 정확하게 칠했어요! 작품을 판매해 보아요.',true);
+ else notice((selected==='erase'?'지웠어요!':COLORS[selected].name+'으로 칠했어요!')+' 주문 팔레트를 살펴봐요.');
+}
+function drawNeeds(){
+ let area=$('needed'),o=current();area.replaceChildren();if(!o)return;
+ Object.entries(o.ask).forEach(([key,n])=>{
+ let el=document.createElement('span'),chip=document.createElement('i');chip.className='color-chip';chip.style.background=COLORS[key].hex;
+ el.append(chip,document.createTextNode(COLORS[key].name+' '+used(key)+'/'+n));area.append(el);
+ });
+}
+function drawPalette(){
+ let e=$('palette');e.replaceChildren();state.palette.forEach(key=>{
+  const b=document.createElement('button');b.type='button';b.className='paint'+(state.selected===key?' selected':'');b.setAttribute('aria-pressed',String(state.selected===key));
+  let pot=document.createElement('span');pot.className='paint-pot';pot.style.backgroundColor=COLORS[key].hex;b.append(pot,document.createTextNode(COLORS[key].name));
+  b.onclick=()=>{state.selected=key;persist();drawPalette();notice(COLORS[key].name+' 물감을 선택했어요. 캔버스를 톡톡 눌러 보아요.')};e.append(b);
+ });
+ $('erase').setAttribute('aria-pressed',String(state.selected==='erase'));
+}
+function drawMixer(){
+ let e=$('mixPicks');e.replaceChildren();BASE.forEach(key=>{
+  let b=document.createElement('button');b.type='button';b.style.background=COLORS[key].hex;b.className=state.mixPicks.includes(key)?'picked':'';
+  b.setAttribute('aria-label',COLORS[key].name+' 물감 섞을 색 선택');
+  b.onclick=()=>{if(state.mixPicks.includes(key))state.mixPicks=state.mixPicks.filter(x=>x!==key);else{state.mixPicks.push(key);state.mixPicks=state.mixPicks.slice(-2)}drawMixer()};e.append(b);
+ });
+}
+function mix(){
+ if(state.mixPicks.length!==2){notice('서로 다른 물감 두 가지를 선택해 주세요.');return;}
+ let key=state.mixPicks.slice().sort().join('+'),result=MIX[key];if(!result){notice('물감을 다시 골라 보아요.');return;}
+ if(!state.palette.includes(result))state.palette.push(result);
+ state.selected=result;state.mixPicks=[];persist();drawPalette();drawMixer();notice('🎨 새로운 '+COLORS[result].name+' 물감이 완성됐어요!',true);
+}
+function drawOrders(){
+ let e=$('orders');e.replaceChildren();
+ state.orders.forEach(order=>{
+  let btn=document.createElement('button');btn.className='order'+(order.id===state.active?' active':'');btn.type='button';
+  btn.append(document.createTextNode('🖌️ 손님 '+(order.id+1)+'번'),document.createElement('br'));
+  let header=document.createElement('strong');header.textContent=niceAsk(order);btn.append(header);
+  let colors=document.createElement('div');colors.className='colors';Object.entries(order.ask).forEach(([key,n])=>{
+   let chip=document.createElement('span'),mark=document.createElement('i');mark.className='color-chip';mark.style.background=COLORS[key].hex;chip.append(mark,document.createTextNode(n+'칸'));colors.append(chip);
+  });btn.append(colors);
+  let reward=Object.entries(order.ask).reduce((a,[k,n])=>a+n,0)*3+state.upgrades.bonus*2;
+  let pay=document.createElement('small');pay.textContent='🪙 예상 보상 '+reward+'코인';btn.append(pay);
+  btn.onclick=()=>{if(order.id===state.active)return;state.active=order.id;state.board=blank();persist();render();notice('새 손님 주문! '+niceAsk(order),true)};
+  e.append(btn);
+ });
+}
+function visitor(){
+ let o=current();$('visitor').src='../art/stickers/'+o.visitor+'.png';$('visitor').alt=o.visitor+' 손님';
+ $('stencil').src='../art/stickers/'+o.visitor+'.png';$('stencil').alt='주문한 동물 손님';
+ $('speech').textContent='멋진 그림을 부탁해요! '+niceAsk(o);$('request').textContent='색을 알맞게 칠해 주세요!';
+}
+function makeImage(){
+ const size=state.size,canvas=document.createElement('canvas');canvas.width=500;canvas.height=500;
+ let ctx=canvas.getContext('2d');if(!ctx)return '';
+ ctx.fillStyle='#fffdf1';ctx.fillRect(0,0,500,500);
+ let cell=480/size,pad=10;
+ for(let i=0;i<size*size;i++){
+  let x=pad+(i%size)*cell,y=pad+Math.floor(i/size)*cell;
+  ctx.fillStyle=state.board[i]?COLORS[state.board[i]].hex:'#fffdf0';ctx.fillRect(x+3,y+3,cell-6,cell-6);
+  ctx.strokeStyle='#d6b488';ctx.lineWidth=3;ctx.strokeRect(x+3,y+3,cell-6,cell-6);
+ }
+ return canvas.toDataURL('image/png');
+}
+function drawGallery(){
+ let g=$('gallery');g.replaceChildren();
+ if(!state.gallery.length){g.textContent='아직 전시 작품이 없어요. 첫 작품을 판매하면 전시됩니다.';return;}
+ state.gallery.slice(0,8).forEach(item=>{let i=document.createElement('img');i.src=item;i.alt='완성한 색깔 모자이크 작품';i.style.borderColor=state.upgrades.frames===1?'#c49059':state.upgrades.frames===2?'#c2bec2':'#edc95c';i.style.borderWidth=(5+state.upgrades.frames*2)+'px';g.append(i)});
+}
+function upgrades(){
+ let u=$('upgrades');u.replaceChildren();const entries=[
+ {key:'frames',title:'🖼️ 전시 액자',desc:'더 큰 전시관 이름표',max:3,cost:8},
+ {key:'bonus',title:'🎖️ 인기 공방',desc:'주문 코인 보너스',max:3,cost:15},
+ {key:'size',title:'🪟 넓은 캔버스',desc:'캔버스 칸 늘리기',max:5,cost:12}
+ ];
+ entries.forEach(up=>{
+ let level=state.upgrades[up.key],b=document.createElement('button');b.className='upgrade';b.type='button';b.disabled=level>=up.max||state.coins<up.cost;
+ b.textContent=up.title;let small=document.createElement('small');small.textContent=(level>=up.max?'🏅 최고 단계':up.cost+'코인 · 현재 '+level)+ ' · '+up.desc;b.append(small);
+ b.onclick=()=>{state.coins-=up.cost;state.upgrades[up.key]++;if(up.key==='size')state.size=state.upgrades.size;persist();render();notice('🎊 공방을 확장했어요! '+up.title,true)};
+ u.append(b);
+ });
+}
+function render(){
+ $('coins').textContent=state.coins;$('stars').textContent=state.stars;$('sold').textContent=state.sold;$('mode').value=state.mode;
+ drawBoard();drawPalette();drawMixer();drawNeeds();drawOrders();drawGallery();upgrades();visitor();
+}
+function deliver(){
+ if(!ready())return;
+ let o=current(),image=makeImage(),count=Object.values(o.ask).reduce((a,n)=>a+n,0),payment=count*3+state.upgrades.bonus*2;
+ state.coins+=payment;state.stars+=2;state.sold++;
+ if(image)state.gallery.unshift(image);
+ // Store no more than eight 500x500 PNGs to keep tablet storage manageable.
+ state.gallery=state.gallery.slice(0,8);
+ state.orders=state.orders.filter(x=>x.id!==o.id);state.board=blank();fillOrders();
+ persist();render();notice('🏅 멋진 작품이 판매됐어요! '+payment+'코인과 별 두 개를 받았어요.',true);
+ try{let k='oks_five_subjects_v1',f=JSON.parse(localStorage.getItem(k)||'{}');f['art-01']={completedAt:new Date().toISOString(),task:'마법 미술 공방 주문 모자이크 및 물감 섞기',supportMode:state.mode,mistakes:0,helps:0};localStorage.setItem(k,JSON.stringify(f))}catch(e){}
+}
+$('deliver').onclick=deliver;$('mix').onclick=mix;
+$('erase').onclick=()=>{state.selected='erase';drawPalette();notice('지우개 선택! 다시 칠할 칸을 눌러요.')};
+$('clear').onclick=()=>{state.board=blank();persist();drawBoard();drawNeeds();notice('새 도화지에 다시 그려 보아요!')};
+$('repeat').onclick=()=>speak(niceAsk(current()));
+$('hint').onclick=()=>{
+ let o=current(),remain=Object.entries(o.ask).filter(([k,n])=>used(k)<n);
+ if(!remain.length){let extra=state.board.filter(Boolean).length-Object.values(o.ask).reduce((a,n)=>a+n,0);notice(extra>0?'도화지의 불필요한 색을 지워 볼까요?':'색과 수량을 한 번 더 살펴봐요.',true);return;}
+ let [key,n]=remain[0];notice(COLORS[key].name+'을 '+(n-used(key))+'칸 더 칠해 볼까요? 필요한 색이 없다면 물감을 섞어보아요!',true);
+};
+$('mode').onchange=function(){state.mode=this.value;state.orders=state.orders.map(o=>want(o.id));state.board=blank();state.palette=BASE.slice();state.selected='red';persist();render();notice('지원 수준에 맞게 손님 주문을 조정했어요.')};
+$('saveImage').onclick=()=>{let src=makeImage();if(!src)return;let a=document.createElement('a');a.href=src;a.download='옥쌤-마법-미술-공방.png';a.click()};
+restore();fillOrders();persist();render();
+})();
+</script></body></html>
