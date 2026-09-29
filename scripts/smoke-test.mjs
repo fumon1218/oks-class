@@ -46,6 +46,16 @@ for(const subject of ['korean','math','art','science','social']){
  }
 }
 console.log('PASS 50 mini-game packs and data integrity');
+// Immersive lobby regression checks: one map image/coordinate plane, map-based walking.
+const lobby=fs.readFileSync(path.join(root,'index.html'),'utf8');
+const lobbyCss=fs.readFileSync(path.join(root,'lobby/lobby-v3.css'),'utf8');
+assert(lobby.includes('id="world-map-layer"'),'Missing shared map plane');
+assert(lobby.includes('const stage=document.getElementById(\'world-map-layer\')'),'Character or joystick no longer matches map coordinate plane');
+assert(lobby.includes('worldRecommendedQuest()')&&lobby.includes('toggle-quest'),'Suggested quest HUD unavailable');
+assert(lobby.includes('let img=null;'),'Duplicate page-wide village wallpaper may be present');
+assert(lobbyCss.includes('width:max(100vw,150dvh)'),'Map cover scaling may break image/hotspot alignment');
+assert(lobbyCss.includes('body.is-world .hud-navbar'),'Accessible navigation dock lost');
+console.log('PASS single-image map plane, walk coordinates and immersive HUD');
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 for(const page of pages.slice(1)){assert(sw.includes("'./"+page+"'"),'Not precached: '+page);}
 console.log('PASS '+parsed+' script parse checks, '+links+' static links/assets, curriculum registration & cache references');
