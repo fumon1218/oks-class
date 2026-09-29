@@ -23,7 +23,21 @@ header .name{font-weight:950;font-size:clamp(15px,2vw,22px);color:#34795d}
 .targets{display:flex;flex-direction:column;gap:9px;z-index:2}
 .target{border:5px solid #fff9e2;border-radius:23px;background:#f4dfabed;box-shadow:0 10px 18px #4c573a72;min-height:105px;padding:9px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;font-weight:950;font-size:clamp(13px,2vw,19px);color:#6d522e}
 .target img{height:65px;max-width:105px;object-fit:contain;filter:drop-shadow(0 3px 3px #644b3470)}
-.target.selected{outline:5px solid #72cf95}.target.good{background:#c4ffc9}
+.target.selected{outline:5px solid #72cf95}.target.good{background:#d6ffc9}
+.target{position:relative;overflow:visible;min-height:145px;isolation:isolate}
+.target>img{width:min(135px,100%);max-width:100%;height:92px;object-fit:contain}
+.basket-items{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:116px;max-width:88%;height:70px;display:flex;flex-wrap:wrap;justify-content:center;align-content:center;pointer-events:none;z-index:3}
+.basket-items img{width:29px;height:31px;object-fit:contain;filter:drop-shadow(0 2px 1px #865d3a88);animation:basket-pop .3s ease-out}
+.basket-count{display:block;background:#fffbed;padding:5px 13px;border-radius:99px;font-size:clamp(15px,1.8vw,21px);font-weight:950;box-shadow:0 3px 4px #765d3638}
+.bench-focus{display:flex;justify-content:center;align-items:center;flex-direction:column;gap:7px}
+.bench-focus img{max-width:135px;width:24vw;height:120px;object-fit:contain;filter:drop-shadow(0 8px 4px #79542c66)}
+.bench-focus strong{font-size:clamp(17px,2vw,25px);color:#79532c}
+.bench-progress{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:9px}
+.bench-progress span{width:23px;height:23px;border:3px solid #bb9a5d;border-radius:50%;background:#fff8e4}
+.bench-progress span.filled{background:#4fbf84;border-color:#2b935f;box-shadow:0 2px 7px #419a63a8}
+.flying-fruit{position:fixed;left:0;top:0;width:78px;height:78px;object-fit:contain;z-index:9999;pointer-events:none;filter:drop-shadow(0 7px 5px #4c4d275c);transition:transform .52s cubic-bezier(.24,.6,.27,1),opacity .52s ease;will-change:transform,opacity}
+@keyframes basket-pop{from{transform:scale(.5);opacity:.2}to{transform:scale(1);opacity:1}}
+@media(prefers-reduced-motion:reduce){.flying-fruit{transition:none!important}.basket-items img{animation:none!important}}
 .label{border-radius:50px;background:#fffef0f1;padding:5px 13px;font-weight:950;font-size:clamp(13px,1.7vw,19px)}
 .controls{max-width:1320px;margin:10px auto 0;padding:11px;background:#fffbeded;border:4px solid #fffff8;border-radius:24px;box-shadow:0 10px 22px #245c4d45;position:relative}
 .status{border:3px solid #f4ce8d;background:#fff9e7;border-radius:15px;text-align:center;font-weight:900;color:#684a2d;padding:8px;min-height:43px}
@@ -45,7 +59,7 @@ header .name{font-weight:950;font-size:clamp(15px,2vw,22px);color:#34795d}
 <div class="scene"><div class="friend"><div id="bubble" class="bubble">도와줄래?</div><img src="../art/stickers/rabbit.png" alt="배달을 부탁하는 토끼 친구"></div>
 <div class="stage"><div class="mission" id="mission" aria-live="polite">오늘의 배달 미션을 준비해요.</div><div class="workbench" id="workbench" aria-label="선택한 물건이 놓이는 작업대"></div><div class="label" id="workLabel">바구니 0개</div></div><div class="targets" id="targets" aria-label="분류하거나 나누는 바구니"></div></div>
 <div class="controls"><div id="status" class="status" role="status" aria-live="polite">시작 버튼을 누르면 배달이 시작돼요!</div><div class="deck" id="deck" aria-label="움직일 수 있는 재료"></div><div class="toolrow"><label for="support">활동 지원 </label><select id="support"><option value="explore">🌱 탐색(터치 자동 이동)</option><option value="guided">🍀 선택·조작</option><option value="independent">🌳 문제 해결</option></select><button id="speak" type="button">🔊 다시 듣기</button><button id="hint" type="button">💡 힌트</button><button id="restart" type="button">↻ 다시하기</button><button id="next" type="button" class="go" disabled>다음 미션 ➜</button></div>
-<p style="font-size:12px;color:#667369;text-align:center">과일·채소를 터치하고 바구니를 선택하거나 직접 끌어 놓아 보세요. 탐색 모드에서는 한 번 터치하면 자동으로 옮겨집니다. 제한 시간이나 생명 감소는 없습니다.</p></div>
+<p style="font-size:12px;color:#667369;text-align:center">재료를 한 번 터치하면 알맞은 바구니로 날아가요! 원하는 바구니로 직접 끌어 놓을 수도 있어요. 제한 시간이나 생명 감소는 없습니다.</p></div>
 <div class="end" id="end" hidden><div class="endcard"><h2>🏅 배달 대성공!</h2><p id="endReport"></p><button id="again">12개 미션 다시 시작</button> <a href="index.html?subject=math">수학 교실로</a></div></div>
 </main><script>
 (function(){
@@ -66,7 +80,7 @@ const MISSIONS=[
  {kind:'share',type:'carrot',count:6,baskets:2,title:'당근 공평하게 나누기'},
  {kind:'share',type:'strawberry',count:9,baskets:3,title:'딸기 아홉 개 나누기'}
 ];
-let mode='guided',stage=0,score=0,wrong=0,hints=0,selected=null,placed=[],binCounts=[],done=false,voice=true,pointerMoved=false,dragging=null;
+let mode='guided',stage=0,score=0,wrong=0,hints=0,selected=null,placed=[],binCounts=[],done=false,voice=true,animating=false,roundId=0;
 try{const preset=JSON.parse(localStorage.getItem('oks_iep_config_v1')||'{}');if(['explore','guided','independent'].includes(preset.mode))mode=preset.mode;}catch(e){}
 $('support').value=mode;
 function say(s){if(!voice||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(s);u.lang='ko-KR';u.rate=.84;speechSynthesis.speak(u);}catch(e){}}
@@ -75,38 +89,86 @@ function im(type,cls='fruit'){const image=document.createElement('img');image.sr
 function configureMission(){const m=MISSIONS[stage];if(m.kind==='collect')return names[m.type]+' '+m.n+'개를 바구니에 담아 보세요.';if(m.kind==='sort')return names[m.types[0]]+'와 '+names[m.types[1]]+'를 알맞은 바구니에 분류해 보세요.';return names[m.type]+' '+m.count+'개를 '+m.baskets+'개의 바구니에 똑같이 나누어 보세요.';}
 function updateHud(){$('missionHud').textContent='🎯 미션 '+(stage+1)+'/12 · '+MISSIONS[stage].title;$('score').textContent=score;$('modeHud').textContent=mode==='explore'?'🌱 탐색':mode==='guided'?'🍀 선택·조작':'🌳 문제 해결';}
 function createButton(type,label,fn){const b=document.createElement('button');b.className='item';b.type='button';b.append(im(type));const x=document.createElement('span');x.textContent=label;b.append(x);b.onclick=fn;return b;}
-function basketButton(label,i){const b=document.createElement('button');b.type='button';b.className='target';b.dataset.bin=String(i);b.append(im('basket'));const x=document.createElement('span');x.textContent=label;b.append(x);b.addEventListener('click',()=>drop(i));b.addEventListener('dragover',e=>e.preventDefault());b.addEventListener('drop',e=>{e.preventDefault();drop(i)});return b;}
-function makeDeck(list){const deck=$('deck');deck.replaceChildren();list.forEach((type,i)=>{const b=createButton(type,names[type],()=>choose(type,i));b.dataset.index=String(i);b.draggable=true;b.addEventListener('dragstart',e=>{selected={type,index:i};e.dataTransfer.setData('text/plain',type)});deck.append(b)});}
+function basketButton(label,i){
+ const b=document.createElement('button');b.type='button';b.className='target';b.dataset.bin=String(i);
+ b.append(im('basket'));
+ const contents=document.createElement('div');contents.className='basket-items';contents.setAttribute('aria-hidden','true');b.append(contents);
+ const x=document.createElement('span');x.className='basket-count';x.textContent=label;b.append(x);
+ b.addEventListener('click',()=>drop(i));b.addEventListener('dragover',e=>e.preventDefault());
+ b.addEventListener('drop',e=>{e.preventDefault();if(selected)drop(i)});
+ return b;
+}
+function makeDeck(list){
+ const deck=$('deck');deck.replaceChildren();
+ list.forEach((type,i)=>{
+  const b=createButton(type,names[type]+' · 터치',()=>choose(type,i));
+  b.dataset.index=String(i);b.draggable=true;
+  b.addEventListener('dragstart',e=>{if(done||animating||b.disabled){e.preventDefault();return;}selected={type,index:i};e.dataTransfer.setData('text/plain',type)});
+  b.addEventListener('dragend',()=>{if(!animating)selected=null;});deck.append(b);
+ });
+}
+function renderBench(){
+ const m=MISSIONS[stage],bench=$('workbench');bench.replaceChildren();
+ const block=document.createElement('div');block.className='bench-focus';
+ const picture=im(m.kind==='sort'?m.types[0]:m.type);
+ const title=document.createElement('strong');title.textContent=m.kind==='sort'?'바구니에 분류해요!':m.kind==='share'?'똑같이 나눠 담아요!':'톡! 누르면 바구니로 쏙!';
+ const progress=document.createElement('div');progress.className='bench-progress';progress.setAttribute('aria-hidden','true');
+ const total=m.kind==='collect'?m.n:m.kind==='sort'?m.sequence.length:m.count;
+ for(let n=0;n<total;n++){const dot=document.createElement('span');if(n<placed.length)dot.className='filled';progress.append(dot);}
+ block.append(picture,title,progress);bench.append(block);
+}
+function animateIntoBasket(type,source,target,complete){
+ const reduced=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(reduced||!source||!target){complete();return;}
+ const a=source.getBoundingClientRect(),z=target.getBoundingClientRect(),ghost=im(type,'flying-fruit');
+ const x=a.left+a.width/2-39,y=a.top+a.height/2-39,dx=z.left+z.width/2-39-x,dy=z.top+z.height*.37-39-y;
+ ghost.style.left=x+'px';ghost.style.top=y+'px';document.body.append(ghost);
+ requestAnimationFrame(()=>{ghost.style.transform='translate('+dx+'px,'+dy+'px) scale(.55) rotate(13deg)';ghost.style.opacity='.8'});
+ setTimeout(()=>{ghost.remove();complete()},540);
+}
 function render(){
+ roundId++;document.querySelectorAll('.flying-fruit').forEach(x=>x.remove());animating=false;
  const m=MISSIONS[stage];done=false;selected=null;placed=[];wrong=0;hints=0;binCounts=Array(m.kind==='share'?m.baskets:m.kind==='sort'?2:1).fill(0);
  $('next').disabled=true;$('next').textContent=stage===11?'🏆 전체 마치기':'다음 미션 ➜';
  $('bubble').textContent=stage<4?'재료를 세어 줘!':stage<8?'분류를 도와줘!':'같이 나눠 보자!';
- $('mission').textContent=configureMission();$('workbench').replaceChildren();$('targets').replaceChildren();
+ $('mission').textContent=configureMission();$('workbench').replaceChildren();$('targets').replaceChildren();renderBench();
  if(m.kind==='collect'){$('targets').append(basketButton('0 / '+m.n+'개',0));$('workLabel').textContent='배달 준비: 0 / '+m.n+'개';}
  if(m.kind==='sort'){m.types.forEach((type,i)=>$('targets').append(basketButton(names[type]+' 0개',i)));$('workLabel').textContent='0 / '+m.sequence.length+'개 분류';}
  if(m.kind==='share'){for(let i=0;i<m.baskets;i++)$('targets').append(basketButton((i+1)+'번: 0개',i));$('workLabel').textContent='나눌 재료: '+m.count+'개';}
  let seq=m.kind==='sort'?m.sequence.slice():m.kind==='share'?Array(m.count).fill(m.type):Array(m.n).fill(m.type);
  if(m.kind==='collect'&&mode!=='explore')seq=seq.concat(m.distractors.slice(0,mode==='guided'?1:2));
- makeDeck(seq);if(mode==='explore'&&m.kind==='sort')text('재료를 누르면 알맞은 바구니로 자동 이동해요.');else text('재료를 터치한 뒤 바구니를 골라요. 끌어 놓아도 됩니다.');
+ makeDeck(seq);text('과일을 한 번 터치하면 바구니로 쏙! 직접 끌어 놓아도 돼요.');
  updateHud();say(configureMission());
 }
 function targetFor(type){const m=MISSIONS[stage];return m.kind==='sort'?m.types.indexOf(type):0;}
-function choose(type,index){if(done)return;const m=MISSIONS[stage];if(m.kind==='collect'&&type!==m.type){wrong++;text('주문서와 같은 재료를 찾아봐요.');return;}
- selected={type,index};$('deck').querySelectorAll('.item').forEach(b=>b.classList.toggle('selected',Number(b.dataset.index)===index));
- if(mode==='explore'){const i=m.kind==='share'?binCounts.indexOf(Math.min(...binCounts)):targetFor(type);drop(i);return;}
- text(names[type]+' 선택! 이제 바구니를 눌러 보세요.');
+function choose(type,index){
+ if(done||animating)return;
+ const m=MISSIONS[stage];if(m.kind==='collect'&&type!==m.type){wrong++;text(names[m.type]+'를 찾아봐요!');say(names[m.type]+'를 찾아보세요.');return;}
+ selected={type,index};
+ // A single tap automatically picks the correct target, in every support mode.
+ const bin=m.kind==='share'?binCounts.indexOf(Math.min(...binCounts)):targetFor(type);
+ drop(bin);
 }
 function drop(i){
- if(done||!selected)return;const m=MISSIONS[stage],type=selected.type;
- if(m.kind==='sort'&&m.types[i]!==type){wrong++;text('이 재료에 맞는 바구니를 찾아봐요.');return;}
- if(m.kind==='share'&&binCounts[i]>=m.count/m.baskets){wrong++;text('이 바구니에는 이미 충분히 담았어요. 다른 바구니를 골라요.');return;}
- const image=im(type);$('workbench').append(image);binCounts[i]++;placed.push(type);
- const btn=$('deck').querySelector('[data-index="'+selected.index+'"]');if(btn)btn.disabled=true;selected=null;
- const targets=$('targets').querySelectorAll('.target');targets.forEach((t,j)=>{const label=t.lastElementChild;if(m.kind==='sort')label.textContent=names[m.types[j]]+' '+binCounts[j]+'개';else if(m.kind==='share')label.textContent=(j+1)+'번: '+binCounts[j]+'개';else label.textContent=binCounts[j]+' / '+m.n+'개';});
- $('workLabel').textContent=m.kind==='collect'?'배달 준비: '+placed.length+' / '+m.n+'개':m.kind==='sort'?placed.length+' / '+m.sequence.length+'개 분류':'나눌 재료: '+(m.count-placed.length)+'개';
- let target=m.kind==='collect'?m.n:m.kind==='sort'?m.sequence.length:m.count;
- if(placed.length===target){done=true;score+=10;$('next').disabled=false;text('⭐ 성공! '+MISSIONS[stage].title+' 완료! 다음으로 이동해요.');say('잘했어요! 배달 성공!');targets.forEach(t=>t.classList.add('good'));storeProgress();}
- else{text('좋아요! '+(target-placed.length)+'개 더 남았어요.');}
+ if(done||animating||!selected)return;
+ const m=MISSIONS[stage],type=selected.type;
+ if(m.kind==='sort'&&m.types[i]!==type){wrong++;text('재료에 맞는 바구니를 찾아봐요.');return;}
+ if(m.kind==='share'&&binCounts[i]>=m.count/m.baskets){wrong++;text('이 바구니는 충분해요. 다른 바구니를 찾아봐요.');return;}
+ const source=$('deck').querySelector('[data-index="'+selected.index+'"]'),target=$('targets').querySelector('[data-bin="'+i+'"]');
+ if(!source||source.disabled||!target){selected=null;return;}
+ animating=true;const current=roundId;source.disabled=true;source.classList.add('selected');selected=null;
+ animateIntoBasket(type,source,target,()=>{
+  if(current!==roundId)return;
+  const contents=target.querySelector('.basket-items');if(contents)contents.append(im(type,''));
+  binCounts[i]++;placed.push(type);
+  target.querySelector('.basket-count').textContent=m.kind==='sort'?names[m.types[i]]+' '+binCounts[i]+'개':m.kind==='share'?(i+1)+'번: '+binCounts[i]+'개':binCounts[i]+' / '+m.n+'개';
+  $('workLabel').textContent=m.kind==='collect'?'배달 준비: '+placed.length+' / '+m.n+'개':m.kind==='sort'?placed.length+' / '+m.sequence.length+'개 분류':'나눌 재료: '+(m.count-placed.length)+'개';
+  renderBench();const total=m.kind==='collect'?m.n:m.kind==='sort'?m.sequence.length:m.count;animating=false;
+  if(placed.length===total){
+   done=true;score+=10;$('next').disabled=false;updateHud();text('🎉 모두 담았어요! 다음 미션을 눌러요.');say('잘했어요! 미션 성공!');
+   $('targets').querySelectorAll('.target').forEach(t=>t.classList.add('good'));storeProgress();
+  }else{text('쏙! '+(total-placed.length)+'개 더 담아 볼까요?');}
+ });
 }
 function storeProgress(){
  try{const key='oks_math_fruit_quest_v1',old=JSON.parse(localStorage.getItem(key)||'{}');old.stages=Array.isArray(old.stages)?old.stages:[];if(!old.stages.includes(stage))old.stages.push(stage);old.updatedAt=new Date().toISOString();old.support=mode;old.lastScore=score;localStorage.setItem(key,JSON.stringify(old));if(stage===11){const k='oks_five_subjects_v1',s=JSON.parse(localStorage.getItem(k)||'{}');s['math-01']={completedAt:new Date().toISOString(),task:'과일·채소 배달 12개 단계',supportMode:mode,mistakes:wrong,helps:hints};localStorage.setItem(k,JSON.stringify(s));}}catch(e){}
@@ -117,8 +179,7 @@ $('speak').onclick=()=>say(configureMission());
 $('hint').onclick=()=>{hints++;const m=MISSIONS[stage];const s=m.kind==='collect'?'부탁한 재료와 같은 그림을 찾아요.':m.kind==='sort'?'재료 이름과 바구니 이름을 연결해요.':'각 바구니에 하나씩 번갈아 담아 보아요.';text(s);say(s)};
 $('restart').onclick=render;
 $('again').onclick=()=>{stage=0;score=0;$('end').hidden=true;render()};
-document.addEventListener('pointerup',e=>{if(!selected||!dragging)return;const t=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-bin]');if(t)drop(Number(t.dataset.bin));dragging=null});
-$('deck').addEventListener('pointerdown',e=>{const item=e.target.closest('.item');if(item)dragging=item});
+// Drag-and-drop remains optional; one tap is the primary action.
 render();
 })();
 </script></body></html>
