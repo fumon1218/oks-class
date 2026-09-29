@@ -53,7 +53,7 @@ jobs:
                 young:document.querySelectorAll('.plot .plant-window').length,
                 packed:tray?.querySelectorAll('.basket-produce').length,
                 frontInBasket:!!front,frontClip:front?getComputedStyle(front).clipPath:null,
-                guests:[...document.querySelectorAll('.customer-actor img')].map(i=>i.getAttribute('src')),
+                guests:[...document.querySelectorAll('.customer-actor > img')].map(i=>i.getAttribute('src')),
                 dockBottom:document.querySelector('.action-dock').getBoundingClientRect().bottom
               }
             });
