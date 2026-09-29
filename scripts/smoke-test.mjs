@@ -6,7 +6,7 @@ import vm from 'node:vm';
 // GitHub Pages game smoke checks: no npm dependencies and no generated content.
 // This checks parse-time errors and local link targets, not touch/visual behavior.
 const root=path.resolve(import.meta.dirname,'..');
-const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','curriculum/reports.html','minigames/index.html','minigames/math-fruit.html','minigames/math-tycoon.html','minigames/art-tycoon.html','quests/index.html'];
+const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','curriculum/reports.html','minigames/index.html','minigames/math-fruit.html','minigames/math-tycoon.html','minigames/math-tycoon-v2.html','minigames/art-tycoon.html','quests/index.html'];
 let parsed=0,links=0;
 for(const relative of pages){
   const src=fs.readFileSync(path.join(root,relative),'utf8');
@@ -65,7 +65,7 @@ assert(mathFruit.includes("contents.append(im(type,''))"),'Basket must visually 
 console.log('PASS direct tap, animated basket fill and live fruit count');
 assert(mathFruit.includes("const MISSIONS=[")&&mathFruit.includes("m.kind==='share'")&&mathFruit.includes("m.kind==='sort'"),"Immersive 12-stage game systems missing");
 assert(mathFruit.includes("art/stickers/rabbit.png")&&mathFruit.includes("art/stickers/strawberry.png"),"Existing 3D animal or produce art integration missing");
-assert(fs.readFileSync(path.join(root,'minigames/index.html'),'utf8').includes('href="math-tycoon.html"'),'Math tycoon entry not linked');
+assert(fs.readFileSync(path.join(root,'minigames/index.html'),'utf8').includes('href="math-tycoon-v2.html"'),'Immersive math tycoon entry not linked');
 const tycoon=fs.readFileSync(path.join(root,'minigames/math-tycoon.html'),'utf8');
 for(const marker of ["function tapPlot(index)","function autoWater()","function autoHarvest()","function checkoutAnswer(value,o)","function buyUpgrade(up)","function pack(key,source)","function safeRestore()","ORDER_TEMPLATES=[","localStorage.setItem(SAVE"]){
  assert(tycoon.includes(marker),'Missing tycoon loop: '+marker);
@@ -73,7 +73,14 @@ for(const marker of ["function tapPlot(index)","function autoWater()","function 
 assert(tycoon.includes('href="math-fruit.html"'),'Original 12-stage practice must remain available');
 assert(tycoon.includes('if(state.pending!==null)'),'Checkout must guard customer order zero as an active pending order');
 assert(!tycoon.includes('Boolean(state.pending)'),'Never rely on falsy first-order ID zero');
-assert(fs.readFileSync(path.join(root,'quests/index.html'),'utf8').includes("link:'../minigames/math-tycoon.html'"),'Integrated math quest must link tycoon');
+assert(fs.readFileSync(path.join(root,'quests/index.html'),'utf8').includes("link:'../minigames/math-tycoon-v2.html'"),'Integrated math quest must link tycoon');
+const immersive=fs.readFileSync(path.join(root,'minigames/math-tycoon-v2.html'),'utf8');
+for(const marker of ['class="game-shell"','class="customer-line"','class="pack-station"','id="seedShelf"','renderPlots=function()','renderVisitor=function()','renderTray=function()','checkoutAnswer=function(value,o)']){
+ assert(immersive.includes(marker),'Immersive scene missing: '+marker);
+}
+assert(immersive.includes("SAVE='oks_math_tycoon_v1'"),'Existing farm progress storage key must stay compatible');
+assert(fs.readFileSync(path.join(root,'index.html'),'utf8').includes("minigames/math-tycoon-v2.html"),'Village maths building must open new game');
+console.log('PASS immersive farm: stage, 3D image sprites, customer queue, visual packing, shared progress');
 console.log('PASS new tycoon: planting, watering, harvesting, packing, checkout, upgrades and saved progress');
 console.log('PASS immersive math workshop linked and core systems present');
 const artTycoon=fs.readFileSync(path.join(root,'minigames/art-tycoon.html'),'utf8');

@@ -2716,7 +2716,7 @@ function onGlobalAction(e){
   else if(action==='go-room'){
     const btn=e.currentTarget;
     const room=btn.getAttribute('data-room')||route.room;
-    const doNav=()=>{ if(room==='word'){window.location.href='korean/index.html';return;}if(room==='number'){window.location.href='minigames/math-tycoon.html';return;}if(room==='science'||room==='social'){const subject={science:'science',social:'social'}[room];window.location.href='minigames/index.html?subject='+subject;return;}worldDirectoryOpen=false;route.view='room'; route.room=room; route.subject=null; route.method=null; runtime=null; render(); };
+    const doNav=()=>{ if(room==='word'){window.location.href='korean/index.html';return;}if(room==='number'){window.location.href='minigames/math-tycoon-v2.html';return;}if(room==='science'||room==='social'){const subject={science:'science',social:'social'}[room];window.location.href='minigames/index.html?subject='+subject;return;}worldDirectoryOpen=false;route.view='room'; route.room=room; route.subject=null; route.method=null; runtime=null; render(); };
     if(btn.closest('.world-hero')) walkAvatarTo(btn, doNav); else doNav();
   }
   else if(action==='go-path'){ route.view='path'; route.subject=e.currentTarget.getAttribute('data-subject'); route.method=null; runtime=null; render(); }
