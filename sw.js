@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v25';
+const CACHE_NAME = 'oks-class-v26';
 const ASSETS = [
   './',
   './index.html',
@@ -24,10 +24,14 @@ const ASSETS = [
   './icons/apple-touch-icon.png'
 ];
 
+const OPTIONAL_ASSETS = ['./art/scenes/town_spring_hd.webp'];
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(ASSETS))
+      .then((cache) => cache.addAll(ASSETS).then(() => Promise.all(
+        OPTIONAL_ASSETS.map((path) => cache.add(path).catch(() => null))
+      )))
       .then(() => self.skipWaiting())
   );
 });
@@ -59,13 +63,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // A previously missing high-resolution image must not be stuck behind a cached 404.
+  const newMap = event.request.url.includes('/art/scenes/town_spring_hd.webp');
+  if(newMap){
+    event.respondWith(fetch(event.request).then((response)=>{
+      if(response.ok){const copy=response.clone();caches.open(CACHE_NAME).then(cache=>cache.put(event.request,copy));}
+      return response;
+    }).catch(()=>caches.match(event.request)));
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then((cached) => {
-      if (cached) return cached;
+      if (cached && cached.ok) return cached;
       return fetch(event.request)
         .then((response) => {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          if(response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
         })
         .catch(() => caches.match('./index.html'));
