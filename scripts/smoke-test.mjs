@@ -107,6 +107,11 @@ for(const marker of ['grid-template-areas:"garden guests" "garden farmer" "store
 }
 assert(mockup.includes("farmer.src='../art/stickers/rabbit.png'"),'Incomplete bunny must be temporarily replaced with intact farmer');
 assert(fs.readFileSync(path.join(root,'sw.js'),'utf8').includes('farm-responsive-v5.css'),'New farm responsive CSS must be precached');
+assert(mockup.includes("farmer.src='../art/farm/v4/rabbit_full.webp'"),'Approved complete-armed rabbit should load after image import');
+const importer=fs.readFileSync(path.join(root,'.github/workflows/import-farm-characters.yml'),'utf8');
+assert(importer.includes("'art/farm/v4/rabbit_full.webp'"),'ZIP importer must install new full-armed image');
+assert(importer.includes('if ! unzip -Z1'), 'Partial character ZIP must keep other animals');
+console.log('PASS uploaded complete-armed rabbit preference and rabbit-only ZIP import');
 console.log('PASS iPhone landscape collision prevention and intact bunny fallback');
 assert(mockup.includes('function styledFarmAnimal(name,alt)'),'User-provided premium animal asset resolver missing');
 assert(mockup.includes("'../art/farm/v4/'+name+'.webp'"),'Preferred user-provided animal image paths missing');
