@@ -164,17 +164,17 @@
       "games": [
         {
           "id": "math-01",
-          "title": "몇 개일까?",
-          "activity": "실물·그림의 개수 세기",
-          "status": "prototype",
+          "title": "과일 농장 타이쿤",
+          "activity": "작물 재배·수량 대응·다양한 주문 수량 포장·총액 계산·가게 운영",
+          "status": "prototype-tycoon",
           "verifiedStandardCodes": [],
           "supportModes": [
             "explore",
             "guided",
             "independent"
           ],
-          "implementation": "minigames/index.html?subject=math",
-          "note": "공통 게임 엔진으로 작동하는 1차 활동입니다. 교과별 전용 그래픽과 정밀한 성취기준 연결은 후속 개선."
+          "implementation": "minigames/math-tycoon.html",
+          "note": "완료 시 5교과 활동 기록에 연동하는 다회 플레이형 농장 타이쿤 1차 구현. 16개 주문 템플릿의 반복/변형이며 공식 16개 성취기준과 동일하지 않음."
         },
         {
           "id": "math-02",
