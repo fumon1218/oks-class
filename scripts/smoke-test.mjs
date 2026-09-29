@@ -6,7 +6,7 @@ import vm from 'node:vm';
 // GitHub Pages game smoke checks: no npm dependencies and no generated content.
 // This checks parse-time errors and local link targets, not touch/visual behavior.
 const root=path.resolve(import.meta.dirname,'..');
-const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','curriculum/reports.html','minigames/index.html','minigames/math-fruit.html','minigames/math-tycoon.html','quests/index.html'];
+const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','curriculum/reports.html','minigames/index.html','minigames/math-fruit.html','minigames/math-tycoon.html','minigames/art-tycoon.html','quests/index.html'];
 let parsed=0,links=0;
 for(const relative of pages){
   const src=fs.readFileSync(path.join(root,relative),'utf8');
@@ -76,6 +76,12 @@ assert(!tycoon.includes('Boolean(state.pending)'),'Never rely on falsy first-ord
 assert(fs.readFileSync(path.join(root,'quests/index.html'),'utf8').includes("link:'../minigames/math-tycoon.html'"),'Integrated math quest must link tycoon');
 console.log('PASS new tycoon: planting, watering, harvesting, packing, checkout, upgrades and saved progress');
 console.log('PASS immersive math workshop linked and core systems present');
+const artTycoon=fs.readFileSync(path.join(root,'minigames/art-tycoon.html'),'utf8');
+for(const marker of ["function paint(i)","function mix()","function deliver()","function upgrades()","function makeImage()","DESIGNS=[","SAVE='oks_art_tycoon_v1'"]){assert(artTycoon.includes(marker),'Missing art tycoon system '+marker);}
+assert(fs.readFileSync(path.join(root,'minigames/index.html'),'utf8').includes('href="art-tycoon.html"'),'Art arcade entry missing');
+assert(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('href="minigames/art-tycoon.html"'),'Art room entry missing');
+assert(fs.readFileSync(path.join(root,'quests/index.html'),'utf8').includes("link:'../minigames/art-tycoon.html'"),'Art spring quest not linked');
+console.log('PASS 16-template art paint-shop tycoon: mixing, drawing, selling, gallery, upgrades');
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
 for(const page of pages.slice(1)){assert(sw.includes("'./"+page+"'"),'Not precached: '+page);}
 console.log('PASS '+parsed+' script parse checks, '+links+' static links/assets, curriculum registration & cache references');
