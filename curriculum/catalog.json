@@ -35,7 +35,8 @@
         "쓰기 별: 음절 따라 쓰기",
         "단어 별: 생활 낱말 쓰기",
         "조립 별: 낱말 구성",
-        "이야기 별: 문장 읽기·구성"
+        "이야기 별: 문장 읽기·구성",
+        "글자 받기: 원본 Stage1 낙하형 미니게임의 터치·방향키 적응 버전"
       ],
       "url": "korean/index.html"
     },
@@ -312,6 +313,17 @@
       "path": "korean/index.html",
       "source": "사용자 업로드 word-master-main.zip",
       "note": "워드 마스터 5단계 구조·기초 학습자료 기반의 경량 연계 시범판. 원본 React 앱의 완전 이식은 별도 개발. 학년별 성취기준 1:1 일치 자동 판정 불가"
+    },
+    {
+      "id": "wordmaster-falling-sound",
+      "status": "pilot",
+      "subjects": [
+        "국어",
+        "일상생활 활동 중 의사소통"
+      ],
+      "path": "korean/catch.html",
+      "source": "사용자 업로드 word-master-main.zip - components/Stage1Game.tsx + constants.ts",
+      "note": "원본의 낙하 글자+이동 바구니 게임 동작을 참고해 독립 HTML로 재구현. 시각적 강조, 정적 탭 대안, 힌트, 무제한 재도전은 특수교육 접근성 확장; 학생의 교육 성취 자동 판정 아님."
     }
   ]
 }
