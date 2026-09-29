@@ -1,0 +1,12 @@
+/* Clear prices and distinct staff/customer roles. */
+.mission-bar{width:min(96%,980px)!important;max-width:980px!important}
+.unit-prices{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:5px;margin:5px auto 0}
+.price-chip{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;min-height:27px;border:2px solid #e1b87a;border-radius:16px;padding:2px 9px;background:#fffaf1e8;color:#705034;font-size:clamp(12px,1.03vw,15px);font-weight:950;text-shadow:none}
+.helper .speech{font-size:clamp(11px,1vw,15px)!important;line-height:1.35!important;max-width:70%!important}
+.customer-actor .order-bubble{width:min(98%,165px)!important;max-width:165px!important}
+.customer-actor .order-bubble small{display:block;font-size:clamp(8px,.65vw,10px)!important;line-height:1.15;color:#715335}
+.customer-actor .order-bubble>span{display:block;margin-top:2px;font-size:clamp(10px,.8vw,12px);font-weight:950}
+#checkoutQuestion{white-space:pre-line;font-size:clamp(16px,2vw,23px);line-height:1.6;background:#fff9e9;border:2px solid #edcb8c;border-radius:18px;padding:12px;margin:10px auto}
+#checkoutHint{color:#84512d;font-weight:950;line-height:1.4}
+@media(max-width:900px){.mission-bar{width:96%!important}.price-chip{font-size:13px;padding:2px 6px}.helper .speech{max-width:68%!important}.customer-actor .order-bubble{width:min(100%,145px)!important}.customer-actor .order-bubble small{font-size:9px!important}}
+@media(max-width:460px){.unit-prices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px}.price-chip{font-size:12px;min-height:24px;padding:2px 5px}.customer-actor .order-bubble{width:100%!important;max-width:115px!important}.customer-actor .order-bubble small{font-size:8px!important}}
