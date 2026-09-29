@@ -16,3 +16,9 @@
 원본은 배경 투명도 유지, 이미지 재저장으로 인한 추가 손실 없이 보관합니다. 고객 안내와 화분/바구니 개선은 이미 운영 앱 코드에 적용돼 있으며 이 등록 작업은 **새로 받은 동물 원본을 실제 바이너리 경로에 추가하는 마지막 과정**입니다.
 
 ZIP을 GitHub 폴더에 그대로 넣어서는 동물이 교체되지 않습니다. 압축을 풀고 4개 WebP 파일만 `art/farm/v4/` 경로로 업로드해야 합니다.
+
+## ZIP 한 파일로 간편 등록
+
+GitHub 화면에서 일일이 네 파일을 선택하지 않으려면, 준비한 **`farm_v4_latest_upload.zip` 한 개만** [이 경로](https://github.com/fumon1218/oks-class/upload/main/art/farm/v4)에 추가하고 커밋하세요. `.github/workflows/import-farm-characters.yml` 워크플로가 ZIP에 들어 있는 정확한 `rabbit.webp`, `monkey.webp`, `cat.webp`, `panda.webp` 네 파일을 추출해 설치하고 서비스 워커 캐시를 갱신합니다. 정상적으로 등록되면 ZIP 자체는 자동으로 제거됩니다. ZIP 안에는 최상위 경로에 네 WebP 파일이 있어야 합니다.
+
+작업 전후 이미지가 보이지 않는 경우 [GitHub Actions](https://github.com/fumon1218/oks-class/actions)에서 `Import farm character ZIP` 실행 결과를 확인하세요. 운영 저장소의 브랜치 보호 또는 워크플로의 쓰기 권한이 차단되면 자동 커밋이 실패할 수 있습니다.

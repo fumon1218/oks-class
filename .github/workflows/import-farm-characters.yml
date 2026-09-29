@@ -1,0 +1,64 @@
+name: Import farm character ZIP
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'art/farm/v4/farm_v4_latest_upload.zip'
+permissions:
+  contents: write
+concurrency:
+  group: farm-v4-character-import
+  cancel-in-progress: false
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Check zip and install exact four animal images
+        id: install
+        shell: bash
+        run: |
+          set -euo pipefail
+          ZIP='art/farm/v4/farm_v4_latest_upload.zip'
+          if [ ! -f "$ZIP" ]; then
+            echo 'The archive has already been imported'; echo 'done=false' >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          test "$(stat -c %s "$ZIP")" -lt 10000000
+          mkdir -p /tmp/oks-animals
+          # Extract only the four expected source files from the ZIP root.
+          for name in rabbit monkey cat panda; do
+            unzip -p "$ZIP" "$name.webp" > "/tmp/oks-animals/$name.webp"
+            test "$(stat -c %s "/tmp/oks-animals/$name.webp")" -gt 1000
+            test "$(stat -c %s "/tmp/oks-animals/$name.webp")" -lt 2000000
+            mime="$(file --mime-type -b "/tmp/oks-animals/$name.webp")"
+            test "$mime" = 'image/webp'
+            cp "/tmp/oks-animals/$name.webp" "art/farm/v4/$name.webp"
+          done
+          rm "$ZIP"
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path('sw.js')
+          src=p.read_text()
+          m=re.search(r'oks-class-v(\d+)',src)
+          assert m
+          src=src.replace(m.group(0),'oks-class-v'+str(int(m.group(1))+1),1)
+          anchor="  './minigames/farm-props-v4.css',"
+          assert anchor in src
+          for name in ['rabbit','monkey','cat','panda']:
+              item=f"  './art/farm/v4/{name}.webp',"
+              if item not in src:
+                  src=src.replace(anchor,anchor+'\n'+item,1)
+          p.write_text(src)
+          PY
+          echo 'done=true' >> "$GITHUB_OUTPUT"
+      - name: Commit the four original premium sprites
+        if: steps.install.outputs.done == 'true'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A art/farm/v4/ sw.js
+          git commit -m 'art: apply supplied premium farm farmer and customers'
+          git push origin HEAD:main
