@@ -112,6 +112,13 @@ const importer=fs.readFileSync(path.join(root,'.github/workflows/import-farm-cha
 assert(importer.includes("'art/farm/v4/rabbit_full.webp'"),'ZIP importer must install new full-armed image');
 assert(importer.includes('if ! unzip -Z1'), 'Partial character ZIP must keep other animals');
 console.log('PASS uploaded complete-armed rabbit preference and rabbit-only ZIP import');
+const clean=fs.readFileSync(path.join(root,'minigames/farm-clean-v6.css'),'utf8');
+for(const marker of ['grid-template-areas:"garden guests" "garden farmer" "store packing"','grid-area:garden','grid-area:guests','grid-area:farmer','grid-area:packing','grid-area:store','position:relative!important']){
+ assert(clean.includes(marker),'Missing clean stage zone: '+marker);
+}
+assert(mockup.includes('href="farm-clean-v6.css"'),'Farm screen must load final clean grid');
+assert(fs.readFileSync(path.join(root,'sw.js'),'utf8').includes('./minigames/farm-clean-v6.css'),'Farm clean grid must precache');
+console.log('PASS cleaned farm layout replaces absolute positioning');
 console.log('PASS iPhone landscape collision prevention and intact bunny fallback');
 assert(mockup.includes('function styledFarmAnimal(name,alt)'),'User-provided premium animal asset resolver missing');
 assert(mockup.includes("'../art/farm/v4/'+name+'.webp'"),'Preferred user-provided animal image paths missing');
