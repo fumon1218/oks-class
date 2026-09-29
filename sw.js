@@ -21,6 +21,7 @@ const ASSETS = [
   './minigames/farm-props-v4.css',
   './art/farm/v4/rabbit_full.webp',
   './minigames/farm-responsive-v5.css',
+  './minigames/farm-clean-v6.css',
   './art/farm/v4/panda.webp',
   './art/farm/v4/cat.webp',
   './art/farm/v4/monkey.webp',
