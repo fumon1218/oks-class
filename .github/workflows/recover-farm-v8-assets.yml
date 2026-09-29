@@ -1,0 +1,91 @@
+name: Restore missing 52 illustrated farm assets
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/recover-farm-v8-assets.yml'
+permissions:
+  contents: write
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Recover original user's artwork from existing uploaded GitHub commit
+        run: |
+          set -euo pipefail
+          git show 0917e6e4:art/farm/install/farm_v8_install.zip > /tmp/farm_v8_original.zip
+          python3 - <<'PY'
+          from zipfile import ZipFile
+          from pathlib import Path
+          import re
+          root=Path('minigames/farm-v8/assets')
+          with ZipFile('/tmp/farm_v8_original.zip') as archive:
+            entries=[x for x in archive.infolist() if x.filename.startswith('minigames/farm-v8/assets/') and x.filename.endswith('.webp')]
+            assert len(entries)==52, f'Expected 52 exact original sprites, got {len(entries)}'
+            for entry in entries:
+              assert 0 < entry.file_size < 6_000_000
+              filename=entry.filename.removeprefix('minigames/farm-v8/assets/')
+              assert re.fullmatch(r'[A-Za-z0-9_-]+\.webp',filename),filename
+              output=root/filename
+              output.parent.mkdir(parents=True,exist_ok=True)
+              data=archive.read(entry)
+              assert data[:4]==b'RIFF' and data[8:12]==b'WEBP',filename
+              output.write_bytes(data)
+          assert len(list(root.glob('*.webp')))==52
+          print('Recovered all 52 original WebP images from historical GitHub ZIP.')
+          PY
+          git add -f minigames/farm-v8/assets/*.webp
+          test "$(git diff --cached --name-only | grep -c '^minigames/farm-v8/assets/.*\.webp$')" -eq 52
+          node --check minigames/farm-v8/game.js
+          node scripts/smoke-test.mjs
+      - name: Browser-test that artwork really loads
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          python3 -m http.server 8877 >/tmp/farm-art-qa-server.log 2>&1 &
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+            const page=await browser.newPage({viewport:{width:1672,height:941}});
+            const errors=[];
+            const missing=[];
+            page.on('pageerror',e=>errors.push(e.message));
+            page.on('response',r=>{if(r.url().includes('/farm-v8/assets/')&&!r.ok())missing.push(r.url()+' '+r.status())});
+            await page.goto('http://127.0.0.1:8877/minigames/farm-v8/index.html',{waitUntil:'load'});
+            await page.waitForTimeout(900);
+            const outcome=await page.evaluate(()=>{
+              const imgs=[...document.querySelectorAll('img')];
+              return {
+                images:imgs.length,
+                loaded:imgs.filter(i=>i.complete&&i.naturalWidth>0).length,
+                broken:imgs.filter(i=>i.complete&&!i.naturalWidth).map(i=>i.getAttribute('src')),
+                background:getComputedStyle(document.querySelector('#scenic')).backgroundImage,
+                plots:document.querySelectorAll('#farm-field .plot').length,
+                guests:document.querySelectorAll('#customers .guest').length
+              };
+            });
+            require('fs').mkdirSync('qa',{recursive:true});
+            await page.screenshot({path:'qa/farm-v8-art-restored.png',fullPage:true});
+            console.log('RESTORED_FARM_RENDER',JSON.stringify({outcome,missing,errors}));
+            await browser.close();
+            if(missing.length||errors.length||outcome.broken.length||outcome.loaded<10||outcome.plots!==6||outcome.guests!==3){
+              process.exit(1);
+            }
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recovered-illustrated-farm-screenshot
+          path: qa/farm-v8-art-restored.png
+      - name: Publish verified original illustration assets
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'fix: restore all 52 original illustrated farm assets ignored at install'
+          git push origin HEAD:main
