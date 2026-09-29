@@ -173,8 +173,8 @@
             "guided",
             "independent"
           ],
-          "implementation": "minigames/math-tycoon-v2.html",
-          "note": "몰입형 3D 스타일 농장 무대와 애니메이션으로 개편, 재배·포장·배달·정산 반복. 실시간 3D 엔진이 아닌 3D 이미지 기반 게임."
+          "implementation": "minigames/math-tycoon-v3.html",
+          "note": "승인된 시안의 공간 구성(농장 좌측, 중앙 토끼, 우측 동물 손님 셋 중 둘 활성 주문, 전경 포장 작업대)에 맞춰 다시 제작한 HTML/CSS 3D 이미지 게임. 완전 동일한 전용 일러스트는 별도 제작 필요."
         },
         {
           "id": "math-02",

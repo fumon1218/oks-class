@@ -1,0 +1,215 @@
+/* FARM TYCOON v3 — composition keyed to the approved warm flower-filled mockup.
+   3D-rendered 2D sprites from Jungle Jump; no fabricated WebGL claim. */
+:root{--frame:#805027;--honey:#ffd177}
+body{background:#352218!important}
+.game-shell{
+ width:min(100%,1780px);margin:0 auto;min-height:100dvh;isolation:isolate;
+ border:clamp(0px,2.8vw,42px) solid #362314;border-radius:clamp(0px,3vw,43px);
+ box-shadow:inset 0 0 0 10px #8c5d38,0 16px 45px #130d09b0;
+ background:
+ url("farm-floral-v3.svg") center / cover no-repeat,
+ radial-gradient(circle at 12% 68%,#f9da7999 0%,transparent 31%),
+ linear-gradient(180deg,#f0b47140 0%,#fee1a236 55%,#dfac6650 100%),
+ url("https://fumon1218.github.io/jungle-jump/assets/wj/farm/bg_farm.jpg") center/cover no-repeat!important;
+ overflow:hidden;position:relative;
+}
+.game-shell:before{background:
+ linear-gradient(90deg,#f4cc7444,transparent 28%,transparent 78%,#f6e2a044),
+ linear-gradient(#a2e8e900,#fff3c241 65%,#ffd1807a);
+ opacity:.85}
+.game-shell:after{
+ content:"";position:absolute;z-index:0;inset:auto -2% 0 -2%;height:29%;
+ background:linear-gradient(180deg,#f1bb783d 0%,#d99a56ba 50%,#a46535e5 100%);
+ border-top:13px ridge #daa36a;pointer-events:none
+}
+.hud{max-width:1480px;margin:0 auto;gap:6px;padding:13px 15px 2px}
+.hud .brand{
+ font-size:clamp(22px,2.35vw,37px);border:0;border-radius:15px 25px 30px 20px;
+ background:linear-gradient(165deg,#995728,#6d361d);padding:11px 26px;
+ box-shadow:inset 0 2px #e9af63,0 8px #4f2a1e,0 15px 18px #3f30227a;
+ transform:rotate(-1deg);text-shadow:0 3px 2px #401d0d
+}
+.hud .stats span{
+ background:linear-gradient(#b5732e,#6d3a1e);
+ border:4px solid #ffd99a;box-shadow:inset 0 2px #fff8c2a1,0 5px #49301e8a;
+ border-radius:30px;padding:8px 14px;font-size:clamp(15px,1.7vw,24px)
+}
+.hud .xbtn{background:#fff9e8;border:4px solid #daae71;font-size:14px}
+.mission-bar{
+ margin:6px auto 1px;padding:7px 15px;max-width:600px;
+ background:linear-gradient(#fff9e6,#f2cd87);border:5px solid #9c6639;
+ color:#885023;box-shadow:inset 0 3px #fff9ef,0 8px #49332383;
+ border-radius:30px;font-size:clamp(17px,1.9vw,25px);
+}
+.mission-bar .tiny{font-size:12px;color:#7a552d}
+.arena{max-width:1530px;width:100%;height:clamp(620px,56vw,840px);min-height:0;padding:10px 12px 120px}
+.garden-wrap{
+ position:absolute;z-index:3;left:2%;top:13%;width:52%;height:68%;
+ border:0;border-radius:0;background:transparent;box-shadow:none;padding:0
+}
+.garden-header{
+ position:absolute;z-index:5;top:-12px;left:1%;padding:12px 25px;
+ background:linear-gradient(#a96b35,#78421e);border:5px ridge #e7b46b;border-radius:18px;
+ box-shadow:0 9px 9px #56321cb8;font-size:clamp(17px,1.6vw,23px)
+}
+.plots{position:absolute;inset:45px 0 0 0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:1px}
+.plot{
+ min-height:0;height:100%;background-size:100% 103%;
+ border:0;padding:0;margin:0;filter:drop-shadow(0 10px 5px #543b287b);
+}
+.plot .plant{width:94%;height:103%;max-height:100%;transform:translateY(-7%);
+ filter:drop-shadow(0 9px 5px #51442169);animation:grow-sway 3.2s ease-in-out infinite}
+.plot[data-phase="ready"] .plant{animation:ready-pulse 2s ease-in-out infinite}
+.plot .plot-label{
+ bottom:6%;font-size:clamp(11px,1vw,16px);padding:4px 9px;
+ background:linear-gradient(#fffaeb,#edca94);border:3px solid #b8804c
+}
+.plot .growth{bottom:0;left:18%;width:64%;height:9px}
+.plot[data-phase="locked"]{border:5px dashed #fff9b4;background-color:#7b725771!important;filter:drop-shadow(0 7px 4px #543b2860)}
+.customer-zone{top:11%;right:.5%;width:47%;height:46%;z-index:7}
+.customer-line{height:84%;align-items:flex-end;gap:0;overflow:visible}
+.customer-actor{height:83%;flex:1;min-width:0}
+.customer-actor img{height:90%;position:absolute;bottom:0;left:0;filter:drop-shadow(0 9px 6px #3a291e78)}
+.customer-actor.active{height:100%}.customer-actor.active img{height:100%}
+.customer-actor .order-bubble{
+ top:0;z-index:12;font-size:clamp(10px,1vw,15px);font-weight:1000;
+ border:3px solid #b97d42;min-width:94px;max-width:210px;
+ background:linear-gradient(#fffef5,#fff0cf);padding:7px;
+ box-shadow:0 7px #8b62429a
+}
+.order-bubble .bubble-icons{font-size:clamp(13px,1.3vw,19px)}
+.customer-zone .counter{
+ height:20%;min-height:63px;background:
+ linear-gradient(170deg,#d1a570,#89512f 30%,#754122 60%,#bd8b54 85%);
+ border:11px ridge #b67d46;border-radius:8px;box-shadow:0 14px 8px #3f2c2388;
+ font-size:clamp(16px,1.3vw,23px);padding:7px
+}
+.helper{top:24%;left:49%;z-index:10;width:clamp(125px,15vw,260px);filter:drop-shadow(0 13px 7px #4432259c)}
+.helper img{width:100%;height:100%;object-fit:contain}
+.helper .speech{top:-25px;left:-6%;min-width:120px;font-size:clamp(11px,1vw,15px);
+ border:4px solid #b88146;box-shadow:0 5px #75502f90}
+.farm-sign{
+ position:absolute;z-index:4;top:1%;left:24%;height:77px;min-width:210px;
+ display:grid;place-items:center;
+ border:9px ridge #c89860;border-radius:9px;
+ background:linear-gradient(#ac703b,#7c441f);box-shadow:0 8px 10px #3e291e8f;
+ color:#ffefc3;text-shadow:0 3px #6f3f20;font-weight:1000;font-size:clamp(19px,2vw,32px);
+ transform:rotate(-2deg);pointer-events:none;
+}
+.farm-chalk{
+ position:absolute;z-index:2;left:2.5%;top:4%;width:180px;height:145px;
+ display:grid;place-content:center;text-align:center;transform:rotate(-5deg);
+ border:11px ridge #bb7e4c;border-radius:14px;background:#364b39;
+ box-shadow:0 12px 13px #543a2b71;color:#fff9d8;
+ text-shadow:0 2px #21442b;font-size:17px;pointer-events:none
+}
+.farm-flowers{position:absolute;z-index:1;inset:7% 0 5%;pointer-events:none;
+ background:
+ radial-gradient(ellipse 7px 7px at 5% 17%,#fffce1 50%,transparent 60%),
+ radial-gradient(ellipse 9px 9px at 11% 42%,#ffa1d3 50%,transparent 60%),
+ radial-gradient(ellipse 12px 11px at 60% 7%,#fff5ab 50%,transparent 60%),
+ radial-gradient(ellipse 12px 12px at 72% 64%,#ed9bc1 55%,transparent 65%),
+ radial-gradient(ellipse 10px 9px at 91% 67%,#fff3c1 55%,transparent 65%);
+ filter:drop-shadow(0 2px 5px #4d492e);opacity:.95
+}
+.pack-station{
+ top:54%;right:1.2%;width:41%;min-height:250px;z-index:10;
+ background:linear-gradient(155deg,#e7bd86e8,#a86f3de8);
+ border:11px ridge #b67e49;border-radius:20px;
+ box-shadow:0 22px 14px #463021ad,inset 0 4px #ffe4a0
+}
+.pack-station h2{font-size:clamp(16px,1.6vw,25px);color:#fff8dd;text-shadow:0 3px #764520}
+.basket-layout{min-height:158px;grid-template-columns:43% 57%}
+.basket-layout .basket-art>img{height:158px;filter:drop-shadow(0 13px 5px #5f442d)}
+.tray img{height:clamp(44px,4.5vw,66px);width:clamp(44px,4.5vw,66px)}
+.pack-footer .go{
+ background:linear-gradient(#59cd82,#188c52);font-size:clamp(15px,1.5vw,24px);
+ border:5px solid #eaffd3;box-shadow:0 4px #397141;min-height:56px
+}
+.warehouse{bottom:3%;left:2.5%;width:57%;z-index:10;
+ background:linear-gradient(#eac392ec,#b17a48ed);border:8px ridge #bc844d;
+ box-shadow:0 11px 13px #4e3625ab;border-radius:23px}
+.warehouse h2{color:#fff4d7;text-shadow:0 3px #735029;font-size:clamp(16px,1.4vw,22px)}
+.rack{gap:2px}
+.stock{background:transparent;border:0;box-shadow:none;color:#fff2c9;text-shadow:0 2px #614021}
+.stock img{height:clamp(55px,5.5vw,95px);width:98%;filter:drop-shadow(0 6px 3px #4e3026)}
+.stock b{right:10px;top:0;background:#573d27;min-width:42px}
+.stock span{background:#5d381fa6;padding:1px 8px;border-radius:99px}
+.action-dock{
+ max-width:min(1510px,98%);background:
+ linear-gradient(#ad7344,#8c4d28 70%,#684025);
+ border:9px ridge #c8955b;border-radius:38px;box-shadow:0 12px 17px #432c1ba0;
+ padding:7px 8px 16px;margin:-24px auto 0;
+ gap:clamp(4px,.7vw,15px);flex-wrap:nowrap;align-items:stretch
+}
+.action{flex:1;min-width:0;min-height:clamp(82px,7.5vw,125px);font-size:clamp(14px,1.55vw,23px);
+ border:6px solid #fff2c8;border-radius:37px;box-shadow:0 8px #7b4d28,0 12px 10px #4e342975}
+.action img{height:clamp(44px,4.2vw,68px);max-width:40%}
+.action-mini{min-width:clamp(90px,9vw,135px);font-size:clamp(13px,1.25vw,18px);border:5px solid #fbe9b9}
+.seed-action{background:linear-gradient(#ffd75c,#ee8a0b)}
+.water-action{background:linear-gradient(#92dbff,#1982da)}
+.harvest-action{background:linear-gradient(#abf77a,#269d31)}
+.pack-action{background:linear-gradient(#eaa5f7,#9942bd)}
+.deliver-action{background:linear-gradient(#ffb2a3,#e13e72)}
+.seeds{left:15%;top:auto;bottom:5%;z-index:15;transform:none;width:min(48%,680px);flex-wrap:nowrap;
+ border:7px ridge #c89454;background:linear-gradient(#fff7e1ed,#eacb9def);border-radius:24px;
+ box-shadow:0 12px 16px #503b2a96}
+.seed{border:4px solid #fff3c8}
+.seed.active{border:5px solid #f4b73d;box-shadow:0 0 16px #fff5aa}
+.status{max-width:1200px;margin:4px auto;border:5px solid #f6d7a8;background:#fff6dfd9;color:#7f542e}
+.help-line{color:#f8e2b6;background:#4f3324c2}
+.game-shell .shop-overlay{z-index:99}
+.customer-actor.entering{animation:customer-enter .75s cubic-bezier(.2,.7,.2,1) both}
+.customer-actor.departing{animation:customer-exit .6s ease-in forwards}
+.helper.celebrating img{animation:happy-hop .35s ease-in-out 2}
+.farm-celebrate{position:absolute;z-index:30;top:36%;left:39%;font-size:55px;pointer-events:none;animation:big-burst 1.1s ease forwards}
+@keyframes grow-sway{50%{transform:translateY(-6%) rotate(1deg)}}
+@keyframes customer-enter{from{opacity:0;transform:translateX(130px) scale(.75)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes customer-exit{to{opacity:0;transform:translateX(190px) scale(.6)}}
+@keyframes happy-hop{50%{transform:translateY(-27px) rotate(-8deg)}}
+@keyframes big-burst{to{transform:translateY(-130px) scale(1.5);opacity:0}}
+@media(max-width:940px){
+ .garden-wrap{left:1%;width:60%;height:56%;top:13%}
+ .garden-header{top:-22px;font-size:18px;padding:7px 9px}
+ .plots{inset:35px 0 0}
+ .customer-zone{right:0;top:36%;height:29%;width:45%}
+ .customer-actor .order-bubble{top:-35px}
+ .farm-sign{top:3%;left:43%;height:57px;min-width:145px;font-size:19px}
+ .farm-chalk{top:4%;width:115px;height:89px;font-size:12px;opacity:.86}
+ .helper{top:40%;left:52%;width:126px}
+ .pack-station{top:62%;width:48%;min-height:154px}
+ .warehouse{bottom:2%;left:1%;width:53%}
+ .seeds{bottom:4%;left:4%;width:50%}
+ .action-dock{flex-wrap:wrap;border-width:4px}.action{min-width:110px}
+ .arena{height:clamp(660px,90vw,820px)}
+}
+@media(max-width:570px){
+ .game-shell{border:0;border-radius:0}
+ .hud .brand{font-size:18px;padding:7px 11px}.hud .stats span{font-size:12px;padding:4px}
+ .arena{height:780px;padding:3px}
+ .garden-wrap{top:13%;width:100%;height:41%;left:0}
+ .farm-chalk,.farm-sign{display:none}
+ .garden-header{top:-18px;font-size:16px}
+ .plots{inset:27px 0 0;gap:0}
+ .plot{min-height:0}.plot .plot-label{font-size:9px;padding:2px 3px}
+ .helper{top:49%;left:7%;width:105px}
+ .helper .speech{min-width:97px;max-width:130px}
+ .customer-zone{top:45%;right:0;width:70%;height:22%}
+ .customer-actor{height:75%}.customer-actor .order-bubble{top:-29px}
+ .customer-zone .counter{min-height:32px;border-width:5px;font-size:12px}
+ .pack-station{top:66%;width:55%;right:1%;min-height:154px;border-width:5px}
+ .basket-layout .basket-art>img{height:100px}
+ .warehouse{top:67%;bottom:auto;width:45%;min-height:160px}
+ .warehouse h2{font-size:12px}.rack{grid-template-columns:repeat(2,1fr)}
+ .stock{min-height:54px}.stock img{height:32px}
+ .action-dock{margin:-10px auto 0}.action{min-width:29%;min-height:69px}
+ .seeds{top:auto;bottom:2%;left:2%;width:96%;padding:2px}
+ .seed{min-height:66px}.seed img{height:39px}
+}
+@media(prefers-reduced-motion:reduce){.customer-actor.entering,.customer-actor.departing,.helper.celebrating img,.farm-celebrate{animation:none!important}}
+
+/* Keep the seed shelf from obscuring raised planting beds on initial load. */
+.seeds[hidden]{display:none!important}
+.customer-actor .bubble-icons{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:3px}
+.customer-actor .bubble-icons img{position:static;width:29px;height:32px;filter:drop-shadow(0 3px 3px #5e492b77)}
+@media(min-width:941px){.garden-wrap .plots{transform:perspective(1200px) rotateX(1deg);transform-origin:center bottom}}
