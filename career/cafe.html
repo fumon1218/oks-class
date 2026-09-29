@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3AAFA9">
+<title>동물 친구 카페 | 옥쌤의 즐거운 교실</title>
+<style>
+:root{font-family:"Noto Sans KR","Gowun Dodum",system-ui,sans-serif;color:#25374e;background:#f0faf6;font-synthesis:none}
+*{box-sizing:border-box}body{margin:0;min-height:100dvh;background:linear-gradient(#d7f7f3 0,#fff4de 72%,#e9f8f2 100%)}
+button,a{font:inherit}button{cursor:pointer}button:focus-visible,a:focus-visible{outline:4px solid #287e76;outline-offset:4px}
+main{max-width:760px;margin:auto;padding:14px 14px 64px}
+.header{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.back{border:0;border-radius:40px;background:white;text-decoration:none;color:#23483e;padding:12px 18px;box-shadow:0 3px 11px #315d5430;font-weight:800}
+.header-right{display:flex;gap:7px}.tool{padding:10px 14px;background:white;border:2px solid #cce6da;border-radius:24px;font-weight:750;color:#264c42}
+h1{font-size:clamp(25px,5vw,38px);margin:20px 0 6px;text-align:center;color:#286c59}p{line-height:1.6}.subtitle{text-align:center;font-weight:650;color:#596e64;margin:0 0 12px}
+.stage{background:linear-gradient(180deg,#fffdf7,#f7ead4);border:5px solid #fff;border-radius:28px;box-shadow:0 12px 30px #407d6540;padding:18px;min-height:230px;position:relative;overflow:hidden}
+.stage:before{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-35px;top:-35px;background:#a5e4d333}
+.stage-top{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.tag{border-radius:20px;padding:5px 11px;font-size:13px;font-weight:800;background:#e8f6e9;color:#2c6552}
+.scene{display:flex;justify-content:center;align-items:center;gap:10px;min-height:170px}
+.scene .friend{width:36%;max-width:175px;object-fit:contain;filter:drop-shadow(0 8px 7px #465c4930)}
+.scene .counter{display:flex;flex-direction:column;align-items:center;gap:5px}
+.scene .counter img{width:130px;max-width:100%;filter:drop-shadow(0 7px 5px #6052452f)}
+.bubble{background:white;border:3px solid #d2efe4;border-radius:24px;padding:14px 16px;font-weight:850;font-size:clamp(19px,3.5vw,25px);text-align:center;line-height:1.5;position:relative;box-shadow:0 5px 12px #426a5830}
+.bubble small{display:block;color:#49675b;font-size:14px;margin-top:5px}
+.progress{display:flex;justify-content:center;gap:6px;margin:14px 0}.step{flex:1;max-width:80px;border-radius:99px;height:10px;background:#d9dfda}.step.on{background:#eeb451}.step.done{background:#56b88f}
+.panel{margin-top:14px;background:#ffffffef;border-radius:24px;padding:18px;box-shadow:0 5px 18px #5a93752b}
+.panel h2{margin:0 0 8px;font-size:23px}.panel p{margin:6px 0 15px;color:#556a5f;font-weight:650}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.mode{background:#f5f8f6;border:2px solid #dce6df;color:#3b5145;border-radius:14px;min-height:50px;padding:9px 4px;font-weight:850}
+.mode[aria-pressed="true"]{background:#e1f4e7;border-color:#39976d;color:#20643b}
+.choices{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px;margin-top:16px}
+.choice{min-height:90px;border:3px solid #d8e8e2;border-radius:20px;background:#fff;box-shadow:0 4px 11px #497b6421;display:flex;justify-content:center;align-items:center;flex-direction:column;gap:5px;padding:9px;font-size:18px;font-weight:850;color:#283b34}
+.choice img{height:86px;width:100px;object-fit:contain}.choice:active{transform:scale(.97)}.choice[disabled]{opacity:.58;cursor:default}
+.emoji{font-size:49px}.hint{border-radius:16px;margin-top:12px;padding:11px 13px;background:#fff4d5;color:#624a18;font-weight:750;min-height:44px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin:13px 0}.primary{border:0;border-radius:18px;padding:14px 22px;background:#3ba57e;color:white;font-weight:850;min-height:50px;box-shadow:0 4px 10px #28634b35}
+.secondary{border:2px solid #b9d9cc;border-radius:18px;padding:12px 20px;background:white;color:#255b4c;font-weight:800;min-height:50px}
+.basket{display:flex;align-items:center;justify-content:center;gap:8px;min-height:58px;margin-top:10px;background:#eaf6ea;border-radius:16px;font-size:23px;font-weight:800}
+.note{font-size:13px;line-height:1.65;color:#597269}.curriculum{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}.curriculum span{font-size:12px;background:#d6eadd;border-radius:20px;padding:6px 10px;color:#26553c;font-weight:800}
+.report{background:#ecf8ee;padding:14px;border-radius:15px;line-height:1.8}
+[hidden]{display:none!important}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<div class="header"><a class="back" href="../index.html">← 마을로 돌아가기</a><div class="header-right"><button class="tool" id="voice" type="button" aria-pressed="true">🔊 음성 켜짐</button><button class="tool" id="restart" type="button">↻ 처음부터</button></div></div>
+<h1>☕ 동물 친구 카페</h1><p class="subtitle">인사하고, 주문받고, 음료를 준비해 보아요!</p>
+<div class="modes" aria-label="활동 지원 단계"><button class="mode" type="button" data-mode="explore" aria-pressed="false">🌱 탐색</button><button class="mode" type="button" data-mode="guided" aria-pressed="true">🍀 선택</button><button class="mode" type="button" data-mode="independent" aria-pressed="false">🌳 도전</button></div>
+<div class="progress" id="progress" aria-label="활동 진행 상황"></div>
+<section class="stage" aria-label="카페 체험 장면"><div class="stage-top"><span class="tag" id="stageLabel">손님 맞이</span><span class="tag" id="orderTag">🥤 딸기 음료</span></div><div class="scene"><img class="friend" src="../art/stickers/monkey.png" alt="귀여운 원숭이 손님"><div class="counter"><img id="counterImage" src="../art/stickers/strawberry.png" alt="딸기"><span class="tag">동물 친구가 찾아왔어요!</span></div></div><div class="bubble" id="speech" aria-live="polite"></div></section>
+<section class="panel"><h2 id="prompt">손님을 맞이해요</h2><p id="instructions"></p><div class="curriculum"><span>국어 · 의사소통</span><span>수학 · 수량/계산</span><span>사회 · 예절</span><span>진로와 직업 · 외식서비스</span></div><div class="choices" id="choices"></div><div class="basket" id="basket" hidden></div><div class="hint" id="feedback" aria-live="polite">원하는 활동 단계를 고를 수 있어요.</div><div class="actions"><button id="repeat" class="secondary" type="button">🔊 다시 듣기</button><button id="help" class="secondary" type="button">💡 도움받기</button><button id="next" class="primary" type="button" hidden>다음으로 →</button></div></section>
+<section class="panel" id="teacherPanel" hidden><h2>교사용 활동 기록</h2><div id="report" class="report"></div><p class="note">이 기록은 현재 브라우저에만 저장됩니다. 학생의 실제 성취 여부는 교사가 관찰해 판단합니다. 이름이나 개인식별정보는 저장하지 않습니다.</p><button id="resetRecord" class="secondary" type="button">이 기기의 카페 기록 지우기</button></section>
+<p class="note">옥쌤의 즐거운 교실 · 직업 체험 시범 콘텐츠. 정글 점프 동물·카페 이미지 및 기존 옥쌤 스티커를 활용합니다. 외부 카페 아이콘은 온라인일 때 표시되며, 연결이 없으면 그림 대체 문자를 보여줍니다.</p>
+</main>
+<script>
+(function(){
+"use strict";
+var steps=["인사하기","주문 확인","재료 준비","음료 전달","계산하기"];
+var mode="guided",step=0,prepared=0,mistakes=0,helpCount=0,voiceOn=true,ready=false,finished=false,choiceLocked=false;
+var amounts={explore:1,guided:2,independent:3};
+var cupUrl="https://fumon1218.github.io/jungle-jump/assets/coffee/cup_iced.png";
+var el=function(id){return document.getElementById(id);};
+var amount=function(){return amounts[mode];};
+var q=function(){return amount()===1?"한":amount()===2?"두":"세";};
+var msg=function(text){el("feedback").textContent=text;};
+var say=function(text){if(!voiceOn||!("speechSynthesis" in window))return;window.speechSynthesis.cancel();var utter=new SpeechSynthesisUtterance(text);utter.lang="ko-KR";utter.rate=.87;window.speechSynthesis.speak(utter);};
+var image=function(path,alt,fallback){return '<img src="'+path+'" alt="'+alt+'" onerror="this.hidden=true;this.nextElementSibling.hidden=false"><span class="emoji" hidden aria-hidden="true">'+fallback+'</span>';};
+var berry=function(){return image("../art/stickers/strawberry.png","딸기","🍓");};
+var cup=function(){return image(cupUrl,"차가운 음료 컵","🥤");};
+var stageTexts=function(){
+return [
+"어서 오세요! 원숭이 손님에게 어떤 인사를 할까요?",
+"딸기 음료 "+amount()+"잔 주세요! 어떤 음료를 주문했나요?",
+"음료를 준비할 딸기를 "+amount()+"개 장바구니에 담아주세요.",
+"주문한 딸기 음료 "+amount()+"잔을 손님에게 전달해요.",
+"딸기 음료는 한 잔에 1,000원이에요. "+amount()+"잔의 가격을 확인해요."
+];};
+function choices(list){el("choices").innerHTML="";list.forEach(function(c){var b=document.createElement("button");b.type="button";b.className="choice";b.setAttribute("aria-label",c.label);if(c.html)b.innerHTML=c.html;b.appendChild(document.createTextNode(c.label));b.addEventListener("click",function(){pick(c.correct,c.label);});el("choices").appendChild(b);});}
+function render(){
+ el("teacherPanel").hidden=true;el("next").hidden=true;el("choices").hidden=false;el("basket").hidden=true;choiceLocked=false;ready=false;finished=false;
+ document.querySelectorAll(".mode").forEach(function(b){b.setAttribute("aria-pressed",String(b.dataset.mode===mode));});
+ el("progress").innerHTML=steps.map(function(s,i){return '<span class="step '+(i<step?"done":i===step?"on":"")+'" title="'+s+'"></span>';}).join("");
+ el("stageLabel").textContent=(step+1)+"/5 "+steps[step];
+ el("orderTag").textContent="🥤 딸기 음료 "+amount()+"잔";
+ el("speech").innerHTML=stageTexts()[step]+'<small>원숭이 친구와 함께해요</small>';
+ el("prompt").textContent=steps[step];
+ el("instructions").textContent=mode==="explore"?"그림과 음성으로 천천히 탐색해요.":mode==="guided"?"그림 중에서 알맞은 것을 골라보아요.":"스스로 문제를 해결해 보아요.";
+ el("counterImage").src=step===3?cupUrl:"../art/stickers/strawberry.png";
+ el("counterImage").alt=step===3?"음료 컵":"딸기";
+ el("counterImage").onerror=function(){this.style.display="none";};
+ el("basket").textContent="🧺 0 / "+amount();msg("정답을 선택하면 다음 활동으로 넘어갈 수 있어요.");
+ var wrongGreeting=mode==="explore"?[]:[{label:"안녕히 주무세요",correct:false,html:"<span class=emoji>🌙</span>"}];
+ if(step===0){choices([{label:"어서 오세요!",correct:true,html:"<span class=emoji>👋</span>"}].concat(wrongGreeting,mode==="independent"?[{label:"안녕히 가세요!",correct:false,html:"<span class=emoji>🚪</span>"}]:[]));}
+ else if(step===1){choices([{label:"딸기 음료",correct:true,html:berry()},{label:"수박 음료",correct:false,html:image("../art/stickers/watermelon.png","수박","🍉")}].concat(mode==="independent"?[{label:"당근 음료",correct:false,html:image("../art/stickers/carrot.png","당근","🥕")}]:[]));}
+ else if(step===2){el("basket").hidden=false;choices([{label:"딸기 담기",correct:true,html:berry()},{label:"수박 담기",correct:false,html:image("../art/stickers/watermelon.png","수박","🍉")}].concat(mode==="independent"?[{label:"당근 담기",correct:false,html:image("../art/stickers/carrot.png","당근","🥕")}]:[]));}
+ else if(step===3){choices([{label:"딸기 음료 전달",correct:true,html:cup()},{label:"과일 바구니 전달",correct:false,html:image("../art/stickers/basket.png","장바구니","🧺")}]);}
+ else if(step===4){var total=amount()*1000;var opts=[{label:total.toLocaleString("ko-KR")+"원",correct:true,html:"<span class=emoji>💰</span>"}];if(mode!=="explore")opts.push({label:(total+1000).toLocaleString("ko-KR")+"원",correct:false,html:"<span class=emoji>💰</span>"});if(mode==="independent")opts.push({label:"1,000원",correct:false,html:"<span class=emoji>🪙</span>"});choices(opts);}
+}
+function pick(correct,label){
+ if(ready||finished)return;
+ if(!correct){mistakes++;msg("다시 살펴볼까요? 필요하면 도움받기를 눌러요.");say("괜찮아요. 다시 찾아보아요.");return;}
+ if(step===2){prepared++;el("basket").textContent="🧺 "+prepared+" / "+amount();if(prepared<amount()){msg("잘했어요! "+(amount()-prepared)+"개 더 담아보아요.");say("잘했어요. 하나 더 담아볼까요?");return;}}
+ ready=true;el("next").hidden=false;document.querySelectorAll(".choice").forEach(function(b){b.disabled=true;});msg("잘했어요! 다음으로 이동해요.");say("좋아요! 잘했어요.");el("next").textContent=step===4?"활동 마치기 ✓":"다음으로 →";
+}
+function finish(){
+ finished=true;el("progress").innerHTML=steps.map(function(){return '<span class="step done"></span>';}).join("");
+ el("stageLabel").textContent="완료";el("speech").textContent="고마워요! 즐거운 카페였어요!";el("prompt").textContent="카페 체험을 완성했어요!";el("choices").hidden=true;el("basket").hidden=true;el("next").hidden=true;el("teacherPanel").hidden=false;
+ var record={date:new Date().toISOString(),mode:mode,count:amount(),retries:mistakes,hints:helpCount,completed:true};
+ try{var records=JSON.parse(localStorage.getItem("oks-career-cafe-v1")||"[]");records.unshift(record);localStorage.setItem("oks-career-cafe-v1",JSON.stringify(records.slice(0,30)));}catch(e){}
+ el("report").textContent="활동 단계: "+({explore:"탐색",guided:"선택",independent:"도전"})[mode]+" / 수행한 과제: 인사, 주문 확인, 재료 준비, 전달, 계산 / 오답 후 재시도: "+mistakes+"회 / 도움 요청: "+helpCount+"회";
+ msg("별을 획득했어요! 실제 생활에서도 해볼까요?");say("멋져요. 카페 체험을 완성했어요!");
+}
+el("next").addEventListener("click",function(){if(!ready)return;if(step===4){finish();return;}step++;prepared=0;render();say(stageTexts()[step]);});
+el("repeat").addEventListener("click",function(){say(finished?"카페 체험을 완성했어요!":stageTexts()[step]);});
+el("help").addEventListener("click",function(){helpCount++;var hints=["손님을 반갑게 맞이해요. '어서 오세요'를 찾아보아요.","원숭이가 원하는 것은 딸기 음료예요.","빨간 딸기를 눌러서 장바구니에 담아요.","바구니가 아니라 음료 컵을 골라요.","한 잔에 천 원이에요. 잔 수만큼 더해보아요."];msg(hints[step]);say(hints[step]);});
+el("voice").addEventListener("click",function(){voiceOn=!voiceOn;this.setAttribute("aria-pressed",String(voiceOn));this.textContent=voiceOn?"🔊 음성 켜짐":"🔇 음성 꺼짐";if(!voiceOn&&"speechSynthesis" in window)window.speechSynthesis.cancel();});
+el("restart").addEventListener("click",function(){step=0;prepared=0;mistakes=0;helpCount=0;render();say(stageTexts()[0]);});
+document.querySelectorAll("[data-mode]").forEach(function(b){b.addEventListener("click",function(){mode=b.dataset.mode;step=0;prepared=0;mistakes=0;helpCount=0;render();say(stageTexts()[0]);});});
+el("resetRecord").addEventListener("click",function(){if(confirm("이 브라우저의 카페 활동 기록을 지울까요?")){localStorage.removeItem("oks-career-cafe-v1");msg("활동 기록을 지웠어요.");}});
+render();
+})();
+</script>
+</body></html>
