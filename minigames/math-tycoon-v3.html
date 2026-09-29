@@ -433,7 +433,7 @@ buyUpgrade=function(u){const prev=state.upgrades[u.key];upgradesOld(u);if(state.
 document.querySelectorAll('[data-step]').forEach(button=>button.addEventListener('click',()=>{
  const step=button.dataset.step;stageStep(step);
  if(step==='plant'){$('seedShelf').hidden=false;notice('씨앗을 하나 골라 주세요. 고른 뒤 빈 밭을 터치해요.');}
- if(step==='water'){const sprout=document.querySelector('.plot[data-phase="seeded"]');if(sprout)motion($('stepWater'),sprout,REMOTE_FARM+'can.png');$('waterReady').click();notice('💧 물을 뿌렸어요! 성장한 작물을 수확해 봐요.',true);}
+ if(step==='water'){const sprout=document.querySelector('.plot[data-phase="seeded"]');if(sprout)motion($('stepWater'),sprout,REMOTE_FARM+'can.png');$('waterReady').click();notice('💧 물을 줬어요! 어린 새싹은 한 번 더 물을 주면 다 자라요.',true);}
  if(step==='harvest'){const ripe=document.querySelector('.plot[data-phase="ready"]');if(ripe)motion(ripe,$('warehouse'),REMOTE_FARM+'basket.png');$('harvestReady').click();}
  if(step==='pack'){if(activeOrder())notice('🧺 '+orderCaption(activeOrder())+' · 창고 재료를 한 번씩 눌러 담아요.',true);}
  if(step==='deliver'){if($('deliver').disabled)notice('주문서에 필요한 작물을 정확하게 포장해요.');else $('deliver').click();}
