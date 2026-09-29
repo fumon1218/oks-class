@@ -1,0 +1,45 @@
+/* Integrated harvest props and lighter interface, preserving the original game logic. */
+.plot{background:none!important;overflow:visible;isolation:isolate}
+.plot .plot-base{position:absolute;inset:1% 0 0;width:100%;height:97%;object-fit:fill;z-index:0;pointer-events:none;filter:drop-shadow(0 9px 5px #4a2c1e76)}
+.plot .plant-window{position:absolute;z-index:1;left:27%;width:46%;top:20%;height:46%;overflow:hidden;pointer-events:none;transform-origin:50% 85%}
+.plot .plant-window .plant{position:absolute;left:0;top:0;width:100%;height:155%;max-height:none!important;object-fit:fill;animation:grow-sway 3s ease-in-out infinite;transform-origin:center 53%;filter:drop-shadow(0 2px 2px #352e1777)}
+.plot[data-phase="growing"] .plant-window{left:24%;width:52%;top:16%;height:51%}
+.plot[data-phase="ready"] .plant-window{left:13%;width:74%;top:-5%;height:78%;overflow:visible}
+.plot[data-phase="ready"] .plant-window .plant{width:100%;height:104%;top:0;object-fit:contain;clip-path:inset(0 0 23% 0);filter:drop-shadow(0 4px 3px #52392b68)}
+.plot[data-phase="seeded"] .plant-window .plant{clip-path:inset(0 0 29% 0)}
+.plot[data-phase="growing"] .plant-window .plant{clip-path:inset(0 0 26% 0)}
+.plot[data-phase="empty"] .plot-base{filter:drop-shadow(0 9px 5px #4a2c1e70)}
+.plot[data-phase="locked"]{background:transparent!important;filter:none!important;border:0!important}
+.plot[data-phase="locked"] .plot-base{filter:grayscale(.83) brightness(.61) drop-shadow(0 7px 4px #4a332d88)}
+.plot .plot-lock{z-index:2;position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;display:grid;place-items:center;background:#fffbe7d9;border-radius:14px;border:3px solid #e5ccab;font-size:25px}
+.plot .plot-label{z-index:4;bottom:0!important}
+.plot .growth{z-index:3;bottom:-2%!important}
+.plot[data-phase="ready"]:after{top:4%;z-index:5}
+.pack-station{background:linear-gradient(155deg,#fffbecbf,#f5d8ac9c)!important;backdrop-filter:blur(5px);border:5px solid #fce2af!important;box-shadow:0 8px 21px #694a3470!important}
+.pack-station h2{color:#87522e!important;text-shadow:0 2px #fff!important;font-size:clamp(15px,1.35vw,20px)!important}
+.basket-layout{grid-template-columns:1fr!important;justify-items:center;align-content:center;min-height:0!important}
+.basket-layout .basket-art{width:clamp(155px,19vw,270px);height:clamp(121px,16vw,206px);min-height:0!important;position:relative;overflow:visible}
+.basket-art .basket-bg,.basket-art .basket-front{position:absolute;left:0;top:0;width:100%!important;height:100%!important;max-height:none!important;object-fit:contain;pointer-events:none;filter:drop-shadow(0 5px 4px #7050345b)}
+.basket-art .basket-bg{z-index:1}
+.basket-art .basket-front{z-index:4;clip-path:inset(52% 0 0 0);filter:drop-shadow(0 6px 4px #543e2e55)}
+.basket-art .basket-shadow{position:absolute;bottom:4%;left:14%;width:72%;height:20%;border-radius:50%;background:#5e472444;filter:blur(11px);z-index:0}
+.basket-art .tray{position:absolute!important;z-index:2!important;top:19%;left:15%;width:70%;height:56%;min-height:0!important;display:block!important;overflow:hidden;pointer-events:none;padding:0!important}
+.basket-art .tray img{position:absolute;max-width:none!important;width:36%!important;height:72%!important;object-fit:contain;clip-path:inset(0 0 29% 0);filter:drop-shadow(0 4px 3px #3b342b5d)}
+.basket-art .tray .empty{position:absolute;left:0;top:35%;font-size:13px;width:100%;text-align:center;background:#fff8e5c4}
+.basket-layout .tray:not(.inside-basket){display:none}
+.pack-footer{z-index:6}
+.pack-footer .go{background:linear-gradient(#53ca8a,#188f65)!important}
+.customer-zone .counter{height:15%!important;min-height:43px!important;border:4px solid #dbb17a!important;box-shadow:0 6px 9px #60402f49!important;background:#fdf2d9ab!important;color:#75502d!important;text-shadow:0 2px #fff!important;border-radius:15px!important}
+.warehouse{background:#fff5ddac!important;backdrop-filter:blur(6px);border:4px solid #fff0d3!important;box-shadow:0 8px 14px #64432d73!important}
+.warehouse h2{color:#815634!important;text-shadow:0 2px #fff7ed!important}
+.stock{color:#67422e!important;text-shadow:0 1px #fff!important}
+.stock span{background:#fff8e7e8!important;color:#78502d!important}
+.farm-chalk{opacity:.75;transform:rotate(-2deg) scale(.82);transform-origin:top left}
+.farm-sign{opacity:.88;transform:rotate(-2deg) scale(.82);transform-origin:center top}
+.mission-bar{background:#fff9e1da!important;backdrop-filter:blur(3px);box-shadow:0 4px 9px #59432a57!important}
+.customer-actor .order-bubble{background:#fff9e9e8!important;backdrop-filter:blur(3px);border-width:2px!important;box-shadow:0 4px 7px #7a573b69!important}
+.helper .speech{background:#fffbeecc!important;backdrop-filter:blur(3px)}
+.action-dock{background:linear-gradient(#a6734390,#935a36d3)!important;backdrop-filter:blur(3px);border-width:5px!important;box-shadow:0 7px 12px #6148328a!important}
+@media(min-width:1100px) and (orientation:landscape){.basket-layout .basket-art{height:min(14vw,158px)!important}.pack-footer{bottom:2px!important}.pack-station{top:56%;height:38%;}.plot .plot-base{height:92%}}
+@media(max-width:570px){.basket-layout .basket-art{width:140px;height:104px}.plot .plant-window{top:19%;height:42%}.plot[data-phase="ready"] .plant-window{top:-7%;height:78%}.pack-station{min-height:145px}.basket-art .tray img{width:40%!important}.farm-sign,.farm-chalk{display:none!important}}
+@media(prefers-reduced-motion:reduce){.plot .plant-window .plant{animation:none!important}}
