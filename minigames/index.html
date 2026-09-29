@@ -80,7 +80,7 @@ function renderLobby(){
  PACK[subject].forEach(function(g,i){var b=create('button','game'+(records[subject+'-'+String(i+1).padStart(2,'0')]?' done':''),undefined,function(){start(i)});b.type='button';var span=create('span','icon',icons[g.type]),num=create('span','num','미션 '+(i+1)),name=create('strong','',titles[subject][i]),sm=create('small','',records[subject+'-'+String(i+1).padStart(2,'0')]?'⭐ 완료 기록 있음':'누르면 모험 시작');b.append(span,num,name,sm);$('games').appendChild(b)});
 }
 function finishAvailable(){completed=true;$('finish').disabled=false;msg(item.type==='draw'||item.type==='reflect'?'좋아요! 활동을 마쳤다면 완료하기를 눌러요.':'성공했어요! 별을 받아요!');speak('잘했어요! 미션 완료!')}
-function start(i){index=i;item=PACK[subject][i];helps=0;mistakes=0;completed=false;touched=false;matches=new Set();selected=null;sorted=0;orderPos=0;collected=0;
+function start(i){if(subject==='math'&&i===0){window.location.href='math-fruit.html';return;}index=i;item=PACK[subject][i];helps=0;mistakes=0;completed=false;touched=false;matches=new Set();selected=null;sorted=0;orderPos=0;collected=0;
  $('lobby').classList.add('hidden');$('gamePanel').classList.remove('hidden');$('mission').textContent=SUBJECTS.find(x=>x[0]===subject)[1]+' · '+titles[subject][i];$('question').textContent=item.q;$('finish').disabled=true;$('play').innerHTML='';msg('미션을 수행해 보아요!');
  renderGame();speak(item.q);}
 function renderGame(){
