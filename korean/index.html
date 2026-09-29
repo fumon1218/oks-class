@@ -41,7 +41,7 @@ canvas{width:100%;height:240px;touch-action:none;display:block}.guidechar{positi
 <div class="hud"><div id="stageLabel">🏫 어느 별로 갈까요?</div><div id="stars">⭐ 0</div><div id="modeLabel">🍀 선택·조작</div></div>
 <div class="world"><img src="../art/stickers/fox.png" alt="국어 도서관을 안내하는 여우 친구"><div class="speech" id="speech" aria-live="polite">안녕! 한글별을 탐험해 볼까?</div></div>
 <div id="home" class="box"><h2>🌟 오늘의 한글별 모험</h2><p class="muted">학생은 어느 단계에서나 시작할 수 있어요. 학년이 아니라 현재 학습 목표와 접근 방법에 맞춰 선택하세요.</p>
-<div class="teacher"><strong>🎮 게임 모드:</strong> 정글 점프처럼 움직이는 글자를 바구니로 받아요. 움직임이 어렵다면 큰 글자 선택 모드로 바꿀 수 있습니다.<div class="smallbar"><a class="action" href="catch.html" style="text-decoration:none">🌟 소리 별 글자 받기 게임 시작 →</a></div></div><div id="stages" class="stage-grid"></div></div>
+<div class="teacher"><strong>🎮 게임 모드:</strong> 정글 점프처럼 움직이는 글자를 바구니로 받아요. 움직임이 어렵다면 큰 글자 선택 모드로 바꿀 수 있습니다.<div class="smallbar"><a class="action" href="catch.html" style="text-decoration:none">🌟 소리 별 글자 받기 게임 시작 →</a></div></div><div class="smallbar" style="align-items:center"><label for="writingConsonant" style="font-weight:850">✏️ 쓰기 별 시작 자음: </label><select id="writingConsonant" aria-label="쓰기 단계 시작 자음" style="font-size:19px;padding:10px;border:2px solid #b9dfcf;border-radius:12px"><option value="ㄱ">ㄱ</option><option value="ㄴ">ㄴ</option><option value="ㄷ">ㄷ</option><option value="ㄹ">ㄹ</option><option value="ㅁ">ㅁ</option><option value="ㅂ">ㅂ</option><option value="ㅅ">ㅅ</option><option value="ㅇ">ㅇ</option><option value="ㅈ">ㅈ</option><option value="ㅊ">ㅊ</option><option value="ㅋ">ㅋ</option><option value="ㅌ">ㅌ</option><option value="ㅍ">ㅍ</option><option value="ㅎ">ㅎ</option></select></div><div id="stages" class="stage-grid"></div></div>
 <div class="box hide" id="game"><div class="progress" id="progress"></div><h2 id="gameTitle"></h2><div id="stageContent"></div><div class="status" id="status" aria-live="polite">시작해요!</div>
 <div class="smallbar"><button class="action secondary" id="hear">🔊 다시 듣기</button><button class="action secondary" id="hint">💡 도움말</button><button class="action secondary" id="retry">↻ 다시 하기</button><button class="action" id="finish" disabled>⭐ 완료하고 돌아가기</button></div></div>
 <div class="teacher"><strong>📚 국어 → 일상생활 체험:</strong> 한글별에서 글자와 문장을 익힌 뒤 동물 친구 카페에서 주문을 듣고 인사하는 역할놀이를 해 보세요. 게임 간 기록·성취 판정은 아직 별도로 관리합니다.<div class="smallbar"><a class="action secondary" style="text-decoration:none" href="../career/cafe.html">☕ 동물 친구 카페로 이동</a></div></div>
@@ -51,6 +51,10 @@ canvas{width:100%;height:240px;touch-action:none;display:block}.guidechar{positi
 "use strict";
 const CONSONANTS=['ㄱ','ㄴ','ㄷ','ㄹ','ㅁ','ㅂ','ㅅ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
 const VOWELS=['ㅏ','ㅑ','ㅓ','ㅕ','ㅗ','ㅛ','ㅜ','ㅠ','ㅡ','ㅣ'];
+const INITIAL_INDEX={'ㄱ':0,'ㄴ':2,'ㄷ':3,'ㄹ':5,'ㅁ':6,'ㅂ':7,'ㅅ':9,'ㅇ':11,'ㅈ':12,'ㅊ':14,'ㅋ':15,'ㅌ':16,'ㅍ':17,'ㅎ':18};
+const MEDIAL_INDEX={'ㅏ':0,'ㅑ':1,'ㅓ':2,'ㅕ':3,'ㅗ':4,'ㅛ':5,'ㅜ':6,'ㅠ':7,'ㅡ':18,'ㅣ':20};
+function consonantSyllables(c){return VOWELS.map(v=>String.fromCharCode(0xAC00+INITIAL_INDEX[c]*588+MEDIAL_INDEX[v]*28));}
+
 const WORDS=['가구','고기','나비','누나','다리','도구','마차','모자','바지','부모','사자','소수','아가','오리','자두','주사','차도','치즈','카드','코피','타조','토마토','파도','포도','하루','허리','기차','나무','머리','보리'];
 const SENTENCES=['하늘이 매우 푸릅니다.','학교에 가서 공부를 해요.','친구와 사이좋게 지내요.','맛있는 밥을 먹습니다.','어머니 사랑해요.'];
 const LEVELS={explore:{label:'🌱 탐색',opts:2},guided:{label:'🍀 선택·조작',opts:3},independent:{label:'🌳 문제 해결',opts:4}};
@@ -79,7 +83,7 @@ function stageIntro(){return INFO[stage].goal;}
 function start(i){
  stage=i;turn=0;wrong=0;hints=0;done=false;traceCount=0;syllables=[];chosen=[];
  if(i===0)stageTasks=shuffle(soundKind==='vowel'?VOWELS:CONSONANTS).slice(0,mode==='explore'?3:5);
- if(i===1)stageTasks=['가','나','다'].slice(0,mode==='explore'?1:mode==='guided'?2:3);
+ if(i===1)stageTasks=consonantSyllables($('writingConsonant').value).slice(0,mode==='explore'?3:mode==='guided'?5:10);
  if(i===2)stageTasks=['나비','오리','나무'].slice(0,mode==='explore'?1:mode==='guided'?2:3);
  if(i===3)stageTasks=['나비','오리','나무'].slice(0,mode==='explore'?1:mode==='guided'?2:3);
  if(i===4)stageTasks=SENTENCES.slice(0,mode==='explore'?1:mode==='guided'?2:3);
