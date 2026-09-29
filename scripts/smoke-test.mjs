@@ -6,7 +6,7 @@ import vm from 'node:vm';
 // GitHub Pages game smoke checks: no npm dependencies and no generated content.
 // This checks parse-time errors and local link targets, not touch/visual behavior.
 const root=path.resolve(import.meta.dirname,'..');
-const pages=['index.html','career/cafe.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','minigames/index.html','quests/index.html'];
+const pages=['index.html','career/cafe.html','career/barista.html','korean/index.html','korean/catch.html','curriculum/teacher-guide.html','minigames/index.html','quests/index.html'];
 let parsed=0,links=0;
 for(const relative of pages){
   const src=fs.readFileSync(path.join(root,relative),'utf8');
