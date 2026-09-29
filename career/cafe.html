@@ -44,7 +44,7 @@ h1{font-size:clamp(25px,5vw,38px);margin:20px 0 6px;text-align:center;color:#286
 </head>
 <body>
 <main>
-<div class="header"><a class="back" href="../index.html">← 마을로 돌아가기</a><div class="header-right"><button class="tool" id="voice" type="button" aria-pressed="true">🔊 음성 켜짐</button><button class="tool" id="restart" type="button">↻ 처음부터</button></div></div>
+<div class="header"><a class="back" href="../index.html">← 마을로 돌아가기</a><a class="back" href="../curriculum/teacher-guide.html">📘 교사용 설정</a><div class="header-right"><button class="tool" id="voice" type="button" aria-pressed="true">🔊 음성 켜짐</button><button class="tool" id="restart" type="button">↻ 처음부터</button></div></div>
 <h1>☕ 동물 친구 카페</h1><p class="subtitle">인사하고, 주문받고, 음료를 준비해 보아요!</p>
 <div class="modes" aria-label="활동 지원 단계"><button class="mode" type="button" data-mode="explore" aria-pressed="false">🌱 탐색</button><button class="mode" type="button" data-mode="guided" aria-pressed="true">🍀 선택</button><button class="mode" type="button" data-mode="independent" aria-pressed="false">🌳 도전</button></div>
 <div class="progress" id="progress" aria-label="활동 진행 상황"></div>
@@ -58,6 +58,11 @@ h1{font-size:clamp(25px,5vw,38px);margin:20px 0 6px;text-align:center;color:#286
 "use strict";
 var steps=["인사하기","주문 확인","재료 준비","음료 전달","계산하기"];
 var mode="guided",step=0,prepared=0,mistakes=0,helpCount=0,voiceOn=true,ready=false,finished=false,choiceLocked=false;
+/* 교사용 맞춤 지원 설정(기기 로컬)을 읽되 카페 화면에서 학생이 다시 바꿀 수 있음. */
+try{
+ var iepPreset=JSON.parse(localStorage.getItem("oks_iep_config_v1")||"{}");
+ if(["explore","guided","independent"].includes(iepPreset.mode)) mode=iepPreset.mode;
+}catch(e){}
 var amounts={explore:1,guided:2,independent:3};
 var cupUrl="https://fumon1218.github.io/jungle-jump/assets/coffee/cup_iced.png";
 var el=function(id){return document.getElementById(id);};
