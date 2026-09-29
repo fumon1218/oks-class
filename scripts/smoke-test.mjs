@@ -88,6 +88,16 @@ for(const marker of ['farm-mockup-v3.css','class="farm-chalk"','class="farm-sign
 }
 assert(mockup.includes("SAVE='oks_math_tycoon_v1'"),'Farm v3 must preserve previous currency and fields');
 assert(mockCss.includes('farm-floral-v3.svg'),'Lush custom foliage is not shown');
+const integrated=fs.readFileSync(path.join(root,'minigames/farm-props-v4.css'),'utf8');
+for(const marker of ['.plot .plot-base','.plot .plant-window','.basket-art .basket-front','.basket-art .tray','.pack-station{background','.warehouse{background']){
+ assert(integrated.includes(marker),'Missing integrated object design '+marker);
+}
+for(const marker of ['class="basket-bg"','class="basket-front"','const plotTapV3=tapPlot','renderTray=function()','const positions=[','guest:\'cat\'','guest:\'panda\'','guest:\'monkey\'','slot.phase=first?\'growing\':\'ready\'']){
+ assert(mockup.includes(marker),'Farm v4 feature missing '+marker);
+}
+assert(fs.readFileSync(path.join(root,'sw.js'),'utf8').includes('./minigames/farm-props-v4.css'),'Latest object styles not PWA cached');
+console.log('PASS real planter base, integrated basket layers, customer style and growth progression');
+
 assert(mockCss.includes('height:100dvh;min-height:0'),'Landscape stage must fit a single viewport');
 assert(mockCss.includes('flex:1 1 0;height:0'),'Arena must take remaining viewport space');
 assert(mockup.includes('const originalRackRender=renderRack'),'Warehouse should display ripe harvest artwork');

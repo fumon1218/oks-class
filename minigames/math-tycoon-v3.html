@@ -43,14 +43,14 @@
 @media(max-width:830px){.arena{padding:4px 5px 130px;min-height:790px}.garden-wrap{width:100%;padding:5px;max-width:none}.plots{gap:2px}.plot{min-height:clamp(100px,23vw,170px)}.customer-zone{top:43%;right:0;width:44%;height:28%}.helper{left:42%;top:43%;width:120px}.pack-station{top:68%;right:0;width:48%;min-height:122px}.warehouse{bottom:0;width:50%}.warehouse .stock{min-height:72px}.warehouse .stock img{height:42px}.action-dock{margin:0}.action{min-height:70px;min-width:96px}.action img{height:38px}.basket-layout{min-height:96px}.basket-layout .basket-art>img{height:89px}.customer-actor .order-bubble{top:-16px;min-width:65px;padding:3px;font-size:10px}.customer-zone .counter{height:28%}}
 @media(max-width:540px){.hud{gap:4px;padding:3px}.hud>*{padding:6px}.hud .brand{font-size:18px}.hud .stats span{font-size:11px;padding:5px}.mission-bar{font-size:13px;padding:5px}.arena{min-height:690px}.plot{min-height:100px}.plot .plot-label{font-size:10px;padding:1px 4px}.helper{width:91px;top:45%;left:34%}.helper .speech{min-width:100px;font-size:10px}.customer-zone{top:44%;width:57%}.pack-station{top:68%;width:49%;border-width:5px}.warehouse{width:50%;padding:2px;border-width:3px}.warehouse h2{font-size:12px}.rack{gap:1px}.stock{border-width:2px;font-size:10px}.stock img{height:34px}.action{min-width:calc(29vw);min-height:64px;font-size:14px}.action img{height:32px}.action-mini{min-width:91px;min-height:61px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.fly-sprite{transition:none!important}}
-</style><link rel="stylesheet" href="farm-mockup-v3.css"></head><body><div class="game-shell">
+</style><link rel="stylesheet" href="farm-mockup-v3.css"><link rel="stylesheet" href="farm-props-v4.css"></head><body><div class="game-shell">
 <header class="hud"><a class="brand" href="../index.html">🌱 내 농장</a><div class="stats"><span>☀️ <b id="day">1</b>일째</span><span>🪙 <b id="coins">10</b></span><span>⭐ <b id="stars">0</b></span><span>🎁 <b id="served">0</b>건</span></div><button class="xbtn" id="toggleSound" type="button" aria-pressed="true">🔊 음성 켜짐</button></header>
 <div class="mission-bar">🎯 <b id="farmTask">손님 주문을 준비해 볼까요?</b><small class="tiny">심기 → 물주기 → 수확 → 포장 → 배달</small></div>
 <main class="arena" id="arena"><div class="farm-flowers" aria-hidden="true"></div><div class="farm-chalk" aria-hidden="true">🌼 오늘도<br>맛있는 채소를<br>키워볼까요? 🌱</div><div class="farm-sign" aria-hidden="true">🌿 쑥쑥 농장</div>
 <section class="garden-wrap" aria-label="직접 조작하는 여섯 칸의 농장"><h1 class="garden-header">🥕 쑥쑥 농장 · 밭을 터치해요!</h1><div class="plots" id="plots"></div></section>
 <section class="customer-zone" aria-label="주문하는 동물 손님"><div class="customer-line" id="customerLine"></div><div class="counter">🧾 오늘의 동물 손님</div></section>
 <section class="helper" id="helper"><div class="speech" id="speech">어서 와요!</div><img id="visitor" src="../art/stickers/rabbit.png" alt="농장 도우미 동물 친구"></section>
-<section class="pack-station" id="packStation" aria-label="작업대와 수확물 포장"><h2>🧺 수확한 작물을 담아 배달해요</h2><div class="basket-layout"><div class="basket-art"><img src="https://fumon1218.github.io/jungle-jump/assets/wj/farm/basket.png" alt="입체 바구니"></div><div class="tray" id="tray" aria-live="polite"></div></div><div class="pack-footer"><button class="panel-btn" id="undo">↶ 하나 취소</button><button class="panel-btn go" id="deliver">🚚 배달하기</button></div></section>
+<section class="pack-station" id="packStation" aria-label="작업대와 수확물 포장"><h2>🧺 수확한 작물을 담아 배달해요</h2><div class="basket-layout"><div class="basket-art" aria-label="수확한 채소가 바구니 안에 차곡차곡 담깁니다"><div class="basket-shadow" aria-hidden="true"></div><img class="basket-bg" src="https://fumon1218.github.io/jungle-jump/assets/wj/farm/basket.png" alt="빈 바구니"><div class="tray inside-basket" id="tray" aria-live="polite"></div><img class="basket-front" src="https://fumon1218.github.io/jungle-jump/assets/wj/farm/basket.png" alt="" aria-hidden="true"></div></div><div class="pack-footer"><button class="panel-btn" id="undo">↶ 하나 취소</button><button class="panel-btn go" id="deliver">🚚 배달하기</button></div></section>
 <section class="warehouse" id="warehouse" aria-label="포장할 수 있는 수확 작물"><h2>📦 창고 · 작물을 톡톡 눌러요!</h2><div class="rack" id="rack"></div></section>
 <section class="seeds" id="seedShelf" hidden aria-label="씨앗 고르기"><div id="seeds" style="display:contents"></div></section>
 <section id="orders" class="orders" aria-label="접근성을 위한 전체 주문 목록"></section>
@@ -433,7 +433,7 @@ buyUpgrade=function(u){const prev=state.upgrades[u.key];upgradesOld(u);if(state.
 document.querySelectorAll('[data-step]').forEach(button=>button.addEventListener('click',()=>{
  const step=button.dataset.step;stageStep(step);
  if(step==='plant'){$('seedShelf').hidden=false;notice('씨앗을 하나 골라 주세요. 고른 뒤 빈 밭을 터치해요.');}
- if(step==='water'){const sprout=document.querySelector('.plot[data-phase="seeded"]');if(sprout)motion($('stepWater'),sprout,REMOTE_FARM+'can.png');$('waterReady').click();notice('💧 물을 뿌렸어요! 성장한 작물을 수확해 봐요.',true);}
+ if(step==='water'){const sprout=document.querySelector('.plot[data-phase="seeded"]');if(sprout)motion($('stepWater'),sprout,REMOTE_FARM+'can.png');$('waterReady').click();notice('💧 물을 줬어요! 어린 새싹은 한 번 더 물을 주면 다 자라요.',true);}
  if(step==='harvest'){const ripe=document.querySelector('.plot[data-phase="ready"]');if(ripe)motion(ripe,$('warehouse'),REMOTE_FARM+'basket.png');$('harvestReady').click();}
  if(step==='pack'){if(activeOrder())notice('🧺 '+orderCaption(activeOrder())+' · 창고 재료를 한 번씩 눌러 담아요.',true);}
  if(step==='deliver'){if($('deliver').disabled)notice('주문서에 필요한 작물을 정확하게 포장해요.');else $('deliver').click();}
@@ -445,6 +445,135 @@ const originalSpeak=speak;speak=function(message){if(voiceOn)originalSpeak(messa
 $('seedShelf').addEventListener('click',e=>{if(e.target.closest('.seed'))setTimeout(()=>$('seedShelf').hidden=true,110);});
 stageStep('plant');
 $('seedShelf').hidden=true;
+
+
+/* Farm v4: all crop states share the SAME fitted wooden planter artwork.
+ * Source sprout/crop sprites include their own dirt mound, so the lower part
+ * is clipped and the plant grows from the soil surface of the planter. */
+const plotTapV3=tapPlot;
+function plantPicture(slot){
+ if(slot.phase==='seeded')return 'sprout.png';
+ if(slot.phase==='growing')return 'young.png';
+ if(slot.phase==='ready')return FARM_ASSETS[slot.crop]||'crop_lettuce.png';
+ return null;
+}
+renderPlots=function(){
+ const wrap=$('plots');wrap.replaceChildren();
+ const label={empty:'씨앗 심기',seeded:'어린 새싹',growing:'물을 한 번 더 주세요',ready:'수확할 수 있어요',locked:'잠긴 밭'};
+ state.plots.forEach((slot,index)=>{
+  const btn=document.createElement('button');btn.type='button';btn.className='plot';
+  btn.dataset.index=String(index);btn.dataset.phase=slot.phase;
+  const base=extraImage(REMOTE_FARM+'plot.png','', 'plot-base');base.setAttribute('aria-hidden','true');btn.append(base);
+  const filename=plantPicture(slot);
+  if(filename){
+   const well=document.createElement('span');well.className='plant-window';
+   const plant=extraImage(REMOTE_FARM+filename,slot.crop?CROPS[slot.crop].name+' '+label[slot.phase]:label[slot.phase],'plant');
+   plant.onerror=()=>{plant.onerror=null;plant.src=REMOTE_FARM+'sprout.png'};
+   well.append(plant);btn.append(well);
+  }
+  if(slot.phase==='locked'){const lock=btext('span','🔒');lock.className='plot-lock';lock.setAttribute('aria-hidden','true');btn.append(lock)}
+  const caption=btext('strong',(index+1)+'번 · '+(slot.crop?CROPS[slot.crop].name+' ':'')+label[slot.phase]);caption.className='plot-label';
+  const progress=document.createElement('span');progress.className='growth';
+  const fill=document.createElement('span');fill.style.width=slot.phase==='seeded'?'28%':slot.phase==='growing'?'68%':slot.phase==='ready'?'100%':'0%';
+  progress.append(fill);btn.append(caption,progress);
+  btn.setAttribute('aria-label',(index+1)+'번 나무 화분 '+(slot.crop?CROPS[slot.crop].name+' ':'')+label[slot.phase]);
+  btn.onclick=()=>tapPlot(index);wrap.append(btn);
+ });
+ const empty=state.plots.filter(p=>p.phase==='empty').length,grow=state.plots.filter(p=>['seeded','growing'].includes(p.phase)).length,ready=state.plots.filter(p=>p.phase==='ready').length;
+ $('farmTask').textContent=ready?ready+'칸의 작물이 잘 익었어요. 수확해 볼까요?':grow?grow+'칸에 물을 주고 쑥쑥 키워요!':empty?'빈 나무 화분에 씨앗을 심어 봐요!':'수확물을 손님께 포장해요!';
+};
+tapPlot=function(index){
+ const slot=state.plots[index];
+ if(!slot||state.pending!==null)return;
+ if(slot.phase==='seeded'||slot.phase==='growing'){
+  const first=slot.phase==='seeded';
+  slot.phase=first?'growing':'ready';stageStep('water');
+  const target=document.querySelector('#plots [data-index="'+index+'"]');
+  motion($('stepWater'),target,REMOTE_FARM+'can.png');
+  persist();render();
+  notice(first?'💧 물을 먹은 새싹이 쑥쑥 자라요! 다시 물을 주면 수확할 수 있어요.':'🌼 다 자랐어요! 화분을 터치해 수확해 보세요.',true);
+  return;
+ }
+ plotTapV3(index);
+};
+autoWater=function(){
+ if(state.pending!==null)return;
+ let count=0;state.plots.forEach(p=>{
+  if(p.phase==='seeded'){p.phase='growing';count++}
+  else if(p.phase==='growing'){p.phase='ready';count++}
+ });
+ if(!count){notice('먼저 빈 화분에 씨앗을 심어 보아요!');return;}
+ persist();render();notice('💦 '+count+'칸에 물을 줬어요. 작물이 조금 더 자랐어요!',true);
+};
+$('waterReady').onclick=autoWater;
+
+/* One real 3D wicker basket, with the basket rear at z=1, produce inside
+ * its inner well at z=2 and the identical lower basket front at z=4.
+ * Crops therefore appear inside the weave rather than floating alongside. */
+renderTray=function(){
+ const tray=$('tray'),o=activeOrder();tray.replaceChildren();
+ if(!state.tray.length){
+  const text=btext('span','수확한 작물을 포장해요');text.className='empty';tray.append(text);
+ }
+ state.tray.forEach((key,index)=>{
+  const item=extraImage('../art/stickers/'+key+'.png',CROPS[key].name+' 바구니 속','basket-produce');
+  item.style.left=(3+(index%4)*23)+'%';
+  item.style.top=(index<4?'0%':index<8?'20%':'34%');
+  item.style.transform='rotate('+((index%3-1)*13)+'deg)';
+  item.style.zIndex=String(10-index);
+  tray.append(item);
+ });
+ $('deliver').disabled=!o||!orderComplete(o)||state.pending!==null;
+ $('undo').disabled=!state.tray.length||state.pending!==null;
+};
+const motionOld=motion;
+pack=function(key,source){
+ const count=state.tray.length;
+ packOld(key,source);
+ if(state.tray.length>count)motionOld(source,$('packStation').querySelector('.basket-art'),'../art/stickers/'+key+'.png');
+};
+/* The farmer is always a rabbit, while the three recognizable cute guests
+ * use the farm's existing actual 3D animal stickers. Preview guests do not
+ * create phantom sellable orders. */
+renderVisitor=function(){
+ const order=activeOrder(),queue=$('customerLine');if(!order)return;
+ $('visitor').src='../art/stickers/rabbit.png';$('visitor').alt='토끼 농부';
+ $('speech').textContent=orderCaption(order)+' 담아 볼까요?';
+ queue.replaceChildren();
+ const active=state.orders.find(o=>o.id===state.active);
+ const waiting=state.orders.find(o=>o.id!==state.active);
+ const next=ORDER_TEMPLATES[state.sequence%ORDER_TEMPLATES.length];
+ const positions=[
+  {order:active,guest:'cat',preview:false},
+  {order:waiting,guest:'panda',preview:false},
+  {order:{ask:next.ask,reward:0,id:'preview'},guest:'monkey',preview:true}
+ ];
+ positions.forEach(({order:o,guest,preview},i)=>{
+  if(!o)return;
+  const el=document.createElement('div'),fresh=!knownCustomerIds.has(o.id);
+  el.className='customer-actor'+(!preview&&o.id===state.active?' active':'')+(fresh?' entering':'');
+  el.style.animationDelay=(i*.15)+'s';
+  el.append(extraImage('../art/stickers/'+guest+'.png',guest+' 귀여운 동물 손님'));
+  const bubble=document.createElement('div');bubble.className='order-bubble';
+  const name=btext('strong',preview?'🐵 다음 손님':o.id===state.active?'💚 내 차례!':'기다리는 중');
+  const icons=document.createElement('div');icons.className='bubble-icons';
+  Object.entries(o.ask).forEach(([key,n])=>{
+   const icon=extraImage('../art/stickers/'+key+'.png',CROPS[key].name);
+   icon.style.cssText='width:31px;height:31px;object-fit:contain;position:static;';
+   icons.append(icon,btext('span','×'+n));
+  });
+  bubble.append(name,icons);if(!preview)bubble.append(btext('span','🪙 '+o.reward));
+  el.append(bubble);queue.append(el);
+  if(!preview){
+   el.tabIndex=0;el.style.pointerEvents='auto';el.setAttribute('role','button');
+   el.setAttribute('aria-label',CROPS&&orderCaption(o)+' 손님 주문 선택');
+   el.onclick=()=>selectOrder(o.id);
+   el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectOrder(o.id)}};
+  }
+  if(fresh){knownCustomerIds.add(o.id);el.addEventListener('animationend',()=>el.classList.remove('entering'),{once:true})}
+ });
+ knownCustomerIds=new Set(positions.filter(p=>p.order).map(p=>p.order.id));
+};
 
 safeRestore();restockOrders();persist();render();
 })();
