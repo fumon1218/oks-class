@@ -48,7 +48,7 @@
       "id": 1,
       "source": "Stage2Tracing",
       "title": "쓰기 별",
-      "activity": "기초 음절 따라 그리기",
+      "activity": "원본 워드 마스터의 14개 자음×10개 모음 조합(총 140개 무받침 음절)에서 시작 자음 선택 후 따라 그리기",
       "target": "글자 인식과 기초 필기 참여",
       "application": "내 이름·생활 글자 익히기(추후)",
       "evaluation": [
@@ -56,7 +56,8 @@
         "사용 보조도구",
         "선택 반응"
       ],
-      "status": "pilot-adapted"
+      "status": "pilot-adapted",
+      "detail": "유니코드 한글 음절 조합식을 활용하며 탐색/선택/도전 모드에서 각각 3/5/10개를 제공; 원본 140개 중 부분연습"
     },
     {
       "id": 2,
