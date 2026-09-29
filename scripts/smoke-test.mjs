@@ -12,7 +12,9 @@ for(const relative of pages){
   const src=fs.readFileSync(path.join(root,relative),'utf8');
   const scripts=[...src.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
   for(const script of scripts){new vm.Script(script[1],{filename:relative});parsed++;}
-  const attrs=[...src.matchAll(/\b(?:href|src)="([^"]+)"/g)].map(x=>x[1]);
+  // Ignore runtime-generated HTML inside <script> (e.g. src="'+path+'").
+  const staticMarkup=src.split(/<script(?:\s|>)/i)[0];
+  const attrs=[...staticMarkup.matchAll(/\b(?:href|src)="([^"]+)"/g)].map(x=>x[1]);
   for(const dest of attrs){
     if(!dest||/^(?:https?:|data:|#|mailto:|javascript:)/.test(dest)||dest.includes('$'))continue;
     const clean=dest.split(/[?#]/)[0];
