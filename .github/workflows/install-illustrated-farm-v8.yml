@@ -71,6 +71,8 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -f minigames/farm-v8/assets/*.webp
+          test "$(git ls-files 'minigames/farm-v8/assets/*.webp' | wc -l)" -eq 52
           git add -A
           git commit -m 'feat: install full-scene illustrated farm v8 and activate maths classroom'
           git push origin HEAD:main
