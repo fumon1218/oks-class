@@ -71,6 +71,8 @@ for(const marker of ["function tapPlot(index)","function autoWater()","function 
  assert(tycoon.includes(marker),'Missing tycoon loop: '+marker);
 }
 assert(tycoon.includes('href="math-fruit.html"'),'Original 12-stage practice must remain available');
+assert(tycoon.includes('if(state.pending!==null)'),'Checkout must guard customer order zero as an active pending order');
+assert(!tycoon.includes('Boolean(state.pending)'),'Never rely on falsy first-order ID zero');
 assert(fs.readFileSync(path.join(root,'quests/index.html'),'utf8').includes("link:'../minigames/math-tycoon.html'"),'Integrated math quest must link tycoon');
 console.log('PASS new tycoon: planting, watering, harvesting, packing, checkout, upgrades and saved progress');
 console.log('PASS immersive math workshop linked and core systems present');
