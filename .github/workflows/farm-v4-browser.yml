@@ -1,0 +1,73 @@
+name: Visual QA - Integrated Farm Props v4
+on:
+  push:
+    branches: [qa/farm-v4-browser]
+    paths: [.github/workflows/farm-v4-browser.yml]
+permissions:
+  contents: read
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright@1.56.1
+      - run: npx playwright install --with-deps chromium
+      - name: Exercise integrated planter and basket state
+        run: |
+          mkdir -p qa
+          python3 -m http.server 8877 >/tmp/farmv4-qa.log 2>&1 &
+          node <<'NODE'
+          const {chromium}=require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+            const page=await browser.newPage({viewport:{width:1536,height:960}});
+            const faults=[];page.on('pageerror',e=>faults.push(String(e)));
+            await page.addInitScript(()=>{
+              const state={
+                day:2,coins:39,stars:6,served:2,level:1,completed:[],selected:'strawberry',
+                mode:'guided',plots:[
+                  {phase:'empty',crop:null},{phase:'seeded',crop:'strawberry'},
+                  {phase:'growing',crop:'lettuce'},{phase:'ready',crop:'tomato'},
+                  {phase:'ready',crop:'carrot'},{phase:'locked',crop:null}
+                ],
+                upgrades:{plots:5,yield:1,bonus:1},
+                stock:{strawberry:3,tomato:2,carrot:3,lettuce:1},
+                sequence:2,orders:[{id:0,ask:{strawberry:2,lettuce:1},visitor:'cat',reward:15,price:10}],
+                active:0,tray:['strawberry','strawberry'],pending:null
+              };
+              localStorage.setItem('oks_math_tycoon_v1',JSON.stringify(state));
+            });
+            await page.goto('http://127.0.0.1:8877/minigames/math-tycoon-v3.html',{waitUntil:'domcontentloaded'});
+            await page.waitForFunction(()=>document.querySelectorAll('.plot').length===6,{timeout:15000});
+            await page.waitForTimeout(3000);
+            const before=await page.evaluate(()=>{
+              const status=Array.from(document.querySelectorAll('.plot')).map(x=>x.dataset.phase);
+              const tray=document.querySelector('.basket-art #tray');
+              const front=document.querySelector('.basket-art .basket-front');
+              return {
+                status,
+                baseCount:document.querySelectorAll('.plot img.plot-base').length,
+                young:document.querySelectorAll('.plot .plant-window').length,
+                packed:tray?.querySelectorAll('.basket-produce').length,
+                frontInBasket:!!front,frontClip:front?getComputedStyle(front).clipPath:null,
+                guests:[...document.querySelectorAll('.customer-actor img')].map(i=>i.getAttribute('src')),
+                dockBottom:document.querySelector('.action-dock').getBoundingClientRect().bottom
+              }
+            });
+            await page.screenshot({path:'qa/farm-v4-before.png'});
+            await page.locator('.plot[data-phase="seeded"]').click();
+            const after=await page.locator('.plot[data-phase="growing"]').count();
+            await page.screenshot({path:'qa/farm-v4-after.png'});
+            console.log('FARM_V4_QA',JSON.stringify({before,after,faults},null,2));
+            await browser.close();
+            if(faults.length||before.baseCount!==6||before.young!==4||before.packed!==2||!before.frontInBasket||after!==2||before.guests.length!==3||before.dockBottom>960)process.exit(1);
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: farm-v4-integrated-preview
+          path: qa/farm-v4-*.png
