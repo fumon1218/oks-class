@@ -33,4 +33,4 @@ GitHub 화면에서 일일이 네 파일을 선택하지 않으려면, 준비한
 - PWA 버전을 자동 증가하고 새로운 토끼 이미지를 오프라인 캐시에 추가합니다.
 - 게임은 `rabbit_full.webp`가 있을 때만 새 토끼로 바꾸고, 설치 전에는 양팔이 보이는 기존 토끼 스티커를 사용합니다.
 
-임시 ZIP `farm_v4_latest_upload.zip`은 기존 이름을 그대로 유지해야 자동 설치 작업이 실행됩니다. 사용자에게 제공하는 `farm_rabbit_replacement.zip`은 다운로드 편의를 위한 이름이므로 GitHub 업로드 전 **`farm_v4_latest_upload.zip`으로 이름 변경**해야 합니다.
+제공 ZIP의 이름은 자동 설치 경로와 동일한 **`farm_v4_latest_upload.zip`**입니다. 이름 변경이나 압축 해제 없이 파일을 그대로 업로드하면 됩니다.
