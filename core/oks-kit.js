@@ -11,14 +11,20 @@
     ctx.target = function (t) { O.target(t, ctx.level); };
     ctx.untarget = function () { O.target(null); };
   /* 그림 카드 */
+    /* 3D 모델이 있는 그림이면 오른쪽 위에 '3D' 단추 (누르면 크게 돌려 보기) */
+    function m3d(path, label) {
+      var M = window.OKS_MODELS; if (!M || !window.OKS3D || !OKS3D.ok()) return '';
+      var n = String(path).split('/').pop().replace(/\.\w+$/, '');
+      return M.indexOf(n) >= 0 ? '<span class="m3d" role="button" tabindex="0" data-m3d="' + n + '" data-label="' + O.esc(label || '') + '" aria-label="3D로 돌려 보기">3D</span>' : '';
+    }
     ctx.pic = function (item) {
       var sc = item.scale ? ' style="transform:scale(' + item.scale + ')"' : '';
       if (item.svg) return item.svg;
-      if (item.img) return '<img src="' + ctx.img(item.img) + '" alt=""' + sc + '>';
+      if (item.img) return '<img src="' + ctx.img(item.img) + '" alt=""' + sc + '>' + m3d(item.img, item.label);
       if (item.color) return '<span class="swatch" style="background:' + item.color + '"></span>';
       /* 그림 사전(art/art-ready.js)에 있는 이모지는 그림으로 */
       var AI = window.OKS_ART && window.OKS_ART.icons;
-      if (AI && item.emo && AI[item.emo]) return '<img class="artemo" src="' + ctx.img(AI[item.emo]) + '" alt=""' + sc + '>';
+      if (AI && item.emo && AI[item.emo]) return '<img class="artemo" src="' + ctx.img(AI[item.emo]) + '" alt=""' + sc + '>' + m3d(AI[item.emo], item.label);
       return '<span class="emo"' + sc + '>' + (item.emo || '❓') + '</span>';
     };
     ctx.card = function (item, o) {
@@ -141,6 +147,14 @@
     };
     return ctx;
   };
+  /* '3D' 단추: 카드 고르기와 섞이지 않게 먼저 가로챔 */
+  if (!window.__oksM3d) {
+    window.__oksM3d = true;
+    var openM = function (el) { var O2 = window.OKS; if (O2 && O2.say && el.dataset.label) O2.say(el.dataset.label, { noRepeat: true }); OKS3D.open((O2 ? O2.ROOT : '') + 'art/3d/' + el.dataset.m3d + '.glb', { title: el.dataset.label || '' }); };
+    ['pointerdown', 'mousedown', 'touchstart'].forEach(function (t) { document.addEventListener(t, function (e) { if (e.target.closest && e.target.closest('.m3d')) e.stopPropagation(); }, true); });
+    document.addEventListener('click', function (e) { var m = e.target.closest && e.target.closest('.m3d'); if (!m) return; e.stopPropagation(); e.preventDefault(); openM(m); }, true);
+    document.addEventListener('keydown', function (e) { var m = e.target.closest && e.target.closest('.m3d'); if (m && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); openM(m); } }, true);
+  }
 })();
 
 /* 🔘 스위치(스캔) 모드: 설정에서 켜면, 누를 수 있는 것을 불빛이 차례로 비추고
@@ -181,4 +195,12 @@
   }
   O.scanner = { start: start, press: press };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { setTimeout(start, 300); }); else setTimeout(start, 300);
+  /* '3D' 단추: 카드 고르기와 섞이지 않게 먼저 가로챔 */
+  if (!window.__oksM3d) {
+    window.__oksM3d = true;
+    var openM = function (el) { var O2 = window.OKS; if (O2 && O2.say && el.dataset.label) O2.say(el.dataset.label, { noRepeat: true }); OKS3D.open((O2 ? O2.ROOT : '') + 'art/3d/' + el.dataset.m3d + '.glb', { title: el.dataset.label || '' }); };
+    ['pointerdown', 'mousedown', 'touchstart'].forEach(function (t) { document.addEventListener(t, function (e) { if (e.target.closest && e.target.closest('.m3d')) e.stopPropagation(); }, true); });
+    document.addEventListener('click', function (e) { var m = e.target.closest && e.target.closest('.m3d'); if (!m) return; e.stopPropagation(); e.preventDefault(); openM(m); }, true);
+    document.addEventListener('keydown', function (e) { var m = e.target.closest && e.target.closest('.m3d'); if (m && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); openM(m); } }, true);
+  }
 })();

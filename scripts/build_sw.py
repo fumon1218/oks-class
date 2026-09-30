@@ -7,7 +7,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 PAGES = [
     './', './index.html', './classic.html', './manifest.json',
-    './space/space.css', './core/oks-3d.js', './space/space.js', './space/data.js', './art/art-ready.js',
+    './space/space.css', './core/oks-3d.js', './art/3d/models.js', './space/space.js', './space/data.js', './art/art-ready.js',
     './learn/', './learn/index.html', './learn/learn.css', './learn/learn.js',
     './play/', './play/index.html', './play/play.css', './play/play.js', './play/content.js', './play/content2.js', './play/content-extra.js', './play/custom.js', './play/scenes.js', './curriculum/editor.html', './play/describe.js', './curriculum/plan.html',
     './play/engines.js', './play/engines2.js', './play/farm.js',

@@ -8,7 +8,8 @@
 - 별 위 건물을 누르면 층(1층 초등 · 2층 중등 · 3층 고등)별 차시와 수준 1~5가 바로 나와요. 차시를 마치면 그 건물로 돌아와요
 - 복습 모험장: 최근 한 차시와 다음 수준 추천 (별 3개면 다음 수준, 아니면 같은 수준 한 번 더)
 - `space/` (지도·건물 배정 `space/data.js`), 예전 첫 화면은 `classic.html`
-- 3D 별: `art/3d/*.glb` (AI 도구로 만든 무거운 GLB를 `python3 scripts/import_3d.py <입력.glb> <이름> [삼각형 수]`로 1MB 안팎으로 줄임 — 질감 이음매를 지키는 줄이기 `scripts/simplify.c`), 그리는 곳은 `core/oks-3d.js`(외부 라이브러리 없는 WebGL). '움직임 줄이기'·저사양 기기는 그림 그대로
+- 3D 별: `art/3d/*.glb` (AI 도구로 만든 무거운 GLB를 `python3 scripts/import_3d.py <입력.glb> <이름> [삼각형 수]`로 1MB 안팎으로 줄임 — 질감 이음매를 지키는 줄이기 `scripts/simplify.c`), 그리는 곳은 `core/oks-3d.js`(외부 라이브러리 없는 WebGL). '움직임 줄이기'·저사양 기기는 그림 그대로. 한 파일에 여러 물건이면 `--split <입력.glb> 이름1,이름2,...`로 나눔
+- 3D 크게 보기(`OKS3D.open`): 끌어서 위아래·좌우 돌리기, 휠·두 손가락으로 확대·축소, 두 손가락·오른쪽 버튼으로 옮기기, 처음으로. 우주 지도 별의 🔍, 별 위 '3D로 보기', 건물 안 그림, 차시 카드의 '3D' 단추에서 열려요
 - 그림: `scripts/art_manifest.py` 목록 → `docs/image-prompts.html` 작업판 → 받은 그림은 `python3 scripts/import_art.py <폴더|zip>` (배경 지우기·여러 개 한 장 자르기 자동). 그림 사전에 있는 이모지는 차시 카드에서 그림으로 바뀌어요
 
 - **교과**: 국어·수학·사회·과학·영어·미술·음악 7교과 × 초·중·고 × 3단원 × 2차시 = 126차시 (`curriculum/source/*.xlsx`)

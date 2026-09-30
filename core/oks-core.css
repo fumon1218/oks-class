@@ -160,3 +160,8 @@ body.oks.big-targets .oks-card{min-height:190px;}
 .scan-switch small{font-size:15px;}
 .oks-dots:empty{display:none;}
 @media (max-width:1300px){ .oks-top .eco-hud .eco-lv i{display:none;} .oks-top .eco-hud button{padding:0 10px;} }
+/* 3D로 돌려 보기 단추 (카드 오른쪽 위) */
+.m3d{position:absolute;right:6px;top:6px;z-index:3;min-width:40px;height:32px;padding:0 8px;border-radius:999px;background:#5b4fd6;color:#fff;
+  font:700 14px/32px system-ui,sans-serif;text-align:center;box-shadow:0 3px 8px rgba(40,20,90,.35);cursor:pointer;letter-spacing:.02em;}
+.m3d:focus-visible{outline:4px solid #ffd54f;outline-offset:2px;}
+body.big .m3d{height:40px;line-height:40px;min-width:50px;font-size:17px;}

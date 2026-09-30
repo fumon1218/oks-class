@@ -5,6 +5,9 @@
   var O = window.OKS, E = O.el, SP = window.OKS_SPACE, D = window.OKS_LESSONS;
   var READY = {}; ((window.OKS_ART && window.OKS_ART.ready) || []).forEach(function (p) { READY[p.split('/').pop().replace(/\.webp$/, '')] = p; });
   function art(n) { return READY[n] || null; }
+  var MODELS = {}; (window.OKS_MODELS || []).forEach(function (n) { MODELS[n] = 'art/3d/' + n + '.glb'; });
+  function model(n) { return MODELS[n] || null; }
+  function open3d(n, title, color) { if (model(n) && window.OKS3D && OKS3D.ok()) { O.sfx('pop'); OKS3D.open(model(n), { title: title, glow: color ? hex(color) : null }); return true; } return false; }
   var SUBJ = { korean: '국어', math: '수학', social: '사회', science: '과학', english: '영어', art: '미술', music: '음악', career: '진로' };
   var SCH = {}; D.schools.forEach(function (s) { SCH[s.key] = s.name; });
   var BYB = SP.assign(D.lessons);
@@ -67,7 +70,17 @@
       e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, '🪐', 'sp-star-img') + '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>';
       e.onclick = function () { O.unlock && O.unlock(); O.sfx('pop'); go(s.id); };
       mapEl.appendChild(e);
-      if (view3d && s.model) view3d.add('art/3d/' + s.model + '.glb', e, { box: e.querySelector('.sp-star-img'), spin: s.id === 'center' ? .18 : .26, yaw: i * 1.3, tilt: .42, dist: 1.8, dy: -.04, glow: hex(s.color) });
+      if (view3d && model(s.model)) {
+        view3d.add(model(s.model), e, { box: e.querySelector('.sp-star-img'), spin: s.id === 'center' ? .18 : .26, yaw: i * 1.3, tilt: .42, dist: 1.8, dy: -.04, glow: hex(s.color),
+          onload: function (ok3) {
+            if (!ok3) return;
+            var z = E('span', 'sp-zoom', '🔍'); z.setAttribute('role', 'button'); z.tabIndex = 0; z.setAttribute('aria-label', s.name + ' 크게 보기'); z.title = '크게 보기 (돌리고 확대해 봐요)';
+            z.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); });
+            z.onclick = function (ev) { ev.stopPropagation(); ev.preventDefault(); open3d(s.model, s.name, s.color); };
+            z.onkeydown = function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); ev.stopPropagation(); open3d(s.model, s.name, s.color); } };
+            e.appendChild(z);
+          } });
+      }
     });
     if (view3d) view3d.start();
   }
@@ -104,6 +117,10 @@
   /* ---------- 별 위 ---------- */
   function renderLand(s) {
     landEl.innerHTML = '';
+    if (land3d) { land3d.stop(); land3d = null; }
+    if (window.OKS3D && OKS3D.ok() && (SP.B[s.id] || []).some(function (b) { return model(b.id); })) {
+      var cv3 = E('canvas', 'sp-3d'); cv3.setAttribute('aria-hidden', 'true'); landEl.appendChild(cv3); land3d = OKS3D.view(cv3, landEl);
+    }
     var bs = SP.B[s.id] || [];
     bs.slice().sort(function (a, b) { return portrait() ? 0 : a.y - b.y; }).forEach(function (b, i) {
       var w = 12.5 * (b.s || 1);
@@ -115,8 +132,11 @@
       e.style.animationDelay = (i * 60) + 'ms';
       e.onclick = function () { O.sfx('pop'); location.hash = s.id + '/' + b.id; };
       landEl.appendChild(e);
+      if (land3d && model(b.id)) land3d.add(model(b.id), e, { box: e.querySelector('.sp-bld-img'), spin: .2, yaw: -.5, tilt: .28, dist: 1.75, dy: -.02, pad: 1.35, glow: hex(s.color) });
     });
+    if (land3d) land3d.start();
   }
+  var land3d = null;
 
   /* ---------- 우주선 이동 ---------- */
   var flight = document.getElementById('flight'), ship = document.getElementById('flightShip');
@@ -159,7 +179,7 @@
     var maxY = scroller.scrollHeight - scroller.clientHeight; if (maxY > 0) scroller.scrollTop = maxY * .5;
   }
   function showMap(fromStar) {
-    cur = { view: 'map', star: null, b: null }; document.body.dataset.view = 'map';
+    cur = { view: 'map', star: null, b: null }; document.body.dataset.view = 'map'; if (land3d) land3d.stop();
     landEl.hidden = true; mapEl.hidden = false; setBg('space_bg');
     document.getElementById('backBtn').hidden = true;
     document.getElementById('title').innerHTML = '<b>옥쌤의 즐거운 교실</b><span>우주선을 타고 공부하러 떠나요</span>';
@@ -176,6 +196,11 @@
       mapEl.hidden = true; landEl.hidden = false; setBg(s.land); if (view3d) view3d.stop();
       document.getElementById('backBtn').hidden = false;
       document.getElementById('title').innerHTML = '<b>' + O.esc(s.name) + '</b><span>' + s.subjects.map(function (k) { return SUBJ[k]; }).join(' · ') + ' · 건물을 눌러요</span>';
+      if (model(s.model) && window.OKS3D && OKS3D.ok()) {
+        var zb = E('button', 'oks-pill sp-3dbtn', '🪐 <span>3D로 보기</span>'); zb.type = 'button';
+        zb.onclick = function () { open3d(s.model, s.name, s.color); };
+        document.getElementById('title').appendChild(zb);
+      }
       renderLand(s); startTwinkle(); centerScroll(50); fadeIn();
       talk(s.guide, s.hello);
     };
@@ -212,6 +237,11 @@
   function openBuilding(s, b) {
     cur.b = b.id;
     document.getElementById('sheetPic').innerHTML = pic(b.id, b.emo);
+    if (model(b.id) && window.OKS3D && OKS3D.ok()) {
+      var zb = E('button', 'sp-zoom in-sheet', '🔍'); zb.type = 'button'; zb.setAttribute('aria-label', b.name + ' 3D로 크게 보기');
+      zb.onclick = function () { open3d(b.id, b.name, s.color); };
+      document.getElementById('sheetPic').appendChild(zb);
+    }
     document.getElementById('sheetName').textContent = b.name;
     document.getElementById('sheetSub').textContent = s.name + ' · ' + b.sub;
     var body = document.getElementById('sheetBody'); body.innerHTML = '';

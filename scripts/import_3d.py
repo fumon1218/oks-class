@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """3D 모델(GLB) 가볍게 만들기 — Tripo·Meshy 같은 AI 도구가 만든 무거운 GLB(수십 MB)를 웹용으로 줄입니다.
 사용: python3 scripts/import_3d.py <입력.glb> <출력 이름> [삼각형 수(기본 60000)] [질감 크기(기본 1024)]
+     python3 scripts/import_3d.py --split <입력.glb> 이름1,이름2,... [물건마다 삼각형 수]   # 한 파일에 여러 물건 → 따로따로
  - 삼각형 줄이기: 가장자리 모양을 지키는 방식(QEM, scripts/simplify.c)으로 줄입니다. (없으면 격자 묶기)
  - 질감: 기본 색 질감만 남기고 JPEG로 줄입니다.
  - 크기: 가운데를 (0,0,0)에 두고, 가장 긴 쪽이 1이 되게 맞춥니다.
@@ -162,6 +163,14 @@ def write_glb(path, P, N, U, T, tex_bytes):
     return len(out)
 
 
+def write_index():
+    """art/3d/models.js: 앱이 3D 모델이 있는지 알 수 있게 목록을 만듭니다."""
+    d = os.path.join(ROOT, 'art/3d')
+    names = sorted(f[:-4] for f in os.listdir(d) if f.endswith('.glb'))
+    open(os.path.join(d, 'models.js'), 'w', encoding='utf-8').write('/* 자동 생성: scripts/import_3d.py */\nwindow.OKS_MODELS = ' + json.dumps(names) + ';\n')
+    return names
+
+
 def main(src, name, target=60000, texsize=1024):
     P, N, U, I, tex = load(src)
     print('원본: 정점 %d, 삼각형 %d' % (len(P), len(I)))
@@ -179,8 +188,84 @@ def main(src, name, target=60000, texsize=1024):
     out = os.path.join(ROOT, 'art/3d', name + '.glb')
     size = write_glb(out, P2, N2, U2, T2, buf.getvalue())
     print('결과: 정점 %d, 삼각형 %d, %.2f MB → %s' % (len(P2), len(T2), size / 1e6, out))
+    write_index()
+
+
+def groups(P, I, margin=0.012):
+    """한 덩어리 안의 떨어진 물건들 찾기: 서로 닿지 않는 조각을 찾고, 상자가 겹치는 조각끼리 한 물건으로 묶음.
+    순서: 위 줄부터(높이가 높은 쪽), 같은 줄은 왼쪽부터."""
+    from scipy.sparse import coo_matrix
+    from scipy.sparse.csgraph import connected_components
+    Wp, wid = np.unique(P.astype(np.float32), axis=0, return_inverse=True); wid = wid.ravel(); T = wid[I]
+    n = len(Wp); e = np.vstack([T[:, [0, 1]], T[:, [1, 2]]])
+    nc, lab = connected_components(coo_matrix((np.ones(len(e)), (e[:, 0], e[:, 1])), shape=(n, n)), directed=False)
+    lo = np.full((nc, 3), np.inf); hi = np.full((nc, 3), -np.inf)
+    np.minimum.at(lo, lab, Wp); np.maximum.at(hi, lab, Wp)
+    span = Wp.max(0) - Wp.min(0); ax = int(np.argmax(span)); up = 1 if span[1] > span[2] * 0.8 else 2
+    PL = (ax, up)
+    par = list(range(nc))
+    def f(a):
+        while par[a] != a: par[a] = par[par[a]]; a = par[a]
+        return a
+    changed = True
+    while changed:
+        changed = False
+        for a in range(nc):
+            for b in range(a + 1, nc):
+                ra, rb = f(a), f(b)
+                if ra == rb: continue
+                # 늘어놓은 면(가로·세로)에서 작은 쪽 상자가 30% 넘게 겹치면 같은 물건
+                ov = [max(0, min(hi[a][d], hi[b][d]) - max(lo[a][d], lo[b][d])) for d in PL]
+                ar = [(hi[x][PL[0]] - lo[x][PL[0]]) * (hi[x][PL[1]] - lo[x][PL[1]]) for x in (a, b)]
+                if ov[0] * ov[1] > 0.3 * max(1e-12, min(ar)): par[rb] = ra; changed = True
+    root = np.array([f(a) for a in range(nc)])
+    gid = root[lab]                       # 정점 → 묶음
+    tg = gid[T[:, 0]]                     # 삼각형 → 묶음
+    keys = np.unique(tg)
+    boxes = {k: (Wp[gid == k].min(0), Wp[gid == k].max(0)) for k in keys}
+    # 줄 나누기: 가운데 높이로 정렬 후 높이가 크게 벌어지는 곳에서 줄 바꿈 (가장 긴 축이 가로)
+    ctr = {k: (boxes[k][0] + boxes[k][1]) / 2 for k in keys}
+    order = sorted(keys, key=lambda k: -ctr[k][up])
+    rows, cur = [], [order[0]]
+    hgt = np.median([boxes[k][1][up] - boxes[k][0][up] for k in keys])
+    for k in order[1:]:
+        if abs(ctr[k][up] - np.mean([ctr[c][up] for c in cur])) > hgt * 0.5: rows.append(cur); cur = [k]
+        else: cur.append(k)
+    rows.append(cur)
+    out = []
+    for r in rows: out += sorted(r, key=lambda k: ctr[k][ax])
+    return [(tg == k) for k in out]
+
+
+def split_main(src, names, target_each=12000, texsize=1024):
+    P, N, U, I, tex = load(src)
+    gs = groups(P, I)
+    print('물건 %d개 찾음' % len(gs))
+    for i, sel in enumerate(gs):
+        name = names[i] if i < len(names) else 'part%d' % (i + 1)
+        Ii = I[sel]; used = np.unique(Ii); rm = -np.ones(len(P), np.int64); rm[used] = np.arange(len(used))
+        Pi, Ni, Ui, Ii = P[used], N[used], U[used], rm[Ii]
+        tgt = min(target_each, len(Ii))
+        try: P2, N2, U2, T2 = qem(Pi, Ni, Ui, Ii, tgt)
+        except Exception as e: print('  QEM 실패', e); P2, N2, U2, T2 = cluster(Pi, Ni, Ui, Ii, tgt)
+        im = (tex or Image.new('RGB', (4, 4), 'white')).convert('RGB').resize((texsize, texsize), Image.LANCZOS)
+        # 이 물건이 쓰는 질감 부분만 잘라서 작게 (질감 좌표도 맞춰 옮김)
+        lo, hi = U2.min(0), U2.max(0); pad = 4 / texsize
+        lo = np.clip(lo - pad, 0, 1); hi = np.clip(hi + pad, 0, 1)
+        box = (int(lo[0] * texsize), int(lo[1] * texsize), int(np.ceil(hi[0] * texsize)), int(np.ceil(hi[1] * texsize)))
+        sub = bleed(im, Ui, Ii).crop(box)
+        U3 = (U2 * texsize - [box[0], box[1]]) / [box[2] - box[0], box[3] - box[1]]
+        side = 512 if max(sub.size) <= 700 else 1024
+        sub = sub.resize((side, side), Image.LANCZOS)
+        buf = io.BytesIO(); sub.save(buf, 'JPEG', quality=82, optimize=True)
+        out = os.path.join(ROOT, 'art/3d', name + '.glb')
+        size = write_glb(out, P2, N2, U3, T2, buf.getvalue())
+        print('  %d. %s: 삼각형 %d, %.2f MB' % (i + 1, name, len(T2), size / 1e6))
 
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == '--split':
+        split_main(sys.argv[2], sys.argv[3].split(','), int(sys.argv[4]) if len(sys.argv) > 4 else 12000); write_index(); sys.exit(0)
+    if len(sys.argv) > 1 and sys.argv[1] == '--index': print(write_index()); sys.exit(0)
     if len(sys.argv) < 3: print(__doc__); sys.exit(1)
     main(sys.argv[1], sys.argv[2], int(sys.argv[3]) if len(sys.argv) > 3 else 60000, int(sys.argv[4]) if len(sys.argv) > 4 else 1024)
