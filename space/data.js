@@ -7,28 +7,36 @@
   var STARS = [
     { id: 'center', model: 'star_center', name: '학생회관 별', short: '학생회관', img: 'star_center', land: 'land_center', guide: 'ok_wave', guideName: '옥쌤',
       subjects: ['korean', 'english'], color: '#f3c24b', hello: '학생회관 별이에요! 국어와 영어를 배우고, 복습 모험도 할 수 있어요.',
-      map: { x: 50, y: 56, w: 30 }, mapP: { x: 50, y: 45, w: 70 } },
+      map: { x: 50, y: 56, w: 30 }, mapP: { x: 50, y: 36.0, w: 70 } },
     { id: 'sea', model: 'star_sea', name: '바다별', short: '바다별', img: 'star_sea', land: 'land_sea', guide: 'sea_wave', guideName: '물결이',
       subjects: ['music', 'art'], color: '#3fc1d0', hello: '바다별에 온 걸 환영해요! 음악과 미술을 배워요.',
-      map: { x: 17, y: 28, w: 19 }, mapP: { x: 26, y: 24, w: 42 } },
+      map: { x: 17, y: 28, w: 19 }, mapP: { x: 26, y: 19.2, w: 42 } },
     { id: 'love', model: 'star_love', name: '사랑별', short: '사랑별', img: 'star_love', land: 'land_love', guide: 'love_wave', guideName: '콩이',
       subjects: ['math', 'science'], color: '#f28bb0', hello: '사랑별이에요! 수학과 과학을 배워요.',
-      map: { x: 83, y: 27, w: 19 }, mapP: { x: 75, y: 25, w: 42 } },
+      map: { x: 83, y: 27, w: 19 }, mapP: { x: 75, y: 20.0, w: 42 } },
     { id: 'dream', model: 'star_dream', name: '꿈별', short: '꿈별', img: 'star_dream', land: 'land_dream', guide: 'dream_wave', guideName: '몽실이',
       subjects: ['social', 'career'], color: '#a98bf0', hello: '꿈별이에요! 사회와 진로를 배우고, 일터 거리에서 일해 봐요.',
-      map: { x: 82, y: 76, w: 19 }, mapP: { x: 72, y: 82, w: 40 } },
+      map: { x: 82, y: 76, w: 19 }, mapP: { x: 72, y: 65.6, w: 40 } },
     { id: 'farm', model: 'star_farm', name: '햇살 농장', short: '햇살 농장', img: 'star_farm', land: 'land_farm', guide: 'robot_wave', guideName: '별빛이',
       subjects: ['math', 'science'], color: '#e8a24a', hello: '햇살 농장이에요! 씨앗을 심고, 세고, 키워 봐요.',
-      map: { x: 20, y: 78, w: 13 }, mapP: { x: 24, y: 81, w: 28 } }
+      map: { x: 20, y: 78, w: 13 }, mapP: { x: 24, y: 64.8, w: 28 } }
   ];
   /* 아직 태어나지 않은 별 (업데이트되면 새 교과·심화 단원으로) */
+  /* 다른 게임으로 가는 별 (우주선 타고 날아가서 그 게임으로) */
+  var LINKS = [
+    { id: 'jungle', name: '정글 점프 별', chip: '모험 게임', img: 'star_jungle', model: 'star_jungle', emo: '🌴', color: '#5fcf6a',
+      url: 'https://fumon1218.github.io/jungle-jump/', say: '정글 점프 별로 날아가요! 나뭇가지를 뛰어넘으며 열매를 모아요.',
+      map: { x: 37, y: 20, w: 12.5 }, mapP: { x: 28, y: 91, w: 36 } },
+    { id: 'word', name: '워드 마스터 별', chip: '한글 게임', img: 'star_word', model: 'star_word', emo: '🔤', color: '#ffb74d',
+      url: 'korean/index.html', say: '워드 마스터 별로 날아가요! 한글 낱말을 익혀요.',
+      map: { x: 62, y: 23, w: 11 }, mapP: { x: 73, y: 91, w: 34 } }
+  ];
   var EGGS = [
-    { img: 'egg_sleep', x: 61, y: 17, w: 4.5, p: [50, 17, 11], say: '아직 잠자는 별이에요. 새 공부가 생기면 깨어나요.' },
-    { img: 'egg_crack', x: 37, y: 19, w: 6, p: [88, 44, 14], say: '곧 태어날 별이에요! 새로운 공부가 준비되고 있어요.' },
-    { img: 'egg_sleep', x: 56, y: 91, w: 4.5, p: [12, 45, 10], say: '아직 잠자는 별이에요.' }
+    { img: 'egg_crack', x: 48, y: 9, w: 4.5, p: [50, 13, 10], say: '곧 태어날 별이에요! 새로운 공부가 준비되고 있어요.' },
+    { img: 'egg_sleep', x: 56, y: 91, w: 4.5, p: [50, 79, 9], say: '아직 잠자는 별이에요. 새 공부가 생기면 깨어나요.' }
   ];
   var DECO = [
-    { img: 'ring_planet', x: 6, y: 52, w: 6, p: [10, 62, 13] }, { img: 'comet', x: 72, y: 13, w: 6, drift: 1, p: [18, 91, 16] }, { img: 'satellite', x: 93, y: 52, w: 5.5, p: [90, 62, 13] },
+    { img: 'ring_planet', x: 6, y: 52, w: 6, p: [10, 50, 13] }, { img: 'comet', x: 72, y: 13, w: 6, drift: 1, p: [8, 76, 12] }, { img: 'satellite', x: 93, y: 52, w: 5.5, p: [90, 50, 13] },
     { img: 'galaxy', x: 70, y: 48, w: 5, dim: 1 }, { img: 'moon', x: 94, y: 8, w: 4.5 }, { img: 'asteroid', x: 30, y: 92, w: 3.5 }
   ];
 
@@ -104,5 +112,5 @@
     });
     return out;
   }
-  window.OKS_SPACE = { STARS: STARS, EGGS: EGGS, DECO: DECO, B: B, assign: assign };
+  window.OKS_SPACE = { STARS: STARS, LINKS: LINKS, EGGS: EGGS, DECO: DECO, B: B, assign: assign };
 })();

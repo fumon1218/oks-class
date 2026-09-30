@@ -32,12 +32,12 @@ for (const rel of files.filter(f => f.endsWith('.html'))) {
     assert(fs.existsSync(abs), `깨진 링크/그림: ${rel} -> ${dest}`);
     links++;
   }
-  assert(!/fumon1218\.github\.io\/jungle-jump/.test(src), `다른 저장소 그림을 직접 불러오면 오프라인에서 깨집니다: ${rel}`);
+  assert(!/fumon1218\.github\.io\/jungle-jump\/[^"' ]*\.(webp|png|jpe?g|gif|svg)/.test(src), `다른 저장소 그림을 직접 불러오면 오프라인에서 깨집니다: ${rel}`);
 }
 for (const rel of files.filter(f => f.endsWith('.js') && !f.startsWith('scripts/'))) {
   const src = fs.readFileSync(path.join(root, rel), 'utf8');
   new vm.Script(src, { filename: rel }); scripts++;
-  assert(!/fumon1218\.github\.io\/jungle-jump/.test(src), `다른 저장소 그림 직접 참조: ${rel}`);
+  assert(!/fumon1218\.github\.io\/jungle-jump\/[^"' ]*\.(webp|png|jpe?g|gif|svg)/.test(src), `다른 저장소 그림 직접 참조: ${rel}`);
 }
 console.log(`PASS 스크립트 ${scripts}개 문법, 로컬 링크 ${links}개`);
 

@@ -82,9 +82,28 @@
           } });
       }
     });
+    /* 다른 게임 별: 누르면 우주선 타고 날아가서 그 게임으로 */
+    (SP.LINKS || []).forEach(function (s, i) {
+      var m = P ? s.mapP : s.map;
+      var e = place(E('button', 'sp-star link', ''), m.x, m.y, m.w);
+      e.type = 'button'; e.dataset.id = s.id; e.dataset.depth = '0.7'; e.style.setProperty('--c', s.color); e.style.animationDelay = (-i * 2.3 - 1) + 's';
+      e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, s.emo, 'sp-star-img') + '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b><i>' + O.esc(s.chip) + '</i></span>';
+      e.onclick = function () { O.unlock && O.unlock(); O.sfx('pop'); leave(s, e); };
+      mapEl.appendChild(e);
+      if (view3d && model(s.model)) view3d.add(model(s.model), e, { box: e.querySelector('.sp-star-img'), spin: .3, yaw: 2 + i, tilt: .42, dist: 1.8, dy: -.04, glow: hex(s.color) });
+    });
     if (view3d) view3d.start();
   }
   var view3d = null;
+  /* 다른 게임으로 떠나기: 가운데 별에서 우주선이 날아가고, 그 별로 쑥 들어가면 게임 열기 */
+  function leave(s, el) {
+    if (busy) return; busy = true;
+    talk(s.id === 'jungle' ? 'ok_wave' : 'ok_wave', s.say);
+    var from = mapEl.querySelector('.sp-star.main');
+    var go3 = function () { location.href = s.url; };
+    fly(from, el).then(function () { return zoomInto(el); }).then(function () { setTimeout(go3, calm() ? 0 : 150); });
+    setTimeout(function () { busy = false; }, 4000);
+  }
   function hex(c) { var n = parseInt(c.slice(1), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255]; }
   /* 살짝 입체감: 손가락·마우스를 따라 층마다 다르게 움직임 */
   var par = { x: 0, y: 0 };
@@ -174,9 +193,9 @@
   /* ---------- 화면 바꾸기 ---------- */
   var busy = false, booting = true;
   function setBg(name) { var p = art(name); stage.style.backgroundImage = scroller.style.backgroundImage = p ? 'url(' + p + ')' : ''; }
-  function centerScroll(xPct) {
+  function centerScroll(xPct, yPct) {
     var max = scroller.scrollWidth - scroller.clientWidth; if (max > 0) scroller.scrollLeft = max * (xPct == null ? .5 : xPct / 100);
-    var maxY = scroller.scrollHeight - scroller.clientHeight; if (maxY > 0) scroller.scrollTop = maxY * .5;
+    var maxY = scroller.scrollHeight - scroller.clientHeight; if (maxY > 0) scroller.scrollTop = maxY * (yPct == null ? .5 : yPct / 100);
   }
   function showMap(fromStar) {
     cur = { view: 'map', star: null, b: null }; document.body.dataset.view = 'map'; if (land3d) land3d.stop();
@@ -185,7 +204,7 @@
     document.getElementById('title').innerHTML = '<b>옥쌤의 즐거운 교실</b><span>우주선을 타고 공부하러 떠나요</span>';
     renderMap(); startTwinkle(); closeSheet(true);
     var target = fromStar && mapEl.querySelector('.sp-star[data-id="' + fromStar + '"]');
-    centerScroll(50);
+    centerScroll(50, portrait() ? 0 : 50);
     fadeIn();
     if (target) { busy = true; fly(target, mapEl.querySelector('.sp-star.main'), false).then(function () { busy = false; }); }
     talk('ok_wave', '어느 별로 가 볼까요? 별을 눌러요!', !fromStar);

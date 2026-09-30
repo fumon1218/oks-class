@@ -133,7 +133,8 @@ body.calm .sp-star,body.calm .sp-egg,body.calm .sp-deco,body.calm .sp-star-glow,
 /* ---------- 세로 화면(휴대폰): 우주는 한 화면, 별 위는 두 줄 격자로 아래로 내려 보기 ---------- */
 body.portrait .sp-scroll{background:#140f33 center/cover no-repeat;}
 body.portrait .sp-stage{width:100vw;height:auto;min-height:100vh;background:none!important;}
-body.portrait .sp-map{position:absolute;inset:0;height:100vh;}
+body.portrait .sp-map{position:absolute;inset:0;height:125vh;}
+body.portrait[data-view="map"] .sp-stage{min-height:125vh;}
 body.portrait .sp-star-name{padding:4px 10px;}
 body.portrait .sp-star-name b{font-size:17px;}
 body.portrait .sp-star.main .sp-star-name b{font-size:20px;}
@@ -164,3 +165,6 @@ body.portrait .sp-guide img{width:84px;}
 .sp-zoom.in-sheet{right:-10px;top:-6px;width:38px;height:38px;font-size:17px;}
 .sp-title .sp-3dbtn{align-self:flex-start;margin-top:6px;pointer-events:auto;font-size:14px;padding:6px 12px;text-shadow:none;}
 @media (max-width:600px){.sp-zoom{width:36px;height:36px;font-size:16px;}.sp-3dbtn span{display:none;}}
+/* 다른 게임 별 */
+.sp-star.link .sp-star-name{border-style:dashed;}
+.sp-star.link .sp-fallback{display:grid;place-items:center;aspect-ratio:1;font-size:clamp(40px,6vw,90px);background:radial-gradient(circle,var(--c) 0%,transparent 70%);border-radius:50%;}
