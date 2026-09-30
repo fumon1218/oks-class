@@ -8,7 +8,7 @@ os.chdir(ROOT)
 PAGES = [
     './', './index.html', './manifest.json',
     './learn/', './learn/index.html', './learn/learn.css', './learn/learn.js',
-    './play/', './play/index.html', './play/play.css', './play/play.js', './play/content.js', './play/content2.js', './play/content-extra.js', './play/custom.js', './curriculum/editor.html', './play/describe.js', './curriculum/plan.html',
+    './play/', './play/index.html', './play/play.css', './play/play.js', './play/content.js', './play/content2.js', './play/content-extra.js', './play/custom.js', './play/scenes.js', './curriculum/editor.html', './play/describe.js', './curriculum/plan.html',
     './play/engines.js', './play/engines2.js', './play/farm.js',
     './core/oks-core.css', './core/oks-core.js', './core/oks-kit.js', './core/oks-eco.js', './curriculum/lessons.js',
     './shop/', './shop/index.html', './shop/shop.css', './shop/shop.js', './shop/shops.js', './shop/stations.js',
@@ -20,7 +20,7 @@ PAGES = [
     './quests/index.html', './curriculum/teacher-guide.html', './curriculum/reports.html',
 ]
 files = []
-for pat in ['core/ui/*.webp', 'games/farm/assets/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
+for pat in ['core/ui/*.webp', 'art/scene/*.webp', 'games/farm/assets/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
     files += sorted(glob.glob(pat))
 assets = [p for p in PAGES if p.endswith('/') or os.path.exists(p)] + ['./' + f for f in files]
 src = open('sw.js', encoding='utf-8').read()

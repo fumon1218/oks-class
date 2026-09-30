@@ -51,29 +51,36 @@
       lesson.levels.map(function (t, i) { return '<li><b>' + O.LEVELS[i].name + '</b> ' + O.esc(t.replace(/^〈[^〉]*〉\s*/, '')) + '</li>'; }).join('') + '</ol><p class="src">기록: ' + O.esc(lesson.record) + '</p></div>';
   }
 
+  /* 장면 속 게임판·보너스 표시는 판이 바뀌어도 유지 */
+  function keepCls() { var c = ''; if (scene && ctx.cfg.engine !== 'farm') c += ' in-scene'; if (sh.board.classList.contains('bonus-round')) c += ' bonus-round'; return c; }
   /* ---------- 게임 도우미(ctx) ---------- */
   var st = O.newStats();
   var ctx = {
     lesson: lesson, id: id, level: level, sh: sh, board: sh.board, stats: st,
     cfg: cfgFor(level), nOpt: NOPT[level - 1], rounds: ROUNDS[level - 1],
     ask: function (t, o) { return sh.ask(t, o); },
-    clear: function () { O.clearPrompt(); sh.board.innerHTML = ''; sh.board.className = 'oks-board'; },
-    scene: function (kind) { sh.board.className = 'oks-board ' + (kind || ''); },
+    clear: function () { O.clearPrompt(); sh.board.innerHTML = ''; sh.board.className = 'oks-board' + keepCls(); },
+    scene: function (kind) { sh.board.className = 'oks-board ' + (kind || '') + (kind ? '' : keepCls()); },
     progress: function (i, n) { sh.setRounds(n, i); }
   };
   O.kit(ctx);
 
   /* ---------- 실행 ---------- */
+  var scene = null;
   function run() {
     var cfg = ctx.cfg, eng = ENGINES[cfg.engine];
     ctx.rounds = cfg.rounds ? (cfg.rounds[level - 1] || ctx.rounds) : (eng.rounds ? eng.rounds[level - 1] : ctx.rounds);
     if (cfg.nOpt) ctx.nOpt = cfg.nOpt[level - 1];
     sh.setRounds(ctx.rounds, 0);
-    var i = 0;
+    var i = 0, m0 = 0;
+    /* 장면 띠: 판마다 조각이 생기고, 마지막 판은 보너스, 다 풀면 장면 완성 */
+    scene = (window.OKS_SCENE && cfg.engine !== 'portal' && ctx.rounds > 1) ? window.OKS_SCENE.mount(sh, lesson, ctx.rounds) : null;
+    if (scene && cfg.engine !== 'farm') sh.board.classList.add('in-scene');
     (eng.setup ? Promise.resolve(eng.setup(ctx)) : Promise.resolve()).then(function loop() {
-      if (i >= ctx.rounds) return end();
-      sh.setRounds(ctx.rounds, i); ctx.newStep();
-      return Promise.resolve(eng.round(ctx, i)).then(function () { O.clearPrompt(); i++; return O.wait(650).then(loop); });
+      if (i >= ctx.rounds) return scene ? scene.finale().then(end) : end();
+      sh.setRounds(ctx.rounds, i); ctx.newStep(); m0 = st.mistakes;
+      if (scene) { scene.now(i); if (i === ctx.rounds - 1) scene.bonus(); }
+      return Promise.resolve(eng.round(ctx, i)).then(function () { O.clearPrompt(); if (scene) scene.advance(i, st.mistakes === m0); i++; return O.wait(650).then(loop); });
     }).catch(function (e) { console.error(e); O.toast('앗, 문제가 생겼어요. 다시 시작해 주세요.'); });
   }
   function end() {
@@ -85,7 +92,9 @@
     if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(id, level + 1); location.href = '?id=' + id + '&level=' + (level + 1); } });
     (window.OKS_SHOP_BY_LESSON ? window.OKS_SHOP_BY_LESSON(id) : []).slice(0, 1).forEach(function (S) { btns.push({ label: '🏪 ' + S.name + '에서 일하기', color: 'pink', href: '../shop/?id=' + S.id + '&level=' + level }); });
     btns.push({ label: '배움 지도', color: 'blue', href: '../learn/?subject=' + lesson.subject + '&school=' + lesson.school + '#' + id });
-    O.finish({ stats: st, entry: entry, title: '다 했어요!', text: lesson.topic + ' · ' + O.LEVELS[level - 1].name, buttons: btns });
+    var sc = scene ? scene.stats() : { maxCombo: 0 };
+    if (sc.maxCombo >= 2) entry.combo = sc.maxCombo;
+    O.finish({ stats: st, entry: entry, title: scene ? scene.tpl.done : '다 했어요!', text: lesson.topic + ' · ' + O.LEVELS[level - 1].name + (sc.maxCombo >= 2 ? ' · 최고 ' + sc.maxCombo + '콤보' : ''), extraCoins: sc.maxCombo >= 2 ? sc.maxCombo : 0, buttons: btns });
   }
 
   /* 첫 화면: 시작 버튼(소리 켜기 위해 한 번 눌러야 함) */

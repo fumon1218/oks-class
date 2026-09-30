@@ -254,3 +254,40 @@
   .row.pairs{gap:8px;} .pair-arrow{display:none;} .word-card{font-size:18px;}
   .oks-card.num{width:92px;min-height:100px;} .oks-card.num b{font-size:40px;}
 }
+
+/* 장면 띠 (게임 공간 · 한 판마다 조각이 생겨요) */
+.scene-strip{position:relative;height:150px;border-radius:24px;margin:0 0 12px;background:#cfe8c4 center/cover no-repeat;box-shadow:var(--shadow);overflow:hidden;}
+.scene-strip::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.55));pointer-events:none;}
+.sc-guide{position:absolute;left:12px;bottom:4px;height:120px;z-index:2;filter:drop-shadow(0 6px 6px rgba(0,0,0,.3));}
+.sc-guide.hop{animation:sc-hop .5s ease;}
+@keyframes sc-hop{40%{transform:translateY(-22px) rotate(-5deg)}}
+.sc-title{position:absolute;left:140px;top:10px;z-index:2;background:rgba(255,255,255,.9);border-radius:999px;padding:3px 14px;font-size:16px;}
+.sc-track{position:absolute;left:140px;right:14px;bottom:14px;display:flex;gap:10px;justify-content:center;z-index:2;}
+.sc-slot{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.55);border:3px dashed rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;font-size:30px;transition:transform .2s;}
+.sc-slot.now{transform:scale(1.12);border-color:#ffb300;background:rgba(255,248,225,.85);}
+.sc-slot.last{border-color:#ffd54f;}
+.sc-slot.got{border-style:solid;background:#fff;animation:sc-pop .45s ease;}
+.sc-slot.got.good{border-color:#43a047;} .sc-slot.got.ok{border-color:#90a4ae;}
+.sc-slot b{font-weight:400;font-size:38px;line-height:1;} .sc-slot img{width:80%;height:80%;object-fit:contain;}
+@keyframes sc-pop{0%{transform:scale(.3)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
+.sc-combo{position:absolute;right:16px;top:10px;z-index:3;font-size:22px;color:#fff;background:linear-gradient(90deg,#ff7a59,#ffb300);border-radius:999px;padding:2px 14px;opacity:0;}
+.sc-combo.pop{animation:sc-combo 1.4s ease forwards;}
+@keyframes sc-combo{0%{opacity:0;transform:scale(.5)}20%{opacity:1;transform:scale(1.2)}80%{opacity:1;transform:scale(1)}100%{opacity:0}}
+.sc-spark{position:absolute;bottom:40px;width:10px;height:10px;border-radius:50%;background:#ffd54f;z-index:3;animation:sc-spark .8s ease-out forwards;}
+@keyframes sc-spark{to{transform:translate(var(--dx),var(--dy));opacity:0}}
+.scene-strip.complete .sc-slot{animation:sc-pop .5s ease;}
+.sc-finale{position:fixed;inset:0;z-index:88;display:flex;align-items:center;justify-content:center;pointer-events:none;overflow:hidden;}
+.sc-finale .card{display:flex;flex-direction:column;align-items:center;gap:6px;background:rgba(255,253,245,.96);border-radius:32px;padding:22px 40px;box-shadow:0 20px 50px rgba(0,0,0,.3);animation:sc-pop .6s ease;}
+.sc-finale span{font-size:96px;line-height:1;animation:sc-hop 1s ease infinite;} .sc-finale b{font-weight:400;font-size:30px;color:#e0612f;} .sc-finale small{font-size:16px;color:var(--ink-soft);}
+.confetti{position:absolute;top:-20px;width:12px;height:18px;border-radius:3px;animation:confetti 2s ease-in forwards;}
+@keyframes confetti{to{transform:translateY(110vh) rotate(720deg);}}
+.scene-strip.complete{box-shadow:0 0 0 5px #ffd54f,0 0 28px 6px rgba(255,193,7,.55),var(--shadow);}
+.scene-strip.complete .sc-slot{border-color:#ffd54f;}
+.oks-board.in-scene{background:linear-gradient(rgba(255,253,245,.72),rgba(255,253,245,.72)),var(--scene) center/cover no-repeat;}
+.oks-board.bonus-round{box-shadow:0 0 0 6px #ffd54f,0 0 30px 8px rgba(255,193,7,.55),var(--shadow);}
+.bonus-banner{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%);z-index:90;font-size:44px;color:#fff;background:linear-gradient(90deg,#ffb300,#ff7a59);padding:12px 34px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25);animation:oks-praise 1.6s ease forwards;pointer-events:none;}
+@media (max-width:640px){
+  .scene-strip{height:110px;border-radius:18px;} .sc-guide{height:84px;} .sc-title{left:92px;font-size:13px;}
+  .sc-track{left:92px;gap:5px;bottom:10px;} .sc-slot{width:40px;height:40px;font-size:18px;} .sc-slot b{font-size:24px;}
+  .sc-finale span{font-size:64px;} .sc-finale b{font-size:21px;} .sc-finale .card{padding:16px 22px;}
+}
