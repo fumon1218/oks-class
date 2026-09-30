@@ -155,7 +155,13 @@ def glow_to_alpha(im):
     return Image.fromarray(np.dstack([col, na * 255]).astype(np.uint8), 'RGBA')
 
 
+def has_alpha(im):
+    import numpy as np
+    return im.mode in ('RGBA', 'LA') and (np.array(im.convert('RGBA'))[:, :, 3] < 16).mean() > 0.02
+
+
 def save_cut(im, path, size, glow=False):
+    if glow and has_alpha(im): glow = False   # 이미 투명 배경으로 온 그림은 빛 처리 안 함
     im = trim(white_to_alpha(im)); im.thumbnail((size, size), Image.LANCZOS)
     if glow: im = glow_to_alpha(im)
     im.save(path, 'WEBP', quality=86, method=4)

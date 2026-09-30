@@ -33,6 +33,8 @@ def rows():
             d = {'file': it['file'], 'ko': it['ko'], 'use': it.get('use', ''), 'kind': it['kind'], 'star': it.get('star', ''),
                  'ratio': it.get('ratio') or ('3:1' if it['kind'] == 'sheet' and it['grid'][0] == 1 else '1:1'),
                  'ref': it.get('ref', ''), 'prompt': M.full_prompt(g, it)}
+            keys = [n[0] for n in it['names']] if it['kind'] == 'sheet' else [it['file']]
+            d['have'] = all(os.path.exists(os.path.join(ROOT, g['folder'], k + '.webp')) for k in keys)
             if it['kind'] == 'sheet':
                 d['grid'] = list(it['grid']); d['names'] = [[k, ko, emo] for k, ko, emo, _ in it['names']]
             items.append(d)
@@ -43,7 +45,7 @@ def rows():
 def ref_label(ref):
     if not ref: return ''
     if ref.startswith('icons/'): return '참고 그림: 지금 앱의 옥쌤 그림 (함께 보내 드린 mascot-cheer.png)'
-    if 'avatar' in ref: return '참고 그림: 학생 캐릭터 sheet_kids 그림'
+    if 'avatar' in ref: return '참고 그림: 노란 후드티 남자아이 (함께 보내 드린 kid_boy1.png)'
     return '참고 그림: ' + ref
 
 
@@ -84,7 +86,7 @@ TPL = r'''<title>옥쌤 그림 작업판</title>
 :root[data-theme="dark"]{
   --bg:#12111f; --panel:#1b1a2e; --ink:#ecebf8; --muted:#a19fbf; --line:#2d2b47; --night:#0b0a18; --night-ink:#f3f1ff;
   --accent:#9d94ff; --accent-soft:#2a2750; --done:#5fd39b; --done-soft:#17362a; --gold:#f5c35a; color-scheme:dark}
-*{box-sizing:border-box}
+*{box-sizing:border-box} [hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;margin:0}
 .hero{background:var(--night);color:var(--night-ink);padding-block:28px 22px;position:relative;overflow:hidden}
 .hero canvas{position:absolute;inset:0;width:100%;height:100%;opacity:.8}
@@ -157,13 +159,15 @@ function copy(text,msg,el){
   try{navigator.clipboard.writeText(text).then(ok,fail)}catch(e){fail()}
 }
 var total=0; DATA.forEach(function(g){total+=g.items.length});
-function meter(){var n=0;DATA.forEach(function(g){g.items.forEach(function(it){if(done[it.file])n++})});
+function isDone(it){return it.have||done[it.file]}
+function meter(){var n=0;DATA.forEach(function(g){g.items.forEach(function(it){if(isDone(it))n++})});
   document.getElementById('barFill').style.width=(n/total*100)+'%';document.getElementById('meterText').textContent=n+' / '+total+' 완료'}
-[['all','전체'],[1,'1순위'],[2,'2순위'],[3,'3순위'],['todo','남은 것']].forEach(function(t){
-  var b=document.createElement('button');b.type='button';b.textContent=t[1];b.setAttribute('aria-pressed',t[0]==='all');
+filter='todo';
+[['todo','남은 것'],['all','전체'],[1,'1순위'],[2,'2순위'],[3,'3순위']].forEach(function(t){
+  var b=document.createElement('button');b.type='button';b.textContent=t[1];b.setAttribute('aria-pressed',t[0]==='todo');
   b.onclick=function(){filter=t[0];[].forEach.call(tabs.children,function(x){x.setAttribute('aria-pressed',x===b)});apply()};tabs.appendChild(b)});
 function apply(){[].forEach.call(document.querySelectorAll('section'),function(s){var p=+s.dataset.p;var anyShown=false;
-  [].forEach.call(s.querySelectorAll('.card'),function(c){var show=(filter==='all'||filter===p||filter==='todo')&&!(filter==='todo'&&done[c.dataset.file]);c.hidden=!show;if(show)anyShown=true});
+  [].forEach.call(s.querySelectorAll('.card'),function(c){var show=(filter==='all'||filter===p||filter==='todo')&&!(filter==='todo'&&(done[c.dataset.file]||c.dataset.have==='1'));c.hidden=!show;if(show)anyShown=true});
   s.hidden=!anyShown})}
 var PRI={1:'1순위',2:'2순위',3:'3순위'};
 DATA.forEach(function(g){
@@ -172,23 +176,23 @@ DATA.forEach(function(g){
   s.innerHTML='<h2><span class="pri">'+PRI[g.priority]+'</span>'+esc(g.title)+'<span class="cnt">그림 '+g.items.length+'장 · 파일 '+files+'개</span></h2><p class="note">'+esc(g.note)+'</p><div class="grid"></div>';
   var grid=s.querySelector('.grid');
   g.items.forEach(function(it){
-    var c=document.createElement('article');c.className='card'+(done[it.file]?' is-done':'');c.dataset.file=it.file;
+    var c=document.createElement('article');c.className='card'+(isDone(it)?' is-done':'');c.dataset.file=it.file;c.dataset.have=it.have?'1':'';
     var cells='';
     if(it.names){cells='<div class="cells" style="grid-template-columns:repeat('+it.grid[1]+',minmax(0,1fr))">'+it.names.map(function(n,i){return '<span><em>'+(i+1)+'</em>'+esc(n[1])+'</span>'}).join('')+'</div>'}
     c.innerHTML='<div class="top"><button type="button" class="fname" title="파일 이름 복사">'+esc(it.file)+'.png</button><span class="chip">'+esc(it.ratio)+(it.names?' · '+it.names.length+'개':'')+'</span></div>'+
       '<div class="ko">'+esc(it.ko)+'</div><div class="meta">'+(it.star?esc(it.star)+' · ':'')+esc(it.use)+'</div>'+
       (it.ref?'<div class="ref">'+esc(it.refLabel)+'</div>':'')+cells+
       '<p class="prompt">'+esc(it.short)+'</p>'+
-      '<div class="acts"><button type="button" class="copy">프롬프트 복사</button><button type="button" class="more">전체 보기</button><button type="button" class="done" aria-pressed="'+(!!done[it.file])+'">'+(done[it.file]?'완료 ✓':'완료 표시')+'</button></div>';
+      '<div class="acts"><button type="button" class="copy">프롬프트 복사</button><button type="button" class="more">전체 보기</button>'+(it.have?'<span class="chip">받아서 앱에 넣었어요 ✓</span>':'<button type="button" class="done" aria-pressed="'+(!!done[it.file])+'">'+(done[it.file]?'완료 ✓':'완료 표시')+'</button>')+'</div>';
     var pre=c.querySelector('.prompt');
     c.querySelector('.copy').onclick=function(){copy(it.prompt,'프롬프트를 복사했어요',pre)};
     c.querySelector('.fname').onclick=function(){copy(it.file+'.png','파일 이름을 복사했어요',this)};
     c.querySelector('.more').onclick=function(){var o=c.classList.toggle('open');this.textContent=o?'접기':'전체 보기'};
-    c.querySelector('.done').onclick=function(){done[it.file]=!done[it.file];if(!done[it.file])delete done[it.file];save();
+    if(!it.have)c.querySelector('.done').onclick=function(){done[it.file]=!done[it.file];if(!done[it.file])delete done[it.file];save();
       this.setAttribute('aria-pressed',!!done[it.file]);this.textContent=done[it.file]?'완료 ✓':'완료 표시';c.classList.toggle('is-done',!!done[it.file]);meter();if(filter==='todo')apply()};
     grid.appendChild(c)});
   list.appendChild(s)});
-meter();
+meter();apply();
 (function(){var cv=document.getElementById('sky'),x=cv.getContext('2d');function draw(){var w=cv.width=cv.offsetWidth,h=cv.height=cv.offsetHeight;x.clearRect(0,0,w,h);
   var seed=7;function r(){seed=(seed*9301+49297)%233280;return seed/233280}
   for(var i=0;i<Math.round(w*h/2600);i++){var a=r()*.8+.2;x.fillStyle='rgba(243,241,255,'+a+')';var s=r()<.08?2:1;x.fillRect(r()*w,r()*h,s,s)}

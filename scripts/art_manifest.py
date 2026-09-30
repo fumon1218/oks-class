@@ -17,7 +17,7 @@ SHEET = ("A {r}x{c} grid sprite sheet: {n} separate items arranged in {r} rows a
          "between items, each item centered in its own equal cell and about the same size, same slightly-front 3/4 view for all, "
          "pure plain white background, items must not touch or overlap, no grid lines, no labels, square 1:1.")
 REF_OK = "Use the attached reference image of the teacher character and keep her exactly the same (same face, long wavy brown hair, lavender puff-sleeve dress with a cream bow)."
-REF_KID = "Use the attached reference image (student avatar sheet) and keep the SAME child exactly (same face, hair and clothes) in every cell."
+REF_KID = "Use the attached reference image (the boy with short black hair, yellow hoodie and blue jeans) and keep the SAME boy exactly (same face, hair and clothes) in every cell."
 
 
 def S(key, ko, emo, en):
@@ -264,22 +264,22 @@ GROUPS = [
 {'id': 'act', 'title': '감정·행동 카드', 'folder': 'art/act', 'priority': 3,
  'note': '사회·국어·생활 차시에서 가장 많이 쓰는 그림이에요(“어떻게 할까요?” 문제). 같은 아이가 나와야 해서, 학생 캐릭터 그림(sheet_kids의 남자아이 1 또는 여자아이 1)을 참고 그림으로 넣어 주세요. 잘못된 행동도 무섭지 않게, 부드럽게.',
  'items': [
-  {'file': 'sheet_feel', 'ko': '감정 9가지', 'kind': 'sheet', 'grid': (3, 3), 'size': 256, 'ref': 'art/avatar/kid_girl1', 'use': '감정 알기·표현하기',
+  {'file': 'sheet_feel', 'ko': '감정 9가지', 'kind': 'sheet', 'grid': (3, 3), 'size': 256, 'ref': 'art/avatar/kid_boy1', 'use': '감정 알기·표현하기',
    'names': [S('feel_happy', '기뻐요', '😊😆😄', 'big happy smile'), S('feel_sad', '슬퍼요', '😢😭', 'sad with a small tear'), S('feel_angry', '화나요', '😠😡😤', 'angry frown with puffed cheeks (mild)'),
              S('feel_scared', '무서워요', '😨', 'scared, hugging itself'), S('feel_surprised', '놀라요', '😲', 'surprised with round eyes and open mouth'), S('feel_calm', '편안해요', '😌', 'calm and relaxed, eyes gently closed'),
              S('feel_tired', '졸려요', '😴💤', 'sleepy and yawning'), S('feel_sick', '아파요', '🤒', 'feeling sick with a hand on the tummy'), S('feel_proud', '뿌듯해요', '💪', 'proud, hands on hips')],
    'prompt_head': REF_KID + ' Upper-body portraits of the same child showing 9 feelings:'},
-  {'file': 'sheet_do_school', 'ko': '학교 생활 행동 9가지', 'kind': 'sheet', 'grid': (3, 3), 'size': 256, 'ref': 'art/avatar/kid_girl1', 'use': '인사·차례·학교 규칙',
+  {'file': 'sheet_do_school', 'ko': '학교 생활 행동 9가지', 'kind': 'sheet', 'grid': (3, 3), 'size': 256, 'ref': 'art/avatar/kid_boy1', 'use': '인사·차례·학교 규칙',
    'names': [S('do_bow', '인사해요', '🙇', 'bowing politely to say hello'), S('do_hand_up', '손 들어요', '🙋✋', 'raising one hand high'), S('do_line_up', '줄 서요', '🧍', 'standing in line waiting, with a friend in front'),
              S('do_sit', '앉아요', '🪑', 'sitting nicely on a chair'), S('do_wash_hands', '손 씻어요', '🧼', 'washing hands at a sink with bubbles'), S('do_trash', '쓰레기 버려요', '🗑️', 'putting trash into a bin'),
              S('do_listen', '잘 들어요', '👂', 'listening carefully with a hand behind the ear'), S('do_clap', '박수 쳐요', '👏', 'clapping hands'), S('do_share', '나눠요', '🤝', 'sharing a toy with a friend')],
-   'prompt_head': REF_KID + ' Full-body pictures of the same child doing 9 school actions:'},
-  {'file': 'sheet_do_safe', 'ko': '안전·도움 행동 9가지', 'kind': 'sheet', 'grid': (3, 3), 'size': 256, 'ref': 'art/avatar/kid_girl1', 'use': '도움 요청·안전 차시',
+   'prompt_head': REF_KID + ' IMPORTANT: these are FULL-BODY ACTION scenes, NOT face portraits and NOT emotions. Full-body pictures of the same boy doing 9 school actions, each with the small prop it needs:'},
+  {'file': 'sheet_do_safe', 'ko': '안전·도움 행동 9가지', 'kind': 'sheet', 'grid': (3, 3), 'size': 256, 'ref': 'art/avatar/kid_boy1', 'use': '도움 요청·안전 차시',
    'names': [S('do_help', '도와주세요', '🙋🗣️', 'asking an adult for help, one hand raised'), S('do_stop', '멈춰요', '🛑', 'stopping at the edge of a crosswalk, one hand out'), S('do_walk', '걸어요', '🚶', 'walking calmly'),
              S('do_run', '뛰어요', '🏃', 'running fast'), S('do_ears', '귀를 막아요', '🙉', 'covering both ears'), S('do_quiet', '쉿, 조용히', '🤫', 'finger on lips saying shh'),
              S('do_cry', '울어요', '😭', 'crying'), S('do_push', '밀어요', '👐👊', 'pushing a friend (mild, not violent)'), S('do_ignore', '못 본 척해요', '🙈', 'covering eyes, looking away')],
-   'prompt_head': REF_KID + ' Full-body pictures of the same child in 9 safety situations:'},
-  {'file': 'sheet_do_life', 'ko': '생활 자립 행동 9가지', 'kind': 'sheet', 'grid': (3, 3), 'size': 256, 'ref': 'art/avatar/kid_girl1', 'use': '생활 자립·진로 차시',
+   'prompt_head': REF_KID + ' IMPORTANT: these are FULL-BODY ACTION scenes, NOT face portraits and NOT emotions. Full-body pictures of the same boy in 9 safety situations, each with the small prop or person it needs:'},
+  {'file': 'sheet_do_life', 'ko': '생활 자립 행동 9가지', 'kind': 'sheet', 'grid': (3, 3), 'size': 256, 'ref': 'art/avatar/kid_boy1', 'use': '생활 자립·진로 차시',
    'names': [S('do_brush', '이 닦아요', '🪥', 'brushing teeth'), S('do_shoes', '신발 신어요', '👟', 'putting on shoes'), S('do_eat', '밥 먹어요', '🍚😋', 'eating rice with a spoon'),
              S('do_pour', '물 따라요', '💧', 'pouring water into a cup'), S('do_pay', '계산해요', '💵', 'paying at a shop counter'), S('do_card', '교통카드 찍어요', '💳', 'tapping a transit card on a bus reader'),
              S('do_call', '전화해요', '📞☎️', 'talking on a phone'), S('do_pack', '가방 챙겨요', '🎒', 'packing a school bag'), S('do_sleep', '잠자요', '🛌', 'sleeping in bed')],
