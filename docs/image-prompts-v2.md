@@ -27,7 +27,7 @@ Cute 3D cartoon illustration for a children's special-education learning app, so
 
 ---
 
-## [1순위] 우주·별 — 그림 13장 → 파일 21개
+## [1순위] 우주·별 — 그림 15장 → 파일 23개
 
 > 첫 화면(우주 지도)에 쓰는 그림입니다. 별은 흰 배경 위에 하나씩, 위쪽 평평한 땅은 비워 두세요(건물은 따로 올려요).
 
@@ -78,6 +78,20 @@ Cute 3D cartoon illustration for a children's special-education learning app, so
 
 ```
 Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. Dreamy magical outer space mood, deep navy and violet sky with soft pink and teal nebula glow, tiny twinkling stars, calm and cozy, never scary. A small floating half-sphere mini world in a sunny farm theme: the flat round TOP has neat vegetable field rows and a wooden fence at the rim, open empty ground in the middle; the rounded BOTTOM is warm brown soil and rock with a few carrots and roots poking out, soft sunny glow. Seen from slightly above (about 30 degrees). Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `star_jungle.png` — 정글 점프 별 (다른 게임으로 가는 별)
+- 비율 1:1 · 누르면 우주선 타고 정글 점프 게임으로
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. Dreamy magical outer space mood, deep navy and violet sky with soft pink and teal nebula glow, tiny twinkling stars, calm and cozy, never scary. A floating half-sphere mini world in a lush JUNGLE theme: the flat round TOP is a dense tropical jungle with big leafy trees, hanging vines, tree branches like stepping platforms, bright fruits (bananas, mangoes, berries) and a small waterfall, a wooden treasure chest peeking out; the rounded BOTTOM is mossy rock with roots and vines dangling down. Seen from slightly above (about 30 degrees). Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `star_word.png` — 워드 마스터 별 (다른 게임으로 가는 별)
+- 비율 1:1 · 누르면 우주선 타고 워드 마스터(한글 게임)로
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. Dreamy magical outer space mood, deep navy and violet sky with soft pink and teal nebula glow, tiny twinkling stars, calm and cozy, never scary. A floating half-sphere mini world in a WORD and BOOK theme: the flat round TOP has giant colorful toy letter blocks (blank faces, no letters), stacks of big storybooks like little hills, a pencil-shaped tower and floating paper stars; the rounded BOTTOM is layered like the page edges of a thick book in pastel colors with a soft golden glow. Seen from slightly above (about 30 degrees). No readable text anywhere. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
 ```
 
 ### `egg_sleep.png` — 아직 태어나지 않은 별 (잠든 알)
