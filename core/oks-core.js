@@ -45,6 +45,9 @@
     var s = settings(); var v = s.levels[lessonId]; if (v >= 1 && v <= 5) return v;
     return s.defaultLevel;
   }
+  /* 우주 지도 건물에서 들어왔으면 그 건물로 돌아가기 */
+  function ret(def) { try { var r = sessionStorage.getItem('oks_return'); if (r) return ROOT + r; } catch (e) {} return def; }
+  function fromSpace() { try { return !!sessionStorage.getItem('oks_return'); } catch (e) { return false; } }
   function rememberLevel(lessonId, lv) { var b = jget('oks_core_v1', {}); b.levels = b.levels || {}; b.levels[lessonId] = lv; jset('oks_core_v1', b); }
   function applyBody() {
     var s = settings(); var b = document.body; if (!b) return;
@@ -320,7 +323,7 @@
   global.OKS = {
     ROOT: ROOT, UI: UI, LEVELS: LEVELS, PROMPT: PROMPT, NOTE: NOTE,
     jget: jget, jset: jset, qs: qs, el: el, esc: esc, shuffle: shuffle, pick: pick, wait: wait,
-    settings: settings, saveSetting: saveSetting, levelFor: levelFor, rememberLevel: rememberLevel, applyBody: applyBody,
+    settings: settings, saveSetting: saveSetting, levelFor: levelFor, rememberLevel: rememberLevel, applyBody: applyBody, ret: ret, fromSpace: fromSpace,
     say: say, repeat: repeat, setReplay: setReplay, hush: hush, sfx: sfx, tone: tone, noise: noise, inst: inst, unlock: actx,
     target: target, clearPrompt: clearPrompt, help: help, showNow: showNow,
     shell: shell, toast: toast, praise: praise, mascot: mascot,

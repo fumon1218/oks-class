@@ -395,7 +395,7 @@
       var c = ctx.cfg, lv = ctx.level; ctx.clear();
       var diff = ['easy', 'easy', 'normal', 'hard', 'hard'][lv - 1];
       var box = E('div', 'portal', '<div class="portal-ico">' + (c.emo || '🎨') + '</div><h3>' + O.esc(c.title) + '</h3><p>' + O.esc(ctx.lesson.levels[lv - 1].replace(/^〈[^〉]*〉\s*/, '')) + '</p>');
-      var go = E('a', 'oks-btn', '▶ ' + O.esc(c.button || '미술실에서 하기')); go.href = O.ROOT + 'index.html?go=' + c.go + '&level=' + diff + '&from=' + ctx.id;
+      var go = E('a', 'oks-btn', '▶ ' + O.esc(c.button || '미술실에서 하기')); go.href = O.ROOT + 'classic.html?go=' + c.go + '&level=' + diff + '&from=' + ctx.id;
       var fin = E('button', 'oks-btn blue', '✓ 활동을 마쳤어요'); fin.type = 'button';
       box.appendChild(go); box.appendChild(fin); ctx.board.appendChild(box);
       return ctx.ask(c.q || '미술실로 가서 활동해요. 다 하면 돌아와서 마쳤어요를 눌러요').then(function () {

@@ -16,6 +16,7 @@
   var ask = document.getElementById('askText');
   O.applyBody();
   if (O.eco) O.eco.hud(document.getElementById('ecoHud'));
+  try { sessionStorage.removeItem('oks_return'); } catch (e) {}
   var SHOPS_OF = window.OKS_SHOP_BY_LESSON || function () { return []; };
 
   function renderTabs() {
@@ -118,4 +119,6 @@
     box.querySelector('.btns').appendChild(close); ov.appendChild(box); document.body.appendChild(ov);
   };
   render();
+  if (O.qs('set')) document.getElementById('setBtn').click();
+  if (O.qs('rec')) document.getElementById('recBtn').click();
 })();

@@ -1,0 +1,149 @@
+/* 우주 지도 — 밤하늘 무대 + 떠 있는 별 + 별 위 건물 + 건물 안(아래에서 올라오는 판) */
+body.space{margin:0;height:100%;overflow:hidden;background:#140f33;color:var(--ink);
+  --korean:#ef6c4a; --math:#3f8ee8; --social:#8a63d2; --science:#2aa876; --english:#1fa3b8; --art:#e0569b; --music:#f0a020; --star:#f3c24b;}
+html{height:100%;}
+.sp-scroll{position:fixed;inset:0;overflow:auto;overscroll-behavior:none;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.sp-scroll::-webkit-scrollbar{display:none;}
+/* 무대는 늘 16:9, 화면을 꽉 채우고 남는 쪽은 밀어서 보기 */
+.sp-stage{position:relative;width:100vw;height:max(100vh,56.25vw);background:#140f33 center/cover no-repeat;will-change:transform;}
+.sp-layer{position:absolute;inset:0;}
+.sp-twinkle{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:1;mix-blend-mode:screen;}
+
+/* 위 띠 */
+.sp-top{position:fixed;left:0;right:0;top:0;z-index:20;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;pointer-events:none;}
+.sp-top > *{pointer-events:auto;}
+.sp-title{display:flex;flex-direction:column;line-height:1.1;margin-right:auto;color:#fff;text-shadow:0 2px 10px rgba(20,10,60,.8);}
+.sp-title b{font-size:clamp(20px,2.6vw,30px);font-weight:400;}
+.sp-title span{font-size:clamp(13px,1.4vw,16px);opacity:.9;}
+.sp-back{font-size:18px;}
+@media (max-width:640px){ .sp-tlink span{display:none;} .sp-title span{display:none;} }
+
+/* ---------- 우주 지도 ---------- */
+.sp-map > *{position:absolute;transform:translate(-50%,-50%);}
+.sp-deco img,.sp-egg img{width:100%;display:block;}
+.sp-deco{pointer-events:none;animation:sp-bob 7s ease-in-out infinite;filter:drop-shadow(0 0 14px rgba(170,150,255,.35));}
+.sp-deco.dim{opacity:.7;}
+.sp-deco.drift{animation:sp-drift 16s ease-in-out infinite;}
+.sp-egg{background:none;border:0;padding:0;cursor:pointer;animation:sp-bob 5s ease-in-out infinite;filter:drop-shadow(0 0 16px rgba(230,210,255,.7));}
+.sp-star{background:none;border:0;padding:0;cursor:pointer;animation:sp-bob 6s ease-in-out infinite;color:#fff;font:inherit;}
+.sp-star-img{width:100%;display:block;position:relative;z-index:1;filter:drop-shadow(0 18px 26px rgba(10,5,40,.55));transition:transform .25s;}
+.sp-star-glow{position:absolute;left:50%;top:48%;width:120%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);
+  background:radial-gradient(circle,color-mix(in srgb,var(--c) 55%,transparent) 0%,transparent 65%);opacity:.75;animation:sp-glow 4s ease-in-out infinite;}
+.sp-star:hover .sp-star-img,.sp-star:focus-visible .sp-star-img{transform:scale(1.06);}
+.sp-star-name{position:relative;z-index:2;display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:-4%;
+  padding:6px 14px;border-radius:999px;background:rgba(20,14,55,.72);border:2px solid color-mix(in srgb,var(--c) 70%,#fff);
+  box-shadow:0 0 18px color-mix(in srgb,var(--c) 45%,transparent);white-space:nowrap;}
+.sp-star-name b{font-weight:400;font-size:clamp(16px,1.9vw,26px);}
+.sp-star-name i{font-style:normal;font-size:clamp(12px,1.2vw,16px);padding:2px 9px;border-radius:999px;background:var(--c);color:#1c1440;}
+.sp-star.main .sp-star-name b{font-size:clamp(18px,2.3vw,32px);}
+.sp-fallback{display:grid;place-items:center;aspect-ratio:1;border-radius:32%;background:linear-gradient(160deg,#fff7e8,#ffe1c6);font-size:clamp(34px,5vw,74px);box-shadow:inset 0 -8px 0 rgba(0,0,0,.07),0 10px 24px rgba(0,0,0,.25);}
+.sp-star .sp-fallback{border-radius:50%;}
+
+/* ---------- 별 위 ---------- */
+.sp-land > .sp-bld{position:absolute;transform:translate(-50%,-100%);background:none;border:0;padding:0;cursor:pointer;font:inherit;color:var(--ink);
+  display:flex;flex-direction:column;align-items:center;animation:sp-rise .5s both;}
+.sp-bld-img{width:100%;display:block;filter:drop-shadow(0 14px 14px rgba(30,20,60,.35));transition:transform .2s;transform-origin:50% 100%;}
+.sp-bld:hover .sp-bld-img,.sp-bld:focus-visible .sp-bld-img{transform:translateY(-6px) scale(1.04);}
+.sp-bld:active .sp-bld-img{transform:scale(.97);}
+.sp-bld .sp-fallback{width:70%;margin:0 auto;}
+.sp-bld-name{margin-top:-6%;position:relative;display:flex;flex-direction:column;align-items:center;padding:5px 12px 6px;border-radius:16px;
+  background:rgba(255,255,255,.92);box-shadow:0 6px 16px rgba(30,20,60,.3);border:3px solid var(--star);line-height:1.15;white-space:nowrap;}
+.sp-bld-name b{font-weight:400;font-size:clamp(14px,1.45vw,21px);}
+.sp-bld-name small{font-size:clamp(11px,1vw,14px);color:var(--ink-soft);}
+.sp-bld.far .sp-bld-name{transform:scale(.9);}
+
+/* 안내자 */
+.sp-guide{position:fixed;left:max(8px,env(safe-area-inset-left,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:15;display:flex;align-items:flex-end;gap:4px;cursor:pointer;max-width:min(520px,calc(100vw - 16px));}
+.sp-guide img{width:clamp(76px,8.5vw,118px);filter:drop-shadow(0 8px 14px rgba(0,0,0,.35));}
+.sp-bubble{position:relative;margin-bottom:34%;background:#fffdf6;border-radius:20px;padding:10px 14px;font-size:clamp(15px,1.5vw,20px);line-height:1.35;box-shadow:0 8px 22px rgba(0,0,0,.3);}
+.sp-bubble::before{content:'';position:absolute;left:-10px;bottom:14px;border:9px solid transparent;border-right-color:#fffdf6;border-left:0;}
+.sp-guide.pop img{animation:sp-hop .5s;}
+.sp-guide.pop .sp-bubble{animation:oks-pop .35s;}
+body[data-view="land"] .sp-guide{max-width:min(440px,calc(100vw - 16px));}
+
+/* 우주선 */
+.sp-flight{position:fixed;inset:0;z-index:30;pointer-events:none;}
+.sp-flight img{position:absolute;left:0;top:0;width:clamp(160px,22vw,300px);filter:drop-shadow(0 0 20px rgba(255,220,150,.6));}
+
+/* ---------- 건물 안 ---------- */
+.sp-sheet{position:fixed;inset:0;z-index:40;background:rgba(15,10,40,.5);display:flex;align-items:flex-end;justify-content:center;animation:sp-fade .2s;}
+.sp-sheet[hidden]{display:none;}
+.sp-sheet-box{position:relative;width:min(900px,100%);max-height:88vh;overflow:auto;background:#fffaf1;border-radius:30px 30px 0 0;
+  padding:18px clamp(14px,3vw,28px) calc(20px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 40px rgba(0,0,0,.35);animation:sp-up .3s cubic-bezier(.2,.9,.3,1.1);border-top:6px solid var(--c,#f3c24b);}
+.sp-close{position:absolute;right:14px;top:12px;width:48px;height:48px;border-radius:50%;border:0;background:#f1e8da;font-size:22px;cursor:pointer;}
+.sp-sheet-head{display:flex;align-items:center;gap:14px;padding-right:56px;margin-bottom:12px;}
+.sp-sheet-pic{width:clamp(76px,11vw,120px);flex:none;}
+.sp-sheet-pic img{width:100%;display:block;}
+.sp-sheet-pic .sp-fallback{font-size:48px;}
+.sp-sheet-head h2{margin:0;font-weight:400;font-size:clamp(24px,3vw,34px);}
+.sp-sheet-head p{margin:2px 0 0;color:var(--ink-soft);font-size:16px;}
+.sp-floors{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.sp-floor{font:inherit;font-size:18px;border:3px solid #eadfce;background:#fff;border-radius:16px;padding:8px 16px;cursor:pointer;color:var(--ink);}
+.sp-floor b{font-weight:400;color:var(--ink-soft);margin-right:2px;}
+.sp-floor small{font-size:13px;background:#f1e8da;border-radius:999px;padding:1px 8px;margin-left:4px;}
+.sp-floor.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 18%,#fff);}
+.sp-les-list{display:grid;gap:10px;}
+.sp-les{background:#fff;border-radius:20px;padding:12px 14px;box-shadow:0 3px 10px rgba(80,55,30,.1);}
+.sp-les-h{display:flex;gap:10px;align-items:flex-start;}
+.sp-les-h > div{flex:1;min-width:0;}
+.sp-les-h b{display:block;font-weight:400;font-size:19px;}
+.sp-les-h small{display:block;color:var(--ink-soft);font-size:14px;line-height:1.35;}
+.sp-les-h em{font-style:normal;font-size:13px;color:var(--ink-soft);white-space:nowrap;}
+.sp-no{flex:none;font-size:13px;padding:3px 9px;border-radius:999px;background:var(--s);color:#fff;white-space:nowrap;margin-top:2px;}
+.sp-lv{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:10px;}
+.sp-lvb{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;padding:7px 2px 6px;border-radius:14px;background:#f6efe3;text-decoration:none;color:var(--ink);border:3px solid transparent;min-height:58px;justify-content:center;}
+.sp-lvb b{font-weight:400;font-size:22px;line-height:1;}
+.sp-lvb small{font-size:12px;color:var(--ink-soft);text-align:center;line-height:1.1;}
+.sp-lvb i{font-style:normal;color:#f0a500;font-size:11px;line-height:1;}
+.sp-lvb.cur{border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,#fff);}
+.sp-lvb.got{background:#fff4d6;}
+.sp-lvb:hover{filter:brightness(.97);}
+.sp-rec{position:absolute;top:-9px;right:-4px;background:#ff7a59;color:#fff;border-radius:999px;font-size:11px;padding:1px 7px;}
+.sp-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin-top:12px;}
+.sp-link{display:flex;align-items:center;gap:6px;font:inherit;font-size:18px;padding:14px 16px;border-radius:18px;background:#fff;border:3px solid #eadfce;color:var(--ink);text-decoration:none;cursor:pointer;text-align:left;}
+.sp-link:hover{border-color:var(--c);}
+.sp-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;}
+.sp-stats > div{background:#fff;border-radius:18px;padding:10px;text-align:center;}
+.sp-stats b{display:block;font-weight:400;font-size:24px;}
+.sp-stats small{color:var(--ink-soft);}
+.sp-note,.sp-empty{color:var(--ink-soft);font-size:16px;margin:4px 0 10px;}
+.sp-dock{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;}
+.sp-dockb{font:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px;border-radius:20px;border:3px solid var(--c);background:#fff;cursor:pointer;color:var(--ink);}
+.sp-dockb img{width:70%;}
+.sp-dockb b{font-weight:400;font-size:20px;}
+.sp-dockb small{color:var(--ink-soft);}
+
+button:focus-visible,a:focus-visible{outline:4px solid #ffd54f;outline-offset:3px;}
+
+@keyframes sp-bob{0%,100%{margin-top:0}50%{margin-top:-1.2%}}
+@keyframes sp-drift{0%,100%{margin-left:0;margin-top:0}50%{margin-left:3%;margin-top:-2%}}
+@keyframes sp-glow{0%,100%{opacity:.55}50%{opacity:.95}}
+@keyframes sp-rise{from{opacity:0;margin-top:3%}to{opacity:1;margin-top:0}}
+@keyframes sp-hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-12px)}}
+@keyframes sp-fade{from{opacity:0}}
+@keyframes sp-up{from{transform:translateY(40px);opacity:.4}}
+body.calm .sp-star,body.calm .sp-egg,body.calm .sp-deco,body.calm .sp-star-glow,body.calm .sp-bld,body.calm .sp-sheet,body.calm .sp-sheet-box,body.calm .sp-guide *{animation:none!important;}
+@media (prefers-reduced-motion:reduce){ .sp-star,.sp-egg,.sp-deco,.sp-star-glow,.sp-bld{animation:none!important;} }
+
+.sp-back[hidden],.sp-guide[hidden]{display:none!important;}
+.sp-guide.quiet .sp-bubble{opacity:0;transform:scale(.8);pointer-events:none;}
+.sp-bubble{transition:opacity .3s,transform .3s;transform-origin:0 100%;}
+
+/* ---------- 세로 화면(휴대폰): 우주는 한 화면, 별 위는 두 줄 격자로 아래로 내려 보기 ---------- */
+body.portrait .sp-scroll{background:#140f33 center/cover no-repeat;}
+body.portrait .sp-stage{width:100vw;height:auto;min-height:100vh;background:none!important;}
+body.portrait .sp-map{position:absolute;inset:0;height:100vh;}
+body.portrait .sp-star-name{padding:4px 10px;}
+body.portrait .sp-star-name b{font-size:17px;}
+body.portrait .sp-star.main .sp-star-name b{font-size:20px;}
+body.portrait .sp-star-name i{font-size:12px;padding:1px 7px;}
+body.portrait .sp-land{position:relative;display:grid;grid-template-columns:1fr 1fr;gap:26px 10px;align-items:end;
+  padding:calc(118px + env(safe-area-inset-top,0px)) 12px calc(150px + env(safe-area-inset-bottom,0px));}
+body.portrait .sp-land > .sp-bld{position:relative;left:auto;top:auto;transform:none;width:auto;}
+body.portrait .sp-bld-img{width:88%;margin:0 auto;}
+body.portrait .sp-bld-name{margin-top:-8px;max-width:100%;white-space:normal;text-align:center;}
+body.portrait .sp-bld-name b{font-size:16px;}
+body.portrait .sp-bld-name small{font-size:12px;}
+body.portrait .sp-guide img{width:84px;}
+.sp-layer[hidden]{display:none!important;}

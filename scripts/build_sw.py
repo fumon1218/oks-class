@@ -6,7 +6,8 @@ import os, re, glob
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 os.chdir(ROOT)
 PAGES = [
-    './', './index.html', './manifest.json',
+    './', './index.html', './classic.html', './manifest.json',
+    './space/space.css', './space/space.js', './space/data.js', './art/art-ready.js',
     './learn/', './learn/index.html', './learn/learn.css', './learn/learn.js',
     './play/', './play/index.html', './play/play.css', './play/play.js', './play/content.js', './play/content2.js', './play/content-extra.js', './play/custom.js', './play/scenes.js', './curriculum/editor.html', './play/describe.js', './curriculum/plan.html',
     './play/engines.js', './play/engines2.js', './play/farm.js',
@@ -20,7 +21,7 @@ PAGES = [
     './quests/index.html', './curriculum/teacher-guide.html', './curriculum/reports.html',
 ]
 files = []
-for pat in ['core/ui/*.webp', 'art/scene/*.webp', 'games/farm/assets/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
+for pat in ['core/ui/*.webp', 'art/scene/*.webp', 'art/space/*.webp', 'art/build/*.webp', 'art/char/*.webp', 'art/obj/*.webp', 'art/act/*.webp', 'art/people/*.webp', 'art/avatar/*.webp', 'games/farm/assets/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
     files += sorted(glob.glob(pat))
 assets = [p for p in PAGES if p.endswith('/') or os.path.exists(p)] + ['./' + f for f in files]
 src = open('sw.js', encoding='utf-8').read()

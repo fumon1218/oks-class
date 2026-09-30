@@ -118,5 +118,5 @@
   }
 
   O.eco = { data: data, info: info, reward: reward, spend: spend, shop: shop, saveShop: saveShop, hud: hud, refresh: refreshHud,
-    placeOpen: placeOpen, PLACES: PLACES, PLACE_LV: PLACE_LV, MISSIONS: MISSIONS, BADGES: BADGES, today: today, missionsView: missionsView };
+    placeOpen: placeOpen, PLACES: PLACES, PLACE_LV: PLACE_LV, MISSIONS: MISSIONS, BADGES: BADGES, today: today, missionsView: missionsView, badgesView: badgesView };
 })();

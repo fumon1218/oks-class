@@ -25,20 +25,63 @@ def is_bg(p):
 
 
 def white_to_alpha(im):
-    im = im.convert('RGBA'); px = im.load(); w, h = im.size
-    if im.getextrema()[3][0] < 250:   # 이미 투명 배경
-        return im
-    seen = bytearray(w * h)
-    q = deque([(x, 0) for x in range(w)] + [(x, h - 1) for x in range(w)] + [(0, y) for y in range(h)] + [(w - 1, y) for y in range(h)])
-    while q:
-        x, y = q.popleft()
-        if not (0 <= x < w and 0 <= y < h) or seen[y * w + x]: continue
-        seen[y * w + x] = 1
-        r, g, b, a = px[x, y]
-        if a < 16 or (r > WHITE - 6 and g > WHITE - 6 and b > WHITE - 6):
-            px[x, y] = (r, g, b, 0)
-            q.extend([(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)])
-    return im
+    """배경 지우기. 순수한 흰 배경이면 가장자리와 이어진 흰색만, 연회색·그러데이션 배경이면 그랩컷으로."""
+    import numpy as np
+    im = im.convert('RGBA')
+    a0 = np.array(im)[:, :, 3]
+    if (a0 < 16).mean() > 0.02:   # 이미 일부가 투명: 흰 바탕에 올려서 처리하고, 원래 투명한 곳은 그대로 투명하게
+        flat = Image.new('RGBA', im.size, (255, 255, 255, 255)); flat.alpha_composite(im)
+        out = np.array(white_to_alpha(flat))
+        out[:, :, 3] = np.minimum(out[:, :, 3], a0)
+        out[:, :, :3] = np.array(im)[:, :, :3]
+        return Image.fromarray(out, 'RGBA')
+    rgb = np.array(im)[:, :, :3]
+    border = np.concatenate([rgb[0], rgb[-1], rgb[:, 0], rgb[:, -1]])
+    if np.percentile(border.min(axis=1), 20) >= 246:
+        return _white_flood(im)
+    return _grabcut(im)
+
+
+def _white_flood(im):
+    import numpy as np, cv2
+    arr = np.array(im); rgb = arr[:, :, :3].astype(np.int16); mn = rgb.min(axis=2)
+    white = (mn > 246).astype(np.uint8)
+    n, lab = cv2.connectedComponents(white)
+    edge = np.unique(np.concatenate([lab[0], lab[-1], lab[:, 0], lab[:, -1]]))
+    bgm = np.isin(lab, edge[edge > 0])
+    alpha = np.where(bgm, 0, 255).astype(np.float32)
+    near = cv2.dilate(bgm.astype(np.uint8), np.ones((7, 7), np.uint8)).astype(bool) & ~bgm
+    soft = np.clip((255 - mn) / (255 - 215) * 255, 0, 255)
+    alpha[near] = np.minimum(alpha[near], soft[near])
+    arr[:, :, 3] = alpha.astype(np.uint8)
+    return Image.fromarray(arr, 'RGBA')
+
+
+def _grabcut(im):
+    """연회색 스튜디오 배경용: 가장자리는 배경, 배경색과 비슷하면 배경일 듯, 나머지는 물건일 듯으로 시작."""
+    import numpy as np, cv2
+    arr = np.array(im); rgb = np.ascontiguousarray(arr[:, :, 2::-1]); h, w = rgb.shape[:2]
+    k = 640 / max(h, w); sm = cv2.resize(rgb, (round(w * k), round(h * k)), interpolation=cv2.INTER_AREA)
+    sh, sw = sm.shape[:2]
+    border = np.concatenate([sm[0], sm[-1], sm[:, 0], sm[:, -1]]).astype(np.int16)
+    bgc = np.median(border, axis=0)
+    d = np.abs(sm.astype(np.int16) - bgc).max(axis=2)
+    m = np.where(d < 14, cv2.GC_PR_BGD, cv2.GC_PR_FGD).astype(np.uint8)
+    m[d > 60] = cv2.GC_FGD
+    b = max(3, sw // 60); m[:b] = m[-b:] = cv2.GC_BGD; m[:, :b] = m[:, -b:] = cv2.GC_BGD
+    bgd = np.zeros((1, 65), np.float64); fgd = np.zeros((1, 65), np.float64)
+    cv2.grabCut(sm, m, None, bgd, fgd, 5, cv2.GC_INIT_WITH_MASK)
+    fg = np.where((m == cv2.GC_FGD) | (m == cv2.GC_PR_FGD), 255, 0).astype(np.uint8)
+    n, lab, st, _ = cv2.connectedComponentsWithStats(fg)
+    if n > 2:   # 큰 덩어리와 그 근처만
+        big = st[1:, cv2.CC_STAT_AREA].max()
+        for i in range(1, n):
+            if st[i, cv2.CC_STAT_AREA] < big * 0.01: fg[lab == i] = 0
+    fg = cv2.morphologyEx(fg, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    a = cv2.resize(fg, (w, h), interpolation=cv2.INTER_LINEAR)
+    a = cv2.GaussianBlur(a, (5, 5), 0)
+    arr[:, :, 3] = a
+    return Image.fromarray(arr, 'RGBA')
 
 
 def trim(im, pad=6):
@@ -78,11 +121,43 @@ def split_sheet(im, rows, cols):
     if not rb or not cells:
         cells = [(round(c * w / cols), round(r * h / rows), round((c + 1) * w / cols), round((r + 1) * h / rows)) for r in range(rows) for c in range(cols)]
         print('   (칸을 똑같이 나눠 잘랐어요 — 잘린 모양을 확인해 주세요)')
-    return [trim(im.crop(c)) for c in cells]
+    return [trim(clean_cell(im.crop(c))) for c in cells]
 
 
-def save_cut(im, path, size):
+def clean_cell(cell):
+    """옆 칸에서 넘어온 작은 조각 지우기: 칸 가장자리에 닿은 작은 덩어리는 버림."""
+    import numpy as np, cv2
+    arr = np.array(cell); a = arr[:, :, 3]
+    n, lab, st, _ = cv2.connectedComponentsWithStats((a > 30).astype(np.uint8))
+    if n <= 2: return cell
+    big = st[1:, cv2.CC_STAT_AREA].max(); h, w = a.shape
+    for i in range(1, n):
+        x, y, ww, hh, area = st[i]
+        touches = x <= 1 or y <= 1 or x + ww >= w - 1 or y + hh >= h - 1
+        if touches and area < big * 0.25:
+            a[lab == i] = 0
+    arr[:, :, 3] = a
+    return Image.fromarray(arr, 'RGBA')
+
+
+def glow_to_alpha(im):
+    """우주에 띄울 그림: 흰 바탕 위에 번진 빛(후광)을 반투명한 빛으로 바꿔 어두운 배경에서 흰 테두리가 안 보이게."""
+    import numpy as np, cv2
+    a = np.array(im.convert('RGBA')).astype(np.float32); rgb = a[..., :3]; al = a[..., 3] / 255
+    mn = rgb.min(axis=2); sat = rgb.max(axis=2) - mn
+    body = (((sat > 45) | (mn < 150)) & (al > .5)).astype(np.uint8) * 255
+    body = cv2.morphologyEx(body, cv2.MORPH_CLOSE, np.ones((25, 25), np.uint8))
+    h, w = body.shape; ff = body.copy(); cv2.floodFill(ff, np.zeros((h + 2, w + 2), np.uint8), (0, 0), 255); body = body | (~ff)
+    body = cv2.erode(body, np.ones((5, 5), np.uint8)) > 0
+    glow = (~body) & (al > 0)
+    na = np.where(glow, np.clip((255 - mn) / 105, 0, 1) * al, al)
+    col = np.where(glow[..., None], np.clip((rgb - (1 - na[..., None]) * 255) / np.maximum(na[..., None], 1e-3), 0, 255), rgb)
+    return Image.fromarray(np.dstack([col, na * 255]).astype(np.uint8), 'RGBA')
+
+
+def save_cut(im, path, size, glow=False):
     im = trim(white_to_alpha(im)); im.thumbnail((size, size), Image.LANCZOS)
+    if glow: im = glow_to_alpha(im)
     im.save(path, 'WEBP', quality=86, method=4)
 
 
@@ -163,13 +238,14 @@ def main(src):
                 save_bg(im, os.path.join(out, it['file'] + '.webp'))
                 done.append(it['file'])
             elif it['kind'] == 'cut':
-                save_cut(im, os.path.join(out, it['file'] + '.webp'), it.get('size', 512))
+                save_cut(im, os.path.join(out, it['file'] + '.webp'), it.get('size', 512), glow=g['id'] == 'space')
                 done.append(it['file'])
             else:
                 r, c = it['grid']
                 parts = split_sheet(im, r, c)
                 for (k, ko, emo, en), part in zip(it['names'], parts):
                     part.thumbnail((it.get('size', 256),) * 2, Image.LANCZOS)
+                    if g['id'] == 'space': part = glow_to_alpha(part)
                     part.save(os.path.join(out, k + '.webp'), 'WEBP', quality=86, method=4)
                     done.append(k)
                 print('  %s → %d조각' % (f, len(parts)))

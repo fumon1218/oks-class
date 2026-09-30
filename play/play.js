@@ -22,7 +22,7 @@
   var sh = O.shell({
     title: lesson.subjectName + ' ' + lesson.no + ' · ' + lesson.topic,
     subtitle: '〈' + lesson.space + '〉 ' + lesson.goal,
-    back: '../learn/?subject=' + lesson.subject + '&school=' + lesson.school + '#' + id,
+    back: O.ret('../learn/?subject=' + lesson.subject + '&school=' + lesson.school + '#' + id), backLabel: O.fromSpace() ? '건물로' : '배움 지도',
     level: level
   });
   document.title = lesson.topic + ' · 옥쌤의 즐거운 교실';
@@ -91,7 +91,7 @@
     var btns = [{ label: '한 번 더', color: '', onClick: function () { location.reload(); } }];
     if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(id, level + 1); location.href = '?id=' + id + '&level=' + (level + 1); } });
     (window.OKS_SHOP_BY_LESSON ? window.OKS_SHOP_BY_LESSON(id) : []).slice(0, 1).forEach(function (S) { btns.push({ label: '🏪 ' + S.name + '에서 일하기', color: 'pink', href: '../shop/?id=' + S.id + '&level=' + level }); });
-    btns.push({ label: '배움 지도', color: 'blue', href: '../learn/?subject=' + lesson.subject + '&school=' + lesson.school + '#' + id });
+    btns.push({ label: O.fromSpace() ? '건물로 돌아가기' : '배움 지도', color: 'blue', href: O.ret('../learn/?subject=' + lesson.subject + '&school=' + lesson.school + '#' + id) });
     var sc = scene ? scene.stats() : { maxCombo: 0 };
     if (sc.maxCombo >= 2) entry.combo = sc.maxCombo;
     O.finish({ stats: st, entry: entry, title: scene ? scene.tpl.done : '다 했어요!', text: lesson.topic + ' · ' + O.LEVELS[level - 1].name + (sc.maxCombo >= 2 ? ' · 최고 ' + sc.maxCombo + '콤보' : ''), extraCoins: sc.maxCombo >= 2 ? sc.maxCombo : 0, buttons: btns });

@@ -34,6 +34,14 @@
     if (lesson.subject === 'art' && best !== 'museum') best = best === 'garden' ? 'garden' : 'gallery';
     return best || SUBJ[lesson.subject] || 'village';
   }
+  /* 안내자: 교과 별의 별지기 (그림이 없으면 예전 동물) */
+  var GUIDE = { korean: 'ok', english: 'ok', music: 'sea', art: 'sea', math: 'love', science: 'love', social: 'dream' };
+  var ART = {}; ((window.OKS_ART && window.OKS_ART.ready) || []).forEach(function (p) { ART[p] = 1; });
+  function guideSrc(lesson, t, pose) {
+    var g = GUIDE[lesson.subject], p = g && 'art/char/' + g + '_' + pose + '.webp';
+    if (g === 'ok' && pose === 'cheer') p = 'art/char/ok_clap.webp';
+    return p && ART[p] ? p : 'art/jj/animals/' + t.guide + '.webp';
+  }
   function src(k, kind) { var name = kind === 'piece' ? k + '_piece' : k; return READY.indexOf(name) >= 0 ? 'art/scene/' + name + '.webp' : null; }
 
   /* 장면 띠 달기 */
@@ -42,7 +50,7 @@
     var bg = src(k) || t.bg, pieceImg = src(k, 'piece');
     var strip = E('div', 'scene-strip');
     strip.style.backgroundImage = 'url(' + O.ROOT + bg + ')';
-    strip.innerHTML = '<img class="sc-guide" src="' + O.ROOT + 'art/jj/animals/' + t.guide + '.webp" alt=""><div class="sc-title">〈' + O.esc(lesson.space) + '〉</div>' +
+    strip.innerHTML = '<img class="sc-guide" src="' + O.ROOT + guideSrc(lesson, t, 'wave') + '" alt=""><div class="sc-title">〈' + O.esc(lesson.space) + '〉</div>' +
       '<div class="sc-track"></div><div class="sc-combo"></div>';
     var track = strip.querySelector('.sc-track'), slots = [];
     for (var i = 0; i < rounds; i++) {
@@ -80,7 +88,7 @@
         var f = E('div', 'sc-finale', '<div class="card"><span>' + t.finale + '</span><b>' + O.esc(t.done) + '</b><small>〈' + O.esc(lesson.space) + '〉 완성!</small></div>');
         for (var c = 0; c < 36; c++) { var q = E('i', 'confetti'); q.style.left = Math.random() * 100 + '%'; q.style.background = ['#ff7a59', '#ffd54f', '#43a047', '#1e88e5', '#ec407a'][c % 5]; q.style.animationDelay = (Math.random() * 0.4) + 's'; f.appendChild(q); }
         document.body.appendChild(f); setTimeout(function () { f.remove(); }, O.settings().calm ? 600 : 2400);
-        O.sfx('win'); hop();
+        O.sfx('win'); guide.src = O.ROOT + guideSrc(lesson, t, 'cheer'); hop();
         return O.say(t.done, { noRepeat: true }).then(function () { return O.wait(O.settings().calm ? 200 : 900); });
       },
       stats: function () { return { maxCombo: maxCombo, good: goodN }; }

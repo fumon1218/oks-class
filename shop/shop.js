@@ -20,9 +20,9 @@
 
   var S = SH[id], hall = HALLS[S.hall] || {};
   var level = O.levelFor('shop:' + id);
-  var backUrl = S.camp === 'gn' ? '../index.html' : '../town/?c=' + S.camp;
+  var backUrl = O.ret('../index.html#dream/b_shop_street');
   var lessonsInfo = (S.lessons || []).map(function (lid) { return DATA.lessons.filter(function (l) { return l.id === lid; })[0]; }).filter(Boolean);
-  var sh = O.shell({ title: S.icon + ' ' + S.name, subtitle: CAMPN[S.camp] + ' · ' + (hall.name || '') + (lessonsInfo.length ? ' · 연계 ' + lessonsInfo.map(function (l) { return l.subjectName + ' ' + l.no; }).join(', ') : ''), back: backUrl, backLabel: '마을로', level: level });
+  var sh = O.shell({ title: S.icon + ' ' + S.name, subtitle: CAMPN[S.camp] + ' · ' + (hall.name || '') + (lessonsInfo.length ? ' · 연계 ' + lessonsInfo.map(function (l) { return l.subjectName + ' ' + l.no; }).join(', ') : ''), back: backUrl, backLabel: '꿈별로', level: level });
   document.title = S.name + ' · 옥쌤의 즐거운 교실';
   if (O.eco) { var hh = O.eco.hud(sh.top); sh.top.insertBefore(hh, sh.levelBtn); }
   sh.board.className = 'oks-board shop-board';
@@ -219,7 +219,7 @@
 
   /* ---------- 가게 목록 (id 없이 열 때) ---------- */
   function directory() {
-    var sh2 = O.shell({ title: '🏪 가게 영업', subtitle: '강릉 · 춘천 · 원주 체험 가게', back: '../learn/', backLabel: '배움 지도' });
+    var sh2 = O.shell({ title: '🏪 가게 영업', subtitle: '강릉 · 춘천 · 원주 체험 가게', back: O.ret('../index.html#dream/b_shop_street'), backLabel: '꿈별로' });
     if (O.eco) { var h2 = O.eco.hud(sh2.top); sh2.top.insertBefore(h2, sh2.levelBtn); }
     sh2.levelBtn.style.display = 'none';
     sh2.ask('어느 가게에서 일해 볼까요?', { silent: true });

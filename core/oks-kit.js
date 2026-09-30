@@ -16,6 +16,9 @@
       if (item.svg) return item.svg;
       if (item.img) return '<img src="' + ctx.img(item.img) + '" alt=""' + sc + '>';
       if (item.color) return '<span class="swatch" style="background:' + item.color + '"></span>';
+      /* 그림 사전(art/art-ready.js)에 있는 이모지는 그림으로 */
+      var AI = window.OKS_ART && window.OKS_ART.icons;
+      if (AI && item.emo && AI[item.emo]) return '<img class="artemo" src="' + ctx.img(AI[item.emo]) + '" alt=""' + sc + '>';
       return '<span class="emo"' + sc + '>' + (item.emo || '❓') + '</span>';
     };
     ctx.card = function (item, o) {
