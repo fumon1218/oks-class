@@ -65,7 +65,6 @@ def md(data):
             if it.get('names'):
                 L.append('- 칸 순서: ' + ' / '.join('%d.%s' % (i + 1, n[1]) for i, n in enumerate(it['names'])))
             L += ['', '```', it['prompt'], '```', '']
-    L += ['---', '', '### 이전 문서의 차시 장면 15종', '', '`docs/gemini-prompts-scenes.md`의 배경·조각 30장도 그대로 쓰여요(차시 게임 안 장면). 같은 방법으로 보내 주시면 함께 넣어요.', '']
     return '\n'.join(L), total
 
 

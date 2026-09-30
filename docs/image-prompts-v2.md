@@ -359,7 +359,7 @@ Cute 3D cartoon illustration for a children's special-education learning app, so
 - **참고 그림: 지금 앱의 옥쌤 그림 (함께 보내 드린 mascot-cheer.png)**
 
 ```
-Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. Use the attached reference image of the teacher character and keep her exactly the same (same face, long wavy brown hair, lavender puff-sleeve dress with a cream bow). Full body, one finger on her chin, looking up thoughtfully with a small smile, a tiny question-mark-free sparkle near her head. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. Use the attached reference image of the teacher character and keep her exactly the same (same face, long wavy brown hair, lavender puff-sleeve dress with a cream bow). Full body, one finger on her chin, looking up thoughtfully with a small smile, a tiny sparkle near her head. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
 ```
 
 ### `ok_clap.png` — 옥쌤 — 박수 치며 칭찬
@@ -495,6 +495,222 @@ Cute 3D cartoon illustration for a children's special-education learning app, so
 
 ```
 Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. The SAME four teenagers from the attached reference image (same faces and hair), now each wearing a sleek rounded space suit with a star patch, holding a bubble helmet under one arm, full body, same order: Row 1 (left to right): 1) teen boy 1 in a navy space suit; 2) teen girl 1 in a white and beige space suit. Row 2 (left to right): 3) teen boy 2 in a grey space suit; 4) teen girl 2 in a mint space suit. A 2x2 grid sprite sheet: 4 separate items arranged in 2 rows and 2 columns, evenly spaced with wide empty white gaps between items, each item centered in its own equal cell and about the same size, same slightly-front 3/4 view for all, pure plain white background, items must not touch or overlap, no grid lines, no labels, square 1:1.
+```
+
+---
+
+## [2순위] 차시 게임 장면 (배경·조각) — 그림 30장 → 파일 30개
+
+> 차시 게임 화면 위쪽 장면 띠와 게임판 배경이에요. 한 판 맞힐 때마다 조각이 하나씩 생기고 다 맞히면 장면이 완성돼요. 배경은 가운데와 아래를 비우고, 사람·동물은 넣지 마세요.
+
+### `forest.png` — 숲 배경
+- 비율 16:9 · 차시 게임 장면 — 소리 숲, 정글 생태관, 생태 숲
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal scene of a magical friendly forest clearing seen from the front, tall rounded trees with soft green leaves on the left and right edges, a gentle dirt path and flower-less grass meadow filling the lower third, sunbeams through the canopy, small wooden signpost without text, open empty space in the center and bottom for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `forest_piece.png` — 숲 조각 — 한 판마다 피는 꽃
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single cute pink cosmos flower with a simple round bloom (no face) and two small leaves, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `cafe.png` — 카페 배경
+- 비율 16:9 · 차시 게임 장면 — 동물 카페, 동물 베이커리, 스낵 바, 글로벌 베이커리
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal interior of a cozy animal cafe and bakery, wooden counter along the bottom, pastry display case, hanging lamps, big windows with trees outside, chalkboard menu without writing, empty clean counter surface and center area for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `cafe_piece.png` — 카페 조각 — 손님 자리에 놓이는 음료
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single cute latte cup on a small saucer with a heart latte art, soft steam, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `post.png` — 우체국 배경
+- 비율 16:9 · 차시 게임 장면 — 낱말 우체국, 메시지 우체국, 안전 도움 센터
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal interior of a bright friendly village post office, red mailbox on the left, wall of wooden mail cubbies, parcels stacked neatly, service counter along the bottom, no writing on signs, open empty center and lower area for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `post_piece.png` — 우체국 조각 — 배달된 편지
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single cute envelope with a red heart seal and a small stamp, slightly tilted, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `station.png` — 기차역 배경
+- 비율 16:9 · 차시 게임 장면 — 규칙 기차역, 시간 여행 기차역, 버스 환승 마을, 여행 안내소
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal view of a cheerful small train station platform, railway track running left to right along the lower third, a big round station clock without numbers on a post, roof canopy, flower pots, mountains in the distance, empty track and center area for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `station_piece.png` — 기차역 조각 — 하나씩 이어지는 기차 칸
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single cute toy train carriage seen from the side, bright colors with round windows, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `stage.png` — 무대 배경
+- 비율 16:9 · 차시 게임 장면 — 음악 전체: 리듬 산책길, 동물 오케스트라, 콘서트홀, 축제 무대…
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal view of a small friendly concert stage for children, red curtains on both sides, wooden stage floor along the bottom, unlit round spotlights on a bar at the top, musical instruments (drum, xylophone, tambourine) arranged at the sides, empty center of the stage for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `stage_piece.png` — 무대 조각 — 하나씩 켜지는 조명
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single glowing round stage spotlight lamp shining warm yellow light with a soft glow, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `gallery.png` — 미술관·공방 배경
+- 비율 16:9 · 차시 게임 장면 — 미술 전체: 아틀리에, 디자인 센터, 미술관…
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal interior of a bright children's art gallery and studio, pale walls with several EMPTY picture frames hanging in a row, wooden easel and paint jars at the sides, skylight, polished wooden floor in the lower third, open empty center for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `gallery_piece.png` — 미술관·공방 조각 — 벽에 걸리는 작품
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single small framed colorful abstract painting with a golden wooden frame, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `mart.png` — 마트 배경
+- 비율 16:9 · 차시 게임 장면 — 동물 마트, 심부름 가게, 숫자 블록 공장, 분류·통계 센터
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal interior of a clean friendly small grocery store, shelves with fruits, vegetables and milk bottles on both sides, checkout counter at the bottom right, shopping baskets, no writing on labels, open empty aisle in the center for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `mart_piece.png` — 마트 조각 — 하나씩 차는 장바구니
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single cute shopping basket filled with an apple, a carrot and a milk bottle, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `lab.png` — 실험실 배경
+- 비율 16:9 · 차시 게임 장면 — 실험실, 연구소, 과학 데이터룸, 에너지 실습관…
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal interior of a colorful friendly children's science lab, white lab benches along the bottom, glass flasks with colorful liquids, microscope, magnifying glass, plants on shelves, big bright windows, open empty center area for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `lab_piece.png` — 실험실 조각 — 성공한 실험 병
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single cute round glass flask with bubbling bright green liquid and small sparkles, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `sea.png` — 바닷가 배경
+- 비율 16:9 · 차시 게임 장면 — 바다 보호 본부, 바닷가 조사대, 물놀이 실험실
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal view of a calm clean beach and shallow turquoise sea, soft sand in the lower third, gentle waves, a small wooden pier on one side, rocks with seaweed, blue sky with small clouds, open empty center area for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `sea_piece.png` — 바닷가 조각 — 돌아오는 바다 친구
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single cute tropical fish, orange with white stripes, round friendly shape without scary teeth, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `school.png` — 학교·방송국 배경
+- 비율 16:9 · 차시 게임 장면 — 토론 광장, 진로 스튜디오, 학교 방송국
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal interior of a warm friendly classroom, big green chalkboard left EMPTY at the back wall, wooden desks at the sides, bright windows with trees, a small microphone stand on one side, cork board with blank paper notes, open empty center area for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `school_piece.png` — 학교·방송국 조각 — 칭찬 스티커
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single shiny golden star sticker with a soft glow, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `sky.png` — 하늘 관측소 배경
+- 비율 16:9 · 차시 게임 장면 — 하늘 관측소, 구름 실험관, 기후 대응 마을
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal view from a hilltop weather observatory with a small white dome and a wind vane on the left, big open sky with fluffy clouds, gentle green hills in the lower third, a small rain gauge and thermometer on a post (no numbers), open empty sky and center area for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `sky_piece.png` — 하늘 관측소 조각 — 맑아지는 구름
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single fluffy white cloud with no face with a small sun peeking behind it, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `village.png` — 마을 광장 배경
+- 비율 16:9 · 차시 게임 장면 — 인사 광장, 안내소, 마을 지도, 놀이터…
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal view of a cozy Korean-style small town square, colorful cottages with dark windows along the back, a fountain on one side, flower beds and benches, cobblestone plaza in the lower third, evening golden sky, open empty plaza in the center for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `village_piece.png` — 마을 광장 조각 — 불이 켜지는 집
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single cute small cottage with warm glowing yellow windows and a red roof, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `garden.png` — 정원·농장 배경
+- 비율 16:9 · 차시 게임 장면 — 글자 정원, 햇살 농장, 스마트 온실, 컬러 동물 정원
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal view of a sunny flower garden in front of a glass greenhouse, wooden fence, empty raised garden beds with dark soil along the lower third, watering can and small tools at the side, butterflies, open empty center area for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `garden_piece.png` — 정원·농장 조각 — 피어나는 꽃
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single bright red tulip in a tiny clay pot, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `museum.png` — 박물관·이야기관 배경
+- 비율 16:9 · 차시 게임 장면 — 모험 이야기관, 동화 극장, 시간 여행 박물관
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal interior of a friendly children's history museum, glass display cases with EMPTY stands, a traditional Korean roof model, old pottery on pedestals at the sides, warm spotlights, marble floor in the lower third, open empty center for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `museum_piece.png` — 박물관·이야기관 조각 — 찾은 보물
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single small traditional celadon pottery vase with a soft blue-green glaze and a tiny sparkle, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
+```
+
+### `hall.png` — 마을 회의장·센터 배경
+- 비율 16:9 · 차시 게임 장면 — 마을 회의장, 봉사 활동 센터, 생활 서류 센터, 갈등 해결 극장
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A wide horizontal interior of a bright friendly community meeting hall, round wooden table with empty chairs in the lower third, blank whiteboard on the back wall, potted plants, big windows, notice board with blank colored papers, open empty center area for game cards, no people, no animals, no characters, 16:9, 1600x900 or larger.
+```
+
+### `hall_piece.png` — 마을 회의장·센터 조각 — 모이는 의견 카드
+- 비율 1:1 · 한 판 맞힐 때마다 장면에 하나씩 생기는 조각
+
+```
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. A single cute speech bubble shaped card in soft yellow with a small green check mark, 3D glossy toy style, centered. Single subject isolated and centered on a pure plain white background (transparent background if possible), whole subject visible with empty margin around it, no ground shadow, no frame, square 1:1.
 ```
 
 ---
@@ -732,7 +948,7 @@ Cute 3D cartoon illustration for a children's special-education learning app, so
 - 칸 순서: 1.해 / 2.구름 / 3.비 / 4.눈 / 5.무지개 / 6.바람 / 7.달 / 8.별 / 9.번개
 
 ```
-Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. Nine different cute 3D icon objects: Row 1 (left to right): 1) a smiling-free bright sun; 2) a fluffy cloud; 3) a rain cloud with drops. Row 2 (left to right): 4) a snow cloud with snowflakes; 5) a rainbow with small clouds; 6) swirling wind lines with a leaf. Row 3 (left to right): 7) a crescent moon; 8) a yellow star; 9) a thunder cloud with a lightning bolt. A 3x3 grid sprite sheet: 9 separate items arranged in 3 rows and 3 columns, evenly spaced with wide empty white gaps between items, each item centered in its own equal cell and about the same size, same slightly-front 3/4 view for all, pure plain white background, items must not touch or overlap, no grid lines, no labels, square 1:1.
+Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. Nine different cute 3D icon objects: Row 1 (left to right): 1) a bright round sun with no face; 2) a fluffy cloud; 3) a rain cloud with drops. Row 2 (left to right): 4) a snow cloud with snowflakes; 5) a rainbow with small clouds; 6) swirling wind lines with a leaf. Row 3 (left to right): 7) a crescent moon; 8) a yellow star; 9) a thunder cloud with a lightning bolt. A 3x3 grid sprite sheet: 9 separate items arranged in 3 rows and 3 columns, evenly spaced with wide empty white gaps between items, each item centered in its own equal cell and about the same size, same slightly-front 3/4 view for all, pure plain white background, items must not touch or overlap, no grid lines, no labels, square 1:1.
 ```
 
 ### `sheet_nature.png` — 자연
@@ -758,9 +974,3 @@ Cute 3D cartoon illustration for a children's special-education learning app, so
 ```
 Cute 3D cartoon illustration for a children's special-education learning app, soft rounded clay-like shapes, glossy Pixar-style rendering, soft studio lighting, bright pastel colors, friendly and calm, very clean and simple, no text, no letters, no numbers, no logos, no watermark. Nine different cute 3D icon objects: Row 1 (left to right): 1) a sheep; 2) a horse; 3) a squirrel. Row 2 (left to right): 4) a whale; 5) a dolphin; 6) a crab. Row 3 (left to right): 7) an octopus; 8) an ant; 9) a snail. A 3x3 grid sprite sheet: 9 separate items arranged in 3 rows and 3 columns, evenly spaced with wide empty white gaps between items, each item centered in its own equal cell and about the same size, same slightly-front 3/4 view for all, pure plain white background, items must not touch or overlap, no grid lines, no labels, square 1:1.
 ```
-
----
-
-### 이전 문서의 차시 장면 15종
-
-`docs/gemini-prompts-scenes.md`의 배경·조각 30장도 그대로 쓰여요(차시 게임 안 장면). 같은 방법으로 보내 주시면 함께 넣어요.
