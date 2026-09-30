@@ -66,6 +66,7 @@ if (fs.existsSync(contentPath)) {
   const win = {};
   vm.runInNewContext(fs.readFileSync(contentPath, 'utf8'), { window: win });
   const c2 = path.join(root, 'play/content2.js'); if (fs.existsSync(c2)) vm.runInNewContext(fs.readFileSync(c2, 'utf8'), { window: win });
+  const c3 = path.join(root, 'play/content-extra.js'); if (fs.existsSync(c3)) vm.runInNewContext(fs.readFileSync(c3, 'utf8'), { window: win });
   const engWin = { OKS: {}, OKS_ENGINES: {} };
   for (const f of ['engines.js', 'engines2.js', 'farm.js']) vm.runInNewContext(fs.readFileSync(path.join(root, 'play', f), 'utf8'), { window: engWin, document: {} });
   const data = JSON.parse(fs.readFileSync(lessonsPath, 'utf8'));

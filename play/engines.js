@@ -7,6 +7,8 @@
   var O = window.OKS, E = O.el;
   var EN = window.OKS_ENGINES = window.OKS_ENGINES || {};
 
+  /* 판마다 문항 순서를 섞어서 같은 문제가 이어 나오지 않게 */
+  EN._nth = function (arr, i) { if (!arr._perm || arr._perm.length !== arr.length) arr._perm = O.shuffle(arr.map(function (x, k) { return k; })); return arr[arr._perm[i % arr.length]]; };
   function fill(t, it) { return String(t || '').replace(/\{x\}/g, it.label || '').replace(/\{en\}/g, it.en || '').replace(/\{snd\}/g, it.snd || ''); }
   function zone(ctx, html, cls) { var z = E('div', 'dropzone ' + (cls || ''), html || '<span>여기에 놓아요</span>'); return z; }
   function row(cls) { return E('div', 'row ' + (cls || '')); }
@@ -31,7 +33,7 @@
     var how = c.voice || 'label';
     /* 상황 세트형 */
     if (c.sets && c.sets.length) {
-      var s = c.sets[i % c.sets.length];
+      var s = EN._nth(c.sets, i);
       var okIdx = [].concat(s.ok == null ? 0 : s.ok);
       var right = okIdx.map(function (k) { return s.opts[k]; });
       var wrong = s.opts.filter(function (x, k) { return okIdx.indexOf(k) < 0; });
@@ -263,7 +265,7 @@
       var c = ctx.cfg, lv = ctx.level;
       if (lv === 5 && c.l5) c = Object.assign({}, c, c.l5);
       ctx.clear();
-      var seq = c.seqs[i % c.seqs.length];
+      var seq = EN._nth(c.seqs, i);
       var len = Math.min(seq.steps.length, [2, 2, 3, 4, 4][lv - 1]);
       var steps = sub(seq.steps, len);
       var slots = steps.map(function (s, k) { var z = E('div', 'dropzone slot', '<span class="slot-no">' + (k + 1) + '</span><div class="slot-in"></div>'); z._k = k; return z; });

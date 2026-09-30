@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>문항 편집 · 옥쌤의 즐거운 교실</title>
+<link rel="icon" href="../icons/icon-192.png">
+<style>
+:root{--ink:#2f2622;--soft:#6f625a;--line:#eadfce;--bg:#fbf7ef;--acc:#e0612f;--ok:#2e7d32}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,sans-serif;line-height:1.5}
+header{position:sticky;top:0;z-index:5;background:#fffdf8;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+header h1{margin:0 12px 0 0;font-size:19px}
+select,input,button,textarea{font:inherit}
+select,input[type=text]{border:1px solid var(--line);border-radius:10px;padding:7px 10px;background:#fff}
+button,.btn{border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;cursor:pointer;color:var(--ink);text-decoration:none;display:inline-block}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+button.sm{padding:3px 10px;font-size:13px}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:14px}
+.card h2{margin:0 0 6px;font-size:18px}
+.muted{color:var(--soft);font-size:13.5px}
+.list{display:flex;flex-direction:column;gap:8px}
+.q{border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;gap:10px;align-items:flex-start}
+.q.hidden{opacity:.45;background:#f6f1e8}
+.q .body{flex:1}
+.q .opts{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13.5px;background:#fffdf8}
+.chip.ok{border-color:var(--ok);background:#e8f5e9}
+.chip img{height:28px;border-radius:6px}
+.tag{font-size:12px;border-radius:999px;padding:1px 8px;background:#fff3e0}
+.tag.mine{background:#e3f2fd}
+form .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+form .opt{display:flex;flex-wrap:wrap;gap:6px;align-items:center;border:1px dashed var(--line);border-radius:12px;padding:6px 8px;margin-bottom:6px}
+.opt input[type=text].emo{width:64px;text-align:center}
+.opt img.prev{height:40px;border-radius:8px}
+.emos{display:flex;flex-wrap:wrap;gap:2px;margin:4px 0 8px}
+.emos button{border:0;background:#f6f1e8;border-radius:8px;padding:2px 6px;font-size:20px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.warn{color:#b71c1c}
+label.ck{display:inline-flex;align-items:center;gap:4px;font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <h1>✏️ 문항 편집</h1>
+  <select id="subj"></select><select id="school"></select><select id="lesson"></select>
+  <a class="btn" id="tryBtn" target="_blank">▶ 미리 해 보기</a>
+  <a class="btn" href="../learn/">🌱 배움 지도</a>
+  <a class="btn" href="plan.html">📘 계획서</a>
+</header>
+<main>
+  <div class="card" id="info"></div>
+  <div class="card"><h2>➕ 새 문항 만들기</h2><p class="muted" id="formHelp"></p><div id="formBox"></div></div>
+  <div class="card"><h2>📋 이 차시 문항</h2><p class="muted">기본 문항은 “숨기기”로 빼고, 선생님 문항은 지울 수 있어요 (고칠 때는 지우고 다시 만들어요). <label class="ck"><input type="checkbox" id="onlyMine"> 선생님 문항만 쓰기 (2개 이상일 때)</label></p><div class="list" id="list"></div></div>
+  <div class="card"><h2>💾 다른 기기로 옮기기</h2><p class="muted">선생님 문항은 이 기기(브라우저)에만 저장돼요. 파일로 내보내 다른 태블릿에서 불러오세요. 사진은 작게 줄여 저장돼요.</p>
+    <div class="bar"><button id="exp">📤 모든 선생님 문항 내보내기</button><label class="btn">📥 불러오기<input type="file" id="imp" accept="application/json" hidden></label><span class="muted" id="usage"></span></div></div>
+</main>
+<script src="lessons.js"></script>
+<script src="../play/content.js"></script>
+<script src="../play/content2.js"></script>
+<script src="../play/content-extra.js"></script>
+<script src="../play/custom.js"></script>
+<script>
+(function(){
+  var D = window.OKS_LESSONS, C = window.OKS_CONTENT, CU = window.OKS_CUSTOM;
+  var ROOT = '../';
+  var EMOS = '🍎 🍌 🍓 🥛 🍞 🍪 🍚 🍜 🏫 🏠 🏥 📮 🚌 🚗 🚲 🚦 🧑‍🏫 👩 👨 🧒 🙋 👋 🙏 😊 😢 😠 🤝 🧼 🗑️ ♻️ 💧 ☀️ 🌧️ ❄️ 🌳 🌸 🐶 🐱 🐰 🎨 🎵 ⚽ 📚 ✏️ 💵 🕐 ✅ ❌ ⭐'.split(' ');
+  var q = new URLSearchParams(location.search);
+  var cur = q.get('id') || D.lessons[0].id;
+  var S = document.getElementById('subj'), H = document.getElementById('school'), L = document.getElementById('lesson');
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function pic(it){ if(!it) return ''; if(it.img) return '<img src="' + (/^data:|^https?:/.test(it.img) ? it.img : ROOT + it.img) + '" alt="">'; if(it.color) return '<span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:' + it.color + '"></span>'; return it.emo || (it.svg ? '🔷' : ''); }
+  function chip(it, ok){ return '<span class="chip' + (ok ? ' ok' : '') + '">' + pic(it) + ' ' + esc(it.label || it.en || '') + (ok ? ' ✔' : '') + '</span>'; }
+  function lesson(){ return D.lessons.filter(function(l){ return l.id === cur; })[0]; }
+
+  function fillSel(){
+    var l = lesson();
+    S.innerHTML = D.subjects.map(function(s){ return '<option value="' + s.key + '"' + (s.key === l.subject ? ' selected' : '') + '>' + s.name + '</option>'; }).join('');
+    H.innerHTML = D.schools.map(function(s){ return '<option value="' + s.key + '"' + (s.key === l.school ? ' selected' : '') + '>' + s.name + '</option>'; }).join('');
+    var ls = D.lessons.filter(function(x){ return x.subject === l.subject && x.school === l.school; });
+    L.innerHTML = ls.map(function(x){ var k = CU.kind(C[x.id]), n = CU.count(x.id); return '<option value="' + x.id + '"' + (x.id === cur ? ' selected' : '') + '>' + x.no + ' ' + esc(x.topic) + (k ? '' : ' (편집 없음)') + (n ? ' ✏️' + n : '') + '</option>'; }).join('');
+  }
+  S.onchange = function(){ cur = D.lessons.filter(function(x){ return x.subject === S.value && x.school === H.value; })[0].id; go(); };
+  H.onchange = S.onchange;
+  L.onchange = function(){ cur = L.value; go(); };
+
+  function go(){
+    history.replaceState(null, '', '?id=' + cur);
+    fillSel(); var l = lesson(), base = C[l.id], k = CU.kind(base), c = CU.get(l.id);
+    document.getElementById('tryBtn').href = '../play/?id=' + l.id + '&level=3';
+    var KN = {sets:'상황 문제 (질문 + 보기 카드)', items:'그림 카드 (이름·소리를 듣고 고르기)', seqs:'순서 이야기 (카드를 차례대로)', sort:'나눌 물건 (알맞은 통에 넣기)', pairs:'짝 카드 (그림 ↔ 낱말)'};
+    document.getElementById('info').innerHTML = '<h2>' + esc(l.subjectName + ' ' + l.schoolName + ' ' + l.no + ' · ' + l.topic) + '</h2><div class="muted">🎯 ' + esc(l.goal) + ' · 〈' + esc(l.space) + '〉 · 문항 종류: ' + (k ? KN[k] : '이 차시는 리듬·게이지 같은 조작 게임이라 문항 편집이 없어요') + '</div>';
+    document.getElementById('onlyMine').checked = !!c.only;
+    document.getElementById('onlyMine').onchange = function(e){ var c2 = CU.get(cur); c2.only = e.target.checked; CU.put(cur, c2); };
+    drawForm(k, base); drawList(k, base, c); usage();
+  }
+
+  /* ---------- 문항 목록 ---------- */
+  function drawList(k, base, c){
+    var box = document.getElementById('list'); box.innerHTML = '';
+    if(!k){ box.innerHTML = '<p class="muted">편집할 문항이 없어요.</p>'; return; }
+    var F = {sets:'sets', items:'items', seqs:'seqs', sort:'items', pairs:'items'}[k];
+    var render = function(x, mine, i){
+      var el = document.createElement('div'), hidden = !mine && c.hide[k].indexOf(i) >= 0;
+      el.className = 'q' + (hidden ? ' hidden' : '');
+      var body = '';
+      if(k === 'sets'){ var oks = [].concat(x.ok == null ? 0 : x.ok); body = '<b>' + esc(x.q) + '</b>' + (x.en ? ' <span class="muted">🔊 ' + esc(x.en) + '</span>' : '') + '<div class="opts">' + x.opts.map(function(o, j){ return chip(o, oks.indexOf(j) >= 0); }).join('') + '</div>'; }
+      else if(k === 'seqs'){ body = '<b>📖 ' + esc(x.title) + '</b><div class="opts">' + x.steps.map(function(s, j){ return chip(Object.assign({}, s, {label:(j + 1) + '. ' + (s.label || '')})); }).join('') + '</div>'; }
+      else if(k === 'sort'){ var bin = (base.bins || []).filter(function(b){ return b.key === x.bin; })[0]; body = chip(x) + ' → <b>' + esc(bin ? bin.label : x.bin) + '</b>'; }
+      else if(k === 'pairs'){ body = chip(x) + ' ↔ <b>' + esc(x.word || x.en || x.label) + '</b>'; }
+      else body = chip(x) + (x.en ? ' <span class="muted">🔊 ' + esc(x.en) + '</span>' : '') + (x.snd ? ' <span class="muted">🔊 “' + esc(x.snd) + '”</span>' : '');
+      el.innerHTML = '<span class="tag' + (mine ? ' mine' : '') + '">' + (mine ? '선생님' : '기본') + '</span><div class="body">' + body + '</div>';
+      var b = document.createElement('button'); b.className = 'sm';
+      if(mine){ b.textContent = '🗑️ 지우기'; b.onclick = function(){ var c2 = CU.get(cur); c2[k].splice(i, 1); CU.put(cur, c2); go(); }; }
+      else { b.textContent = hidden ? '👁️ 다시 쓰기' : '🙈 숨기기'; b.onclick = function(){ var c2 = CU.get(cur), h = c2.hide[k], p = h.indexOf(i); if(p >= 0) h.splice(p, 1); else h.push(i); CU.put(cur, c2); go(); }; }
+      el.appendChild(b); box.appendChild(el);
+    };
+    c[k].forEach(function(x, i){ render(x, true, i); });
+    (base[F] || []).forEach(function(x, i){ render(x, false, i); });
+  }
+
+  /* ---------- 새 문항 입력 ---------- */
+  function cardInput(label, opt){
+    opt = opt || {};
+    var w = document.createElement('div'); w.className = 'opt';
+    w.innerHTML = (opt.check ? '<label class="ck"><input type="checkbox" class="okck"' + (opt.checked ? ' checked' : '') + '> 정답</label>' : '') +
+      '<input type="text" class="emo" placeholder="그림" maxlength="8"><input type="text" class="lab" placeholder="' + esc(label) + '">' +
+      (opt.en ? '<input type="text" class="en" placeholder="영어 (예: apple)">' : '') + (opt.snd ? '<input type="text" class="snd" placeholder="소리 (예: 멍멍)">' : '') +
+      (opt.word ? '<input type="text" class="word" placeholder="짝 낱말">' : '') + (opt.bins ? '<select class="bin">' + opt.bins.map(function(b){ return '<option value="' + b.key + '">' + esc(b.label) + '</option>'; }).join('') + '</select>' : '') +
+      '<label class="btn" style="padding:4px 10px">📷 사진<input type="file" accept="image/*" class="ph" hidden></label><img class="prev" hidden>';
+    var emo = w.querySelector('.emo');
+    w.querySelector('.ph').onchange = function(e){ var f = e.target.files[0]; if(!f) return; CU.shrink(f, 320, function(url){ w._img = url; var p = w.querySelector('.prev'); p.src = url; p.hidden = false; emo.value = ''; }); };
+    emo.onfocus = function(){ lastEmo = emo; };
+    return w;
+  }
+  var lastEmo = null;
+  function emoBar(){ var d = document.createElement('div'); d.className = 'emos'; EMOS.forEach(function(x){ var b = document.createElement('button'); b.type = 'button'; b.textContent = x; b.onclick = function(){ if(lastEmo){ lastEmo.value = x; lastEmo.focus(); } }; d.appendChild(b); }); return d; }
+  function readCard(w){
+    var o = {label: w.querySelector('.lab').value.trim()};
+    if(w._img) o.img = w._img; else if(w.querySelector('.emo').value.trim()) o.emo = w.querySelector('.emo').value.trim();
+    ['en', 'snd', 'word'].forEach(function(k){ var el = w.querySelector('.' + k); if(el && el.value.trim()) o[k] = el.value.trim(); });
+    var b = w.querySelector('.bin'); if(b) o.bin = b.value;
+    return o;
+  }
+  function drawForm(k, base){
+    var box = document.getElementById('formBox'), help = document.getElementById('formHelp'); box.innerHTML = '';
+    if(!k){ help.textContent = ''; return; }
+    var f = document.createElement('form'), rows = document.createElement('div');
+    var isEn = base.voice === 'en' || base.wordOf === 'en', isSnd = base.voice === 'sound';
+    if(k === 'sets'){
+      help.textContent = '질문을 쓰고, 보기 카드 2~4개를 만들어요. 정답에 ✔를 표시해요 (2개도 돼요). 그림은 이모지를 고르거나 📷 우리 학교 사진을 넣어요.';
+      f.innerHTML = '<div class="row"><input type="text" id="fq" style="flex:1;min-width:260px" placeholder="질문 (예: 우리 학교 보건실은 어디일까요?)">' + (isEn ? '<input type="text" id="fen" placeholder="영어로 들려줄 문장(선택)">' : '') + '</div>';
+      for(var i = 0; i < 4; i++) rows.appendChild(cardInput(i === 0 ? '정답 카드 이름' : '보기 ' + (i + 1) + ' 이름 (비워도 돼요)', {check:true, checked:i === 0, en:isEn}));
+    } else if(k === 'items'){
+      help.textContent = '새 그림 카드를 만들어요. 학생이 이름' + (isEn ? '(영어)' : isSnd ? '·소리' : '') + '를 듣고 고르게 돼요. 사진을 넣으면 우리 반 친구·선생님·학교 장소 카드가 돼요.';
+      rows.appendChild(cardInput('카드 이름 (예: 김옥 선생님)', {en:isEn, snd:isSnd}));
+    } else if(k === 'seqs'){
+      help.textContent = '이야기 제목과 순서 카드 2~5장을 차례대로 써요 (예: 우리 반 아침 활동).';
+      f.innerHTML = '<div class="row"><input type="text" id="ft" style="flex:1" placeholder="제목 (예: 우리 반 아침 활동)"></div>';
+      for(var j = 0; j < 5; j++) rows.appendChild(cardInput((j + 1) + '번째 카드' + (j >= 2 ? ' (비워도 돼요)' : ''), {en:isEn}));
+    } else if(k === 'sort'){
+      help.textContent = '나눌 물건을 만들고 어느 통에 넣어야 하는지 골라요.';
+      rows.appendChild(cardInput('물건 이름', {bins:base.bins}));
+    } else if(k === 'pairs'){
+      help.textContent = '그림과 짝이 되는 낱말을 만들어요.';
+      rows.appendChild(cardInput('그림 이름', {word:true, en:isEn}));
+    }
+    f.appendChild(emoBar()); f.appendChild(rows);
+    var msg = document.createElement('span'); msg.className = 'warn';
+    var sub = document.createElement('button'); sub.className = 'pri'; sub.type = 'submit'; sub.textContent = '＋ 문항 저장';
+    var r = document.createElement('div'); r.className = 'row'; r.appendChild(sub); r.appendChild(msg); f.appendChild(r);
+    f.onsubmit = function(e){
+      e.preventDefault(); msg.textContent = '';
+      var cards = Array.prototype.map.call(rows.querySelectorAll('.opt'), function(w){ return {w:w, c:readCard(w), ok:w.querySelector('.okck') ? w.querySelector('.okck').checked : false}; });
+      var filled = cards.filter(function(x){ return x.c.label || x.c.img || x.c.emo; });
+      var c2 = CU.get(cur), item;
+      if(k === 'sets'){
+        var qq = f.querySelector('#fq').value.trim();
+        if(!qq){ msg.textContent = '질문을 써 주세요.'; return; }
+        if(filled.length < 2){ msg.textContent = '보기 카드를 2개 이상 만들어 주세요.'; return; }
+        var ok = []; filled.forEach(function(x, i){ if(x.ok) ok.push(i); });
+        if(!ok.length){ msg.textContent = '정답 카드에 ✔를 표시해 주세요.'; return; }
+        item = {q:qq, opts:filled.map(function(x){ return x.c; }), ok:ok.length === 1 ? ok[0] : ok};
+        var fe = f.querySelector('#fen'); if(fe && fe.value.trim()) item.en = fe.value.trim();
+      } else if(k === 'seqs'){
+        var t = f.querySelector('#ft').value.trim();
+        if(!t || filled.length < 2){ msg.textContent = '제목과 카드 2장 이상이 필요해요.'; return; }
+        item = {title:t, steps:filled.map(function(x){ return x.c; })};
+      } else {
+        if(!filled.length || !filled[0].c.label){ msg.textContent = '이름을 써 주세요.'; return; }
+        item = filled[0].c; if(!item.img && !item.emo) item.emo = '⭐';
+      }
+      c2[k].push(item);
+      if(!CU.put(cur, c2)){ msg.textContent = '저장 공간이 부족해요. 사진 수를 줄여 주세요.'; return; }
+      go();
+    };
+    box.appendChild(f);
+  }
+
+  /* ---------- 내보내기 · 불러오기 ---------- */
+  document.getElementById('exp').onclick = function(){
+    var blob = new Blob([JSON.stringify({app:'oks-class', kind:'custom-questions', at:new Date().toISOString(), data:CU.load()}, null, 1)], {type:'application/json'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '옥쌤_선생님문항.json'; a.click();
+  };
+  document.getElementById('imp').onchange = function(e){
+    var f = e.target.files[0]; if(!f) return;
+    var r = new FileReader(); r.onload = function(){
+      try{
+        var j = JSON.parse(r.result), data = j.data || j, all = CU.load(), n = 0;
+        Object.keys(data).forEach(function(id){ var a = all[id] || {}, b = data[id]; ['sets', 'items', 'seqs', 'sort', 'pairs'].forEach(function(k){ if(b[k]){ a[k] = (a[k] || []).concat(b[k]); n += b[k].length; } }); if(b.hide) a.hide = b.hide; if(b.only) a.only = b.only; all[id] = a; });
+        if(CU.save(all)){ alertBox(n + '개 문항을 불러왔어요.'); go(); } else alertBox('저장 공간이 부족해요.');
+      }catch(err){ alertBox('파일을 읽을 수 없어요.'); }
+    }; r.readAsText(f);
+  };
+  function alertBox(t){ var u = document.getElementById('usage'); u.textContent = t; setTimeout(usage, 3000); }
+  function usage(){ var s = (localStorage.getItem(CU.KEY) || '').length, all = CU.load(), n = 0; Object.keys(all).forEach(function(id){ n += CU.count(id); }); document.getElementById('usage').textContent = '선생님 문항 ' + n + '개 · 저장 ' + Math.round(s / 1024) + 'KB 사용 (약 4,000KB까지)'; }
+  go();
+})();
+</script>
+</body>
+</html>

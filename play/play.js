@@ -10,7 +10,7 @@
   var id = O.qs('id') || '02-01-01-01';
   var lesson = DATA.lessons.filter(function (l) { return l.id === id; })[0];
   if (!lesson) { document.body.classList.add('oks'); document.body.innerHTML = '<div class="oks-app"><div class="oks-board">차시를 찾을 수 없어요. <a href="../learn/">배움 지도로</a></div></div>'; return; }
-  var base = CONTENT[id];
+  var base = window.OKS_CUSTOM ? window.OKS_CUSTOM.apply(id, CONTENT[id]) : CONTENT[id]; /* 선생님 문항 합치기 */
   var level = O.levelFor(id);
 
   function cfgFor(lv) {

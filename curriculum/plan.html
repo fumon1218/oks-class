@@ -47,6 +47,7 @@ td.orig{color:var(--soft);font-size:12.5px}
 <script src="lessons.js"></script>
 <script src="../play/content.js"></script>
 <script src="../play/content2.js"></script>
+<script src="../play/content-extra.js"></script>
 <script src="../shop/shops.js"></script>
 <script src="../play/describe.js"></script>
 <script>
@@ -96,7 +97,7 @@ td.orig{color:var(--soft);font-size:12.5px}
       html += '</tbody></table><div class="meta"><span>📝 평가 기록: ' + esc(l.record) + '</span>' +
         (shops.length ? '<span>🏪 연계 가게: ' + shops.map(function(s){ return '<a href="../shop/?id=' + s.id + '">' + s.icon + ' ' + esc(s.name) + '</a>'; }).join(', ') + '</span>' : '') +
         (c ? '<span>▶ <a href="../play/?id=' + l.id + '&level=1">1</a> · <a href="../play/?id=' + l.id + '&level=3">3</a> · <a href="../play/?id=' + l.id + '&level=5">5수준 바로 하기</a></span>' : '') +
-        '<span>🔎 ' + esc(l.verify) + (l.source ? ' · <a href="' + esc(l.source) + '" target="_blank" rel="noopener">공식 자료</a>' : '') + '</span><span>ID ' + l.id + '</span></div></section>';
+        (c ? '<span>✏️ <a href="editor.html?id=' + l.id + '">문항 편집</a></span>' : '') + '<span>🔎 ' + esc(l.verify) + (l.source ? ' · <a href="' + esc(l.source) + '" target="_blank" rel="noopener">공식 자료</a>' : '') + '</span><span>ID ' + l.id + '</span></div></section>';
     });
     main.innerHTML = html;
   }
