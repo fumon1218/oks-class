@@ -5,19 +5,19 @@
 (function () {
   'use strict';
   var STARS = [
-    { id: 'center', name: '학생회관 별', short: '학생회관', img: 'star_center', land: 'land_center', guide: 'ok_wave', guideName: '옥쌤',
+    { id: 'center', model: 'star_center', name: '학생회관 별', short: '학생회관', img: 'star_center', land: 'land_center', guide: 'ok_wave', guideName: '옥쌤',
       subjects: ['korean', 'english'], color: '#f3c24b', hello: '학생회관 별이에요! 국어와 영어를 배우고, 복습 모험도 할 수 있어요.',
       map: { x: 50, y: 56, w: 30 }, mapP: { x: 50, y: 45, w: 70 } },
-    { id: 'sea', name: '바다별', short: '바다별', img: 'star_sea', land: 'land_sea', guide: 'sea_wave', guideName: '물결이',
+    { id: 'sea', model: 'star_sea', name: '바다별', short: '바다별', img: 'star_sea', land: 'land_sea', guide: 'sea_wave', guideName: '물결이',
       subjects: ['music', 'art'], color: '#3fc1d0', hello: '바다별에 온 걸 환영해요! 음악과 미술을 배워요.',
       map: { x: 17, y: 28, w: 19 }, mapP: { x: 26, y: 24, w: 42 } },
-    { id: 'love', name: '사랑별', short: '사랑별', img: 'star_love', land: 'land_love', guide: 'love_wave', guideName: '콩이',
+    { id: 'love', model: 'star_love', name: '사랑별', short: '사랑별', img: 'star_love', land: 'land_love', guide: 'love_wave', guideName: '콩이',
       subjects: ['math', 'science'], color: '#f28bb0', hello: '사랑별이에요! 수학과 과학을 배워요.',
       map: { x: 83, y: 27, w: 19 }, mapP: { x: 75, y: 25, w: 42 } },
-    { id: 'dream', name: '꿈별', short: '꿈별', img: 'star_dream', land: 'land_dream', guide: 'dream_wave', guideName: '몽실이',
+    { id: 'dream', model: 'star_dream', name: '꿈별', short: '꿈별', img: 'star_dream', land: 'land_dream', guide: 'dream_wave', guideName: '몽실이',
       subjects: ['social', 'career'], color: '#a98bf0', hello: '꿈별이에요! 사회와 진로를 배우고, 일터 거리에서 일해 봐요.',
       map: { x: 82, y: 76, w: 19 }, mapP: { x: 72, y: 82, w: 40 } },
-    { id: 'farm', name: '햇살 농장', short: '햇살 농장', img: 'star_farm', land: 'land_farm', guide: 'robot_wave', guideName: '별빛이',
+    { id: 'farm', model: 'star_farm', name: '햇살 농장', short: '햇살 농장', img: 'star_farm', land: 'land_farm', guide: 'robot_wave', guideName: '별빛이',
       subjects: ['math', 'science'], color: '#e8a24a', hello: '햇살 농장이에요! 씨앗을 심고, 세고, 키워 봐요.',
       map: { x: 20, y: 78, w: 13 }, mapP: { x: 24, y: 81, w: 28 } }
   ];

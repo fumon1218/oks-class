@@ -147,3 +147,10 @@ body.portrait .sp-bld-name b{font-size:16px;}
 body.portrait .sp-bld-name small{font-size:12px;}
 body.portrait .sp-guide img{width:84px;}
 .sp-layer[hidden]{display:none!important;}
+
+/* 3D 별 */
+.sp-map > canvas.sp-3d{left:0;top:0;transform:none;pointer-events:none;z-index:0;}
+.sp-star.is-3d .sp-star-img{visibility:hidden;}
+.sp-star.is-3d .sp-star-glow{display:none;}
+.sp-star.is-3d{cursor:grab;touch-action:pan-y;}
+.sp-star.is-3d:active{cursor:grabbing;}

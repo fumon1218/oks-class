@@ -54,6 +54,10 @@
       e.onclick = function () { O.sfx('pop'); talk('ok_think', g.say); };
       mapEl.appendChild(e);
     });
+    /* 3D 별: 캔버스 하나에 별마다 천천히 도는 3D 모델 (못 쓰는 기기·'움직임 줄이기'면 그림 그대로) */
+    if (view3d) { view3d.stop(); view3d = null; }
+    var use3d = window.OKS3D && OKS3D.ok();
+    if (use3d) { var cv3 = E('canvas', 'sp-3d'); cv3.setAttribute('aria-hidden', 'true'); mapEl.appendChild(cv3); view3d = OKS3D.view(cv3, mapEl); }
     SP.STARS.forEach(function (s, i) {
       var m = P ? s.mapP : s.map;
       var e = place(E('button', 'sp-star' + (s.id === 'center' ? ' main' : ''), ''), m.x, m.y, m.w);
@@ -63,8 +67,12 @@
       e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, '🪐', 'sp-star-img') + '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>';
       e.onclick = function () { O.unlock && O.unlock(); O.sfx('pop'); go(s.id); };
       mapEl.appendChild(e);
+      if (view3d && s.model) view3d.add('art/3d/' + s.model + '.glb', e, { box: e.querySelector('.sp-star-img'), spin: s.id === 'center' ? .18 : .26, yaw: i * 1.3, tilt: .42, dist: 1.8, dy: -.04, glow: hex(s.color) });
     });
+    if (view3d) view3d.start();
   }
+  var view3d = null;
+  function hex(c) { var n = parseInt(c.slice(1), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255]; }
   /* 살짝 입체감: 손가락·마우스를 따라 층마다 다르게 움직임 */
   var par = { x: 0, y: 0 };
   function parallax() {
@@ -165,7 +173,7 @@
   function showLand(s, withFlight) {
     var go2 = function () {
       cur = { view: 'land', star: s.id, b: null }; document.body.dataset.view = 'land'; document.body.style.setProperty('--star', s.color);
-      mapEl.hidden = true; landEl.hidden = false; setBg(s.land);
+      mapEl.hidden = true; landEl.hidden = false; setBg(s.land); if (view3d) view3d.stop();
       document.getElementById('backBtn').hidden = false;
       document.getElementById('title').innerHTML = '<b>' + O.esc(s.name) + '</b><span>' + s.subjects.map(function (k) { return SUBJ[k]; }).join(' · ') + ' · 건물을 눌러요</span>';
       renderLand(s); startTwinkle(); centerScroll(50); fadeIn();
