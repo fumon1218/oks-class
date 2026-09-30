@@ -1,0 +1,30 @@
+.oks-board.town-board{background:transparent;box-shadow:none;padding:0;}
+.town-map{position:relative;width:100%;border-radius:28px;overflow:hidden;box-shadow:var(--shadow);}
+.town-map .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+.town-map .spot{position:absolute;border-radius:24px;background:transparent;}
+.town-map .spot:hover,.town-map .spot:focus-visible{background:rgba(255,255,255,.18);outline:3px dashed rgba(255,255,255,.8);}
+.town-map .sign{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.94);padding:4px 14px 4px 4px;border-radius:999px;font-size:clamp(12px,1.6vw,18px);box-shadow:0 4px 10px rgba(0,0,0,.25);white-space:nowrap;z-index:2;animation:sign-bob 3s ease-in-out infinite;}
+.town-map .sign .ic{width:clamp(24px,3vw,38px);height:clamp(24px,3vw,38px);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:clamp(14px,1.8vw,22px);}
+@keyframes sign-bob{50%{transform:translate(-50%,-58%)}}
+.town-map .walker{position:absolute;width:clamp(40px,6vw,76px);transform:translate(-50%,-90%);transition:left .85s ease-in-out,top .85s ease-in-out;z-index:3;filter:drop-shadow(0 4px 4px rgba(0,0,0,.35));pointer-events:none;}
+.town-map .walker.walking{animation:walk-bob .25s infinite alternate;}
+@keyframes walk-bob{to{margin-top:-6px}}
+.town-list{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px;}
+.town-list .tl{background:var(--glass);border-radius:999px;padding:10px 16px;font-size:17px;box-shadow:0 4px 10px rgba(80,55,30,.15);}
+.hall{max-width:720px;} .hall-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:14px;}
+.bus{max-width:780px;}
+.bus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+.bus-grid.big{max-width:1000px;margin:0 auto;}
+.bus-card{display:flex;flex-direction:column;align-items:center;gap:4px;background:#fff;border-radius:20px;padding:8px 8px 12px;text-decoration:none;color:var(--ink);box-shadow:0 4px 10px rgba(0,0,0,.12);border:4px solid transparent;}
+.bus-card img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px;}
+.bus-card b{font-weight:400;font-size:19px;} .bus-card small{font-size:13px;color:var(--ink-soft);text-align:center;}
+.bus-card.here{border-color:var(--teal);} .bus-card.lock{opacity:.55;filter:grayscale(.6);}
+.bus-ride{position:fixed;inset:0;z-index:99;background:linear-gradient(180deg,#81d4fa,#e1f5fe 60%,#a5d6a7 60%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font-size:22px;}
+.bus-ride .br-mt{font-size:48px;letter-spacing:12px;}
+.bus-ride .br-road{width:100%;height:40px;background:repeating-linear-gradient(90deg,#616161 0 60px,#757575 60px 64px);}
+.bus-ride .br-bus{font-size:110px;animation:bus-go 2.4s linear forwards;}
+.bus-ride b{font-weight:400;background:rgba(255,255,255,.85);padding:8px 18px;border-radius:999px;}
+@keyframes bus-go{from{transform:translateX(-60vw)}to{transform:translateX(60vw)}}
+.locked-town{position:relative;border-radius:28px;overflow:hidden;} .locked-town img{width:100%;filter:grayscale(.7) blur(2px);display:block;}
+.locked-town div{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(0,0,0,.25);color:#fff;font-size:26px;} .locked-town span{font-size:70px;}
+@media (max-width:640px){ .bus-grid{grid-template-columns:1fr;} .town-map .sign{padding:2px 8px 2px 2px;} }

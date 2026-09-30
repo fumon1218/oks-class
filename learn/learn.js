@@ -15,6 +15,8 @@
   var school = O.qs('school') || O.jget('oks_learn_last', {}).school || 'elem';
   var ask = document.getElementById('askText');
   O.applyBody();
+  if (O.eco) O.eco.hud(document.getElementById('ecoHud'));
+  var SHOPS_OF = window.OKS_SHOP_BY_LESSON || function () { return []; };
 
   function renderTabs() {
     var s = document.getElementById('subjects'); s.innerHTML = '';
@@ -67,6 +69,8 @@
         var desc = card.querySelector('.desc');
         l.levels.forEach(function (t, i) { desc.insertAdjacentHTML('beforeend', '<li><b>' + O.LEVELS[i].name + '</b> ' + O.esc(t.replace(/^〈[^〉]*〉\s*/, '')) + '</li>'); });
         desc.insertAdjacentHTML('beforeend', '<li class="rec">기록: ' + O.esc(l.record) + (l.track ? ' · ' + O.esc(l.track) : '') + '</li>');
+        var shops = SHOPS_OF(l.id);
+        if (shops.length) card.querySelector('.lfoot').insertAdjacentHTML('beforebegin', '<div class="lshops">' + shops.map(function (S) { return '<a href="../shop/?id=' + S.id + '&level=' + lv + '" style="--c:' + S.col + '">' + S.icon + ' ' + S.name + '에서 일하기</a>'; }).join('') + '</div>');
         card.querySelector('.more').onclick = function () { card.classList.toggle('open'); };
         grid.appendChild(card);
       });
@@ -80,7 +84,7 @@
   document.getElementById('setBtn').onclick = function () {
     var s = O.settings();
     var ov = E('div', 'oks-overlay'), box = E('div', 'oks-finish settings');
-    var rows = [['voice', '🗣️ 읽어 주는 목소리', s.voice], ['sound', '🎵 효과음', s.sound], ['slow', '🐢 천천히 말하기', s.slow], ['calm', '🌙 움직임 줄이기(감각 조절)', s.calm], ['big', '👆 큰 누름 칸', s.big]];
+    var rows = [['voice', '🗣️ 읽어 주는 목소리', s.voice], ['sound', '🎵 효과음', s.sound], ['slow', '🐢 천천히 말하기', s.slow], ['calm', '🌙 움직임 줄이기(감각 조절)', s.calm], ['big', '👆 큰 누름 칸', s.big], ['scan', '🔘 스위치(스캔) 모드', !!s.scan], ['openAll', '🔓 모든 마을 열기(선생님)', !!s.openAll]];
     box.innerHTML = '<h2>설정</h2><div class="set-rows"></div><p>처음 시작할 수준</p><div class="set-lv"></div><div class="btns"></div><div class="note">시간 제한은 없어요. 4·5수준은 🙋 도와줘를 누를 때만 힌트가 나와요.</div>';
     var sr = box.querySelector('.set-rows');
     rows.forEach(function (r) { var b = E('button', 'tog' + (r[2] ? ' on' : ''), r[1] + '<span>' + (r[2] ? '켜짐' : '꺼짐') + '</span>'); b.type = 'button'; b.onclick = function () { r[2] = !r[2]; O.saveSetting(r[0], r[2]); b.classList.toggle('on', r[2]); b.querySelector('span').textContent = r[2] ? '켜짐' : '꺼짐'; }; sr.appendChild(b); });

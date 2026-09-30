@@ -31,7 +31,7 @@
     var a = jget('oksaem-settings', {}), b = jget('oks_core_v1', {});
     return {
       voice: a.voice !== false, sound: a.sound !== false,
-      calm: !!b.calm, big: !!b.big, slow: !!b.slow,
+      calm: !!b.calm, big: !!b.big, slow: !!b.slow, scan: !!b.scan, scanSec: b.scanSec || 1.6, openAll: !!b.openAll,
       levels: b.levels || {}, defaultLevel: b.defaultLevel || 2
     };
   }
@@ -228,7 +228,7 @@
         ask.querySelector('.oks-mascot').src = mascot(opt.mood || 'idle');
         b.classList.remove('oks-pop'); void b.offsetWidth; b.classList.add('oks-pop');
         replayFn = opt.replay || null;
-        if (opt.replay) { lastSaid = { text: text, opt: opt }; return say(text, opt).then(function () { return opt.replay(); }); }
+        if (opt.replay) { lastSaid = { text: text, opt: opt }; return say(opt.speak || text, opt).then(function () { return opt.replay(); }); }
         if (opt.silent) { lastSaid = { text: opt.speak || text, opt: opt }; return Promise.resolve(); }
         return say(opt.speak || text, opt);
       },
@@ -299,6 +299,11 @@
       chips.appendChild(c);
     });
     log(entry);
+    if (global.OKS.eco && !o.noReward) { /* 코인·경험치 */
+      var rc = o.coins != null ? o.coins : 3 + stars * 3, rx = o.xp != null ? o.xp : 10 + (entry.level || 1) * 4 + stars * 3;
+      global.OKS.eco.reward({ coins: rc, xp: rx, mission: o.mission || { lesson: 1 }, badge: [o.badge || 'first_lesson'].concat(entry.level === 5 && stars === 3 ? ['star5'] : []), delay: 900 });
+      box.querySelector('.stars').insertAdjacentHTML('afterend', '<div class="eco-gain">🪙 +' + rc + ' · ⭐ 경험치 +' + rx + '</div>');
+    }
     var btns = box.querySelector('.btns');
     (o.buttons || []).forEach(function (b) {
       var x = el(b.href ? 'a' : 'button', 'oks-btn ' + (b.color || ''), esc(b.label)); if (b.href) x.href = b.href; else { x.type = 'button'; x.onclick = function () { ov.remove(); b.onClick && b.onClick(); }; }

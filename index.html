@@ -1958,6 +1958,8 @@ function renderWorld(){
     <div class="directory-actions">
       ${allRooms.map(r=>`<button type="button" class="${r.locked?'directory-soon':''}" data-action="${r.locked?'soon-room':'go-room'}" data-room="${r.key}">${r.locked?'🔒':'🏫'} ${r.label}</button>`).join('')}
       <a href="learn/">🌱 배움 지도 (7교과 126차시)</a>
+      <a href="town/">🚌 버스 정류장 (춘천본원 · 원주분원)</a>
+      <a href="shop/">🏪 가게 영업 (타이쿤)</a>
       <a href="career/barista.html">☕ 직업 체험 카페</a>
       <a href="minigames/index.html">🎮 예전 미니게임 모음</a>
       <a href="quests/index.html">🌸 마을 통합 퀘스트</a>
@@ -1967,6 +1969,7 @@ function renderWorld(){
     <button class="navcircle active" data-action="go-world"><span>🗺️</span>지도</button>
     <button class="navcircle world-directory-toggle" data-action="toggle-directory" aria-expanded="${worldDirectoryOpen}"><span>🧭</span>교실 찾기</button>
     <a class="navcircle" href="learn/" style="text-decoration:none"><span style="border-color:#8bc34a">🌱</span>배움 지도</a>
+    <a class="navcircle" href="town/" style="text-decoration:none"><span style="border-color:#e0a800">🚌</span>버스·가게</a>
     <button class="navcircle" data-action="go-lessons"><span>📚</span>오늘의 수업</button>
     <a class="navcircle" href="quests/index.html" style="text-decoration:none"><span>🌸</span>마을 퀘스트</a>
     <a class="navcircle" href="career/barista.html" style="text-decoration:none"><span style="border-color:#3AAFA9">☕</span>직업 체험</a>

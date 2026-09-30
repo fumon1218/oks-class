@@ -77,3 +77,18 @@ if (fs.existsSync(contentPath)) {
   }
   console.log(`PASS 차시 게임 ${Object.keys(win.OKS_CONTENT).length}개 · 그림 ${imgs}곳`);
 }
+
+// 가게(타이쿤): 그림 경로와 연계 차시 확인
+const shopsPath = path.join(root, 'shop/shops.js');
+if (fs.existsSync(shopsPath)) {
+  const src = fs.readFileSync(shopsPath, 'utf8');
+  const J = 'art/jj/', F = 'games/farm/assets/';
+  let n = 0;
+  for (const m of src.matchAll(/(J|F) \+ '([^']+\.webp)'/g)) { const p = (m[1] === 'J' ? J : F) + m[2]; assert(fs.existsSync(path.join(root, p)), '가게 그림 없음: ' + p); n++; }
+  for (const m of src.matchAll(/'img:([^']+)'/g)) assert(fs.existsSync(path.join(root, m[1])), '가게 배경 없음: ' + m[1]);
+  const win = { OKS: { ROOT: '../' } };
+  vm.runInNewContext(src, { window: win, OKS: win.OKS });
+  const data = JSON.parse(fs.readFileSync(lessonsPath, 'utf8')); const ids = new Set(data.lessons.map(l => l.id));
+  for (const [k, s] of Object.entries(win.OKS_SHOPS)) for (const l of s.lessons) assert(ids.has(l), `가게 ${k} 연계 차시 없음: ${l}`);
+  console.log(`PASS 가게 ${Object.keys(win.OKS_SHOPS).length}곳 · 그림 ${n}곳`);
+}

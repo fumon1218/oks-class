@@ -25,6 +25,7 @@
     level: level
   });
   document.title = lesson.topic + ' · 옥쌤의 즐거운 교실';
+  if (O.eco) { var ehud = O.eco.hud(sh.top); sh.top.insertBefore(ehud, sh.levelBtn); }
 
   /* 수준 바꾸기 (선생님용) */
   sh.levelBtn.onclick = function () {
@@ -54,141 +55,12 @@
   var ctx = {
     lesson: lesson, id: id, level: level, sh: sh, board: sh.board, stats: st,
     cfg: cfgFor(level), nOpt: NOPT[level - 1], rounds: ROUNDS[level - 1],
-    O: O, el: E, wait: O.wait, shuffle: O.shuffle, pick: O.pick, say: O.say, sfx: O.sfx,
-    img: function (p) { return /^(https?:|data:|\.\.?\/)/.test(p) ? p : O.ROOT + p; },
     ask: function (t, o) { return sh.ask(t, o); },
-    target: function (t) { O.target(t, level); },
-    untarget: function () { O.target(null); },
     clear: function () { O.clearPrompt(); sh.board.innerHTML = ''; sh.board.className = 'oks-board'; },
     scene: function (kind) { sh.board.className = 'oks-board ' + (kind || ''); },
     progress: function (i, n) { sh.setRounds(n, i); }
   };
-  /* 그림 카드 */
-  ctx.pic = function (item) {
-    var sc = item.scale ? ' style="transform:scale(' + item.scale + ')"' : '';
-    if (item.svg) return item.svg;
-    if (item.img) return '<img src="' + ctx.img(item.img) + '" alt=""' + sc + '>';
-    if (item.color) return '<span class="swatch" style="background:' + item.color + '"></span>';
-    return '<span class="emo"' + sc + '>' + (item.emo || '❓') + '</span>';
-  };
-  ctx.card = function (item, o) {
-    o = o || {};
-    var c = E('button', 'oks-card oks-pop' + (o.big ? ' big' : '') + (o.cls ? ' ' + o.cls : ''));
-    c.type = 'button';
-    c.innerHTML = '<div class="pic">' + ctx.pic(item) + '</div>' + (o.noLabel ? '' : '<div class="lab">' + O.esc(o.label != null ? o.label : item.label || '') + '</div>');
-    c._item = item;
-    return c;
-  };
-  ctx.grid = function (els, cols) {
-    var g = E('div', 'oks-grid');
-    var n = cols || els.length; if (n > 4) n = Math.ceil(n / 2) <= 4 ? Math.ceil(n / 2) : 4;
-    g.style.gridTemplateColumns = 'repeat(' + n + ', minmax(0, ' + (els.length === 1 ? 300 : 220) + 'px))';
-    els.forEach(function (e) { g.appendChild(e); });
-    return g;
-  };
-  /* 항목을 소리/말로 들려주기 */
-  ctx.voice = function (item, how) {
-    how = how || ctx.cfg.voice || 'label';
-    if (item.inst) { O.inst(item.inst, item.freq); if (how === 'inst') return O.wait(700); }
-    if (how === 'en' && item.en) return O.say(item.en, { lang: 'en-US', noRepeat: true });
-    if (how === 'sound' && item.snd) return O.say(item.snd, { noRepeat: true, rate: 0.9 });
-    return O.say(item.sayAs || item.label, { noRepeat: true });
-  };
-  ctx.good = function (el, text) {
-    O.clearPrompt(); O.sfx('ok');
-    if (el) { el.classList.add('good'); }
-    if (text !== false) O.praise(text);
-  };
-  var stepMiss = 0;
-  ctx.bad = function (el) {
-    O.sfx('no'); st.mistakes++; stepMiss++;
-    if (el) { el.classList.remove('wobble'); void el.offsetWidth; el.classList.add('wobble'); }
-    sh.mood('soft');
-    if (level <= 3) O.showNow(stepMiss >= 2 ? 'hand' : 'glow');
-    else if (stepMiss >= 3) O.showNow('glow');
-    O.say(['다시 해 볼까요?', '괜찮아요, 한 번 더!', '천천히 다시 봐요.'][stepMiss % 3], { noRepeat: true });
-  };
-  ctx.newStep = function () { stepMiss = 0; sh.mood('idle'); };
-
-  /* 누르기 기다리기: right(el) 이 참인 것을 누를 때까지. 틀리면 흔들림 + 촉진 */
-  ctx.tapWait = function (els, right, onWrong) {
-    return new Promise(function (res) {
-      els.forEach(function (e) {
-        e.onclick = function () {
-          if (e.classList.contains('dim') || e._done) return;
-          if (right(e)) { els.forEach(function (x) { x.onclick = null; }); res(e); }
-          else { ctx.bad(e); if (onWrong) onWrong(e); }
-        };
-      });
-    });
-  };
-
-  /* 옮기기(끌어다 놓기 + 눌러서 고르고 눌러서 놓기 둘 다 됨)
-     items: 옮길 요소들, zones: 놓을 곳들, check(item, zone) → true면 성공
-     성공할 때마다 onPlace(item, zone) 실행, done() 이 true를 돌려주면 끝 */
-  ctx.dnd = function (items, zones, check, onPlace, done) {
-    return new Promise(function (res) {
-      var sel = null, drag = null;
-      function select(it) { if (sel) sel.classList.remove('sel'); sel = it; if (it) it.classList.add('sel'); }
-      function tryPlace(it, z) {
-        if (!it || !z) return;
-        if (check(it, z)) {
-          it._done = true; it.classList.remove('sel'); select(null);
-          O.sfx('pop'); O.clearPrompt();
-          var r = onPlace(it, z);
-          if (done()) { cleanup(); res(); }
-          return r;
-        } else { ctx.bad(it); select(null); }
-      }
-      function zoneAt(x, y) { /* 겹쳐 있으면 가운데가 가장 가까운 곳 */
-        var best = null, bd = 1e9;
-        for (var i = 0; i < zones.length; i++) { var r = zones[i].getBoundingClientRect(); if (x >= r.left - 12 && x <= r.right + 12 && y >= r.top - 12 && y <= r.bottom + 12) {
-          var d = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2)) / Math.max(20, Math.min(r.width, r.height)); if (d < bd) { bd = d; best = zones[i]; } } }
-        return best;
-      }
-      function down(e) {
-        var it = e.currentTarget; if (it._done) return;
-        var r = it.getBoundingClientRect();
-        drag = { it: it, x0: e.clientX, y0: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, ghost: null, moved: false, w: r.width, h: r.height };
-        try { it.setPointerCapture(e.pointerId); } catch (x) {}
-      }
-      function move(e) {
-        if (!drag) return;
-        if (!drag.moved && Math.hypot(e.clientX - drag.x0, e.clientY - drag.y0) > 10) {
-          drag.moved = true;
-          var g = drag.it.cloneNode(true); g.classList.add('ghost'); g.classList.remove('oks-glow', 'oks-pop');
-          g.style.width = drag.w + 'px'; g.style.height = drag.h + 'px'; document.body.appendChild(g); drag.ghost = g;
-          drag.it.classList.add('lifted'); O.sfx('tick');
-        }
-        if (drag.ghost) {
-          drag.ghost.style.transform = 'translate(' + (e.clientX - drag.dx) + 'px,' + (e.clientY - drag.dy) + 'px)';
-          zones.forEach(function (z) { z.classList.remove('hover'); }); var z = zoneAt(e.clientX, e.clientY); if (z) z.classList.add('hover');
-        }
-      }
-      function up(e) {
-        if (!drag) return; var d = drag; drag = null;
-        zones.forEach(function (z) { z.classList.remove('hover'); });
-        if (d.ghost) { d.ghost.remove(); d.it.classList.remove('lifted'); var z = zoneAt(e.clientX, e.clientY); if (z) tryPlace(d.it, z); }
-        else { if (sel === d.it) select(null); else { select(d.it); O.sfx('tick'); } }
-      }
-      function zclick(e) { if (sel) tryPlace(sel, e.currentTarget); }
-      items.forEach(function (it) { it.style.touchAction = 'none'; it.addEventListener('pointerdown', down); it.addEventListener('pointermove', move); it.addEventListener('pointerup', up); it.addEventListener('pointercancel', up); it.onclick = null; });
-      zones.forEach(function (z) { z.addEventListener('click', zclick); });
-      function cleanup() {
-        items.forEach(function (it) { it.removeEventListener('pointerdown', down); it.removeEventListener('pointermove', move); it.removeEventListener('pointerup', up); it.removeEventListener('pointercancel', up); });
-        zones.forEach(function (z) { z.removeEventListener('click', zclick); });
-      }
-    });
-  };
-  /* 요소를 다른 곳으로 날려 보내기(애니메이션) */
-  ctx.fly = function (from, to, html) {
-    var a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
-    var f = E('div', 'oks-fly', html || from.innerHTML); document.body.appendChild(f);
-    f.style.width = a.width + 'px'; f.style.height = a.height + 'px'; f.style.left = a.left + 'px'; f.style.top = a.top + 'px';
-    var dx = b.left + b.width / 2 - (a.left + a.width / 2), dy = b.top + b.height / 2 - (a.top + a.height / 2);
-    var an = f.animate([{ transform: 'translate(0,0) scale(1)' }, { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(.45)', opacity: .6 }], { duration: O.settings().calm ? 10 : 520, easing: 'ease-in' });
-    return new Promise(function (r) { an.onfinish = function () { f.remove(); r(); }; });
-  };
+  O.kit(ctx);
 
   /* ---------- 실행 ---------- */
   function run() {
@@ -210,6 +82,7 @@
       rounds: ctx.rounds, mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: sec };
     var btns = [{ label: '한 번 더', color: '', onClick: function () { location.reload(); } }];
     if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(id, level + 1); location.href = '?id=' + id + '&level=' + (level + 1); } });
+    (window.OKS_SHOP_BY_LESSON ? window.OKS_SHOP_BY_LESSON(id) : []).slice(0, 1).forEach(function (S) { btns.push({ label: '🏪 ' + S.name + '에서 일하기', color: 'pink', href: '../shop/?id=' + S.id + '&level=' + level }); });
     btns.push({ label: '배움 지도', color: 'blue', href: '../learn/?subject=' + lesson.subject + '&school=' + lesson.school + '#' + id });
     O.finish({ stats: st, entry: entry, title: '다 했어요!', text: lesson.topic + ' · ' + O.LEVELS[level - 1].name, buttons: btns });
   }
