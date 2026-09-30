@@ -279,11 +279,12 @@
         tgt();
         return ctx.dnd(cards, slots, function (cd, z) { return cd._k === z._k && cd._k === nextK; }, function (cd, z) {
           var cp = ctx.card(cd._item); cp.classList.add('good', 'in-slot'); z.querySelector('.slot-in').appendChild(cp); z.classList.add('filled');
-          cd.style.visibility = 'hidden'; O.say(cd._item.label, { noRepeat: true }); nextK++;
+          cd.style.visibility = 'hidden'; if (cd._item.en) O.say(cd._item.en, { lang: 'en-US', noRepeat: true }); else O.say(cd._item.label, { noRepeat: true }); nextK++;
           if (lv === 1) { var nx = cards.filter(function (x) { return x._k === nextK; })[0]; if (nx) nx.style.visibility = ''; }
           ctx.good(null, nextK >= steps.length ? undefined : false); tgt();
         }, function () { return nextK >= steps.length; }).then(function () {
           /* 이야기로 다시 들려주기 */
+          if (steps[0].en) return O.say(steps.map(function (s) { return s.en; }).join(' '), { lang: 'en-US', noRepeat: true }).then(function () { return O.wait(400); });
           var txt = steps.map(function (s, k) { return ['먼저', '그 다음', '그리고', '마지막으로'][k === steps.length - 1 ? 3 : Math.min(k, 2)] + ' ' + (s.story || s.label); }).join(', ');
           return O.say(txt, { noRepeat: true }).then(function () { return O.wait(400); });
         });

@@ -67,8 +67,9 @@
           lvls.appendChild(a);
         });
         var desc = card.querySelector('.desc');
-        l.levels.forEach(function (t, i) { desc.insertAdjacentHTML('beforeend', '<li><b>' + O.LEVELS[i].name + '</b> ' + O.esc(t.replace(/^〈[^〉]*〉\s*/, '')) + '</li>'); });
-        desc.insertAdjacentHTML('beforeend', '<li class="rec">기록: ' + O.esc(l.record) + (l.track ? ' · ' + O.esc(l.track) : '') + '</li>');
+        var DS = window.OKS_DESCRIBE;
+        l.levels.forEach(function (t, i) { var g = C[l.id] && DS ? DS(C[l.id], i + 1) : ''; desc.insertAdjacentHTML('beforeend', '<li><b>' + O.LEVELS[i].name + '</b> ' + (g ? '<span class="game">🎮 ' + O.esc(g) + '</span><br>' : '') + '<small class="orig">' + O.esc(t.replace(/^〈[^〉]*〉\s*/, '')) + '</small></li>'); });
+        desc.insertAdjacentHTML('beforeend', '<li class="rec"><a href="../curriculum/plan.html?subject=' + l.subject + '&school=' + l.school + '">📘 지도 계획서</a> · 기록: ' + O.esc(l.record) + (l.track ? ' · ' + O.esc(l.track) : '') + '</li>');
         var shops = SHOPS_OF(l.id);
         if (shops.length) card.querySelector('.lfoot').insertAdjacentHTML('beforebegin', '<div class="lshops">' + shops.map(function (S) { return '<a href="../shop/?id=' + S.id + '&level=' + lv + '" style="--c:' + S.col + '">' + S.icon + ' ' + S.name + '에서 일하기</a>'; }).join('') + '</div>');
         card.querySelector('.more').onclick = function () { card.classList.toggle('open'); };

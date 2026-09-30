@@ -46,3 +46,4 @@
 .lshops{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 6px;}
 .lshops a{font-size:14px;text-decoration:none;color:#fff;background:var(--c);padding:6px 12px;border-radius:999px;box-shadow:0 3px 0 rgba(0,0,0,.15);}
 #ecoHud{display:inline-flex;}
+.desc .game{color:#2e5e1e;} .desc .orig{color:var(--ink-soft);} .desc .rec a{color:#1565c0;}

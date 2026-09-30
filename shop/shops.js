@@ -261,5 +261,5 @@
   };
   Object.keys(S).forEach(function (k) { S[k].id = k; });
   window.OKS_SHOPS = S; window.OKS_HALLS = HALLS;
-  window.OKS_SHOP_BY_LESSON = function (lessonId) { return Object.keys(S).filter(function (k) { return S[k].lessons.indexOf(lessonId) >= 0; }).map(function (k) { return S[k]; }); };
+  window.OKS_SHOP_BY_LESSON = function (lessonId) { var L2 = window.OKS_SHOP_LINKS2 || {}; return Object.keys(S).filter(function (k) { return S[k].lessons.indexOf(lessonId) >= 0 || L2[lessonId] === k; }).map(function (k) { return S[k]; }); };
 })();

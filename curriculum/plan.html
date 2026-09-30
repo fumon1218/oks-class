@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>교육과정 기반 게임 지도 계획서 · 옥쌤의 즐거운 교실</title>
+<link rel="icon" href="../icons/icon-192.png">
+<style>
+:root{--ink:#2f2622;--soft:#6f625a;--line:#eadfce;--bg:#fbf7ef;--card:#fff;--acc:#e0612f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',system-ui,sans-serif;line-height:1.5}
+header{position:sticky;top:0;z-index:5;background:#fffdf8;border-bottom:1px solid var(--line);padding:10px 16px}
+header h1{margin:0;font-size:20px} header p{margin:2px 0 8px;font-size:13px;color:var(--soft)}
+.bar{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.bar button,.bar a{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:14px;cursor:pointer;color:var(--ink);text-decoration:none}
+.bar button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.bar .sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+main{max-width:1200px;margin:0 auto;padding:16px}
+.sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:14px}
+.sum div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px} .sum b{display:block;font-size:22px} .sum small{color:var(--soft)}
+h2{font-size:22px;margin:26px 0 8px;padding-bottom:6px;border-bottom:3px solid var(--c,#ccc)}
+h3{font-size:17px;margin:16px 0 8px;color:var(--soft)}
+.lesson{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c,#ccc);border-radius:14px;padding:12px 14px;margin-bottom:10px;break-inside:avoid}
+.lh{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.lh .no{background:#ffe2a8;border-radius:8px;padding:1px 8px;font-weight:700}
+.lh b{font-size:17px} .lh .sp{color:var(--soft);font-size:14px} .lh .eng{margin-left:auto;font-size:13px;background:#eef6e8;border-radius:999px;padding:2px 10px}
+.goal{margin:4px 0 8px;font-size:14px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{border-top:1px solid #f0e8da;padding:6px 8px;vertical-align:top;text-align:left}
+th{width:120px;color:var(--soft);font-weight:600;white-space:nowrap}
+td.orig{color:var(--soft);font-size:12.5px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:12.5px;color:var(--soft)}
+.meta a{color:#1565c0}
+.tag{display:inline-block;background:#fff3e0;border-radius:999px;padding:1px 8px;margin-right:4px}
+.hideorig td.orig,.hideorig th.orig{display:none}
+@media print{header{position:static}.bar{display:none}body{background:#fff}.lesson{border-color:#ccc}main{padding:0}}
+@media (max-width:640px){th{width:auto;display:block;border:0;padding-bottom:0} td{display:block} table,tbody,tr{display:block}}
+</style>
+</head>
+<body>
+<header>
+  <h1>📘 교육과정 기반 게임 지도 계획서</h1>
+  <p id="sub"></p>
+  <div class="bar" id="bar"></div>
+</header>
+<main id="main"></main>
+<script src="lessons.js"></script>
+<script src="../play/content.js"></script>
+<script src="../play/content2.js"></script>
+<script src="../shop/shops.js"></script>
+<script src="../play/describe.js"></script>
+<script>
+(function(){
+  var D = window.OKS_LESSONS, C = window.OKS_CONTENT || {}, desc = window.OKS_DESCRIBE, engName = window.OKS_ENGINE_NAME;
+  var shopsOf = window.OKS_SHOP_BY_LESSON || function(){ return []; };
+  var COL = {korean:'#ff8a65',math:'#66bb6a',social:'#ffb300',science:'#29b6f6',english:'#ab47bc',art:'#ec407a',music:'#5c6bc0'};
+  var LV = ['1 감각 탐색','2 골라 보기','3 직접 해 보기','4 혼자 해 보기','5 생활에 써 보기'];
+  var q = new URLSearchParams(location.search);
+  var subj = q.get('subject') || 'all', school = q.get('school') || 'all', showOrig = q.get('orig') !== '0';
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function strip(t){ return String(t).replace(/^〈[^〉]*〉\s*/, ''); }
+  document.getElementById('sub').textContent = D.title + ' · ' + D.version + ' · ' + D.note;
+  var bar = document.getElementById('bar');
+  function btn(label, on, fn){ var b = document.createElement('button'); b.textContent = label; if(on) b.className = 'on'; b.onclick = fn; bar.appendChild(b); }
+  function drawBar(){
+    bar.innerHTML = '';
+    btn('전체 교과', subj === 'all', function(){ subj = 'all'; render(); });
+    D.subjects.forEach(function(s){ btn(s.name, subj === s.key, function(){ subj = s.key; render(); }); });
+    bar.insertAdjacentHTML('beforeend', '<span class="sep"></span>');
+    btn('전체 학교급', school === 'all', function(){ school = 'all'; render(); });
+    D.schools.forEach(function(s){ btn(s.name, school === s.key, function(){ school = s.key; render(); }); });
+    bar.insertAdjacentHTML('beforeend', '<span class="sep"></span>');
+    btn(showOrig ? '설계표 원문 숨기기' : '설계표 원문 보기', false, function(){ showOrig = !showOrig; render(); });
+    btn('🖨️ 인쇄', false, function(){ window.print(); });
+    bar.insertAdjacentHTML('beforeend', '<a href="../learn/">🌱 배움 지도</a>');
+  }
+  function render(){
+    drawBar();
+    history.replaceState(null, '', '?subject=' + subj + '&school=' + school + (showOrig ? '' : '&orig=0'));
+    var main = document.getElementById('main'); main.className = showOrig ? '' : 'hideorig';
+    var list = D.lessons.filter(function(l){ return (subj === 'all' || l.subject === subj) && (school === 'all' || l.school === school); });
+    var ready = list.filter(function(l){ return C[l.id]; }).length, withShop = list.filter(function(l){ return shopsOf(l.id).length; }).length;
+    var eng = {}; list.forEach(function(l){ if(C[l.id]){ var n = engName(C[l.id], 3); eng[n] = (eng[n] || 0) + 1; } });
+    var html = '<div class="sum"><div><b>' + list.length + '</b><small>차시</small></div><div><b>' + ready + '</b><small>게임으로 구현</small></div><div><b>' + withShop + '</b><small>가게(타이쿤) 연계</small></div><div><b>' + Object.keys(eng).length + '</b><small>게임 방식: ' + esc(Object.keys(eng).slice(0, 6).join(', ')) + (Object.keys(eng).length > 6 ? ' …' : '') + '</small></div></div>';
+    var lastS = '', lastSch = '', lastU = '';
+    list.forEach(function(l){
+      var c = C[l.id], col = COL[l.subject];
+      if(l.subject !== lastS){ html += '<h2 style="--c:' + col + '">' + esc(l.subjectName) + '</h2>'; lastS = l.subject; lastSch = ''; }
+      if(l.school !== lastSch || l.unit !== lastU){ html += '<h3>' + esc(l.schoolName) + ' · ' + l.unitNo + '단원 ' + esc(l.unit) + ' <small>(' + esc(l.track) + ')</small></h3>'; lastSch = l.school; lastU = l.unit; }
+      var shops = shopsOf(l.id);
+      html += '<section class="lesson" style="--c:' + col + '"><div class="lh"><span class="no">' + esc(l.schoolName + ' ' + l.no) + '</span><b>' + esc(l.topic) + '</b><span class="sp">〈' + esc(l.space) + '〉</span><span class="eng">🎮 ' + esc(c ? engName(c, 3) : '준비 중') + '</span></div>' +
+        '<div class="goal">🎯 <b>학습 목표</b> ' + esc(l.goal) + '</div><table><tbody>';
+      for(var i = 1; i <= 5; i++){
+        html += '<tr><th>' + LV[i - 1] + '</th><td>' + esc(c ? desc(c, i) : '—') + '</td><td class="orig">' + esc(strip(l.levels[i - 1])) + '</td></tr>';
+      }
+      html += '</tbody></table><div class="meta"><span>📝 평가 기록: ' + esc(l.record) + '</span>' +
+        (shops.length ? '<span>🏪 연계 가게: ' + shops.map(function(s){ return '<a href="../shop/?id=' + s.id + '">' + s.icon + ' ' + esc(s.name) + '</a>'; }).join(', ') + '</span>' : '') +
+        (c ? '<span>▶ <a href="../play/?id=' + l.id + '&level=1">1</a> · <a href="../play/?id=' + l.id + '&level=3">3</a> · <a href="../play/?id=' + l.id + '&level=5">5수준 바로 하기</a></span>' : '') +
+        '<span>🔎 ' + esc(l.verify) + (l.source ? ' · <a href="' + esc(l.source) + '" target="_blank" rel="noopener">공식 자료</a>' : '') + '</span><span>ID ' + l.id + '</span></div></section>';
+    });
+    main.innerHTML = html;
+  }
+  render();
+})();
+</script>
+</body>
+</html>

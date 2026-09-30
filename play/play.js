@@ -16,6 +16,7 @@
   function cfgFor(lv) {
     var c = Object.assign({}, base || {});
     if (c.byLevel && c.byLevel[lv]) c = Object.assign(c, c.byLevel[lv]);
+    if (lv === 5 && c.l5 && c.l5.engine) c = Object.assign(c, c.l5); /* 5수준에서 다른 게임으로 바뀌는 차시 */
     return c;
   }
   var sh = O.shell({
@@ -90,7 +91,8 @@
   /* 첫 화면: 시작 버튼(소리 켜기 위해 한 번 눌러야 함) */
   sh.ask(lesson.topic + '! 시작해 볼까요?', { silent: true });
   var start = E('div', 'oks-start');
-  start.innerHTML = '<div class="oks-start-lv">' + O.LEVELS[level - 1].name + '</div><p>' + O.esc(lesson.levels[level - 1].replace(/^〈[^〉]*〉\s*/, '')) + '</p>';
+  var gdesc = window.OKS_DESCRIBE && base ? window.OKS_DESCRIBE(base, level) : '';
+  start.innerHTML = '<div class="oks-start-lv">' + O.LEVELS[level - 1].name + '</div>' + (gdesc ? '<p class="gdesc">🎮 ' + O.esc(gdesc) + '</p>' : '') + '<p>🎯 ' + O.esc(lesson.goal) + '</p>';
   var go = E('button', 'oks-btn', '▶ 시작하기'); go.type = 'button';
   start.appendChild(go); sh.board.appendChild(start);
   O.target({ get: function () { return go; } }, Math.min(level, 2));
