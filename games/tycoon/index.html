@@ -60,8 +60,14 @@ body.oks::before{background:rgba(255,250,235,.15);}
 .cust.oks-glow{animation:pglow 1s ease-in-out infinite;box-shadow:none;}
 .cust.leave{animation:leave .7s ease forwards;}
 @keyframes leave{to{transform:translateX(60px);opacity:0}}
-.basket{position:relative;height:clamp(96px,17vh,140px);background:rgba(255,250,236,.88);border-radius:22px;box-shadow:0 4px 12px rgba(0,0,0,.12);display:flex;align-items:center;gap:10px;padding:8px 12px;}
-.basket > img{height:86%;}
+.basket{position:relative;height:clamp(110px,20vh,170px);background:rgba(255,250,236,.88);border-radius:22px;box-shadow:0 4px 12px rgba(0,0,0,.12);display:flex;align-items:center;gap:10px;padding:8px 12px;}
+.basket .bk{position:relative;height:100%;aspect-ratio:1.55;flex:none;}
+.basket .bk img.bk-back,.basket .bk img.bk-rim{position:absolute;left:0;bottom:0;width:100%;pointer-events:none;}
+.basket .bk img.bk-rim{z-index:2;}
+.basket .pile{position:absolute;left:12%;right:12%;bottom:44%;height:56%;z-index:1;}
+.basket .pile img{position:absolute;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
+.basket .pile img.drop{animation:bkdrop .55s cubic-bezier(.3,1.5,.5,1) both;}
+@keyframes bkdrop{0%{transform:translateY(-120%) scale(.6);opacity:0}60%{opacity:1}100%{transform:none}}
 .basket .stock{display:flex;flex-wrap:wrap;gap:6px;align-content:center;flex:1;}
 .basket .stock span{display:flex;align-items:center;gap:2px;background:#fff;border-radius:12px;padding:2px 8px;font-size:20px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
 .basket .stock img{height:36px;}
@@ -158,7 +164,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
     '<div class="lvbar"><div class="lv">Lv.1</div><div class="bar"><i></i></div><small></small></div>' +
     '<div class="pill coins"><img src="' + FA + 'coin.webp" alt=""><span>0</span></div><div class="pill stars"><img src="' + FA + 'star_gold.webp" alt=""><span>0</span></div>' +
     '<button class="tb help" type="button">🐰<span> 도움 모드</span></button><button class="tb snd" type="button">🔊</button></div>' +
-    '<div class="main"><div class="farm"></div><div class="side"><div class="custs"></div><div class="basket"><h4>수확한 작물</h4><img src="' + FA + 'basket.webp" alt=""><div class="stock"></div></div></div></div>' +
+    '<div class="main"><div class="farm"></div><div class="side"><div class="custs"></div><div class="basket"><h4>수확한 작물</h4><div class="bk"><img class="bk-back" src="' + FA + 'basket.webp" alt=""><div class="pile"></div><img class="bk-rim" src="' + FA + 'basket_rim.webp" alt=""></div><div class="stock"></div></div></div></div>' +
     '<div class="tools">' +
     '<button class="tool t1" data-t="seed" type="button"><b>1</b><img src="' + M + 'seed_strawberry.webp" alt="">씨앗 심기</button>' +
     '<button class="tool t2" data-t="water" type="button"><b>2</b><img src="' + JJ + 'farm/can.webp" alt="">물 주기</button>' +
@@ -203,7 +209,31 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
       farm.appendChild(el);
     });
   }
+  /* 바구니 속에 작물을 소복이 쌓아요 (아래 줄은 넓게, 위로 갈수록 좁게) */
+  var lastPile = {};
+  function drawPile() {
+    var pile = app.querySelector('.pile'); pile.innerHTML = '';
+    var list = []; Object.keys(S.barn).forEach(function (k) { for (var i = 0; i < S.barn[k]; i++) list.push(k); });
+    var show = list.slice(0, 15), n = show.length, PW = pile.clientWidth || 160;
+    var rowsN = n <= 4 ? 1 : n <= 9 ? 2 : 3, counts = [], left = n;
+    for (var r0 = 0; r0 < rowsN; r0++) { var c0 = Math.ceil(left / (rowsN - r0)) + (r0 === 0 && rowsN > 1 ? 1 : 0); c0 = Math.min(c0, left); counts.push(c0); left -= c0; }
+    var sz = Math.min(PW * .48, PW * 1.45 / Math.max(2, counts[0] || 1));   /* 한 개 크기(px) */
+    var k = 0, seen = {};
+    counts.forEach(function (cnt, r) {
+      var step = sz * .72, span = step * (cnt - 1) + sz;
+      for (var j = 0; j < cnt; j++, k++) {
+        var crop = show[k], im = E('img'); im.src = CROPS[crop].item; im.alt = '';
+        im.style.width = sz + 'px'; im.style.left = (PW / 2 - span / 2 + j * step) + 'px'; im.style.bottom = (r * sz * .42) + 'px';
+        im.style.transform = 'rotate(' + (((k * 37) % 30) - 15) + 'deg)'; im.style.zIndex = 10 - r;
+        seen[crop] = (seen[crop] || 0) + 1;
+        if (seen[crop] > (lastPile[crop] || 0)) { im.classList.add('drop'); im.style.animationDelay = ((seen[crop] - (lastPile[crop] || 0) - 1) * .12) + 's'; }
+        pile.appendChild(im);
+      }
+    });
+    lastPile = seen;
+  }
   function drawBarn() {
+    drawPile();
     stock.innerHTML = '';
     var keys = Object.keys(S.barn).filter(function (k) { return S.barn[k] > 0; });
     if (!keys.length) stock.innerHTML = '<span style="background:none;box-shadow:none;color:#9a8a6e;font-size:16px">아직 비어 있어요. 다 자란 작물을 수확해요!</span>';
