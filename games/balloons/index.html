@@ -163,7 +163,7 @@ body.calm .sky .bal{transition:none;}
   var W = 0, H = 0, U = 0, R = { x: 0, w: 0, h: 0 }, calm = O.settings().calm;
   function layout() {
     W = sky.clientWidth; H = sky.clientHeight; U = W < 700 ? W * 1.45 : Math.min(W, H * 1.7);
-    R.w = Math.round(U * .11); R.h = R.w * 520 / 373; R.y = H - R.h - 8;
+    R.w = Math.round(U * .11); R.h = R.w * 520 / 373; R.y = H - R.h - (W < 700 ? 74 : 8);   /* 휴대폰은 버튼 위로 */
     if (!R.x) R.x = W / 2; R.x = clamp(R.x, R.w / 2 + 8, W - R.w / 2 - 8);
     rocket.style.width = R.w + 'px';
     bals.forEach(sizeBal);
@@ -174,7 +174,7 @@ body.calm .sky .bal{transition:none;}
 
   /* ---------- 풍선 ---------- */
   var bals = [], stats = null, playing = false, busy = false, cfg = null, round = 0, task = {}, popped = 0;
-  function sizeBal(b) { b.w = Math.round(U * (W < 700 ? .15 : .135) * (b.scale || 1)); b.h = b.w * 1.8; b.el.style.width = b.w + 'px'; var lab = b.el.querySelector('.lab'); lab.style.fontSize = Math.round(b.w * (b.fs || .42)) + 'px'; }
+  function sizeBal(b) { b.w = Math.round(Math.min(U * (W < 700 ? .15 : .135) * (b.scale || 1), b.cap || 1e9)); b.h = b.w * 1.8; b.el.style.width = b.w + 'px'; var lab = b.el.querySelector('.lab'); lab.style.fontSize = Math.round(b.w * (b.fs || .42)) + 'px'; }
   function addBal(o) {
     var color = o.color || O.pick(COLORS)[0].id;
     var el = E('div', 'bal c-' + color, '<img src="' + M + 'b_' + color + '.webp" alt=""><div class="lab' + (o.cls ? ' ' + o.cls : '') + '">' + (o.html || '') + '</div>');
@@ -184,17 +184,18 @@ body.calm .sky .bal{transition:none;}
     return b;
   }
   function clearBals() { bals.forEach(function (b) { b.el.remove(); }); bals = []; }
+  /* 풍선마다 자기 세로 줄(칸)을 가져요 → 위아래로 겹쳐 서지 않아서, 아래에서 곧장 쏴도 어느 풍선이든 맞힐 수 있어요 */
   function spread() {
-    var n = bals.length, cols = Math.min(n, W < 700 ? 3 : 6), rows = Math.ceil(n / cols), sl = O.shuffle(bals), top = zoneTop(), bot = zoneBot();
+    var n = bals.length, sl = O.shuffle(bals), top = zoneTop(), bot = zoneBot(), lw = (W - 24) / Math.max(1, n);
     sl.forEach(function (b, i) {
-      var c = i % cols, r = Math.floor(i / cols);
-      var x0 = 20 + (W - 40) * c / cols, cw = (W - 40) / cols;
-      b.x = x0 + (cw - b.w) * (.2 + Math.random() * .6);
-      var rh = (bot - top) / rows;
-      b.y = b.fixY != null ? b.fixY : top + rh * r + Math.max(0, rh - b.h) * (.15 + Math.random() * .5);
-      b.minX = x0 + 2; b.maxX = x0 + cw - 2;
+      b.cap = lw * .92; sizeBal(b);
+      var x0 = 12 + lw * i;
+      b.x = x0 + (lw - b.w) * (.3 + Math.random() * .4);
+      var room = Math.max(0, bot - top - b.h), zig = i % 2 ? .55 + Math.random() * .4 : Math.random() * .4;
+      b.y = b.fixY != null ? b.fixY : top + room * zig;
+      b.minX = x0 + 2; b.maxX = x0 + lw - 2;
       b.el.style.transform = 'translate(' + b.x + 'px,' + b.y + 'px)';   /* 바로 제자리에 */
-      b.vx = (Math.random() < .5 ? -1 : 1) * W * .012 * (b.fixY != null ? .5 : 1) * (level <= 2 ? .6 : 1);
+      b.vx = (Math.random() < .5 ? -1 : 1) * W * .008 * (level <= 2 ? .6 : 1);
     });
   }
 
@@ -431,7 +432,7 @@ body.calm .sky .bal{transition:none;}
     rocket.style.transform = 'translate(' + (R.x - R.w / 2) + 'px,' + (R.y + (calm ? 0 : Math.sin(now / 500) * 3)) + 'px)';
     requestAnimationFrame(tick);
   }
-  function step(dir) { if (!playing || busy) return; moveTo(R.x + dir * Math.max(40, W * .08)); }
+  function step(dir) { if (!playing || busy) return; moveTo(R.x + dir * Math.max(30, W * .06)); }
   ctrl.querySelector('.l').onclick = function () { step(-1); };
   ctrl.querySelector('.r').onclick = function () { step(1); };
   ctrl.querySelector('.fire').onclick = function () { fireUp(); };

@@ -231,10 +231,10 @@ body.oks::before{display:none;}
   function clearThings() { things.forEach(function (t) { t.el.remove(); }); things = []; }
   /* 겹치지 않게 칸에 나눠 놓기 */
   function spread(list) {
-    var n = list.length, cols = Math.min(n, W < 700 ? 2 : 4), rows = Math.ceil(n / cols), sl = O.shuffle(list);
+    var n = list.length, still = !list.some(function (t) { return t.fish; }), cols = still ? n : Math.min(n, W < 700 ? 2 : 4), rows = Math.ceil(n / cols)   /* 물건은 한 줄에 하나씩 (낚싯줄이 막히지 않게) */, sl = O.shuffle(list);
     sl.forEach(function (t, i) {
       var c = i % cols, r = Math.floor(i / cols);
-      t.fx = (c + .2 + Math.random() * .6) / cols; t.fy = rows === 1 ? .35 + Math.random() * .3 : (r + .15 + Math.random() * .5) / rows;
+      t.fx = (c + .2 + Math.random() * .6) / cols; t.fy = rows === 1 ? (still ? (c % 2 ? .5 + Math.random() * .4 : .05 + Math.random() * .35) : .35 + Math.random() * .3) : (r + .15 + Math.random() * .5) / rows;
       t.x = null; sizeThing(t);
     });
   }
