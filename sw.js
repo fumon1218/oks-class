@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v63';
+const CACHE_NAME = 'oks-class-v64';
 const ASSETS = [
   './',
   './index.html',
@@ -49,6 +49,7 @@ const ASSETS = [
   './town/cc.webp',
   './town/wj.webp',
   './games/farm/index.html',
+  './games/birds/index.html',
   './minigames/farm-v8/index.html',
   './career/cafe.html',
   './career/barista.html',
@@ -433,6 +434,16 @@ const ASSETS = [
   './games/farm/assets/tomato_plant.webp',
   './games/farm/assets/watering_can.webp',
   './games/farm/assets/young_plant.webp',
+  './games/birds/img/bluebird.webp',
+  './games/birds/img/eagle.webp',
+  './games/birds/img/girl.webp',
+  './games/birds/img/hummingbird.webp',
+  './games/birds/img/nest.webp',
+  './games/birds/img/net.webp',
+  './games/birds/img/owl.webp',
+  './games/birds/img/parrot.webp',
+  './games/birds/img/sky.webp',
+  './games/birds/img/sparrow.webp',
   './art/jj/animals/baby_monkey.webp',
   './art/jj/animals/bear.webp',
   './art/jj/animals/cat.webp',

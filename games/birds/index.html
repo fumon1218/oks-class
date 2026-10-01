@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#5fb6ff">
+<title>새 잡기 놀이 · 옥쌤의 즐거운 교실</title>
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../icons/icon-192.png">
+<link rel="stylesheet" href="../../core/oks-core.css">
+<style>
+/* 스크래치 '마녀와 새' 게임을 옥쌤 교실 방식으로 다시 만든 것: 하늘에서 이름을 듣고 그 새만 그물로 잡아 둥지에 데려다줘요 */
+body.oks{background:#7cc8ff url('img/sky.webp') center/cover no-repeat fixed;overflow:hidden;}
+body.oks::before{display:none;}
+.oks-app{max-width:none;padding:10px 14px 0;height:100dvh;display:flex;flex-direction:column;box-sizing:border-box;}
+.oks-top.compact .oks-title{background:rgba(255,253,248,.94);border-radius:999px;color:var(--ink);text-shadow:none;box-shadow:0 4px 14px rgba(30,20,50,.2);padding:8px 26px;}
+.oks-ask{margin:8px auto 0;max-width:760px;width:100%;}
+.oks-ask .oks-mascot{display:none;}
+.oks-ask-bubble::before,.oks-ask-bubble::after{display:none!important;}
+.oks-top.compact{flex-wrap:nowrap;}
+.oks-top.compact .oks-title{flex:0 1 680px;margin:0 auto;min-width:0;}
+.oks-top.compact > *:not(.oks-title):not(.oks-menu){flex-shrink:0;white-space:nowrap;}
+.oks-menu[hidden]{display:none!important;}
+.oks-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:22px;background:#fffdf7;box-shadow:0 14px 34px rgba(60,40,20,.28);min-width:240px;}
+.oks-top.compact{position:relative;}
+.oks-more{font-size:28px;font-weight:800;color:var(--ink);line-height:1;}
+.oks-menu .eco-hud,.oks-menu .oks-level{justify-content:center;flex-wrap:wrap;}
+.oks-menu .oks-dots{justify-content:center;box-shadow:none;}
+@media (max-width:560px){.oks-top.compact .oks-title{display:none;} .oks-top.compact{justify-content:space-between;} .oks-top.compact .oks-pill > span{display:none;}}
+.oks-ask-bubble{font-size:26px;background:#fffdf8;box-shadow:0 6px 18px rgba(30,40,80,.22);border-radius:24px;display:flex;align-items:center;justify-content:center;gap:12px;min-height:64px;}
+.oks-ask-img{height:62px;width:auto;margin:-8px 0;}
+.oks-board.sky{flex:1;position:relative;margin:8px -14px 0;padding:0;border-radius:0;background:transparent;box-shadow:none;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;cursor:crosshair;}
+.sky img{position:absolute;left:0;top:0;pointer-events:none;-webkit-user-drag:none;will-change:transform;}
+.sky .bird{pointer-events:auto;cursor:pointer;filter:drop-shadow(0 8px 8px rgba(20,40,80,.25));}
+.sky .bird.flap{animation:flap .32s ease-in-out infinite alternate;}
+@keyframes flap{to{scale:1 .9;translate:0 4px;}}
+.sky .bird.oks-glow{animation:bird-glow .8s ease-in-out infinite;box-shadow:none;}
+@keyframes bird-glow{50%{filter:drop-shadow(0 0 14px #ffd54f) drop-shadow(0 0 26px #ffb300);}}
+.sky .girl{filter:drop-shadow(0 10px 10px rgba(20,40,80,.28));}
+.sky .net{z-index:5;}
+.sky .nest{z-index:2;}
+.sky .home{z-index:3;transition:transform .9s cubic-bezier(.4,1.3,.5,1),width .9s;}
+.nest-count{position:absolute;z-index:4;min-width:58px;height:58px;padding:0 10px;border-radius:999px;background:#ff8a3d;color:#fff;border:4px solid #fff;
+  display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 12px rgba(120,60,10,.35);}
+.nest-count.pop{animation:cnt .5s ease;}
+@keyframes cnt{50%{transform:scale(1.35)}}
+.slots{position:absolute;z-index:4;display:flex;gap:6px;justify-content:center;}
+.slots i{width:22px;height:22px;border-radius:50%;background:#fff8e6;border:3px solid #d7b98a;}
+.slots i.got{background:#5fcf6a;border-color:#2f9a46;}
+.oks-start{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;background:rgba(20,40,90,.35);}
+.st-card{background:#fffdf8;border-radius:32px;padding:24px 28px;max-width:560px;width:calc(100% - 32px);text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3);}
+.st-card h1{margin:4px 0 6px;font-size:32px;font-weight:400;}
+.st-card p{margin:0 0 14px;color:var(--ink-soft);font-size:17px;line-height:1.5;}
+.st-birds{display:flex;justify-content:center;gap:4px;margin:4px 0 10px;}
+.st-birds img{width:64px;height:54px;object-fit:contain;}
+.st-lv{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 16px;}
+.st-lv button{border:3px solid #e6d7bb;background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:16px;cursor:pointer;color:var(--ink);}
+.st-lv button.on{background:#ff9a2e;border-color:#ff9a2e;color:#fff;}
+.st-go{font-size:24px!important;padding:14px 40px!important;}
+.keys{font-size:14px;color:var(--ink-soft);margin-top:10px;}
+@media (max-width:640px){
+  .oks-ask-bubble{font-size:19px;min-height:52px;} .oks-ask-img{height:44px;}
+  .slots i{width:16px;height:16px;} .nest-count{min-width:44px;height:44px;font-size:20px;}
+  .st-card h1{font-size:26px;} .st-birds img{width:46px;height:40px;}
+}
+body.calm .sky .bird.flap{animation:none;}
+</style>
+</head>
+<body class="oks">
+<script src="../../core/oks-core.js"></script>
+<script src="../../core/oks-eco.js"></script>
+<script>
+(function () {
+  'use strict';
+  var O = window.OKS, E = O.el;
+  var IMG = 'img/';
+  var KINDS = [
+    { id: 'bluebird', name: '파랑새', josa: '를', w: 1 },
+    { id: 'sparrow', name: '참새', josa: '를', w: 1 },
+    { id: 'parrot', name: '앵무새', josa: '를', w: 1.1 },
+    { id: 'eagle', name: '독수리', josa: '를', w: 1.2 },
+    { id: 'owl', name: '올빼미', josa: '를', w: 1.1 },
+    { id: 'hummingbird', name: '벌새', josa: '를', w: .9 }
+  ];
+  /* 수준: 새 종류 수 · 한 번에 나는 새 · 잡을 마리 · 지나가는 시간(초) */
+  var LV = {
+    1: { kinds: 1, fly: 1, goal: 3, sec: 10 },
+    2: { kinds: 2, fly: 2, goal: 4, sec: 9 },
+    3: { kinds: 3, fly: 3, goal: 5, sec: 8 },
+    4: { kinds: 4, fly: 3, goal: 6, sec: 6.5 },
+    5: { kinds: 6, fly: 4, goal: 6, sec: 5.5 }
+  };
+  var LESSON = 'mini-birds';
+  var level = O.levelFor(LESSON);
+
+  var sh = O.shell({ compact: true, title: '새 잡기 놀이', back: O.ret(O.ROOT + 'index.html'), backLabel: '돌아가기', level: level });
+  document.body.classList.add('oks-play');
+  var sky = sh.board; sky.classList.add('sky');
+  if (O.eco) try { sh.menu.insertBefore(O.eco.hud(sh.menu), sh.levelBtn); } catch (e) {}
+
+  /* ---------- 장면 ---------- */
+  function img(src, cls) { var i = E('img', cls); i.src = IMG + src + '.webp'; i.alt = ''; i.draggable = false; sky.appendChild(i); return i; }
+  var girl = img('girl', 'girl'), nest = img('nest', 'nest'), net = img('net', 'net');
+  net.style.display = 'none';
+  var count = E('div', 'nest-count', '0'); sky.appendChild(count);
+  var slots = E('div', 'slots'); sky.appendChild(slots);
+
+  var W = 0, H = 0, U = 0, G = {}, NEST = {};
+  function layout() {
+    W = sky.clientWidth; H = sky.clientHeight; U = W < 700 ? W * 1.5 : Math.min(W, H * 1.7);
+    G.w = Math.round(U * .23); G.h = Math.round(G.w * 532 / 640);
+    G.x = W - G.w - Math.max(8, W * .02);
+    G.min = Math.round(H * .04); G.max = Math.round(H * .58 - G.h * .3);
+    if (G.y == null) G.y = Math.round(H * .3);
+    G.y = clamp(G.y, G.min, G.max);
+    girl.style.width = G.w + 'px';
+    NEST.w = Math.round(U * .24); NEST.h = Math.round(NEST.w * 329 / 520);
+    NEST.x = W - NEST.w - Math.max(8, W * .02); NEST.y = H - NEST.h - Math.max(6, H * .02);
+    nest.style.width = NEST.w + 'px'; nest.style.transform = 'translate(' + NEST.x + 'px,' + NEST.y + 'px)';
+    count.style.left = (NEST.x - 18) + 'px'; count.style.top = (NEST.y + NEST.h * .05) + 'px';
+    slots.style.left = NEST.x + 'px'; slots.style.width = NEST.w + 'px'; slots.style.top = (NEST.y + NEST.h + 2 - 30) + 'px';
+    net.style.width = Math.round(U * .1) + 'px';
+    homes.forEach(placeHome);
+  }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  addEventListener('resize', layout);
+
+  /* ---------- 상태 ---------- */
+  var cfg = LV[level], calm = O.settings().calm;
+  var kinds = [], birds = [], homes = [], want = null, got = 0, stats = null, playing = false, throwing = null, keys = {};
+  var spawnTimer = 0, last = 0, t0 = 0;
+
+  function birdW(k) { return Math.round(U * .13 * k.w); }
+  function spawn(kind) {
+    var w = birdW(kind), el = img(kind.id, 'bird flap');
+    el.style.width = w + 'px'; el.dataset.kind = kind.id;
+    var h = w * .8;
+    var b = { kind: kind, el: el, w: w, h: h, x: -w - Math.random() * W * .15, y0: H * .06 + Math.random() * (H * .58 - h), ph: Math.random() * 6, caught: false, away: 0,
+      vx: (W + w) / (cfg.sec * (calm ? 1.4 : 1) * (.85 + Math.random() * .3)) };
+    b.y = b.y0;
+    el.addEventListener('pointerdown', function (e) { e.stopPropagation(); e.preventDefault(); aimAt(b); });
+    birds.push(b);
+    return b;
+  }
+  /* 화면에 잡을 새가 늘 하나는 있게, 나머지는 섞어서 */
+  function fill() {
+    var flying = birds.filter(function (b) { return !b.caught && !b.away; });
+    if (!flying.some(function (b) { return b.kind === want; })) { spawn(want); return; }
+    if (flying.length < cfg.fly) {
+      var others = kinds.filter(function (k) { return k !== want; });
+      spawn(others.length && Math.random() < .6 ? O.pick(others)[0] : want);
+    }
+  }
+  function remove(b) { b.el.remove(); birds.splice(birds.indexOf(b), 1); }
+
+  /* ---------- 그물 던지기 ---------- */
+  function hand() { return { x: G.x + G.w * .1, y: G.y + G.h * .2 }; }
+  function aimAt(b) {
+    if (!playing || throwing || b.caught || b.away) return;
+    O.unlock(); O.hush();
+    G.ty = clamp(b.y + b.h / 2 - G.h * .2, G.min, G.max);
+    launch({ bird: b });
+  }
+  function aimPoint(x, y) {
+    if (!playing || throwing) return;
+    O.unlock(); O.hush();
+    G.ty = clamp(y - G.h * .2, G.min, G.max);
+    launch({ x: x, y: y });
+  }
+  function launch(t) {
+    var h = hand();
+    throwing = { x: h.x, y: h.y, t: t, spin: 0, back: false };
+    net.style.display = 'block'; O.sfx('pop');
+  }
+  function stepNet(dt) {
+    var n = throwing; if (!n) return;
+    var nw = net.offsetWidth || U * .1, speed = Math.max(900, W * 1.4);
+    if (n.back) {
+      var h = hand(), dx = h.x - n.x, dy = h.y - n.y, d = Math.hypot(dx, dy);
+      if (d < 30) { throwing = null; net.style.display = 'none'; return; }
+      n.x += dx / d * speed * 1.2 * dt; n.y += dy / d * speed * 1.2 * dt;
+    } else {
+      var tx, ty;
+      if (n.t.bird) { tx = n.t.bird.x + n.t.bird.w / 2; ty = n.t.bird.y + n.t.bird.h / 2; }
+      else { tx = n.t.x; ty = n.t.y; }
+      var ddx = tx - n.x, ddy = ty - n.y, dd = Math.hypot(ddx, ddy), step = speed * dt;
+      if (dd <= step) { n.x = tx; n.y = ty; } else { n.x += ddx / dd * step; n.y += ddy / dd * step; }
+      /* 지나가며 닿은 새 */
+      var hit = null;
+      birds.forEach(function (b) { if (!hit && !b.caught && !b.away && n.x > b.x + b.w * .15 && n.x < b.x + b.w * .85 && n.y > b.y && n.y < b.y + b.h) hit = b; });
+      if (hit) { n.back = true; catchBird(hit); }
+      else if (dd <= step) {
+        if (n.t.bird) { n.back = true; catchBird(n.t.bird); }
+        else if (n.t.x !== -1 && n.x > 0) { n.t = { x: -1, y: n.y }; n.t.x = -nw; } /* 빈 하늘: 왼쪽 끝까지 */
+        else n.back = true;
+      }
+    }
+    n.spin += dt * 9;
+    net.style.transform = 'translate(' + (n.x - nw / 2) + 'px,' + (n.y - nw / 2) + 'px) rotate(' + (-60 + Math.sin(n.spin) * 25) + 'deg)';
+  }
+
+  /* ---------- 잡았을 때 ---------- */
+  function catchBird(b) {
+    if (b.kind === want) {
+      b.caught = true; b.el.classList.remove('flap', 'oks-glow'); O.clearPrompt();
+      O.sfx('ok'); O.praise(); got++;
+      count.textContent = got; count.classList.remove('pop'); void count.offsetWidth; count.classList.add('pop');
+      slots.children[got - 1] && slots.children[got - 1].classList.add('got');
+      goHome(b);
+      if (got >= cfg.goal) { playing = false; setTimeout(done, 1300); }
+      else setTimeout(nextTarget, 900);
+    } else {
+      stats.mistakes++; O.sfx('no');
+      b.away = 1; b.el.classList.remove('oks-glow');
+      O.say('그건 ' + b.kind.name + '예요. ' + want.name + want.josa + ' 찾아봐요.');
+    }
+  }
+  function placeHome(h, i) {
+    /* 둥지 위에 한 줄에 3마리씩, 둘째 줄은 조금 위에 */
+    var w = Math.round(NEST.w * .3), n = homes.length, row = Math.floor(i / 3), inRow = Math.min(3, n - row * 3), k = i % 3;
+    var cx = NEST.x + NEST.w * (inRow === 1 ? .5 : .27 + .46 * k / (inRow - 1));
+    var x = cx - w / 2, y = NEST.y + NEST.h * .12 - w * .62 - row * w * .38;
+    h.el.style.width = w + 'px'; h.el.style.zIndex = 3 - row; h.el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+  }
+  function goHome(b) {
+    var el = b.el; birds.splice(birds.indexOf(b), 1);
+    el.classList.add('home'); el.style.pointerEvents = 'none';
+    var h = { el: el }; homes.push(h);
+    requestAnimationFrame(function () { homes.forEach(placeHome); });
+  }
+
+  /* ---------- 진행 ---------- */
+  function nextTarget() {
+    if (!playing) return;
+    var prev = want;
+    want = kinds.length > 1 && Math.random() < .7 ? O.pick(kinds.filter(function (k) { return k !== prev; }))[0] : (prev || kinds[0]);
+    sh.ask(want.name + want.josa + ' 잡아요!', { html: '<b>' + want.name + '</b>' + want.josa + ' 잡아요!', img: IMG + want.id + '.webp', speak: want.name + want.josa + ' 잡아요!' });
+    sh.setRounds(cfg.goal, got);
+    fill();
+    O.target({ get: function () { return birds.filter(function (b) { return b.kind === want && !b.caught && !b.away && b.x > -b.w * .3 && b.x < G.x - b.w; }).map(function (b) { return b.el; }); },
+      say: '반짝이는 ' + want.name + '를 눌러요' }, level);
+  }
+  function done() {
+    var st = stats;
+    var entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'science', topic: '새 잡기 놀이', level: level, engine: 'birds', mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: Math.round((Date.now() - st.t0) / 1000) };
+    O.finish({ stats: st, entry: entry, title: '새들이 모두 둥지에 왔어요!', text: '새 ' + got + '마리 · ' + O.LEVELS[level - 1].name, mission: { lesson: 1 },
+      buttons: [{ label: '🔁 한 번 더', color: 'green', onClick: function () { location.reload(); } }, { label: '🏠 돌아가기', href: O.ret(O.ROOT + 'index.html') }] });
+  }
+
+  function tick(t) {
+    var dt = Math.min(.05, (t - (last || t)) / 1000); last = t;
+    if (playing || throwing) {
+      /* 키보드로 위아래 */
+      if (keys.ArrowUp) G.ty = clamp((G.ty != null ? G.ty : G.y) - H * 1.1 * dt, G.min, G.max);
+      if (keys.ArrowDown) G.ty = clamp((G.ty != null ? G.ty : G.y) + H * 1.1 * dt, G.min, G.max);
+    }
+    if (G.ty != null) { G.y += (G.ty - G.y) * Math.min(1, dt * 10); }
+    var bob = calm ? 0 : Math.sin(t / 600) * 6;
+    girl.style.transform = 'translate(' + G.x + 'px,' + (G.y + bob) + 'px)';
+    birds.slice().forEach(function (b) {
+      if (b.caught) return;
+      var slow = b.el.classList.contains('oks-glow') ? .45 : 1;
+      if (b.away) { b.away += dt; b.x += b.vx * 1.6 * dt; b.y -= H * .9 * dt; b.el.style.opacity = Math.max(0, 1 - b.away); if (b.away > 1.1) remove(b); }
+      else {
+        b.x += b.vx * slow * dt; b.ph += dt * 2.2;
+        b.y = b.y0 + (calm ? 0 : Math.sin(b.ph) * H * .03);
+        if (b.x > G.x - b.w * .6) b.away = .01; /* 끝까지 가면 하늘 위로 날아가요 */
+      }
+      b.el.style.transform = 'translate(' + b.x + 'px,' + b.y + 'px)';
+    });
+    stepNet(dt);
+    if (playing) { spawnTimer -= dt; if (spawnTimer <= 0) { fill(); spawnTimer = .9 + Math.random() * 1.2; } }
+    requestAnimationFrame(tick);
+  }
+
+  sky.addEventListener('pointerdown', function (e) {
+    if (e.target.classList.contains('bird')) return;
+    var r = sky.getBoundingClientRect(); aimPoint(e.clientX - r.left, e.clientY - r.top);
+  });
+  addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { keys[e.key] = true; e.preventDefault(); }
+    if (e.key === ' ' && playing) { e.preventDefault(); var h = hand(); aimPoint(h.x - 10, h.y); if (throwing) throwing.t = { x: -1, y: h.y }; }
+  });
+  addEventListener('keyup', function (e) { keys[e.key] = false; });
+
+  /* ---------- 시작 화면 ---------- */
+  function startScreen() {
+    sh.askEl.style.visibility = 'hidden';
+    var ov = E('div', 'oks-start');
+    var lvBtns = O.LEVELS.map(function (L) { return '<button type="button" data-lv="' + L.n + '" class="' + (L.n === level ? 'on' : '') + '" title="' + O.esc(L.desc) + '">' + L.short + '</button>'; }).join('');
+    ov.innerHTML = '<div class="st-card"><div class="st-birds">' + KINDS.map(function (k) { return '<img src="' + IMG + k.id + '.webp" alt="' + k.name + '">'; }).join('') + '</div>' +
+      '<h1>🐦 새 잡기 놀이</h1><p>이름을 잘 듣고, 그 새를 <b>톡</b> 눌러요.<br>그물로 잡아서 둥지에 데려다줘요!</p>' +
+      '<div class="st-lv">' + lvBtns + '</div><button type="button" class="oks-btn green st-go">시작! ▶</button>' +
+      '<div class="keys">키보드: ↑ ↓ 로 움직이고 스페이스로 그물 던지기</div></div>';
+    document.body.appendChild(ov);
+    ov.querySelectorAll('.st-lv button').forEach(function (b) {
+      b.onclick = function () { level = +b.dataset.lv; ov.querySelectorAll('.st-lv button').forEach(function (x) { x.classList.toggle('on', x === b); }); };
+    });
+    ov.querySelector('.st-go').onclick = function () { O.unlock(); ov.remove(); begin(); };
+  }
+  function begin() {
+    sh.askEl.style.visibility = '';
+    cfg = LV[level]; O.rememberLevel(LESSON, level); sh.setLevel(level);
+    kinds = level === 1 ? O.pick(KINDS.slice(0, 3), 1) : O.pick(KINDS, cfg.kinds);
+    stats = O.newStats(); got = 0; count.textContent = '0';
+    slots.innerHTML = ''; for (var i = 0; i < cfg.goal; i++) slots.appendChild(E('i'));
+    playing = true; t0 = Date.now();
+    nextTarget();
+  }
+  sh.levelBtn.onclick = function () { location.reload(); };
+
+  layout();
+  requestAnimationFrame(tick);
+  startScreen();
+  window.BIRDS = { get want() { return want && want.id; }, get got() { return got; }, birds: function () { return birds; } };
+})();
+</script>
+</body>
+</html>
