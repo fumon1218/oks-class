@@ -57,7 +57,9 @@
       var sl = E('span', 'sc-slot' + (i === rounds - 1 ? ' last' : ''), i === rounds - 1 ? '🎁' : '');
       track.appendChild(sl); slots.push(sl);
     }
-    sh.app.insertBefore(strip, sh.board);
+    sh.app.insertBefore(strip, sh.boardWrap || sh.board);
+    /* 안내 말풍선을 장면 띠 안으로: 안내자(별지기) 한 명 + 문제 + 진행 칸을 한곳에 */
+    if (sh.askEl) { var main = E('div', 'sc-main'); main.appendChild(sh.askEl); main.appendChild(strip.querySelector('.sc-track')); strip.appendChild(main); strip.classList.add('has-ask'); }
     sh.board.style.setProperty('--scene', 'url(' + O.ROOT + bg + ')');
     var combo = 0, maxCombo = 0, goodN = 0;
     var guide = strip.querySelector('.sc-guide'), comboEl = strip.querySelector('.sc-combo');

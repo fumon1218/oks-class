@@ -76,6 +76,7 @@
             p.onclick = function () {
               if (p._done) return; p._done = true; n++; O.clearPrompt(); O.sfx('pop');
               p.querySelector('.plant').classList.add('picked');
+              var tg = p.querySelector('.tag'); if (tg) { tg.textContent = '✓ 땄어요'; tg.classList.add('done'); }
               ctx.fly(p.querySelector('.plant'), bk, img(ctx, crop.one)).then(function () {
                 bkAdd(bk, E('span', 'in-fruit', img(ctx, crop.one)));
                 O.say(crop.label + ' ' + NUMW[n], { noRepeat: true });

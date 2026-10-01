@@ -216,17 +216,32 @@
     function exShow() { var on = settings().explain; exBtn.innerHTML = on ? '🗣️ <span>설명 켬</span>' : '🔇 <span>설명 끔</span>'; exBtn.setAttribute('aria-pressed', on); exBtn.title = on ? '문제 설명을 읽어 줘요 (누르면 꺼져요)' : '문제 설명을 읽지 않아요 (누르면 켜져요)'; exBtn.classList.toggle('off', !on); }
     exShow();
     exBtn.onclick = function () { var on = !settings().explain; saveSetting('explain', on); if (!on) hush(); exShow(); toast(on ? '설명을 읽어 줄게요' : '설명을 읽지 않아요. 🔊를 누르면 들을 수 있어요', 1800); };
-    top.appendChild(back); top.appendChild(title); top.appendChild(lvl); top.appendChild(dots); top.appendChild(exBtn); top.appendChild(speak); top.appendChild(helpBtn);
+    var menu = null, moreBtn = null;
+    if (o.compact) {
+      /* 학생 화면은 단순하게: 돌아가기 · 제목 · 설명 · 다시 듣기 · 도와줘 · ⋯(코인·수준·진행은 안으로) */
+      moreBtn = el('button', 'oks-round oks-more', '⋯'); moreBtn.type = 'button'; moreBtn.title = '코인·레벨·수준 바꾸기'; moreBtn.setAttribute('aria-expanded', 'false');
+      menu = el('div', 'oks-menu'); menu.hidden = true;
+      menu.appendChild(lvl); menu.appendChild(dots);
+      moreBtn.onclick = function (e) { e.stopPropagation(); menu.hidden = !menu.hidden; moreBtn.setAttribute('aria-expanded', String(!menu.hidden)); };
+      document.addEventListener('click', function (e) { if (!menu.hidden && !menu.contains(e.target) && e.target !== moreBtn) { menu.hidden = true; moreBtn.setAttribute('aria-expanded', 'false'); } });
+      top.classList.add('compact');
+      top.appendChild(back); top.appendChild(title); top.appendChild(exBtn); top.appendChild(speak); top.appendChild(helpBtn); top.appendChild(moreBtn); top.appendChild(menu);
+    } else {
+      top.appendChild(back); top.appendChild(title); top.appendChild(lvl); top.appendChild(dots); top.appendChild(exBtn); top.appendChild(speak); top.appendChild(helpBtn);
+    }
     var ask = el('div', 'oks-ask', '<img class="oks-mascot" src="' + mascot('idle') + '" alt=""><div class="oks-ask-bubble"><span class="oks-ask-text"></span></div>');
     var board = el('div', 'oks-board');
-    app.appendChild(top); app.appendChild(ask); app.appendChild(board);
+    var wrap = null;
+    app.appendChild(top); app.appendChild(ask);
+    if (o.fit) { wrap = el('div', 'oks-fit'); wrap.appendChild(board); app.appendChild(wrap); fitBoard(wrap, board); }
+    else app.appendChild(board);
     document.body.appendChild(app);
     speak.onclick = function () { actx(); repeat(); };
     board.addEventListener('pointerdown', function () { if (askTalking) { askTalking = false; hush(); } }, true);
     helpBtn.onclick = function () { actx(); help(); };
     ask.querySelector('.oks-ask-bubble').onclick = function () { repeat(); };
     var ref = {
-      app: app, board: board, top: top, levelBtn: lvl,
+      app: app, board: board, boardWrap: wrap || board, askEl: ask, top: top, levelBtn: lvl, menu: menu || top,
       setLevel: function (n) { lvl.textContent = '수준 ' + LEVELS[n - 1].short; lvl.title = LEVELS[n - 1].desc; },
       setRounds: function (n, cur) {
         dots.innerHTML = ''; for (var i = 0; i < n; i++) dots.appendChild(el('span', 'oks-dot' + (i < cur ? ' done' : i === cur ? ' now' : '')));
@@ -254,6 +269,28 @@
     if (o.rounds) ref.setRounds(o.rounds, 0);
     shellRef = ref;
     return ref;
+  }
+  /* 게임판을 화면에 맞게 크게: 넓은 화면에서는 남는 높이·너비만큼 키우고(최대 1.6배), 좁은 화면(760px 미만)은 그대로 */
+  function fitBoard(wrap, board) {
+    var W0 = 980, raf = 0;
+    function fit() {
+      raf = 0;
+      if (!wrap.isConnected) return;
+      if (innerWidth < 760) { board.style.width = ''; board.style.transform = ''; wrap.style.height = ''; return; }
+      var availW = wrap.clientWidth, top = wrap.getBoundingClientRect().top + scrollY;
+      var availH = Math.max(300, innerHeight - top - 14);
+      board.style.width = W0 + 'px';
+      var natH = board.offsetHeight;
+      var s = Math.min(availW / W0, availH / natH, 1.6);
+      s = Math.max(s, Math.min(1, availW / W0));          /* 높이가 모자라면 아래로 넘치게 두되, 너비는 꼭 맞추기 */
+      board.style.transform = 'scale(' + s.toFixed(3) + ')';
+      wrap.style.height = Math.ceil(natH * s) + 'px';
+    }
+    function later() { if (!raf) raf = requestAnimationFrame(fit); }
+    addEventListener('resize', later);
+    try { new MutationObserver(later).observe(board, { childList: true, subtree: true }); } catch (e) {}
+    try { new ResizeObserver(later).observe(board); } catch (e) {}
+    setTimeout(later, 0); setTimeout(later, 400);
   }
   function toast(text, ms) {
     var t = el('div', 'oks-toast', esc(text)); document.body.appendChild(t);

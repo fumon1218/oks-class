@@ -23,10 +23,11 @@
     title: lesson.subjectName + ' ' + lesson.no + ' · ' + lesson.topic,
     subtitle: '〈' + lesson.space + '〉 ' + lesson.goal,
     back: O.ret('../learn/?subject=' + lesson.subject + '&school=' + lesson.school + '#' + id), backLabel: O.fromSpace() ? '건물로' : '배움 지도',
-    level: level
+    level: level, compact: true, fit: true
   });
+  document.body.classList.add('oks-play');
   document.title = lesson.topic + ' · 옥쌤의 즐거운 교실';
-  if (O.eco) { var ehud = O.eco.hud(sh.top); sh.top.insertBefore(ehud, sh.levelBtn); }
+  if (O.eco) { var ehud = O.eco.hud(sh.menu); sh.menu.insertBefore(ehud, sh.levelBtn); }
 
   /* 수준 바꾸기 (선생님용) */
   sh.levelBtn.onclick = function () {

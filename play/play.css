@@ -310,3 +310,46 @@
 .basket.full .bk-slots i{border-color:#2fb16a;background:#dff5e7;box-shadow:0 0 0 3px rgba(47,177,106,.25);}
 .basket.over .bk-count{background:#e5534b;}
 body.calm .basket-in > .drop,body.calm .bk-count.pop,body.calm .bk-slots i.got{animation:none;}
+
+/* ===== 차시 화면 정리 (학생용) ===== */
+/* 배경은 흐리고 차분하게 → 문제가 먼저 보이게 */
+body.oks-play::before{background:rgba(255,250,240,.62);-webkit-backdrop-filter:blur(6px) saturate(.8);backdrop-filter:blur(6px) saturate(.8);}
+body.oks-play.calm::before{background:rgba(255,250,240,.82);}
+/* 넓은 화면은 넓게 쓰기 */
+body.oks-play .oks-app{max-width:min(1560px,100%);}
+.oks-fit{position:relative;width:100%;}
+.oks-fit > .oks-board{margin:0 auto;transform-origin:top center;}
+/* 위쪽 줄: 단순하게 */
+.oks-top.compact{flex-wrap:nowrap;position:relative;}
+.oks-top.compact .oks-title{flex:1;min-width:0;}
+.oks-top.compact .oks-title b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.oks-top.compact .oks-title span{display:none;}
+.oks-more{font-size:28px;font-weight:800;color:var(--ink);line-height:1;}
+.oks-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:14px;border-radius:22px;background:#fffdf7;box-shadow:0 14px 34px rgba(60,40,20,.28);min-width:240px;}
+.oks-menu .eco-hud{justify-content:center;flex-wrap:wrap;}
+.oks-menu .oks-level{justify-content:center;}
+.oks-menu .oks-dots{justify-content:center;box-shadow:none;}
+@media (max-width:640px){ .oks-top.compact .oks-help{padding:0 12px;} .oks-top.compact .oks-pill > span{display:none;} }
+/* 장면 띠 + 안내 말풍선 + 진행 칸을 한곳에 */
+.scene-strip.has-ask{height:auto;min-height:150px;overflow:visible;background-color:#fffaf0;}
+.scene-strip.has-ask::after{background:linear-gradient(90deg,rgba(255,252,244,.35),rgba(255,252,244,.82) 30%,rgba(255,252,244,.82));border-radius:24px;}
+.scene-strip.has-ask .sc-guide{height:138px;bottom:6px;}
+.scene-strip.has-ask .sc-title{left:auto;right:14px;top:-12px;font-size:14px;box-shadow:0 2px 8px rgba(0,0,0,.12);}
+.sc-main{position:relative;z-index:2;margin-left:150px;padding:14px 16px 14px 0;display:flex;flex-direction:column;gap:12px;}
+.sc-main .oks-ask{margin:0;}
+.sc-main .oks-ask .oks-mascot{display:none;}
+.sc-main .oks-ask-bubble{font-size:26px;background:#fff;box-shadow:0 4px 14px rgba(80,55,30,.15);}
+.sc-main .sc-track{position:static;justify-content:flex-start;gap:12px;}
+.sc-main .sc-slot{width:58px;height:58px;}
+.sc-main .sc-slot.now{transform:scale(1.15);}
+@media (max-width:640px){
+  .scene-strip.has-ask{min-height:110px;} .scene-strip.has-ask .sc-guide{height:92px;}
+  .sc-main{margin-left:90px;padding:10px 10px 10px 0;gap:8px;} .sc-main .oks-ask-bubble{font-size:19px;padding:10px 12px;}
+  .sc-main .sc-slot{width:38px;height:38px;}
+}
+/* 딴 작물 밭 이름표 */
+.planter .tag.done{background:#e6f7f5;color:#2f8f88;}
+.oks-menu[hidden]{display:none!important;}
+.oks-top.compact .oks-title{flex:0 1 680px;margin:0 auto;}
+@media (max-width:560px){ .oks-top.compact .oks-title{display:none;} .oks-top.compact{justify-content:space-between;} }
+.oks-top.compact > *:not(.oks-title):not(.oks-menu){flex-shrink:0;white-space:nowrap;}
