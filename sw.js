@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v76';
+const CACHE_NAME = 'oks-class-v77';
 const ASSETS = [
   './',
   './index.html',
@@ -492,9 +492,12 @@ const ASSETS = [
   './games/tycoon/img/h_pumpkin.webp',
   './games/tycoon/img/h_watermelon.webp',
   './games/tycoon/img/seed_carrot.webp',
+  './games/tycoon/img/seed_corn.webp',
   './games/tycoon/img/seed_lettuce.webp',
+  './games/tycoon/img/seed_pumpkin.webp',
   './games/tycoon/img/seed_strawberry.webp',
   './games/tycoon/img/seed_tomato.webp',
+  './games/tycoon/img/seed_watermelon.webp',
   './games/tycoon/img/truck.webp',
   './art/jj/animals/baby_monkey.webp',
   './art/jj/animals/bear.webp',
