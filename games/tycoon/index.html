@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8bc34a">
+<title>쑥쑥 햇살 농장 · 옥쌤의 즐거운 교실</title>
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../icons/icon-192.png">
+<link rel="stylesheet" href="../../core/oks-core.css">
+<style>
+/* 쑥쑥 햇살 농장 (타이쿤): 씨앗 심기 → 물 주기 → 수확 → 주문만큼 포장 → 배달 → 코인으로 농장 꾸미기
+   기다리는 시간 없이, 물을 줄 때마다 한 단계씩 자라요. 진행은 기기에 저장돼요. */
+body.oks{background:#f3e6c8 url('../farm/assets/greenhouse.webp') center/cover no-repeat fixed;overflow:hidden;}
+body.oks::before{background:rgba(255,250,235,.15);}
+.app{position:fixed;inset:0;display:flex;flex-direction:column;padding:10px 12px;box-sizing:border-box;gap:8px;}
+.top{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;}
+.sign{background:linear-gradient(#b9773d,#94582a);color:#fff8e6;border-radius:18px;padding:6px 18px;font-size:24px;box-shadow:0 4px 0 #6d3f1b,0 6px 14px rgba(0,0,0,.25);white-space:nowrap;text-shadow:0 2px 0 rgba(0,0,0,.3);}
+.lvbar{flex:1;min-width:120px;max-width:420px;display:flex;align-items:center;gap:8px;background:rgba(255,253,245,.95);border-radius:999px;padding:4px 12px 4px 4px;box-shadow:0 3px 10px rgba(0,0,0,.15);}
+.lvbar .lv{background:#ffb300;color:#fff;border-radius:999px;min-width:44px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.lvbar .bar{flex:1;height:14px;border-radius:99px;background:#eadfc6;overflow:hidden;}
+.lvbar .bar i{display:block;height:100%;background:linear-gradient(90deg,#7cd36b,#3fae4f);border-radius:99px;transition:width .5s;}
+.lvbar small{font-size:13px;color:var(--ink-soft);white-space:nowrap;}
+.pill{display:flex;align-items:center;gap:6px;background:rgba(60,35,15,.82);color:#fff;border-radius:999px;padding:4px 14px 4px 4px;font-size:20px;white-space:nowrap;}
+.pill img{width:34px;height:34px;}
+.pill.pop{animation:pop .5s ease;}
+@keyframes pop{50%{transform:scale(1.25)}}
+.tb{border:none;border-radius:999px;background:rgba(255,253,245,.96);font:inherit;font-size:16px;padding:8px 14px;cursor:pointer;box-shadow:0 3px 10px rgba(0,0,0,.15);color:var(--ink);white-space:nowrap;text-decoration:none;display:flex;align-items:center;gap:4px;}
+.tb.on{background:#fff1c9;box-shadow:0 0 0 3px #ffb300;}
+.main{flex:1;min-height:0;display:grid;grid-template-columns:1.15fr 1fr;gap:12px;}
+.farm{position:relative;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(2,1fr);gap:8px;align-content:center;padding:6px;}
+.plot{position:relative;display:flex;align-items:flex-end;justify-content:center;cursor:pointer;min-height:0;}
+.plot .box{position:absolute;left:4%;right:4%;bottom:12%;width:92%;filter:drop-shadow(0 6px 6px rgba(80,50,20,.25));pointer-events:none;}
+.plot .plant{position:absolute;left:50%;bottom:30%;transform:translateX(-50%);width:62%;pointer-events:none;transition:transform .35s cubic-bezier(.3,1.6,.5,1);filter:drop-shadow(0 4px 4px rgba(0,0,0,.18));}
+.plot .plant.grow{animation:grow .5s ease;}
+@keyframes grow{0%{transform:translateX(-50%) scale(.5)}70%{transform:translateX(-50%) scale(1.15)}100%{transform:translateX(-50%) scale(1)}}
+.plot .seed{position:absolute;left:50%;bottom:36%;width:16px;height:12px;margin-left:-8px;border-radius:50%;background:#8a5a2b;box-shadow:0 0 0 3px rgba(255,236,170,.8);}
+.plot .full{position:absolute;left:2%;right:2%;bottom:8%;width:96%;pointer-events:none;filter:drop-shadow(0 6px 6px rgba(80,50,20,.25));}
+.plot .tag{position:absolute;left:50%;bottom:2%;transform:translateX(-50%);background:#fff4dc;border:2px solid #d9b98a;border-radius:12px;padding:1px 10px;font-size:14px;white-space:nowrap;z-index:2;text-align:center;line-height:1.25;}
+.plot .gbar{display:block;width:70px;height:7px;border-radius:9px;background:#e6d6b6;overflow:hidden;margin:2px auto 1px;}
+.plot .gbar i{display:block;height:100%;background:#4caf50;}
+.plot .lock{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);font-size:34px;z-index:2;}
+.plot.locked .box{filter:grayscale(.6) opacity(.7);}
+.plot .bubble{position:absolute;left:50%;top:4%;transform:translateX(-50%);z-index:3;background:#fff;border-radius:14px;padding:2px 8px;font-size:22px;box-shadow:0 3px 8px rgba(0,0,0,.18);animation:bob 1.2s ease-in-out infinite;}
+@keyframes bob{50%{transform:translate(-50%,-5px)}}
+.plot.oks-glow{animation:pglow 1s ease-in-out infinite;box-shadow:none;}
+@keyframes pglow{50%{filter:drop-shadow(0 0 14px #ffe066) drop-shadow(0 0 22px #ffb300);}}
+.drop{position:absolute;font-size:26px;pointer-events:none;z-index:5;animation:drop .7s ease-in forwards;}
+@keyframes drop{from{transform:translateY(-30px);opacity:1}to{transform:translateY(30px);opacity:0}}
+.side{display:grid;grid-template-rows:1fr auto;gap:12px;min-height:0;}
+.custs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:end;min-height:0;padding-top:6px;}
+.cust{position:relative;display:flex;flex-direction:column;align-items:center;cursor:pointer;}
+.cust .ord{background:#fffdf6;border-radius:16px;padding:6px 8px;box-shadow:0 4px 10px rgba(0,0,0,.15);display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px;font-size:18px;min-height:52px;position:relative;width:100%;box-sizing:border-box;}
+.cust .ord::after{content:'';position:absolute;left:50%;bottom:-10px;margin-left:-10px;border:10px solid transparent;border-top-color:#fffdf6;border-bottom:0;}
+.cust .ord img{height:34px;}
+.cust .ord .pay{flex-basis:100%;text-align:center;font-size:15px;color:#9a6a1e;}
+.cust .who{height:clamp(70px,18vh,150px);margin-top:12px;filter:drop-shadow(0 6px 6px rgba(0,0,0,.2));}
+.cust.ready .ord{box-shadow:0 0 0 4px #4caf50,0 4px 10px rgba(0,0,0,.15);}
+.cust .boxok{position:absolute;right:-4px;bottom:6px;width:46px;}
+.cust.oks-glow{animation:pglow 1s ease-in-out infinite;box-shadow:none;}
+.cust.leave{animation:leave .7s ease forwards;}
+@keyframes leave{to{transform:translateX(60px);opacity:0}}
+.basket{position:relative;height:clamp(96px,17vh,140px);background:rgba(255,250,236,.88);border-radius:22px;box-shadow:0 4px 12px rgba(0,0,0,.12);display:flex;align-items:center;gap:10px;padding:8px 12px;}
+.basket > img{height:86%;}
+.basket .stock{display:flex;flex-wrap:wrap;gap:6px;align-content:center;flex:1;}
+.basket .stock span{display:flex;align-items:center;gap:2px;background:#fff;border-radius:12px;padding:2px 8px;font-size:20px;box-shadow:0 2px 6px rgba(0,0,0,.1);}
+.basket .stock img{height:36px;}
+.basket h4{position:absolute;left:14px;top:-12px;margin:0;background:#94582a;color:#fff;border-radius:999px;padding:1px 12px;font-weight:400;font-size:14px;}
+.tools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;}
+.tool{border:none;border-radius:20px;font:inherit;font-size:19px;color:#fff;padding:8px 14px;display:flex;align-items:center;gap:6px;cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.2),0 8px 14px rgba(0,0,0,.18);min-height:58px;}
+.tool img{height:38px;}
+.tool b{font-weight:400;background:rgba(255,255,255,.3);border-radius:50%;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;font-size:16px;}
+.tool.t1{background:#ff9f2e;} .tool.t2{background:#3d8fe8;} .tool.t3{background:#3fb05a;} .tool.t4{background:#9b6bff;} .tool.t5{background:#ff5d8f;}
+.tool.sel{transform:translateY(3px);box-shadow:0 0 0 4px #fff,0 0 0 8px #ffb300;}
+.tool.oks-glow{animation:pglow 1s ease-in-out infinite;}
+.deco{position:absolute;pointer-events:none;z-index:3;filter:drop-shadow(0 4px 4px rgba(0,0,0,.2));}
+.ov{position:fixed;inset:0;z-index:70;background:rgba(40,25,10,.45);display:flex;align-items:center;justify-content:center;}
+.card{background:#fffdf6;border-radius:28px;padding:18px 20px;max-width:640px;width:calc(100% - 28px);box-shadow:0 20px 50px rgba(0,0,0,.35);text-align:center;max-height:92vh;overflow:auto;}
+.card h3{margin:0 0 10px;font-weight:400;font-size:26px;}
+.card .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.pick{border:3px solid #eadcc0;border-radius:20px;background:#fff;padding:8px;cursor:pointer;font:inherit;font-size:17px;display:flex;flex-direction:column;align-items:center;gap:4px;width:118px;color:var(--ink);}
+.pick img{height:90px;}
+.pick[disabled]{opacity:.45;cursor:default;}
+.pick.oks-glow{animation:pglow 1s ease-in-out infinite;}
+.pack{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;margin:6px 0 10px;}
+.pack .boxw{position:relative;width:180px;}
+.pack .boxw > img{width:100%;}
+.pack .inbox{position:absolute;left:10%;right:10%;top:6%;display:flex;flex-wrap:wrap;justify-content:center;gap:2px;}
+.pack .inbox img{height:40px;animation:pop .35s ease;}
+.need{display:flex;flex-direction:column;gap:6px;align-items:flex-start;}
+.need div{display:flex;align-items:center;gap:6px;font-size:20px;}
+.need div img{height:40px;}
+.need .slots i{display:inline-block;width:22px;height:22px;border-radius:50%;border:3px solid #d9b98a;background:#fff8e6;margin-right:3px;}
+.need .slots i.on{background:#4caf50;border-color:#2f8a3c;}
+.cnt-coins{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin:8px 0;}
+.cnt-coins img{width:44px;animation:pop .4s ease both;}
+.shopg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.shopg .pick{width:auto;}
+.shopg .pick small{color:#9a6a1e;}
+.btn{border:none;border-radius:999px;font:inherit;font-size:20px;padding:10px 26px;cursor:pointer;color:#fff;background:#3fb05a;box-shadow:0 4px 0 #2b8040;margin:6px;}
+.btn.gray{background:#b9a98e;box-shadow:0 4px 0 #8c7c62;}
+.truck{position:fixed;z-index:80;width:220px;pointer-events:none;}
+.say{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:60;background:rgba(255,253,246,.97);border-radius:20px;padding:8px 18px;font-size:20px;box-shadow:0 6px 18px rgba(0,0,0,.2);max-width:90%;text-align:center;pointer-events:none;transition:opacity .3s;}
+@media (max-width:900px){
+  .main{grid-template-columns:1fr;grid-template-rows:auto auto;overflow:auto;}
+  body.oks{overflow:auto;} .app{position:relative;inset:auto;min-height:100dvh;} .top{flex-wrap:wrap;}
+  .main{display:flex;flex-direction:column;overflow:visible;} .farm{height:44vh;flex:none;} .side{display:flex;flex-direction:column;} .cust .who{height:76px;} .basket{height:100px;}
+  .tools{position:sticky;bottom:0;padding:6px 0;background:rgba(255,248,230,.85);border-radius:18px;} .say{bottom:150px;}
+  .tool{font-size:15px;padding:6px 10px;min-height:50px;} .tool img{height:30px;}
+  .sign{font-size:18px;padding:4px 12px;} .lvbar small{display:none;} .pill{font-size:16px;} .pill img{width:26px;height:26px;}
+  .tb span{display:none;}
+}
+body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
+</style>
+</head>
+<body class="oks">
+<script src="../../core/oks-core.js"></script>
+<script src="../../core/oks-eco.js"></script>
+<script>
+(function () {
+  'use strict';
+  var O = window.OKS, E = O.el, FA = '../farm/assets/', JJ = '../../art/jj/', M = 'img/';
+  function josa(w, a, b) { var c = w.charCodeAt(w.length - 1) - 0xAC00; return (c >= 0 && c % 28) ? a : b; }
+  var CNT = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
+
+  /* ---------- 작물 ---------- */
+  var CROPS = {
+    strawberry: { ko: '딸기', grown: FA + 'strawberry_plant.webp', item: FA + 'harvest_strawberry.webp', seed: M + 'seed_strawberry.webp', price: 3, yield: 2, lv: 1 },
+    tomato: { ko: '토마토', grown: FA + 'tomato_plant.webp', item: FA + 'harvest_tomato.webp', seed: M + 'seed_tomato.webp', price: 3, yield: 2, lv: 1 },
+    carrot: { ko: '당근', grown: JJ + 'farm/ripe_carrot.webp', item: FA + 'harvest_carrot.webp', seed: M + 'seed_carrot.webp', price: 4, yield: 2, lv: 1 },
+    lettuce: { ko: '상추', grown: FA + 'lettuce_plant.webp', item: FA + 'harvest_lettuce.webp', seed: M + 'seed_lettuce.webp', price: 4, yield: 2, lv: 1 },
+    pumpkin: { ko: '호박', full: M + 'g_pumpkin.webp', item: M + 'h_pumpkin.webp', seed: JJ + 'farm/seed_bag.webp', price: 6, yield: 1, lv: 2 },
+    corn: { ko: '옥수수', full: M + 'g_corn.webp', item: M + 'h_corn.webp', seed: JJ + 'farm/seed_bag.webp', price: 5, yield: 2, lv: 3 },
+    watermelon: { ko: '수박', full: M + 'g_watermelon.webp', item: M + 'h_watermelon.webp', seed: JJ + 'farm/seed_bag.webp', price: 8, yield: 1, lv: 4 }
+  };
+  var STAGE_IMG = [null, FA + 'sprout.webp', FA + 'young_plant.webp'];
+  var GUESTS = [FA + 'cat.webp', FA + 'panda.webp', FA + 'monkey.webp', JJ + 'animals/bear.webp', JJ + 'animals/dog.webp', JJ + 'animals/fox.webp', JJ + 'animals/koala.webp', JJ + 'animals/penguin.webp', JJ + 'animals/elephant.webp', JJ + 'animals/tiger.webp'];
+  var DECOS = [   /* pos: [왼쪽%, 위%, 너비%] — 밭 사이 빈 곳에 */
+    { id: 'flower', ko: '꽃 화분', price: 15, pos: [-1, 40, 7] }, { id: 'fence', ko: '울타리', price: 20, pos: [-2, 84, 8] },
+    { id: 'sign', ko: '표지판', price: 25, pos: [93, 42, 7] }, { id: 'bench', ko: '벤치', price: 30, pos: [92, 86, 8] },
+    { id: 'scarecrow', ko: '허수아비', price: 40, pos: [31, 34, 6] }, { id: 'windmill', ko: '풍차', price: 60, pos: [88, -2, 10] }
+  ];
+  var PLOT_LV = [1, 1, 1, 1, 2, 3];   /* 밭이 열리는 레벨 */
+
+  /* ---------- 저장 ---------- */
+  var KEY = 'oks_farm_tycoon_v1';
+  var S = O.jget(KEY, null) || { coins: 10, stars: 0, xp: 0, lv: 1, plots: [{}, {}, {}, {}, {}, {}], barn: {}, orders: [], deco: {}, help: true, delivered: 0 };
+  function save() { O.jset(KEY, S); }
+  function need(lv) { return 20 + lv * 20; }
+  function cropsOpen() { return Object.keys(CROPS).filter(function (k) { return CROPS[k].lv <= S.lv; }); }
+
+  /* ---------- 화면 ---------- */
+  O.applyBody();
+  var app = E('div', 'app'); document.body.appendChild(app);
+  var back = O.ret(O.ROOT + 'index.html');
+  app.innerHTML =
+    '<div class="top"><a class="tb" href="' + back + '">⬅<span> 돌아가기</span></a><div class="sign">🌱 쑥쑥 햇살 농장</div>' +
+    '<div class="lvbar"><div class="lv">Lv.1</div><div class="bar"><i></i></div><small></small></div>' +
+    '<div class="pill coins"><img src="' + FA + 'coin.webp" alt=""><span>0</span></div><div class="pill stars"><img src="' + FA + 'star_gold.webp" alt=""><span>0</span></div>' +
+    '<button class="tb help" type="button">🐰<span> 도움 모드</span></button><button class="tb snd" type="button">🔊</button></div>' +
+    '<div class="main"><div class="farm"></div><div class="side"><div class="custs"></div><div class="basket"><h4>수확한 작물</h4><img src="' + FA + 'basket.webp" alt=""><div class="stock"></div></div></div></div>' +
+    '<div class="tools">' +
+    '<button class="tool t1" data-t="seed" type="button"><b>1</b><img src="' + M + 'seed_strawberry.webp" alt="">씨앗 심기</button>' +
+    '<button class="tool t2" data-t="water" type="button"><b>2</b><img src="' + JJ + 'farm/can.webp" alt="">물 주기</button>' +
+    '<button class="tool t3" data-t="harvest" type="button"><b>3</b><img src="' + FA + 'sprout_pot.webp" alt="">수확하기</button>' +
+    '<button class="tool t4" data-t="pack" type="button"><b>4</b><img src="' + FA + 'parcel.webp" alt="">포장하기</button>' +
+    '<button class="tool t5" data-t="deliver" type="button"><b>5</b><img src="' + M + 'truck.webp" alt="">배달하기</button>' +
+    '<button class="tb deco-btn" type="button" style="border-radius:20px;min-height:58px">🏡 농장 꾸미기</button>' +
+    '<a class="tb" href="../../play/?id=02-01-01-01" style="border-radius:20px;min-height:58px">📚 농장 차시 연습</a></div>';
+  var farm = app.querySelector('.farm'), custs = app.querySelector('.custs'), stock = app.querySelector('.stock');
+  var sayEl = E('div', 'say'); sayEl.style.opacity = 0; document.body.appendChild(sayEl);
+  var tool = null;
+  function talk(t, speak) { sayEl.textContent = t; sayEl.style.opacity = 1; clearTimeout(talk.tm); talk.tm = setTimeout(function () { sayEl.style.opacity = 0; }, 3200); O.say(speak || t); }
+
+  /* ---------- 그리기 ---------- */
+  function drawTop() {
+    app.querySelector('.coins span').textContent = S.coins; app.querySelector('.stars span').textContent = S.stars;
+    app.querySelector('.lv').textContent = 'Lv.' + S.lv;
+    app.querySelector('.bar i').style.width = Math.min(100, S.xp / need(S.lv) * 100) + '%';
+    app.querySelector('.lvbar small').textContent = '다음 레벨까지 배달 ' + Math.ceil((need(S.lv) - S.xp) / 10) + '번';
+    app.querySelector('.help').classList.toggle('on', S.help);
+  }
+  function drawPlots() {
+    farm.innerHTML = '';
+    DECOS.forEach(function (d) { if (S.deco[d.id]) { var i = E('img', 'deco'); i.src = M + 'd_' + d.id + '.webp'; i.style.left = d.pos[0] + '%'; i.style.top = d.pos[1] + '%'; i.style.width = d.pos[2] + '%'; farm.appendChild(i); } });
+    S.plots.forEach(function (p, i) {
+      var el = E('div', 'plot'); el.dataset.i = i;
+      var locked = S.lv < PLOT_LV[i], C = p.crop && CROPS[p.crop];
+      var html = '';
+      if (C && C.full && p.stage >= 3) html += '<img class="full" src="' + C.full + '" alt="">';
+      else html += '<img class="box" src="' + FA + 'empty_planter.webp" alt="">';
+      if (locked) { html += '<div class="lock">🔒</div><div class="tag">Lv.' + PLOT_LV[i] + '에 열려요</div>'; el.classList.add('locked'); }
+      else if (!C) html += '<div class="bubble">🌰</div><div class="tag">' + (i + 1) + '번 밭<br>빈 밭</div>';
+      else {
+        if (p.stage === 0) html += '<div class="seed"></div>';
+        else if (p.stage < 3) html += '<img class="plant" src="' + STAGE_IMG[p.stage] + '" alt="" style="width:' + (p.stage === 1 ? 34 : 50) + '%">';
+        else if (!C.full) html += '<img class="plant" src="' + C.grown + '" alt="">';
+        if (p.stage < 3) html += '<div class="bubble">💧</div>'; else html += '<div class="bubble">✨</div>';
+        html += '<div class="tag">' + (i + 1) + '번 밭 ' + C.ko + '<span class="gbar"><i style="width:' + (p.stage / 3 * 100) + '%"></i></span></div>';
+      }
+      el.innerHTML = html;
+      el.onclick = function () { tapPlot(i, el); };
+      farm.appendChild(el);
+    });
+  }
+  function drawBarn() {
+    stock.innerHTML = '';
+    var keys = Object.keys(S.barn).filter(function (k) { return S.barn[k] > 0; });
+    if (!keys.length) stock.innerHTML = '<span style="background:none;box-shadow:none;color:#9a8a6e;font-size:16px">아직 비어 있어요. 다 자란 작물을 수확해요!</span>';
+    keys.forEach(function (k) { var s = E('span', '', '<img src="' + CROPS[k].item + '" alt="">×' + S.barn[k]); stock.appendChild(s); });
+  }
+  function drawCusts() {
+    while (S.orders.length < 3) S.orders.push(newOrder());
+    custs.innerHTML = '';
+    S.orders.forEach(function (o, i) {
+      var pay = orderPay(o), c = E('div', 'cust' + (o.packed ? ' ready' : ''));
+      c.innerHTML = '<div class="ord">' + o.items.map(function (it) { return '<img src="' + CROPS[it[0]].item + '" alt="">×' + it[1]; }).join(' ') + '<div class="pay">🪙 ' + pay + '코인</div></div>' +
+        '<img class="who" src="' + GUESTS[o.g % GUESTS.length] + '" alt="">' + (o.packed ? '<img class="boxok" src="' + FA + 'parcel.webp" alt="">' : '');
+      c.onclick = function () { tapCust(i); };
+      custs.appendChild(c);
+    });
+  }
+  function drawAll() { drawTop(); drawPlots(); drawBarn(); drawCusts(); save(); guide(); }
+
+  /* ---------- 주문 ---------- */
+  function newOrder() {
+    var open = cropsOpen(), kinds = S.lv >= 2 && Math.random() < .55 ? 2 : 1, items = [];
+    O.shuffle(open).slice(0, kinds).forEach(function (k) { items.push([k, 1 + Math.floor(Math.random() * Math.min(3, 1 + S.lv))]); });
+    var used = S.orders.map(function (o) { return o.g % GUESTS.length; }), g;   /* 같은 손님이 겹치지 않게 */
+    do { g = Math.floor(Math.random() * GUESTS.length); } while (used.indexOf(g) >= 0);
+    return { items: items, g: g, packed: false };
+  }
+  function orderPay(o) { var s = 0; o.items.forEach(function (it) { s += CROPS[it[0]].price * it[1]; }); return s; }
+  function canPack(o) { return !o.packed && o.items.every(function (it) { return (S.barn[it[0]] || 0) >= it[1]; }); }
+
+  /* ---------- 밭 ---------- */
+  function tapPlot(i, el) {
+    O.unlock(); O.clearPrompt();
+    var p = S.plots[i];
+    if (S.lv < PLOT_LV[i]) { talk('이 밭은 레벨 ' + PLOT_LV[i] + '이 되면 열려요. 배달을 많이 해 봐요!'); return; }
+    var act = !p.crop ? 'seed' : p.stage < 3 ? 'water' : 'harvest';
+    if (tool && tool !== act && tool !== 'pack' && tool !== 'deliver') {
+      var msg = { seed: '여기는 이미 작물이 있어요.', water: !p.crop ? '빈 밭이에요. 먼저 씨앗을 심어요.' : '다 자랐어요! 수확해요.', harvest: !p.crop ? '빈 밭이에요. 씨앗을 심어요.' : '아직 자라는 중이에요. 물을 주세요.' }[tool];
+      talk(msg); O.sfx('no'); setTool(act); return;
+    }
+    if (act === 'seed') pickSeed(i);
+    else if (act === 'water') water(i, el);
+    else harvest(i, el);
+  }
+  function pickSeed(i) {
+    var ov = E('div', 'ov'), want = wantedCrop();
+    var card = E('div', 'card', '<h3>🌰 ' + (i + 1) + '번 밭에 무엇을 심을까요?</h3><div class="row"></div><button class="btn gray" type="button">닫기</button>');
+    Object.keys(CROPS).forEach(function (k) {
+      var C = CROPS[k], open = C.lv <= S.lv;
+      var b = E('button', 'pick', '<img src="' + C.seed + '" alt="">' + C.ko + (open ? '' : '<small>Lv.' + C.lv + '</small>')); b.type = 'button'; b.disabled = !open;
+      if (k !== 'strawberry' && k !== 'tomato' && k !== 'carrot' && k !== 'lettuce') b.querySelector('img').insertAdjacentHTML('afterend', '');
+      b.onclick = function () { ov.remove(); S.plots[i] = { crop: k, stage: 0 }; O.sfx('pop'); talk(C.ko + ' 씨앗을 심었어요! 이제 물을 주세요.'); setTool('water'); drawAll(); };
+      if (S.help && k === want) b.classList.add('oks-glow');
+      card.querySelector('.row').appendChild(b);
+    });
+    card.querySelector('.gray').onclick = function () { ov.remove(); guide(); };
+    ov.appendChild(card); document.body.appendChild(ov);
+    talk(want ? '손님이 ' + CROPS[want].ko + josa(CROPS[want].ko, '을', '를') + ' 기다려요. 씨앗을 골라요.' : '심을 씨앗을 골라요.');
+  }
+  function water(i, el) {
+    var p = S.plots[i], C = CROPS[p.crop];
+    for (var k = 0; k < 3; k++) { var d = E('div', 'drop', '💧'); d.style.left = (30 + k * 20) + '%'; d.style.top = '20%'; d.style.animationDelay = (k * .1) + 's'; el.appendChild(d); }
+    O.sfx('water');
+    p.stage++; save();
+    setTimeout(function () {
+      drawAll();
+      var pl = farm.children[farm.children.length - 6 + i]; var g = farm.querySelectorAll('.plot')[i].querySelector('.plant,.full'); if (g) g.classList.add('grow');
+      talk(p.stage >= 3 ? C.ko + josa(C.ko, '이', '가') + ' 다 자랐어요! 수확해요.' : ['', '새싹이 났어요!', '쑥쑥 자라요! 한 번 더!'][p.stage]);
+      if (p.stage >= 3) setTool('harvest');
+    }, 500);
+  }
+  function harvest(i, el) {
+    var p = S.plots[i], C = CROPS[p.crop], n = C.yield + (Math.random() < .4 ? 1 : 0);
+    S.barn[p.crop] = (S.barn[p.crop] || 0) + n; S.plots[i] = {};
+    O.sfx('ok'); fly(el, C.item, n);
+    talk(C.ko + ' ' + CNT[n] + ' 개를 수확했어요!');
+    S.orders.some(function (o) { return canPack(o); }) ? setTool('pack') : setTool(null);
+    setTimeout(drawAll, 650);
+  }
+  function fly(fromEl, src, n) {
+    var a = fromEl.getBoundingClientRect(), b = app.querySelector('.basket').getBoundingClientRect();
+    for (var k = 0; k < n; k++) (function (k) {
+      var im = E('img'); im.src = src; im.style.cssText = 'position:fixed;z-index:90;width:56px;left:0;top:0;pointer-events:none';
+      document.body.appendChild(im);
+      im.animate([{ transform: 'translate(' + (a.left + a.width / 2 - 28) + 'px,' + (a.top + a.height / 3) + 'px)' }, { transform: 'translate(' + (b.left + 60 + k * 20) + 'px,' + (b.top + b.height / 3) + 'px) scale(.7)' }],
+        { duration: 650, delay: k * 120, easing: 'ease-in-out', fill: 'forwards' });
+      setTimeout(function () { im.remove(); }, 800 + k * 120);
+    })(k);
+  }
+
+  /* ---------- 포장 (주문만큼 하나씩 담기) ---------- */
+  function tapCust(i) {
+    O.unlock(); O.clearPrompt();
+    var o = S.orders[i];
+    if (o.packed) { deliver(i); return; }
+    if (!canPack(o)) {
+      var lack = o.items.filter(function (it) { return (S.barn[it[0]] || 0) < it[1]; })[0];
+      talk(CROPS[lack[0]].ko + josa(CROPS[lack[0]].ko, '이', '가') + ' 모자라요. ' + CROPS[lack[0]].ko + josa(CROPS[lack[0]].ko, '을', '를') + ' 더 키워서 수확해요.'); O.sfx('no'); return;
+    }
+    pack(i);
+  }
+  function pack(i) {
+    var o = S.orders[i], got = {}; o.items.forEach(function (it) { got[it[0]] = 0; });
+    var ov = E('div', 'ov'), card = E('div', 'card');
+    card.innerHTML = '<h3>📦 주문만큼 상자에 담아요</h3><div class="pack"><div class="need"></div><div class="boxw"><img src="' + FA + 'parcel.webp" alt=""><div class="inbox"></div></div></div><div class="row picks"></div><button class="btn gray" type="button">나중에</button>';
+    function draw() {
+      card.querySelector('.need').innerHTML = o.items.map(function (it) {
+        var s = ''; for (var k = 0; k < it[1]; k++) s += '<i class="' + (k < got[it[0]] ? 'on' : '') + '"></i>';
+        return '<div><img src="' + CROPS[it[0]].item + '" alt="">' + CROPS[it[0]].ko + ' ' + it[1] + '개 <span class="slots">' + s + '</span></div>';
+      }).join('');
+      var picks = card.querySelector('.picks'); picks.innerHTML = '';
+      Object.keys(S.barn).filter(function (k) { return S.barn[k] > 0; }).forEach(function (k) {
+        var b = E('button', 'pick', '<img src="' + CROPS[k].item + '" alt="">' + CROPS[k].ko + ' ×' + (S.barn[k] - (got[k] || 0))); b.type = 'button';
+        var it = o.items.filter(function (x) { return x[0] === k; })[0];
+        if (S.help && it && got[k] < it[1]) b.classList.add('oks-glow');
+        b.onclick = function () {
+          if (!it) { O.sfx('no'); talk('손님은 ' + CROPS[k].ko + josa(CROPS[k].ko, '을', '를') + ' 주문하지 않았어요.'); return; }
+          if (got[k] >= it[1]) { O.sfx('no'); talk(CROPS[k].ko + josa(CROPS[k].ko, '은', '는') + ' ' + CNT[it[1]] + ' 개면 돼요. 더 담지 않아요.'); return; }
+          got[k]++; O.sfx('pop'); O.say(['', '하나', '둘', '셋', '넷', '다섯'][got[k]] || String(got[k]));
+          var im = E('img'); im.src = CROPS[k].item; card.querySelector('.inbox').appendChild(im);
+          draw();
+          if (o.items.every(function (x) { return got[x[0]] >= x[1]; })) {
+            o.items.forEach(function (x) { S.barn[x[0]] -= x[1]; }); o.packed = true; save();
+            O.sfx('ok'); O.praise('포장 완료!');
+            setTimeout(function () { ov.remove(); talk('포장 완료! 이제 손님에게 배달해요.'); setTool('deliver'); drawAll(); }, 900);
+          }
+        };
+        picks.appendChild(b);
+      });
+    }
+    draw();
+    card.querySelector('.gray').onclick = function () { ov.remove(); guide(); };
+    ov.appendChild(card); document.body.appendChild(ov);
+    talk(o.items.map(function (it) { return CROPS[it[0]].ko + ' ' + CNT[it[1]] + ' 개'; }).join(', ') + '를 담아요.');
+  }
+
+  /* ---------- 배달 ---------- */
+  function deliver(i) {
+    var o = S.orders[i], pay = orderPay(o), cel = custs.children[i], r = cel.getBoundingClientRect();
+    var tr = E('img', 'truck'); tr.src = M + 'truck.webp'; tr.alt = ''; document.body.appendChild(tr);
+    O.sfx('tick');
+    tr.animate([{ transform: 'translate(-260px,' + (r.top + 30) + 'px)' }, { transform: 'translate(' + (r.left - 120) + 'px,' + (r.top + 30) + 'px)' }], { duration: 1100, easing: 'ease-out', fill: 'forwards' });
+    setTimeout(function () {
+      tr.remove(); cel.classList.add('leave'); O.sfx('coin');
+      var ov = E('div', 'ov'), card = E('div', 'card');
+      var coins = ''; for (var k = 0; k < Math.min(pay, 20); k++) coins += '<img src="' + FA + 'coin.webp" alt="" style="animation-delay:' + (k * .06) + 's">';
+      card.innerHTML = '<h3>🚚 배달 완료! 고마워요!</h3><img src="' + GUESTS[o.g % GUESTS.length] + '" alt="" style="height:110px"><div class="cnt-coins">' + coins + '</div><h3>🪙 ' + pay + '코인을 받았어요</h3><button class="btn" type="button">좋아요!</button>';
+      ov.appendChild(card); document.body.appendChild(ov);
+      O.say('배달 완료! ' + pay + '코인을 받았어요!');
+      S.coins += pay; S.stars += 1; S.xp += 10; S.delivered++;
+      S.orders.splice(i, 1); S.orders.push(newOrder());
+      var up = false; if (S.xp >= need(S.lv)) { S.xp -= need(S.lv); S.lv++; up = true; }
+      save();
+      if (O.eco) try { O.eco.reward({ coins: 2, xp: 5, mission: { shop: 1 } }); } catch (e) {}
+      O.log({ at: new Date().toISOString(), lesson: 'farm-tycoon', subject: 'math', school: 'elem', topic: '쑥쑥 햇살 농장 배달', level: S.help ? 2 : 4, engine: 'farm-tycoon', stars: 3, mistakes: 0, glow: 0, hand: 0, asked: 0, sec: 0 });
+      card.querySelector('.btn').onclick = function () {
+        ov.remove(); setTool(null); drawAll(); bump('.coins'); bump('.stars');
+        if (up) levelUp();
+      };
+    }, 1150);
+  }
+  function bump(sel) { var e = app.querySelector(sel); e.classList.remove('pop'); void e.offsetWidth; e.classList.add('pop'); }
+  function levelUp() {
+    var news = [];
+    PLOT_LV.forEach(function (l, i) { if (l === S.lv) news.push((i + 1) + '번 밭'); });
+    Object.keys(CROPS).forEach(function (k) { if (CROPS[k].lv === S.lv) news.push(CROPS[k].ko + ' 씨앗'); });
+    var ov = E('div', 'ov'), card = E('div', 'card', '<h3>🎉 레벨 ' + S.lv + '!</h3><img src="' + FA + 'reward_coins.webp" alt="" style="height:120px"><p style="font-size:20px">' + (news.length ? news.join(', ') + josa(news[news.length - 1], '이', '가') + ' 열렸어요!' : '농장이 더 멋져졌어요!') + '</p><button class="btn" type="button">신나요!</button>');
+    ov.appendChild(card); document.body.appendChild(ov); O.sfx('win'); O.say('레벨 ' + S.lv + '! ' + (news.length ? news.join(', ') + '이 열렸어요!' : ''));
+    card.querySelector('.btn').onclick = function () { ov.remove(); drawAll(); };
+  }
+
+  /* ---------- 꾸미기 ---------- */
+  function decoShop() {
+    var ov = E('div', 'ov'), card = E('div', 'card', '<h3>🏡 농장 꾸미기 <small style="font-size:16px">🪙 ' + S.coins + '</small></h3><div class="shopg"></div><button class="btn gray" type="button">닫기</button>');
+    DECOS.forEach(function (d) {
+      var own = !!S.deco[d.id], b = E('button', 'pick', '<img src="' + M + 'd_' + d.id + '.webp" alt="">' + d.ko + '<small>' + (own ? '✅ 꾸몄어요' : '🪙 ' + d.price) + '</small>'); b.type = 'button';
+      b.disabled = own;
+      b.onclick = function () {
+        if (S.coins < d.price) { O.sfx('no'); talk('코인이 ' + (d.price - S.coins) + '개 더 필요해요. 배달을 더 해 봐요!'); return; }
+        S.coins -= d.price; S.deco[d.id] = 1; O.sfx('coin'); O.praise(d.ko + '!'); ov.remove(); drawAll(); talk(d.ko + '로 농장을 꾸몄어요!');
+      };
+      card.querySelector('.shopg').appendChild(b);
+    });
+    card.querySelector('.gray').onclick = function () { ov.remove(); };
+    ov.appendChild(card); document.body.appendChild(ov);
+  }
+
+  /* ---------- 도움 모드: 다음에 할 일을 반짝여요 ---------- */
+  function wantedCrop() {
+    var have = Object.assign({}, S.barn); S.plots.forEach(function (p) { if (p.crop) have[p.crop] = (have[p.crop] || 0) + CROPS[p.crop].yield; });
+    for (var i = 0; i < S.orders.length; i++) { var o = S.orders[i]; if (o.packed) continue; for (var j = 0; j < o.items.length; j++) { var it = o.items[j]; if ((have[it[0]] || 0) < it[1]) return it[0]; } }
+    return null;
+  }
+  function nextStep() {
+    var pi = S.orders.findIndex(function (o) { return o.packed; }); if (pi >= 0) return { t: 'deliver', el: function () { return custs.children[pi]; } };
+    var ci = S.orders.findIndex(canPack); if (ci >= 0) return { t: 'pack', el: function () { return custs.children[ci]; } };
+    var open = function (i) { return S.lv >= PLOT_LV[i]; };
+    var h = S.plots.findIndex(function (p, i) { return open(i) && p.crop && p.stage >= 3; }); if (h >= 0) return { t: 'harvest', el: function () { return farm.querySelectorAll('.plot')[h]; } };
+    var w = S.plots.findIndex(function (p, i) { return open(i) && p.crop && p.stage < 3; }); if (w >= 0) return { t: 'water', el: function () { return farm.querySelectorAll('.plot')[w]; } };
+    var s = S.plots.findIndex(function (p, i) { return open(i) && !p.crop; }); if (s >= 0) return { t: 'seed', el: function () { return farm.querySelectorAll('.plot')[s]; } };
+    return null;
+  }
+  function guide() {
+    app.querySelectorAll('.tool').forEach(function (b) { b.classList.remove('oks-glow'); });
+    if (!S.help) { O.clearPrompt(); return; }
+    var n = nextStep(); if (!n) return;
+    var tb = app.querySelector('.tool[data-t="' + n.t + '"]'); if (tb) tb.classList.add('oks-glow');
+    O.target({ get: n.el }, 1);
+  }
+  function setTool(t) { tool = t; app.querySelectorAll('.tool').forEach(function (b) { b.classList.toggle('sel', b.dataset.t === t); }); }
+  app.querySelectorAll('.tool').forEach(function (b) {
+    b.onclick = function () {
+      O.unlock(); var t = b.dataset.t; setTool(tool === t ? null : t);
+      var tips = { seed: '빈 밭을 눌러 씨앗을 심어요.', water: '자라는 밭을 눌러 물을 주세요.', harvest: '다 자란 밭을 눌러 수확해요.', pack: '주문한 손님을 눌러 상자에 담아요.', deliver: '상자가 준비된 손님을 눌러 배달해요.' };
+      talk(tips[t]);
+      if (t === 'pack') { var ci = S.orders.findIndex(canPack); if (ci < 0) talk('아직 담을 수 있는 주문이 없어요. 작물을 더 수확해요.'); }
+      if (t === 'deliver') { var pi = S.orders.findIndex(function (o) { return o.packed; }); if (pi >= 0) deliver(pi); else talk('먼저 포장을 해요.'); }
+    };
+  });
+  app.querySelector('.deco-btn').onclick = function () { O.unlock(); decoShop(); };
+  app.querySelector('.help').onclick = function () { S.help = !S.help; save(); talk(S.help ? '도움 모드: 다음에 할 일을 반짝여 알려 줄게요.' : '혼자 해 보기! 도움이 필요하면 다시 눌러요.'); drawTop(); guide(); };
+  app.querySelector('.snd').onclick = function () { O.unlock(); var s = O.settings(); O.saveSetting('voice', !s.voice); O.saveSetting('sound', !s.voice); this.textContent = !s.voice ? '🔊' : '🔇'; };
+  app.querySelector('.snd').textContent = O.settings().voice ? '🔊' : '🔇';
+
+  /* 처음 온 친구 */
+  drawAll();
+  if (!S.welcomed) {
+    S.welcomed = 1; save();
+    var ov = E('div', 'ov'), card = E('div', 'card', '<img src="' + FA + 'rabbit_farmer.webp" alt="" style="height:140px"><h3>쑥쑥 햇살 농장에 온 걸 환영해요!</h3><p style="font-size:18px;line-height:1.6">① 씨앗 심기 → ② 물 주기 → ③ 수확하기 → ④ 포장하기 → ⑤ 배달하기<br>손님 주문만큼 담아서 코인을 모으고, 농장을 꾸며요!</p><button class="btn" type="button">시작! ▶</button>');
+    ov.appendChild(card); document.body.appendChild(ov);
+    card.querySelector('.btn').onclick = function () { O.unlock(); ov.remove(); talk('반짝이는 곳을 눌러 보세요. 먼저 씨앗을 심어요!'); guide(); };
+  }
+  window.TYCOON = { state: function () { return S; }, next: nextStep, reset: function () { localStorage.removeItem(KEY); location.reload(); } };
+})();
+</script>
+</body>
+</html>
