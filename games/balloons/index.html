@@ -79,6 +79,13 @@ body.oks::before{display:none;}
   .st-card h1{font-size:26px;}
 }
 body.calm .sky .bal{transition:none;}
+body.oks.flying{background:linear-gradient(180deg,#3d9bf0 0%,#7cc4ff 55%,#c3e6ff 100%) fixed;}
+.clouds{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.clouds img{position:absolute;left:0;top:0;opacity:.95;will-change:transform;}
+.sky .bal,.sky .rocket,.sky .shot,.sky .boom{z-index:2;} .sky .rocket{z-index:6;}
+.st-move{display:flex;gap:8px;justify-content:center;margin:0 0 12px;flex-wrap:wrap;}
+.st-move button{border:3px solid #e1d8ee;background:#fff;border-radius:18px;padding:8px 14px;font:inherit;font-size:16px;cursor:pointer;color:var(--ink);}
+.st-move button.on{background:#e9f4ff;border-color:#2f7fe8;box-shadow:0 0 0 3px rgba(47,127,232,.2);}
 </style>
 </head>
 <body class="oks">
@@ -144,6 +151,9 @@ body.calm .sky .bal{transition:none;}
       lv: { 1: { n: 2, far: 1, rounds: 4 }, 2: { n: 2, far: 1, rounds: 5 }, 3: { n: 4, far: .7, rounds: 5 }, 4: { n: 4, far: .5, rounds: 6 }, 5: { n: 4, far: .35, rounds: 6 } } }
   };
   var mode = MODES[O.qs('mode')] ? O.qs('mode') : null;
+  /* 움직임: 둥실(제자리에서 살랑) / 비행(위에서 아래로 떨어지고 구름이 흘러가요) — 기기에 기억 */
+  var FLY = O.qs('fly') != null ? O.qs('fly') === '1' : !!O.jget('oks_balloon_fly', false);
+  var FALL = { 1: 10, 2: 8.5, 3: 7.5, 4: 6.5, 5: 5.5 };   /* 화면을 다 내려오는 시간(초) */
   var LESSON = O.qs('lesson') || 'mini-balloons';
   var level = O.levelFor(LESSON);
   var BACK = O.qs('lesson') ? O.ret(O.ROOT + 'play/?id=' + LESSON) : O.ret(O.ROOT + 'index.html');
@@ -153,6 +163,17 @@ body.calm .sky .bal{transition:none;}
   var sh = O.shell({ compact: true, title: EN ? 'Pop the Balloons!' : '풍선 터트리기', back: BACK, backLabel: '돌아가기', level: level });
   if (O.eco) try { sh.menu.insertBefore(O.eco.hud(sh.menu), sh.levelBtn); } catch (e) {}
   var sky = sh.board; sky.className = 'sky';
+  var cloudLayer = E('div', 'clouds'); sky.appendChild(cloudLayer);
+  var clouds = [];
+  function makeClouds() {
+    cloudLayer.innerHTML = ''; clouds = [];
+    if (!FLY) return;
+    for (var i = 0; i < 9; i++) {
+      var c = E('img'); c.src = '../../art/obj/cloud.webp'; c.alt = ''; cloudLayer.appendChild(c);
+      var k = .5 + Math.random() * .9;   /* 큰 구름은 가깝고 빨라요 */
+      clouds.push({ el: c, k: k, x: Math.random(), y: Math.random() * 1.2 - .2 });
+    }
+  }
   var rocket = E('img', 'rocket'); rocket.src = M + 'rocket.webp'; rocket.alt = ''; sky.appendChild(rocket);
   var cnt = E('div', 'cnt', '🎈 0'); sky.appendChild(cnt);
   var ctrl = E('div', 'ctrl', '<button type="button" class="l" aria-label="왼쪽">◀</button><button type="button" class="fire">⭐ 쏘기</button><button type="button" class="r" aria-label="오른쪽">▶</button>');
@@ -193,6 +214,7 @@ body.calm .sky .bal{transition:none;}
       b.x = x0 + (lw - b.w) * (.3 + Math.random() * .4);
       var room = Math.max(0, bot - top - b.h), zig = i % 2 ? .55 + Math.random() * .4 : Math.random() * .4;
       b.y = b.fixY != null ? b.fixY : top + room * zig;
+      if (FLY && b.fixY == null) { b.vy = (H + b.h) / (FALL[level] * (calm ? 1.4 : 1)) * (.85 + Math.random() * .3); b.y = -b.h - Math.random() * H * .55; if (IMPL[mode].targets().indexOf(b) >= 0) b.y = -b.h * .6 - Math.random() * H * .15; }
       b.minX = x0 + 2; b.maxX = x0 + lw - 2;
       b.el.style.transform = 'translate(' + b.x + 'px,' + b.y + 'px)';   /* 바로 제자리에 */
       b.vx = (Math.random() < .5 ? -1 : 1) * W * .008 * (level <= 2 ? .6 : 1);
@@ -407,7 +429,7 @@ body.calm .sky .bal{transition:none;}
     var st = stats, MD = MODES[mode];
     var entry = { at: new Date().toISOString(), lesson: LESSON, subject: EN ? 'english' : MD.subject, school: 'elem', topic: '풍선 터트리기 · ' + MD.name + (EN ? ' (영어)' : ''), level: level, engine: 'balloons-' + mode, rounds: cfg.rounds,
       mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: Math.round((Date.now() - st.t0) / 1000) };
-    var q = function (lv) { return '?mode=' + mode + (EN ? '&lang=en' : '') + (O.qs('lesson') ? '&lesson=' + LESSON : '') + '&level=' + lv; };
+    var q = function (lv) { return '?mode=' + mode + (FLY ? '&fly=1' : '') + (EN ? '&lang=en' : '') + (O.qs('lesson') ? '&lesson=' + LESSON : '') + '&level=' + lv; };
     var btns = [{ label: '🔁 한 번 더', color: 'green', onClick: function () { location.href = q(level); } }];
     if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(LESSON, level + 1); location.href = q(level + 1); } });
     if (!O.qs('lesson')) btns.push({ label: '🎈 다른 풍선 놀이', color: 'pink', onClick: function () { location.href = '?'; } });
@@ -417,8 +439,17 @@ body.calm .sky .bal{transition:none;}
 
   function tick(now) {
     var dt = Math.min(.05, (now - (tick.last || now)) / 1000); tick.last = now;
+    if (FLY) clouds.forEach(function (c) {
+      c.y += dt * (calm ? .12 : .45) * c.k; if (c.y > 1.1) { c.y = -.3; c.x = Math.random(); }
+      var cw = U * .22 * c.k; c.el.style.width = cw + 'px'; c.el.style.opacity = .55 + c.k * .3;
+      c.el.style.transform = 'translate(' + (c.x * (W + cw) - cw) + 'px,' + (c.y * H) + 'px)';
+    });
     bals.forEach(function (b) {
       if (b.done) return;
+      if (FLY && b.vy && !b.hold) {   /* 위에서 아래로. 끝까지 내려가면 다시 위에서 */
+        b.y += b.vy * (b.el.classList.contains('oks-glow') ? .35 : 1) * dt;
+        if (b.y > R.y + R.h * .2) b.y = -b.h - Math.random() * H * .3;
+      }
       if (!b.hold && !calm) {
         var slow = b.el.classList.contains('oks-glow') ? .4 : 1;
         b.x += b.vx * slow * dt;
@@ -437,6 +468,25 @@ body.calm .sky .bal{transition:none;}
   ctrl.querySelector('.r').onclick = function () { step(1); };
   ctrl.querySelector('.fire').onclick = function () { fireUp(); };
   ctrl.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+  /* 손가락으로 끌면 로켓이 따라오고, 빈 하늘을 짧게 톡 누르면 쏘아요 */
+  var drag = null;
+  sky.addEventListener('pointerdown', function (e) {
+    if (!playing) return;
+    var r = sky.getBoundingClientRect();
+    drag = { id: e.pointerId, x0: e.clientX, t0: performance.now(), moved: false, left: r.left };
+    try { sky.setPointerCapture(e.pointerId); } catch (er) {}
+  });
+  sky.addEventListener('pointermove', function (e) {
+    if (!drag || drag.id !== e.pointerId || busy) return;
+    if (Math.abs(e.clientX - drag.x0) > 10) drag.moved = true;
+    if (drag.moved) R.x = clamp(e.clientX - drag.left, R.w / 2 + 8, W - R.w / 2 - 8);
+  });
+  function endDrag(e) {
+    if (!drag || drag.id !== e.pointerId) return;
+    var tap = !drag.moved && performance.now() - drag.t0 < 400; drag = null;
+    if (tap) fireUp();
+  }
+  sky.addEventListener('pointerup', endDrag); sky.addEventListener('pointercancel', function () { drag = null; });
   addEventListener('keydown', function (e) {
     if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
     if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
@@ -450,7 +500,8 @@ body.calm .sky .bal{transition:none;}
     var cards = Object.keys(MODES).map(function (k) { var m = MODES[k]; return '<button type="button" class="mode" data-m="' + k + '"><div class="ic">' + m.icon + '</div><b>' + m.name + '</b><small>' + m.desc + '</small></button>'; }).join('');
     var lvBtns = O.LEVELS.map(function (L) { return '<button type="button" data-lv="' + L.n + '" class="' + (L.n === level ? 'on' : '') + '" title="' + O.esc(L.desc) + '">' + L.short + '</button>'; }).join('');
     ov.innerHTML = '<div class="st-card"><h1>🎈 ' + (EN ? 'Pop the Balloons!' : '풍선 터트리기') + '</h1><p>옥쌤 로켓이 <b>별빛</b>을 쏘아 풍선을 터트려요. 알맞은 풍선을 <b>톡</b> 누르세요!</p>' +
-      (O.qs('mode') ? '<p><b>' + MODES[mode].name + (EN ? ' (영어)' : '') + '</b></p>' : '<div class="modes">' + cards + '</div>') + '<div class="st-lv">' + lvBtns + '</div>' +
+      (O.qs('mode') ? '<p><b>' + MODES[mode].name + (EN ? ' (영어)' : '') + '</b></p>' : '<div class="modes">' + cards + '</div>') + '<div class="st-move"><button type="button" data-fly="0">🎈 둥실둥실 (제자리)</button><button type="button" data-fly="1">✈️ 비행 (위에서 떨어져요)</button></div>' +
+      '<div class="st-lv">' + lvBtns + '</div>' +
       '<button type="button" class="oks-btn green st-go">시작! ▶</button><div class="keys">◀ ▶ 로 로켓을 움직이고 ⭐ 쏘기 (키보드: ← → 스페이스)</div></div>';
     document.body.appendChild(ov);
     if (!mode) mode = 'number';
@@ -461,9 +512,15 @@ body.calm .sky .bal{transition:none;}
     ov.querySelectorAll('.st-lv button').forEach(function (b) {
       b.onclick = function () { level = +b.dataset.lv; ov.querySelectorAll('.st-lv button').forEach(function (x) { x.classList.toggle('on', x === b); }); };
     });
+    ov.querySelectorAll('.st-move button').forEach(function (b) {
+      b.classList.toggle('on', (b.dataset.fly === '1') === FLY);
+      b.onclick = function () { FLY = b.dataset.fly === '1'; O.jset('oks_balloon_fly', FLY); ov.querySelectorAll('.st-move button').forEach(function (x) { x.classList.toggle('on', x === b); }); };
+    });
     ov.querySelector('.st-go').onclick = function () { O.unlock(); O.hush(); ov.remove(); begin(); };
   }
   function begin() {
+    if (mode === 'pitch') FLY = false;   /* 높은·낮은 소리는 위·아래 자리가 뜻이 있어서 제자리 */
+    document.body.classList.toggle('flying', FLY); makeClouds();
     sh.askEl.style.visibility = '';
     cfg = MODES[mode].lv[level]; O.rememberLevel(LESSON, level); sh.setLevel(level);
     document.title = '풍선 터트리기 · ' + MODES[mode].name;
