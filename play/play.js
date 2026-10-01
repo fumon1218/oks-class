@@ -120,7 +120,7 @@
   var extraHref = extras.length ? extras[0].href : null;
   extras.forEach(function (x) { var ex = E('a', 'oks-btn orange oks-extra', x.label); ex.href = x.href; start.appendChild(ex); });
   /* 종이 학습지 (지금은 수학 1단원) */
-  var wsHref = /^02-01-/.test(id) ? O.ROOT + 'worksheet/?id=' + id + '&level=' + level : null;
+  var wsHref = base ? O.ROOT + 'worksheet/?id=' + id + '&level=' + level : null;
   if (wsHref) { var wb = E('a', 'oks-btn blue oks-extra', '📄 학습지 인쇄'); wb.href = wsHref; start.appendChild(wb); }
   sh.board.appendChild(start);
   O.target({ get: function () { return go; } }, Math.min(level, 2));

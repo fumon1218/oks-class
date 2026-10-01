@@ -14,7 +14,7 @@ PAGES = [
     './core/oks-core.css', './core/oks-core.js', './core/oks-kit.js', './core/oks-eco.js', './curriculum/lessons.js',
     './shop/', './shop/index.html', './shop/shop.css', './shop/shop.js', './shop/shops.js', './shop/stations.js',
     './town/', './town/index.html', './town/town.css', './town/town.js', './town/cc.webp', './town/wj.webp',
-    './games/farm/index.html', './games/birds/index.html', './games/shapes/index.html', './games/fishing/index.html', './games/balloons/index.html', './games/tycoon/index.html', './worksheet/index.html', './minigames/farm-v8/index.html',
+    './games/farm/index.html', './games/birds/index.html', './games/shapes/index.html', './games/fishing/index.html', './games/balloons/index.html', './games/tycoon/index.html', './worksheet/index.html', './worksheet/generic.js', './minigames/farm-v8/index.html',
     './career/cafe.html', './career/barista.html', './korean/index.html', './korean/catch.html',
     './lobby/lobby-v2.css', './lobby/lobby-v3.css', './curriculum/catalog.json', './curriculum/game-blueprint.json',
     './minigames/index.html', './minigames/art-tycoon.html', './minigames/packs.js',

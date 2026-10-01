@@ -9,7 +9,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap');
 @page{size:A4;margin:10mm;}
 :root{--ink:#2d2a26;--line:#3d3a35;--soft:#8a8174;--accent:#e0612f;}
-*{box-sizing:border-box;}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;color:var(--ink);}
 /* 화면 위 도구 줄 (인쇄할 때는 안 나와요) */
 .bar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:10px;background:#fffdf6;box-shadow:0 2px 10px rgba(0,0,0,.12);}
@@ -101,12 +101,17 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
 </div>
 <div class="pages" id="pages"></div>
 <script src="../curriculum/lessons.js"></script>
+<script src="../play/content.js"></script>
+<script src="../play/content2.js"></script>
+<script src="../play/content-extra.js"></script>
+<script src="../play/custom.js"></script>
+<script src="generic.js"></script>
 <script>
 (function () {
   'use strict';
   var A = '../art/', G = '../games/';
   var Q = new URLSearchParams(location.search);
-  var LESSONS = (window.OKS_LESSONS.lessons || []).filter(function (l) { return /^02-01-/.test(l.id); });
+  var LESSONS = (window.OKS_LESSONS.lessons || []).filter(function (l) { return window.OKS_CONTENT && window.OKS_CONTENT[l.id]; });
   var id = Q.get('id') && LESSONS.some(function (l) { return l.id === Q.get('id'); }) ? Q.get('id') : LESSONS[0].id;
   var level = Math.min(5, Math.max(1, +Q.get('level') || 2));
   var seed = +Q.get('seed') || Math.floor(Math.random() * 1e6);
@@ -267,7 +272,7 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   function pageHtml(qs, ans) {
     var n = qs.length, base = Math.floor(100 / n), pts = qs.map(function (q, i) { return i < n - 1 ? base : 100 - base * (n - 1); });
     return '<section class="page' + (ans ? ' ans' : '') + '"><div class="inner">' + '' +
-      '<div class="head"><div class="tt"><div class="sub">수학 ' + L.unitNo + '단원 · ' + L.unit + ' · ' + L.no + '차시</div><h1>' + L.topic + (ans ? ' <span style="color:#e53935;font-size:22px">[정답지]</span>' : '') + '</h1><div class="goal">🎯 학습 목표: ' + L.goal + '</div><div class="lv">' + LVN[level - 1] + '</div></div>' +
+      '<div class="head"><div class="tt"><div class="sub">' + L.subjectName + ' · ' + L.schoolName + ' ' + L.unitNo + '단원 · ' + L.unit + ' · ' + L.no + '차시</div><h1>' + L.topic + (ans ? ' <span style="color:#e53935;font-size:22px">[정답지]</span>' : '') + '</h1><div class="goal">🎯 학습 목표: ' + L.goal + '</div><div class="lv">' + LVN[level - 1] + '</div></div>' +
       '<div class="score"><b>점수</b><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ 100</span></div></div>' +
       '<div class="info"><div>학년<i></i></div><div>반<i></i></div><div>번호<i></i></div><div>이름<i></i></div><div>날짜<i>&nbsp;&nbsp;&nbsp;월&nbsp;&nbsp;&nbsp;&nbsp;일</i></div></div>' +
       qs.map(function (q, i) { return '<div class="q"><div class="qh"><span class="no">' + (i + 1) + '</span><span>' + q.t + '</span><span class="pt">(' + pts[i] + '점)</span></div><div class="qb">' + q.b + '</div></div>'; }).join('') +
@@ -284,7 +289,7 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   }
   addEventListener('beforeprint', fit);
   function render() {
-    var s0 = seed, qs = MAKE[id]();
+    var s0 = seed, qs = MAKE[id] ? MAKE[id]() : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
     var html = pageHtml(qs, false);
     if (document.getElementById('withAns').checked) html += pageHtml(qs, true);
     document.getElementById('pages').innerHTML = html;
@@ -295,7 +300,9 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
 
   /* 도구 줄 */
   var sel = document.getElementById('lesson');
-  LESSONS.forEach(function (l) { var o = document.createElement('option'); o.value = l.id; o.textContent = '수학 ' + l.no + ' ' + l.topic; sel.appendChild(o); });
+  var groups = {};
+  LESSONS.forEach(function (l) { var gk = l.subjectName + ' · ' + l.schoolName; if (!groups[gk]) { groups[gk] = document.createElement('optgroup'); groups[gk].label = gk; sel.appendChild(groups[gk]); }
+    var o = document.createElement('option'); o.value = l.id; o.textContent = l.subjectName + ' ' + l.no + ' ' + l.topic; groups[gk].appendChild(o); });
   sel.value = id; document.getElementById('level').value = level;
   function go(newSeed) { var u = '?id=' + sel.value + '&level=' + document.getElementById('level').value + '&seed=' + (newSeed ? Math.floor(Math.random() * 1e6) : seed); location.search = u; }
   sel.onchange = function () { go(false); }; document.getElementById('level').onchange = function () { go(false); };
