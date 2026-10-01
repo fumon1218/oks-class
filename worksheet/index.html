@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>학습지 · 옥쌤의 즐거운 교실</title>
+<link rel="icon" href="../icons/icon-192.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700&display=swap');
+@page{size:A4;margin:10mm;}
+:root{--ink:#2d2a26;--line:#3d3a35;--soft:#8a8174;--accent:#e0612f;}
+*{box-sizing:border-box;}
+body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;color:var(--ink);}
+/* 화면 위 도구 줄 (인쇄할 때는 안 나와요) */
+.bar{position:sticky;top:0;z-index:5;display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:10px;background:#fffdf6;box-shadow:0 2px 10px rgba(0,0,0,.12);}
+.bar select,.bar button,.bar a,.bar label{font:inherit;font-size:16px;border:2px solid #dccdb2;border-radius:12px;background:#fff;padding:6px 12px;color:var(--ink);text-decoration:none;cursor:pointer;}
+.bar .print{background:#3fb05a;border-color:#3fb05a;color:#fff;}
+.bar label{display:flex;gap:6px;align-items:center;}
+.pages{display:flex;flex-direction:column;align-items:center;gap:18px;padding:18px 8px 40px;}
+.page{width:210mm;min-height:297mm;background:#fff;padding:10mm 11mm;box-shadow:0 4px 18px rgba(0,0,0,.18);position:relative;display:flex;flex-direction:column;}
+@media print{
+  body{background:#fff;} .bar{display:none;} .pages{padding:0;gap:0;}
+  .page{width:auto;min-height:auto;height:277mm;box-shadow:none;padding:0;page-break-after:always;break-after:page;}
+  .page:last-child{page-break-after:auto;break-after:auto;}
+}
+/* 머리 */
+.head{display:flex;align-items:stretch;gap:8px;border-bottom:3px solid var(--line);padding-bottom:6px;}
+.head .tt{flex:1;}
+.head .sub{font-size:14px;color:var(--soft);}
+.head h1{margin:2px 0 0;font-size:28px;font-weight:400;line-height:1.15;}
+.head .goal{font-size:15px;margin-top:3px;}
+.head .lv{font-size:13px;color:var(--accent);margin-top:2px;}
+.score{width:34mm;border:2.5px solid var(--line);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score b{font-weight:400;font-size:14px;}
+.score span{font-size:24px;margin-top:6px;}
+.info{display:grid;grid-template-columns:1.1fr 1.1fr 1fr 2.4fr 1.6fr;border:2px solid var(--line);border-radius:8px;margin:8px 0 6px;overflow:hidden;}
+.info div{display:flex;align-items:center;gap:4px;padding:6px 8px;font-size:15px;border-right:1.5px solid var(--line);white-space:nowrap;}
+.info div:last-child{border-right:none;}
+.info i{flex:1;font-style:normal;}
+/* 문제 */
+.q{margin-top:16px;break-inside:avoid;page-break-inside:avoid;}
+.qh{display:flex;align-items:baseline;gap:8px;font-size:22px;}
+.qh .no{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:var(--ink);color:#fff;font-size:16px;flex:none;}
+.qh .pt{margin-left:auto;font-size:13px;color:var(--soft);white-space:nowrap;}
+.qb{margin:10px 0 0 40px;}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.card{border:1.5px solid #cfc6b5;border-radius:10px;padding:6px 8px;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.pics{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;align-items:center;}
+.pics img{width:42px;height:42px;object-fit:contain;}
+.big .pics img{width:52px;height:52px;}
+.choices{display:flex;gap:10px;justify-content:center;}
+.choices span{width:40px;height:40px;border:1.5px solid #bbb;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.box{display:inline-flex;align-items:center;justify-content:center;width:54px;height:54px;border:2px solid var(--line);border-radius:8px;font-size:36px;vertical-align:middle;}
+.box.trace{color:#c9c2b6;font-family:'Jua';border-style:dashed;}
+.ans .box.blank::after,.ans .fillans::after{content:attr(data-a);color:#e53935;}
+.ans .box.trace{color:#e53935;border-color:#e53935;}
+.ans .circ{outline:3px solid #e53935;outline-offset:2px;border-radius:12px;}
+.ans .ansline{display:block!important;}
+.ansline{display:none;color:#e53935;font-size:15px;margin-top:4px;}
+.dots{display:flex;gap:6px;flex-wrap:wrap;}
+.dots i{width:40px;height:40px;border:2px dashed #b9b0a0;border-radius:50%;display:inline-block;}
+.match{display:grid;grid-template-columns:auto 130px auto;align-items:center;row-gap:14px;max-width:150mm;}
+.match .l,.match .r{display:flex;align-items:center;gap:8px;}
+.match .r{justify-content:flex-start;}
+.match .dot{width:12px;height:12px;border-radius:50%;background:var(--ink);flex:none;}
+.match .l{justify-content:flex-end;}
+.numbig{font-size:36px;width:46px;text-align:center;}
+.bond{display:inline-flex;flex-direction:column;align-items:center;margin-right:30px;}
+.bond .c{width:58px;height:58px;border:2.5px solid var(--line);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;background:#fff;}
+.bond .two{display:flex;gap:30px;}
+.bond svg{width:120px;height:34px;display:block;}
+.shape-svg{width:48px;height:48px;}
+.pattern{display:flex;gap:6px;align-items:center;}
+.pattern .cell{width:52px;height:52px;display:flex;align-items:center;justify-content:center;}
+.pattern .cell.empty{border:2px dashed var(--line);border-radius:8px;font-size:22px;color:#bbb;}
+.cmp{display:flex;gap:28px;align-items:flex-end;}
+.cmp .card{min-width:90px;}
+.seesaw{width:260px;height:110px;}
+.tbl{border-collapse:collapse;font-size:20px;}
+.tbl td,.tbl th{border:1.5px solid var(--line);padding:4px 12px;text-align:center;font-weight:400;}
+.tbl th{background:#f5efe3;}
+.inner{display:flex;flex-direction:column;flex:1;min-height:100%;transform-origin:top left;}
+.inner.measure{min-height:0;flex:none;height:auto;} .inner.measure .foot{margin-top:12px;}
+.page{overflow:hidden;}
+.foot{margin-top:auto;padding-top:8px;border-top:2px dashed #cfc6b5;display:flex;gap:10px;align-items:center;font-size:13px;}
+.foot .chk{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
+.foot .chk span{border:1.5px solid #bbb;border-radius:6px;padding:2px 6px;}
+.foot .stamp{width:24mm;height:24mm;border:2px dashed #cfc6b5;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#c9c2b6;font-size:13px;flex:none;}
+.anslabel{position:absolute;right:11mm;top:4mm;color:#e53935;font-size:16px;}
+@media print{.anslabel{top:-4mm;right:0;}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <select id="lesson"></select>
+  <select id="level"><option value="1">1수준 · 느끼기</option><option value="2">2수준 · 고르기</option><option value="3">3수준 · 해 보기</option><option value="4">4수준 · 혼자서</option><option value="5">5수준 · 생활로</option></select>
+  <button id="again" type="button">🔄 다른 문제로</button>
+  <label><input type="checkbox" id="withAns"> 정답지 같이</label>
+  <button class="print" id="print" type="button">🖨️ 인쇄 / PDF로 저장</button>
+  <a id="back" href="../learn/">⬅ 돌아가기</a>
+</div>
+<div class="pages" id="pages"></div>
+<script src="../curriculum/lessons.js"></script>
+<script>
+(function () {
+  'use strict';
+  var A = '../art/', G = '../games/';
+  var Q = new URLSearchParams(location.search);
+  var LESSONS = (window.OKS_LESSONS.lessons || []).filter(function (l) { return /^02-01-/.test(l.id); });
+  var id = Q.get('id') && LESSONS.some(function (l) { return l.id === Q.get('id'); }) ? Q.get('id') : LESSONS[0].id;
+  var level = Math.min(5, Math.max(1, +Q.get('level') || 2));
+  var seed = +Q.get('seed') || Math.floor(Math.random() * 1e6);
+  /* 같은 seed면 같은 문제 (다시 인쇄해도 그대로) */
+  function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+  function ri(a, b) { return a + Math.floor(rnd() * (b - a + 1)); }
+  function shuf(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rnd() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function pick(a) { return a[Math.floor(rnd() * a.length)]; }
+  var NUMW = ['영', '하나', '둘', '셋', '넷', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
+
+  /* 그림 */
+  var FR = [['사과', G + 'balloons/img/f_apple.webp'], ['바나나', G + 'balloons/img/f_banana.webp'], ['포도', G + 'balloons/img/f_grapes.webp'], ['귤', G + 'balloons/img/f_tangerine.webp'],
+    ['배', G + 'balloons/img/f_pear.webp'], ['복숭아', G + 'balloons/img/f_peach.webp'], ['레몬', G + 'balloons/img/f_lemon.webp'], ['키위', G + 'balloons/img/f_kiwi.webp'],
+    ['딸기', G + 'farm/assets/harvest_strawberry.webp'], ['토마토', G + 'farm/assets/harvest_tomato.webp'], ['당근', G + 'farm/assets/harvest_carrot.webp'], ['상추', G + 'farm/assets/harvest_lettuce.webp']];
+  var AN = ['토끼:rabbit', '고양이:cat', '강아지:dog', '곰:bear', '판다:panda', '여우:fox', '코끼리:elephant', '펭귄:penguin', '개구리:frog', '원숭이:monkey']
+    .map(function (s) { var p = s.split(':'); return [p[0], A + 'jj/animals/' + p[1] + '.webp']; });
+  var COL = { 빨강: '#e53935', 파랑: '#1e88e5', 노랑: '#fdd835', 초록: '#43a047' };
+  function img(p, sz) { return '<img src="' + p[1] + '" alt="' + p[0] + '"' + (sz ? ' style="width:' + sz + 'px;height:' + sz + 'px"' : '') + '>'; }
+  function many(p, n, sz) { if (!sz && n > 6) sz = 34; var s = ''; for (var i = 0; i < n; i++) s += img(p, sz); return '<div class="pics">' + s + '</div>'; }
+  function shape(k, fill, sz) {
+    sz = sz || 48; fill = fill || 'none';
+    var b = '<svg class="shape-svg" style="width:' + sz + 'px;height:' + sz + 'px" viewBox="0 0 50 50">';
+    var st = ' fill="' + fill + '" stroke="#2d2a26" stroke-width="3"';
+    if (k === 'circle') b += '<circle cx="25" cy="25" r="20"' + st + '/>';
+    if (k === 'tri') b += '<path d="M25 5 46 44H4Z"' + st + ' stroke-linejoin="round"/>';
+    if (k === 'square') b += '<rect x="6" y="6" width="38" height="38"' + st + '/>';
+    return b + '</svg>';
+  }
+  var SHN = { circle: '동그라미(○)', tri: '세모(△)', square: '네모(□)' };
+  function box(a, trace) { return '<span class="box ' + (trace ? 'trace' : 'blank') + '" data-a="' + a + '">' + (trace ? a : '') + '</span>'; }
+  function choices(list, ans) { return '<div class="choices">' + list.map(function (v) { return '<span class="' + (v === ans ? 'circ' : '') + '">' + v + '</span>'; }).join('') + '</div>'; }
+  var trace = level <= 2;   /* 1·2수준은 점선 숫자를 따라 써요 */
+  var nMax = [3, 5, 5, 9, 10][level - 1];
+
+  /* ---------- 차시별 문제 ---------- */
+  var MAKE = {
+    '02-01-01-01': function () {
+      var qs = [], items = shuf(FR);
+      /* 1. 세고 알맞은 수에 ○ */
+      var cards = items.slice(0, level <= 2 ? 3 : 4).map(function (p) {
+        var n = ri(1, nMax), opts = shuf([n, n === 1 ? 2 : n - 1, n + 1 > nMax + 1 ? n - 2 : n + 1].filter(function (v, i, a) { return v > 0 && a.indexOf(v) === i; }));
+        if (level <= 1) opts = shuf([n, n === 1 ? 3 : 1].filter(function (v, i, a) { return a.indexOf(v) === i; }));
+        return '<div class="card big">' + many(p, n) + choices(opts, n) + '</div>';
+      });
+      qs.push({ t: '그림의 수를 세어 알맞은 수에 ○ 하세요.', b: '<div class="row">' + cards.join('') + '</div>' });
+      /* 2. 세고 숫자 쓰기 */
+      var c2 = items.slice(4, level <= 2 ? 7 : 8).map(function (p) { var n = ri(1, nMax); return '<div class="card">' + many(p, n) + '<div>' + box(n, trace) + ' 개</div></div>'; });
+      qs.push({ t: trace ? '세어 보고 숫자를 따라 쓰세요.' : '세어 보고 몇 개인지 □에 쓰세요.', b: '<div class="row">' + c2.join('') + '</div>' });
+      /* 3. 수만큼 ○ 그리기 / 색칠 */
+      var c3 = [ri(1, nMax), ri(1, nMax)].map(function (n) { return '<div class="row" style="margin-bottom:6px"><span class="numbig">' + n + '</span><div class="dots">' + new Array(Math.max(n, nMax) + 1).join('<i></i>') + '</div><span class="ansline">답: ' + n + '개 색칠</span></div>'; });
+      qs.push({ t: '수만큼 ○에 색칠하세요.', b: c3.join('') });
+      /* 4. 선 잇기 */
+      var nums = shuf([1, 2, 3, 4, 5].slice(0, level <= 2 ? 3 : 4)).map(function (v) { return Math.min(v, nMax + 2); });
+      var fr = items.slice(8, 8 + nums.length), right = shuf(nums.slice());
+      var m = nums.map(function (n, i) { return '<div class="l">' + many(fr[i], n, 40) + '<span class="dot"></span></div><div></div><div class="r"><span class="dot"></span><span class="numbig">' + right[i] + '</span></div>'; }).join('');
+      qs.push({ t: '그림과 알맞은 수를 선으로 이으세요.', b: '<div class="match">' + m + '</div><div class="ansline">답: ' + nums.map(function (n, i) { return fr[i][0] + '→' + n; }).join(', ') + '</div>' });
+      return qs;
+    },
+    '02-01-01-02': function () {
+      var qs = [], mx = [3, 5, 5, 7, 9][level - 1];
+      /* 1. 모으기 */
+      var c1 = []; for (var k = 0; k < (level <= 2 ? 2 : 3); k++) { var p = pick(FR), a = ri(1, mx - 1), b = ri(1, mx - a); c1.push('<div class="card big"><div class="row">' + many(p, a) + '<span style="font-size:26px">+</span>' + many(p, b) + '<span style="font-size:26px">=</span>' + box(a + b, trace) + '</div></div>'); }
+      qs.push({ t: '두 묶음을 모으면 모두 몇 개인지 쓰세요.', b: '<div class="row" style="flex-direction:column;align-items:flex-start">' + c1.join('') + '</div>' });
+      /* 2. 가르기 (수 짝) */
+      var c2 = ''; for (k = 0; k < (level <= 2 ? 2 : 3); k++) { var t = ri(2, mx), x = ri(1, t - 1);
+        c2 += '<div class="bond"><div class="c">' + t + '</div><svg viewBox="0 0 120 34"><line x1="60" y1="0" x2="29" y2="34" stroke="#2d2a26" stroke-width="2.5"/><line x1="60" y1="0" x2="91" y2="34" stroke="#2d2a26" stroke-width="2.5"/></svg><div class="two"><div class="c">' + x + '</div>' + box(t - x, trace).replace('class="box', 'style="border-radius:50%;width:58px;height:58px;border-width:2.5px" class="box') + '</div></div>'; }
+      qs.push({ t: '위의 수를 둘로 가르세요. 빈 곳에 알맞은 수를 쓰세요.', b: '<div class="row">' + c2 + '</div>' });
+      /* 3. 그림 가르기: 한 쪽에 ○ */
+      var p3 = pick(FR), t3 = ri(3, mx), h = ri(1, t3 - 1);
+      qs.push({ t: p3[0] + ' ' + t3 + '개 중 ' + h + '개에 ○ 하세요. 남은 것은 몇 개인가요?', b: '<div class="card big" style="display:inline-flex">' + many(p3, t3) + '</div> <span style="font-size:20px">남은 것: ' + box(t3 - h, trace) + ' 개</span>' });
+      if (level >= 4) { var a4 = ri(2, 5), b4 = ri(1, 4); qs.push({ t: '생활 문제: 바구니에 사과 ' + a4 + '개, 접시에 사과 ' + b4 + '개가 있어요. 모두 몇 개인가요?', b: '<span style="font-size:20px">식: ' + a4 + ' + ' + b4 + ' = ' + box(a4 + b4) + ' &nbsp; 답: ' + box(a4 + b4) + ' 개</span>' }); }
+      return qs;
+    },
+    '02-01-02-01': function () {
+      var qs = [], ks = ['circle', 'tri', 'square'], fills = ['#ffd54f', '#81d4fa', '#ef9a9a', '#a5d6a7'];
+      /* 1. 같은 모양 찾기 */
+      var want = pick(ks), set = shuf([want, want].concat(shuf(ks.filter(function (k) { return k !== want; })).concat(ks)).slice(0, level <= 2 ? 5 : 8));
+      if (level <= 2) set = shuf([want, want, ks.filter(function (k) { return k !== want; })[0], ks.filter(function (k) { return k !== want; })[0], want]);
+      qs.push({ t: SHN[want] + ' 모양을 모두 찾아 ○ 하세요.', b: '<div class="row">' + set.map(function (k) { return '<span class="card ' + (k === want ? 'circ' : '') + '">' + shape(k, pick(fills), 54) + '</span>'; }).join('') + '</div>' });
+      /* 2. 모양과 이름 잇기 */
+      var L = shuf(ks), R = shuf(ks);
+      qs.push({ t: '모양과 알맞은 이름을 선으로 이으세요.', b: '<div class="match">' + L.map(function (k, i) { return '<div class="l">' + shape(k, pick(fills), 46) + '<span class="dot"></span></div><div></div><div class="r"><span class="dot"></span><span style="font-size:20px">' + SHN[R[i]] + '</span></div>'; }).join('') + '</div>' });
+      /* 3. 집 그림 속 모양 세기 */
+      var nt = 1, nsq = ri(2, level <= 2 ? 3 : 4), nc = ri(1, level <= 2 ? 2 : 3);
+      var house = '<svg width="260" height="200" viewBox="0 0 260 200"><path d="M40 90 130 20 220 90Z" fill="#ef9a9a" stroke="#2d2a26" stroke-width="3"/><rect x="50" y="90" width="160" height="100" fill="#fff8e1" stroke="#2d2a26" stroke-width="3"/>';
+      var sx = [64, 104, 144, 184]; for (var i = 0; i < nsq; i++) house += '<rect x="' + (sx[i] - 2) + '" y="' + (i % 2 ? 140 : 104) + '" width="28" height="28" fill="#81d4fa" stroke="#2d2a26" stroke-width="3"/>';
+      var cx = [130, 70, 190]; for (i = 0; i < nc; i++) house += '<circle cx="' + cx[i] + '" cy="' + (i ? 178 : 62) + '" r="11" fill="#ffd54f" stroke="#2d2a26" stroke-width="3"/>';
+      house += '</svg>';
+      qs.push({ t: '집 그림에서 모양을 세어 쓰세요.', b: '<div class="row" style="gap:24px">' + house + '<table class="tbl"><tr><th>모양</th><th>개수</th></tr><tr><td>' + shape('tri', '#ef9a9a', 30) + '</td><td>' + box(nt, trace) + '</td></tr><tr><td>' + shape('square', '#81d4fa', 30) + '</td><td>' + box(nsq, trace) + '</td></tr><tr><td>' + shape('circle', '#ffd54f', 30) + '</td><td>' + box(nc, trace) + '</td></tr></table></div>' });
+      if (level >= 3) qs.push({ t: '△ 와 □ 를 이용해 나만의 집을 그려 보세요.', b: '<div style="height:150px;border:1.5px dashed #bbb;border-radius:10px"></div>' });
+      return qs;
+    },
+    '02-01-02-02': function () {
+      var qs = [], fr = shuf(FR);
+      /* 1. 더 큰 것 / 더 작은 것 */
+      var c1 = fr.slice(0, 2).map(function (p, i) { var big = rnd() < .5, w = i ? '작은' : '큰';
+        var a = '<div class="card ' + (big ? (w === '큰' ? 'circ' : '') : (w === '작은' ? 'circ' : '')) + '">' + img(p, big ? 80 : 40) + '</div>', b = '<div class="card ' + (!big ? (w === '큰' ? 'circ' : '') : (w === '작은' ? 'circ' : '')) + '">' + img(p, big ? 40 : 80) + '</div>';
+        return '<div style="margin-right:30px"><div style="font-size:17px;margin-bottom:4px">더 <b style="color:var(--accent);font-weight:400">' + w + '</b> 것에 ○</div><div class="cmp">' + a + b + '</div></div>'; });
+      qs.push({ t: '알맞은 것에 ○ 하세요.', b: '<div class="row">' + c1.join('') + '</div>' });
+      /* 2. 시소: 더 무거운 쪽 */
+      var heavy = fr[2], light = fr[3], leftHeavy = rnd() < .5;
+      var ss = function (lh) { return '<svg class="seesaw" viewBox="0 0 260 110"><path d="M120 108 130 80 140 108Z" fill="#a1887f" stroke="#2d2a26" stroke-width="2"/><line x1="20" y1="' + (lh ? 92 : 58) + '" x2="240" y2="' + (lh ? 58 : 92) + '" stroke="#6d4c41" stroke-width="8" stroke-linecap="round"/></svg>'; };
+      qs.push({ t: '시소를 보고 더 무거운 것에 ○ 하세요.', b: '<div class="row" style="align-items:flex-end;gap:0"><div class="card ' + (leftHeavy ? 'circ' : '') + '" style="border:none">' + img(leftHeavy ? heavy : light, 60) + '<span>' + (leftHeavy ? heavy : light)[0] + '</span></div>' + ss(leftHeavy) + '<div class="card ' + (!leftHeavy ? 'circ' : '') + '" style="border:none">' + img(leftHeavy ? light : heavy, 60) + '<span>' + (leftHeavy ? light : heavy)[0] + '</span></div></div>' });
+      /* 3. 크기 순서 */
+      if (level >= 2) { var p = fr[4], sz = shuf([36, 56, 80].concat(level >= 4 ? [100] : [])), ord = sz.slice().sort(function (a, b) { return b - a; });
+        qs.push({ t: '큰 것부터 차례대로 1, 2, 3' + (level >= 4 ? ', 4' : '') + '을 쓰세요.', b: '<div class="cmp">' + sz.map(function (s) { return '<div class="card">' + img(p, s) + box(ord.indexOf(s) + 1) + '</div>'; }).join('') + '</div>' }); }
+      /* 4. 길이 비교 */
+      var la = ri(4, 9), lb = ri(2, la - 1), top = rnd() < .5;
+      var bar = function (n, c) { return '<div style="height:22px;width:' + n * 26 + 'px;background:' + c + ';border:2px solid #2d2a26;border-radius:6px"></div>'; };
+      qs.push({ t: '더 긴 연필에 ○ 하세요.', b: '<div style="display:flex;flex-direction:column;gap:10px"><div class="row"><span>가</span><span class="' + (top ? 'circ' : '') + '">' + bar(top ? la : lb, '#ffd54f') + '</span></div><div class="row"><span>나</span><span class="' + (!top ? 'circ' : '') + '">' + bar(top ? lb : la, '#81d4fa') + '</span></div></div>' });
+      return qs;
+    },
+    '02-01-03-01': function () {
+      var qs = [], cs = Object.keys(COL);
+      function pat(unit, len, blanks) {
+        var cells = []; for (var i = 0; i < len; i++) cells.push(unit[i % unit.length]);
+        return { cells: cells, html: cells.map(function (c, i) { return blanks.indexOf(i) >= 0 ? '<div class="cell empty fillans" data-a="' + c.n + '">?</div>' : '<div class="cell">' + c.h + '</div>'; }).join('') };
+      }
+      /* 1. 색 규칙: 다음 올 것에 ○ */
+      var a = cs[ri(0, 3)], b = pick(cs.filter(function (x) { return x !== a; })), c = pick(cs.filter(function (x) { return x !== a && x !== b; }));
+      var unit = (level >= 4 ? [a, b, c] : [a, b]).map(function (k) { return { n: k, h: shape('circle', COL[k], 36) }; });
+      var p1 = pat(unit, level >= 4 ? 7 : 6, []), nx = unit[p1.cells.length % unit.length];
+      qs.push({ t: '규칙을 찾아 다음에 올 것에 ○ 하세요.', b: '<div class="row"><div class="pattern">' + p1.html + '<div class="cell empty">?</div></div><span style="margin:0 10px">→</span>' + shuf(unit.map(function (u) { return u; })).map(function (u) { return '<span class="card ' + (u === nx ? 'circ' : '') + '">' + u.h + '</span>'; }).join('') + '</div>' });
+      /* 2. 빈칸 색칠 */
+      var u2 = [pick(cs), pick(cs)]; if (u2[0] === u2[1]) u2[1] = cs[(cs.indexOf(u2[0]) + 1) % 4];
+      var unit2 = u2.map(function (k) { return { n: k, h: shape('square', COL[k], 36) }; });
+      var p2 = pat(unit2, 8, level <= 2 ? [5] : [3, 6]);
+      qs.push({ t: '규칙에 맞게 빈칸에 알맞은 색을 칠하세요.' + (level <= 2 ? ' (' + p2.cells[5].n + ')' : ''), b: '<div class="pattern">' + p2.html.replace(/>\?</g, '><') + '</div><div class="ansline">답: ' + (level <= 2 ? p2.cells[5].n : p2.cells[3].n + ', ' + p2.cells[6].n) + '</div>' });
+      /* 3. 모양 규칙 */
+      var ks = shuf(['circle', 'tri', 'square']), unit3 = (level >= 3 ? [ks[0], ks[1], ks[1]] : [ks[0], ks[1]]).map(function (k) { return { n: SHN[k], h: shape(k, 'none', 36) }; });
+      var p3 = pat(unit3, level >= 3 ? 9 : 8, [level >= 3 ? 7 : 5]);
+      qs.push({ t: '빈칸에 들어갈 모양을 그리세요.', b: '<div class="pattern">' + p3.html.replace(/>\?</g, '><') + '</div><div class="ansline">답: ' + p3.cells[level >= 3 ? 7 : 5].n + '</div>' });
+      if (level >= 4) qs.push({ t: '나만의 규칙을 만들어 색칠하세요. (규칙: ____________ )', b: '<div class="pattern">' + new Array(9).join('<div class="cell empty"></div>') + '</div>' });
+      return qs;
+    },
+    '02-01-03-02': function () {
+      var qs = [], fr = shuf(FR), an = shuf(AN);
+      var nf = ri(2, level <= 2 ? 3 : 5), na = ri(2, level <= 2 ? 3 : 5);
+      var mix = shuf(fr.slice(0, nf).map(function (p) { return { p: p, k: 'f' }; }).concat(an.slice(0, na).map(function (p) { return { p: p, k: 'a' }; })));
+      /* 1. 분류해서 세기 */
+      qs.push({ t: '과일과 동물로 나누어 세어 보세요.', b: '<div class="row" style="gap:24px"><div class="pics" style="max-width:300px;gap:8px">' + mix.map(function (m) { return img(m.p, 46); }).join('') + '</div><table class="tbl"><tr><th>과일</th><th>동물</th></tr><tr><td>' + box(nf, trace) + '</td><td>' + box(na, trace) + '</td></tr></table></div>' });
+      /* 2. 선 잇기: 상자로 */
+      var s = shuf(fr.slice(5, 7).map(function (p) { return { p: p, k: '과일 상자' }; }).concat(an.slice(5, 7).map(function (p) { return { p: p, k: '동물 집' }; })));
+      var R2 = ['🧺 과일 상자', '', '🏠 동물 집', ''];
+      qs.push({ t: '알맞은 곳에 선으로 이으세요.', b: '<div class="match">' + s.map(function (m, i) { return '<div class="l">' + img(m.p, 48) + '<span class="dot"></span></div><div></div><div class="r">' + (R2[i] ? '<span class="dot"></span><span style="font-size:22px">' + R2[i] + '</span>' : '') + '</div>'; }).join('') + '</div><div class="ansline">답: ' + s.map(function (m) { return m.p[0] + '→' + m.k; }).join(', ') + '</div>' });
+      /* 3. 색으로 나누기 */
+      var cs = Object.keys(COL).slice(0, level <= 2 ? 2 : 3), counts = cs.map(function () { return ri(1, level <= 2 ? 3 : 5); }), balls = [];
+      cs.forEach(function (c, i) { for (var k = 0; k < counts[i]; k++) balls.push(c); });
+      qs.push({ t: '색깔별로 세어 표에 쓰세요.', b: '<div class="row" style="gap:24px"><div class="pics" style="max-width:260px;gap:6px">' + shuf(balls).map(function (c) { return shape('circle', COL[c], 34); }).join('') + '</div><table class="tbl"><tr>' + cs.map(function (c) { return '<th>' + c + '</th>'; }).join('') + '</tr><tr>' + counts.map(function (n) { return '<td>' + box(n, trace) + '</td>'; }).join('') + '</tr></table></div>' });
+      if (level >= 4) qs.push({ t: '가장 많은 색은 무엇인가요?', b: '<span style="font-size:20px">답: <span class="fillans" data-a="' + cs[counts.indexOf(Math.max.apply(null, counts))] + '">________</span></span>' });
+      return qs;
+    }
+  };
+
+  /* ---------- 한 장 만들기 ---------- */
+  var L = LESSONS.filter(function (l) { return l.id === id; })[0];
+  var LVN = ['1수준 · 느끼기', '2수준 · 고르기', '3수준 · 해 보기', '4수준 · 혼자서', '5수준 · 생활로'];
+  function pageHtml(qs, ans) {
+    var n = qs.length, base = Math.floor(100 / n), pts = qs.map(function (q, i) { return i < n - 1 ? base : 100 - base * (n - 1); });
+    return '<section class="page' + (ans ? ' ans' : '') + '"><div class="inner">' + '' +
+      '<div class="head"><div class="tt"><div class="sub">수학 ' + L.unitNo + '단원 · ' + L.unit + ' · ' + L.no + '차시</div><h1>' + L.topic + (ans ? ' <span style="color:#e53935;font-size:22px">[정답지]</span>' : '') + '</h1><div class="goal">🎯 학습 목표: ' + L.goal + '</div><div class="lv">' + LVN[level - 1] + '</div></div>' +
+      '<div class="score"><b>점수</b><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ 100</span></div></div>' +
+      '<div class="info"><div>학년<i></i></div><div>반<i></i></div><div>번호<i></i></div><div>이름<i></i></div><div>날짜<i>&nbsp;&nbsp;&nbsp;월&nbsp;&nbsp;&nbsp;&nbsp;일</i></div></div>' +
+      qs.map(function (q, i) { return '<div class="q"><div class="qh"><span class="no">' + (i + 1) + '</span><span>' + q.t + '</span><span class="pt">(' + pts[i] + '점)</span></div><div class="qb">' + q.b + '</div></div>'; }).join('') +
+      '<div class="foot"><b style="font-weight:400">선생님 확인</b><div class="chk"><span>□ 독립</span><span>□ 언어힌트</span><span>□ 시각힌트</span><span>□ 시범</span><span>□ 신체지원</span></div><div class="stamp">참 잘했어요</div></div></div></section>';
+  }
+  /* 한 장(A4)에 들어가도록: 넘치면 살짝 줄여요 */
+  function fit() {
+    [].forEach.call(document.querySelectorAll('.page'), function (pg) {
+      var inn = pg.querySelector('.inner'); inn.style.transform = ''; inn.style.width = ''; inn.style.minHeight = '';
+      var avail = 1040;   /* 277mm */
+      inn.classList.add('measure'); var need = inn.scrollHeight; inn.classList.remove('measure');
+      if (need > avail) { var r = avail / need * .97; inn.style.transform = 'scale(' + r.toFixed(3) + ')'; inn.style.width = (100 / r).toFixed(2) + '%'; inn.style.minHeight = (avail / r) + 'px'; }
+    });
+  }
+  addEventListener('beforeprint', fit);
+  function render() {
+    var s0 = seed, qs = MAKE[id]();
+    var html = pageHtml(qs, false);
+    if (document.getElementById('withAns').checked) html += pageHtml(qs, true);
+    document.getElementById('pages').innerHTML = html;
+    seed = s0;
+    fit(); [].forEach.call(document.images, function (i) { if (!i.complete) i.addEventListener('load', fit); });
+    document.title = '학습지 · ' + L.topic + ' · ' + LVN[level - 1];
+  }
+
+  /* 도구 줄 */
+  var sel = document.getElementById('lesson');
+  LESSONS.forEach(function (l) { var o = document.createElement('option'); o.value = l.id; o.textContent = '수학 ' + l.no + ' ' + l.topic; sel.appendChild(o); });
+  sel.value = id; document.getElementById('level').value = level;
+  function go(newSeed) { var u = '?id=' + sel.value + '&level=' + document.getElementById('level').value + '&seed=' + (newSeed ? Math.floor(Math.random() * 1e6) : seed); location.search = u; }
+  sel.onchange = function () { go(false); }; document.getElementById('level').onchange = function () { go(false); };
+  document.getElementById('again').onclick = function () { go(true); };
+  document.getElementById('withAns').onchange = render;
+  document.getElementById('print').onclick = function () { var im = [].slice.call(document.images).filter(function (i) { return !i.complete; }); Promise.all(im.map(function (i) { return new Promise(function (r) { i.onload = i.onerror = r; }); })).then(function () { window.print(); }); };
+  document.getElementById('back').href = '../play/?id=' + id + '&level=' + level;
+  if (!Q.get('seed')) history.replaceState(null, '', '?id=' + id + '&level=' + level + '&seed=' + seed);
+  L = LESSONS.filter(function (l) { return l.id === id; })[0];
+  render();
+})();
+</script>
+</body>
+</html>

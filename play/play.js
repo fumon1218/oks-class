@@ -93,6 +93,7 @@
     if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(id, level + 1); location.href = '?id=' + id + '&level=' + (level + 1); } });
     (window.OKS_SHOP_BY_LESSON ? window.OKS_SHOP_BY_LESSON(id) : []).slice(0, 1).forEach(function (S) { btns.push({ label: '🏪 ' + S.name + '에서 일하기', color: 'pink', href: '../shop/?id=' + S.id + '&level=' + level }); });
     extras.forEach(function (x) { btns.push({ label: x.label, color: 'green', href: x.href }); });
+    if (wsHref) btns.push({ label: '📄 학습지 인쇄', color: 'blue', href: wsHref });
     btns.push({ label: O.fromSpace() ? '건물로 돌아가기' : '배움 지도', color: 'blue', href: O.ret('../learn/?subject=' + lesson.subject + '&school=' + lesson.school + '#' + id) });
     var sc = scene ? scene.stats() : { maxCombo: 0 };
     if (sc.maxCombo >= 2) entry.combo = sc.maxCombo;
@@ -118,6 +119,9 @@
   var extras = (EXTRA[id] || []).map(function (x) { return { label: x[0], href: O.ROOT + x[1] + 'lesson=' + id + '&level=' + level }; });
   var extraHref = extras.length ? extras[0].href : null;
   extras.forEach(function (x) { var ex = E('a', 'oks-btn orange oks-extra', x.label); ex.href = x.href; start.appendChild(ex); });
+  /* 종이 학습지 (지금은 수학 1단원) */
+  var wsHref = /^02-01-/.test(id) ? O.ROOT + 'worksheet/?id=' + id + '&level=' + level : null;
+  if (wsHref) { var wb = E('a', 'oks-btn blue oks-extra', '📄 학습지 인쇄'); wb.href = wsHref; start.appendChild(wb); }
   sh.board.appendChild(start);
   O.target({ get: function () { return go; } }, Math.min(level, 2));
   go.onclick = function () { O.unlock(); O.clearPrompt(); st.t0 = Date.now(); st.glow = 0; st.hand = 0; ctx.clear(); run(); };
