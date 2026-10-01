@@ -313,7 +313,8 @@ body.calm .basket-in > .drop,body.calm .bk-count.pop,body.calm .bk-slots i.got{a
 
 /* ===== 차시 화면 정리 (학생용) ===== */
 /* 배경은 흐리고 차분하게 → 문제가 먼저 보이게 */
-body.oks-play::before{background:rgba(255,250,240,.62);-webkit-backdrop-filter:blur(6px) saturate(.8);backdrop-filter:blur(6px) saturate(.8);}
+body.oks.oks-play{background-image:url('../core/ui/greenhouse_soft.webp');}
+body.oks-play::before{background:rgba(255,250,240,.55);}  /* 미리 흐리게 만든 배경 (실시간 흐림은 느린 기기에서 버벅여요) */
 body.oks-play.calm::before{background:rgba(255,250,240,.82);}
 /* 넓은 화면은 넓게 쓰기 */
 body.oks-play .oks-app{max-width:min(1560px,100%);}
