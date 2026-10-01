@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v61';
+const CACHE_NAME = 'oks-class-v62';
 const ASSETS = [
   './',
   './index.html',
@@ -602,8 +602,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   const isPage = event.request.mode === 'navigate' || event.request.destination === 'document';
+  // 화면 코드(js·css·json)도 최신 먼저: 고친 내용이 새로고침 한 번에 바로 보이게 (오프라인이면 저장본)
+  const isCode = /\.(js|css|json)(\?|$)/.test(new URL(event.request.url).pathname) || ['script', 'style'].includes(event.request.destination);
 
-  if (isPage) {
+  if (isPage || isCode) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
