@@ -86,7 +86,7 @@
   document.getElementById('setBtn').onclick = function () {
     var s = O.settings();
     var ov = E('div', 'oks-overlay'), box = E('div', 'oks-finish settings');
-    var rows = [['voice', '🗣️ 읽어 주는 목소리', s.voice], ['sound', '🎵 효과음', s.sound], ['slow', '🐢 천천히 말하기', s.slow], ['calm', '🌙 움직임 줄이기(감각 조절)', s.calm], ['big', '👆 큰 누름 칸', s.big], ['scan', '🔘 스위치(스캔) 모드', !!s.scan], ['openAll', '🔓 모든 마을 열기(선생님)', !!s.openAll]];
+    var rows = [['voice', '🗣️ 읽어 주는 목소리', s.voice], ['explain', '📢 문제 설명 읽어 주기', s.explain], ['sound', '🎵 효과음', s.sound], ['slow', '🐢 천천히 말하기', s.slow], ['calm', '🌙 움직임 줄이기(감각 조절)', s.calm], ['big', '👆 큰 누름 칸', s.big], ['scan', '🔘 스위치(스캔) 모드', !!s.scan], ['openAll', '🔓 모든 마을 열기(선생님)', !!s.openAll]];
     box.innerHTML = '<h2>설정</h2><div class="set-rows"></div><p>처음 시작할 수준</p><div class="set-lv"></div><div class="btns"></div><div class="note">시간 제한은 없어요. 4·5수준은 🙋 도와줘를 누를 때만 힌트가 나와요.</div>';
     var sr = box.querySelector('.set-rows');
     rows.forEach(function (r) { var b = E('button', 'tog' + (r[2] ? ' on' : ''), r[1] + '<span>' + (r[2] ? '켜짐' : '꺼짐') + '</span>'); b.type = 'button'; b.onclick = function () { r[2] = !r[2]; O.saveSetting(r[0], r[2]); b.classList.toggle('on', r[2]); b.querySelector('span').textContent = r[2] ? '켜짐' : '꺼짐'; }; sr.appendChild(b); });

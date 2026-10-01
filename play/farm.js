@@ -28,7 +28,23 @@
     var b = E('button', 'planter oks-pop ' + (cls || ''), img(ctx, A + 'empty_planter.webp', 'box') + (crop ? img(ctx, crop.plant, 'plant') : '') + '<span class="tag">' + (crop ? crop.label : '') + '</span>');
     b.type = 'button'; b._crop = crop; return b;
   }
-  function basket(ctx) { var b = E('div', 'dropzone basket', img(ctx, A + 'basket.webp', 'bk') + '<div class="basket-in"></div>' + img(ctx, A + 'basket_front.webp', 'bkf')); return b; }
+  /* 바구니: 담은 것이 바구니 안에 쌓여 보이고(앞 테두리가 살짝 가림), 몇 개인지 숫자와 빈칸으로 보여 줘요 */
+  function basket(ctx, goal) {
+    var b = E('div', 'dropzone basket', img(ctx, A + 'basket.webp', 'bk') + '<div class="basket-in"></div>' + img(ctx, A + 'basket_rim.webp', 'bkf') +
+      '<div class="bk-count" aria-live="polite"><b>0</b><small>개</small></div>' + (goal ? '<div class="bk-slots">' + new Array(goal + 1).join('<i></i>') + '</div>' : ''));
+    b._n = 0; return b;
+  }
+  function bkSync(bk) {
+    var items = bk.querySelectorAll('.basket-in > *'), n = items.length;
+    var c = bk.querySelector('.bk-count'); c.querySelector('b').textContent = n; c.classList.toggle('on', n > 0);
+    if (n !== bk._n) { c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
+    bk._n = n;
+    var slots = bk.querySelectorAll('.bk-slots i');
+    slots.forEach(function (sl, k) { var it = items[k]; sl.className = it ? 'got' : ''; sl.innerHTML = it ? (it.querySelector('img') ? it.querySelector('img').outerHTML : '') : ''; });
+    bk.classList.toggle('full', slots.length > 0 && n === slots.length);
+    bk.classList.toggle('over', slots.length > 0 && n > slots.length);
+  }
+  function bkAdd(bk, el) { el.classList.add('drop'); bk.querySelector('.basket-in').appendChild(el); bkSync(bk); return el; }
   function friend(ctx, f, orderHtml) {
     var w = E('div', 'customer', '<div class="bubble">' + orderHtml + '</div>' + img(ctx, f.img, 'who'));
     return w;
@@ -50,7 +66,7 @@
     function (ctx, i) {
       var crop = CROPS[i % CROPS.length];
       var ps = [0, 1, 2].map(function () { return planter(ctx, crop); });
-      var bk = basket(ctx);
+      var bk = basket(ctx, ps.length);
       var field = row('field'); ps.forEach(function (p) { field.appendChild(p); });
       ctx.board.appendChild(field); var br = row('center'); br.appendChild(bk); ctx.board.appendChild(br);
       return ctx.ask('잘 익은 ' + crop.label + '를 눌러서 따요!').then(function () {
@@ -61,7 +77,7 @@
               if (p._done) return; p._done = true; n++; O.clearPrompt(); O.sfx('pop');
               p.querySelector('.plant').classList.add('picked');
               ctx.fly(p.querySelector('.plant'), bk, img(ctx, crop.one)).then(function () {
-                bk.querySelector('.basket-in').insertAdjacentHTML('beforeend', img(ctx, crop.one, 'in'));
+                bkAdd(bk, E('span', 'in-fruit', img(ctx, crop.one)));
                 O.say(crop.label + ' ' + NUMW[n], { noRepeat: true });
                 if (n === ps.length) { O.praise('바구니 가득!'); setTimeout(res, 1100); }
                 else ctx.target({ get: function () { return ps.filter(function (x) { return !x._done; }); } });
@@ -92,7 +108,7 @@
     function (ctx, i) {
       var crop = CROPS[i % CROPS.length], n = [2, 3, 1, 4, 5][i % 5], f = FRIENDS[(i + 1) % FRIENDS.length];
       var cust = friend(ctx, f, orderHtml(ctx, [{ crop: crop, n: n }]));
-      var bk = basket(ctx);
+      var bk = basket(ctx, n);
       var pile = row('pile'); var fruits = []; for (var k = 0; k < 6; k++) { var fr = E('button', 'fruit oks-pop', img(ctx, crop.one)); fr.type = 'button'; fruits.push(fr); pile.appendChild(fr); }
       var send = E('button', 'oks-btn orange', '📦 배달하기'); send.type = 'button';
       var top = row('shop'); top.appendChild(cust); top.appendChild(bk); ctx.board.appendChild(top); ctx.board.appendChild(pile);
@@ -104,7 +120,7 @@
       var two = O.pick(CROPS, 2), n1 = 1 + Math.floor(Math.random() * 3), n2 = 1 + Math.floor(Math.random() * 3), f = FRIENDS[i % FRIENDS.length];
       var order = [{ crop: two[0], n: n1 }, { crop: two[1], n: n2 }];
       var cust = friend(ctx, f, orderHtml(ctx, order));
-      var bk = basket(ctx);
+      var bk = basket(ctx, n1 + n2);
       var pile = row('pile'); var fruits = [];
       O.shuffle([0, 0, 0, 0, 1, 1, 1, 1]).forEach(function (w) { var fr = E('button', 'fruit oks-pop', img(ctx, two[w].one)); fr.type = 'button'; fr._crop = two[w]; fruits.push(fr); pile.appendChild(fr); });
       var send = E('button', 'oks-btn orange', '📦 배달하기'); send.type = 'button';
@@ -137,7 +153,7 @@
         plantImg.src = ctx.img(A + 'young_plant.webp'); O.say('쑥쑥 자라요', { noRepeat: true });
         return O.wait(900).then(function () { plantImg.src = ctx.img(crop.plant); plantImg.className = 'plant'; O.sfx('ok'); return O.wait(500); });
       }).then(function () {
-        stepOn(2); mid.innerHTML = ''; var bk = basket(ctx);
+        stepOn(2); mid.innerHTML = ''; var bk = basket(ctx, n);
         var pile = row('pile'); var fruits = []; for (var k = 0; k < 6; k++) { var fr = E('button', 'fruit oks-pop', img(ctx, crop.one)); fr.type = 'button'; fruits.push(fr); pile.appendChild(fr); }
         var send = E('button', 'oks-btn orange', '다 담았어요'); send.type = 'button';
         top.appendChild(bk); mid.appendChild(pile); var sr = row('center'); sr.appendChild(send); ctx.board.appendChild(sr);
@@ -186,10 +202,10 @@
       tgt();
       ctx.dnd(fruits, [bk], function () { return true; }, function (f) {
         inB.push(f); f.style.visibility = 'hidden';
-        var m = E('button', 'in-fruit', f.innerHTML); m.type = 'button'; bk.querySelector('.basket-in').appendChild(m);
+        var m = E('button', 'in-fruit', f.innerHTML); m.type = 'button'; m.title = '다시 꺼내기'; bkAdd(bk, m);
         var cnt = order.length === 1 ? inB.length : countOf(f._crop);
         O.say(NUMW[cnt] || String(cnt), { noRepeat: true });
-        m.onclick = function (e) { e.stopPropagation(); m.remove(); f.style.visibility = ''; f._done = false; inB.splice(inB.indexOf(f), 1); O.sfx('tick'); tgt(); };
+        m.onclick = function (e) { e.stopPropagation(); m.remove(); bkSync(bk); f.style.visibility = ''; f._done = false; inB.splice(inB.indexOf(f), 1); O.sfx('tick'); tgt(); };
         tgt();
       }, function () { return false; });
       send.onclick = function () {

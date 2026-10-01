@@ -31,6 +31,7 @@
     var a = jget('oksaem-settings', {}), b = jget('oks_core_v1', {});
     return {
       voice: a.voice !== false, sound: a.sound !== false,
+      explain: b.explain !== false,
       calm: !!b.calm, big: !!b.big, slow: !!b.slow, scan: !!b.scan, scanSec: b.scanSec || 1.6, openAll: !!b.openAll,
       levels: b.levels || {}, defaultLevel: b.defaultLevel || 2
     };
@@ -82,7 +83,7 @@
       } catch (e) { res(); }
     });
   }
-  var replayFn = null;
+  var replayFn = null, askTalking = false;
   function setReplay(fn) { replayFn = fn; }
   function repeat() { if (replayFn) { replayFn(); return; } if (lastSaid.text) say(lastSaid.text, Object.assign({}, lastSaid.opt, { noRepeat: true })); }
   function hush() { try { speechSynthesis.cancel(); } catch (e) {} }
@@ -210,12 +211,18 @@
     var dots = el('div', 'oks-dots');
     var speak = el('button', 'oks-round', '<img src="' + UI + 'speaker.webp" alt="다시 듣기">'); speak.type = 'button'; speak.title = '다시 듣기';
     var helpBtn = el('button', 'oks-pill oks-help', '🙋 도와줘'); helpBtn.type = 'button';
-    top.appendChild(back); top.appendChild(title); top.appendChild(lvl); top.appendChild(dots); top.appendChild(speak); top.appendChild(helpBtn);
+    /* 설명 읽어 주기 켜고 끄기 (선생님·학생이 고를 수 있게, 기기에 저장) */
+    var exBtn = el('button', 'oks-pill oks-explain', ''); exBtn.type = 'button';
+    function exShow() { var on = settings().explain; exBtn.innerHTML = on ? '🗣️ <span>설명 켬</span>' : '🔇 <span>설명 끔</span>'; exBtn.setAttribute('aria-pressed', on); exBtn.title = on ? '문제 설명을 읽어 줘요 (누르면 꺼져요)' : '문제 설명을 읽지 않아요 (누르면 켜져요)'; exBtn.classList.toggle('off', !on); }
+    exShow();
+    exBtn.onclick = function () { var on = !settings().explain; saveSetting('explain', on); if (!on) hush(); exShow(); toast(on ? '설명을 읽어 줄게요' : '설명을 읽지 않아요. 🔊를 누르면 들을 수 있어요', 1800); };
+    top.appendChild(back); top.appendChild(title); top.appendChild(lvl); top.appendChild(dots); top.appendChild(exBtn); top.appendChild(speak); top.appendChild(helpBtn);
     var ask = el('div', 'oks-ask', '<img class="oks-mascot" src="' + mascot('idle') + '" alt=""><div class="oks-ask-bubble"><span class="oks-ask-text"></span></div>');
     var board = el('div', 'oks-board');
     app.appendChild(top); app.appendChild(ask); app.appendChild(board);
     document.body.appendChild(app);
     speak.onclick = function () { actx(); repeat(); };
+    board.addEventListener('pointerdown', function () { if (askTalking) { askTalking = false; hush(); } }, true);
     helpBtn.onclick = function () { actx(); help(); };
     ask.querySelector('.oks-ask-bubble').onclick = function () { repeat(); };
     var ref = {
@@ -231,9 +238,15 @@
         ask.querySelector('.oks-mascot').src = mascot(opt.mood || 'idle');
         b.classList.remove('oks-pop'); void b.offsetWidth; b.classList.add('oks-pop');
         replayFn = opt.replay || null;
-        if (opt.replay) { lastSaid = { text: text, opt: opt }; return say(opt.speak || text, opt).then(function () { return opt.replay(); }); }
-        if (opt.silent) { lastSaid = { text: opt.speak || text, opt: opt }; return Promise.resolve(); }
-        return say(opt.speak || text, opt);
+        var ex = settings().explain;
+        /* 소리를 들어야 하는 문제(replay): 설명을 끄면 소리만 들려주고, 켜면 설명 뒤에 소리 */
+        if (opt.replay) { lastSaid = { text: text, opt: opt }; return (ex ? say(opt.speak || text, opt) : Promise.resolve()).then(function () { return opt.replay(); }); }
+        if (opt.silent || !ex) { lastSaid = { text: opt.speak || text, opt: Object.assign({}, opt, { noRepeat: true }) }; return Promise.resolve(); }
+        var talking = say(opt.speak || text, opt);
+        if (opt.wait) return talking;                 /* 끝까지 들어야 하는 설명(리듬 시작 등) */
+        /* 설명이 나오는 동안에도 바로 누를 수 있어요. 누르면 설명은 멈춰요 */
+        askTalking = true; talking.then(function () { askTalking = false; });
+        return Promise.race([talking, wait(500)]);
       },
       mood: function (m) { ask.querySelector('.oks-mascot').src = mascot(m); }
     };

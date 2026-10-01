@@ -34,7 +34,7 @@
       var tempo = (c.tempo || 80) * (lv === 4 ? 1.15 : 1); var beat = 60000 / tempo;
       if (lv === 2) { /* 반짝일 때 누르기 */
         var b = padEls[0], hits = 0, beats = 8;
-        return ctx.ask(c.q2 || '반짝일 때 눌러요! 쿵, 쿵, 쿵').then(function () {
+        return ctx.ask(c.q2 || '반짝일 때 눌러요! 쿵, 쿵, 쿵', { wait: true }).then(function () {
           return new Promise(function (res) {
             var k = 0, lastBeat = 0;
             b.onclick = function () { hitFx(b); if (Math.abs(performance.now() - lastBeat) < beat * 0.45) { hits++; b.classList.add('ok'); setTimeout(function () { b.classList.remove('ok'); }, 200); } };
@@ -48,7 +48,7 @@
       /* 3·4: 내려오는 음표를 선에서 누르기 */
       var song = (c.songs && c.songs[lv]) || Array.from({ length: 10 }, function () { return Math.floor(Math.random() * nPad); });
       var fall = beat * 3; /* 음표가 내려오는 시간 */
-      return ctx.ask(c.q3 || '음표가 선에 닿을 때 눌러요').then(function () {
+      return ctx.ask(c.q3 || '음표가 선에 닿을 때 눌러요', { wait: true }).then(function () {
         return new Promise(function (res) {
           var t0 = performance.now() + 600, notes = song.map(function (lane, k) { var n = E('div', 'note', ctx.pic(pads[lane])); padEls[lane]._track.appendChild(n); return { lane: lane, at: t0 + fall + k * beat * (c.spacing || 1), el: n, done: false }; });
           var hits = 0, raf;

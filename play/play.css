@@ -216,11 +216,11 @@
 .customer .bubble{background:url('../core/ui/order_bubble.webp') center/100% 100% no-repeat;min-width:170px;padding:12px 18px 26px;display:flex;gap:10px;justify-content:center;}
 .ord{display:flex;flex-direction:column;align-items:center;}
 .ord img{height:58px;} .ord b{font-size:34px;font-weight:400;line-height:1;color:#e0612f;}
-.basket{position:relative;width:260px;height:170px;border:none;background:transparent;padding:0;justify-content:flex-end;}
+.basket{position:relative;width:300px;height:200px;border:none;background:transparent;padding:0;justify-content:flex-end;}
 .basket .bk{position:absolute;bottom:0;width:100%;}
 .basket .bkf{position:absolute;bottom:0;width:100%;z-index:2;pointer-events:none;}
-.basket-in{position:absolute;bottom:40px;left:12%;right:12%;display:flex;flex-wrap:wrap-reverse;justify-content:center;gap:2px;z-index:1;}
-.basket-in img,.in-fruit img{height:46px;}
+.basket-in{position:absolute;bottom:80px;left:17%;right:17%;display:flex;flex-wrap:wrap-reverse;justify-content:center;align-content:flex-start;gap:0 2px;z-index:1;}
+.basket-in img,.in-fruit img{height:62px;}
 .in-fruit{padding:0;}
 .basket.hover .bk{filter:drop-shadow(0 0 14px rgba(58,175,169,.9));}
 .row.pile{gap:10px;}
@@ -249,7 +249,7 @@
   .block{width:72px;height:72px;} .block img,.block .sym{width:54px;height:54px;}
   .track{height:220px;} .pad{min-height:100px;} .pad .emo{font-size:46px;}
   .planter{width:31%;height:160px;} .planter.big{width:220px;height:230px;}
-  .customer .who{height:120px;} .basket{width:190px;height:130px;} .basket-in img,.in-fruit img{height:34px;}
+  .customer .who{height:120px;} .basket{width:220px;height:150px;} .basket-in{bottom:40px;} .basket-in img,.in-fruit img{height:42px;} .bk-slots i{width:28px;height:28px;}
   .fruit{width:70px;height:70px;} .fruit img{height:54px;}
   .row.pairs{gap:8px;} .pair-arrow{display:none;} .word-card{font-size:18px;}
   .oks-card.num{width:92px;min-height:100px;} .oks-card.num b{font-size:40px;}
@@ -291,3 +291,22 @@
   .sc-track{left:92px;gap:5px;bottom:10px;} .sc-slot{width:40px;height:40px;font-size:18px;} .sc-slot b{font-size:24px;}
   .sc-finale span{font-size:64px;} .sc-finale b{font-size:21px;} .sc-finale .card{padding:16px 22px;}
 }
+
+/* 바구니: 담을 때 톡 떨어지고, 개수 숫자와 빈칸으로 몇 개인지 보여 주기 */
+.basket-in > *{margin:0 -5px -22px;}
+.basket-in > .drop{animation:bk-drop .5s cubic-bezier(.3,1.5,.5,1) both;}
+@keyframes bk-drop{0%{transform:translateY(-90px) scale(.6);opacity:0}60%{opacity:1}100%{transform:none}}
+.bk-count{position:absolute;right:-14px;top:-6px;z-index:3;min-width:62px;height:62px;padding:0 8px;border-radius:999px;background:#ff8a3d;color:#fff;display:flex;align-items:baseline;justify-content:center;gap:1px;
+  box-shadow:0 4px 12px rgba(120,60,10,.35);border:4px solid #fff;opacity:.35;transform:scale(.85);transition:opacity .2s,transform .2s;line-height:54px;}
+.bk-count b{font-size:34px;font-weight:800;}
+.bk-count small{font-size:16px;font-weight:700;}
+.bk-count.on{opacity:1;transform:none;}
+.bk-count.pop{animation:bk-pop .45s ease;}
+@keyframes bk-pop{0%{transform:scale(1)}40%{transform:scale(1.35)}100%{transform:scale(1)}}
+.bk-slots{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);display:flex;gap:5px;z-index:3;padding:4px 8px;border-radius:999px;background:rgba(255,253,245,.75);}
+.bk-slots i{width:38px;height:38px;border-radius:50%;border:3px dashed #c9a770;background:rgba(255,253,245,.9);display:grid;place-items:center;overflow:hidden;}
+.bk-slots i img{width:80%;height:80%;object-fit:contain;}
+.bk-slots i.got{border-style:solid;border-color:#3aafa9;background:#e6f7f5;animation:bk-pop .4s ease;}
+.basket.full .bk-slots i{border-color:#2fb16a;background:#dff5e7;box-shadow:0 0 0 3px rgba(47,177,106,.25);}
+.basket.over .bk-count{background:#e5534b;}
+body.calm .basket-in > .drop,body.calm .bk-count.pop,body.calm .bk-slots i.got{animation:none;}
