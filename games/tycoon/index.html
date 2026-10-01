@@ -411,6 +411,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
     var n = nextStep(); if (!n) return;
     var tb = app.querySelector('.tool[data-t="' + n.t + '"]'); if (tb) tb.classList.add('oks-glow');
     O.target({ get: n.el }, 1);
+    if (innerWidth < 900) { var te = n.el(); if (te) { var r = te.getBoundingClientRect(); if (r.top < 60 || r.bottom > innerHeight - 160) te.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }   /* 휴대폰: 할 곳이 보이게 */
   }
   function setTool(t) { tool = t; app.querySelectorAll('.tool').forEach(function (b) { b.classList.toggle('sel', b.dataset.t === t); }); }
   app.querySelectorAll('.tool').forEach(function (b) {
