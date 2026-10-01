@@ -92,6 +92,7 @@
     var btns = [{ label: '한 번 더', color: '', onClick: function () { location.reload(); } }];
     if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(id, level + 1); location.href = '?id=' + id + '&level=' + (level + 1); } });
     (window.OKS_SHOP_BY_LESSON ? window.OKS_SHOP_BY_LESSON(id) : []).slice(0, 1).forEach(function (S) { btns.push({ label: '🏪 ' + S.name + '에서 일하기', color: 'pink', href: '../shop/?id=' + S.id + '&level=' + level }); });
+    if (extraHref) btns.push({ label: '🐦 새 잡기로 세기', color: 'green', href: extraHref });
     btns.push({ label: O.fromSpace() ? '건물로 돌아가기' : '배움 지도', color: 'blue', href: O.ret('../learn/?subject=' + lesson.subject + '&school=' + lesson.school + '#' + id) });
     var sc = scene ? scene.stats() : { maxCombo: 0 };
     if (sc.maxCombo >= 2) entry.combo = sc.maxCombo;
@@ -104,7 +105,12 @@
   var gdesc = window.OKS_DESCRIBE && base ? window.OKS_DESCRIBE(base, level) : '';
   start.innerHTML = '<div class="oks-start-lv">' + O.LEVELS[level - 1].name + '</div>' + (gdesc ? '<p class="gdesc">🎮 ' + O.esc(gdesc) + '</p>' : '') + '<p>🎯 ' + O.esc(lesson.goal) + '</p>';
   var go = E('button', 'oks-btn', '▶ 시작하기'); go.type = 'button';
-  start.appendChild(go); sh.board.appendChild(start);
+  start.appendChild(go);
+  /* 같은 목표를 다른 놀이로: 수 세기 차시 → 새 잡기 */
+  var EXTRA = { '02-01-01-01': 1, '02-01-03-02': 1 };
+  var extraHref = EXTRA[id] ? O.ROOT + 'games/birds/?mode=count&lesson=' + id + '&level=' + level : null;
+  if (extraHref) { var ex = E('a', 'oks-btn orange oks-extra', '🐦 새 잡기로 세기'); ex.href = extraHref; start.appendChild(ex); }
+  sh.board.appendChild(start);
   O.target({ get: function () { return go; } }, Math.min(level, 2));
   go.onclick = function () { O.unlock(); O.clearPrompt(); st.t0 = Date.now(); st.glow = 0; st.hand = 0; ctx.clear(); run(); };
   window.OKS_CTX = ctx;

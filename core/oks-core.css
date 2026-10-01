@@ -169,3 +169,4 @@ body.big .m3d{height:40px;line-height:40px;min-width:50px;font-size:17px;}
 .oks-explain{background:#e9f6ff;color:#1f5f8b;}
 .oks-explain.off{background:#f1eef8;color:#6a6788;}
 @media (max-width:820px){.oks-explain span{display:none;}}
+a.oks-btn{text-decoration:none;}

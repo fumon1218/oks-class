@@ -44,6 +44,11 @@ body.oks::before{display:none;}
   display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 4px 12px rgba(120,60,10,.35);}
 .nest-count.pop{animation:cnt .5s ease;}
 @keyframes cnt{50%{transform:scale(1.35)}}
+.oks-ask-bubble .num{display:inline-block;min-width:1.4em;padding:0 .25em;margin:0 .15em;border-radius:14px;background:#ff8a3d;color:#fff;font-size:1.35em;line-height:1.25;text-align:center;}
+.oks-ask-bubble .dots{display:inline-flex;gap:5px;margin-left:10px;vertical-align:middle;}
+.oks-ask-bubble .dots i{width:16px;height:16px;border-radius:50%;background:#ff8a3d;}
+.check-btn{position:absolute;left:18px;bottom:18px;z-index:6;font-size:24px!important;padding:14px 26px!important;}
+.check-btn[hidden]{display:none;}
 .slots{position:absolute;z-index:4;display:flex;gap:6px;justify-content:center;}
 .slots i{width:22px;height:22px;border-radius:50%;background:#fff8e6;border:3px solid #d7b98a;}
 .slots i.got{background:#5fcf6a;border-color:#2f9a46;}
@@ -90,10 +95,23 @@ body.calm .sky .bird.flap{animation:none;}
     4: { kinds: 4, fly: 3, goal: 6, sec: 6.5 },
     5: { kinds: 6, fly: 4, goal: 6, sec: 5.5 }
   };
-  var LESSON = 'mini-birds';
+  /* 수 세기 모드(수학 차시에서 들어옴): 말한 수만큼 잡아 둥지에 넣기
+     1~3수준은 빈칸이 보이고 다 차면 끝, 4~5수준은 스스로 세고 '다 잡았어요'를 눌러요 */
+  var COUNT = O.qs('mode') === 'count';
+  var CL = {
+    1: { kinds: 1, fly: 2, rounds: 3, min: 1, max: 3, dots: true, check: false, sec: 10 },
+    2: { kinds: 2, fly: 3, rounds: 3, min: 2, max: 5, dots: true, check: false, sec: 9 },
+    3: { kinds: 3, fly: 3, rounds: 4, min: 2, max: 5, dots: true, check: false, sec: 8 },
+    4: { kinds: 3, fly: 4, rounds: 4, min: 3, max: 7, dots: false, check: true, sec: 7 },
+    5: { kinds: 4, fly: 4, rounds: 4, min: 4, max: 10, dots: false, check: true, sec: 6 }
+  };
+  var NUMW = ['영', '하나', '둘', '셋', '넷', '다섯', '여섯', '일곱', '여덟', '아홉', '열', '열하나', '열둘', '열셋'];
+  var CNT = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
+  var LESSON = COUNT ? (O.qs('lesson') || '02-01-01-01') : 'mini-birds';
   var level = O.levelFor(LESSON);
+  var BACK = COUNT ? O.ret(O.ROOT + 'play/?id=' + LESSON) : O.ret(O.ROOT + 'index.html');
 
-  var sh = O.shell({ compact: true, title: '새 잡기 놀이', back: O.ret(O.ROOT + 'index.html'), backLabel: '돌아가기', level: level });
+  var sh = O.shell({ compact: true, title: COUNT ? '새 잡기로 수 세기' : '새 잡기 놀이', back: BACK, backLabel: '돌아가기', level: level });
   document.body.classList.add('oks-play');
   var sky = sh.board; sky.classList.add('sky');
   if (O.eco) try { sh.menu.insertBefore(O.eco.hud(sh.menu), sh.levelBtn); } catch (e) {}
@@ -104,6 +122,9 @@ body.calm .sky .bird.flap{animation:none;}
   net.style.display = 'none';
   var count = E('div', 'nest-count', '0'); sky.appendChild(count);
   var slots = E('div', 'slots'); sky.appendChild(slots);
+  var checkBtn = E('button', 'oks-btn orange check-btn', '✅ 다 잡았어요'); checkBtn.type = 'button'; checkBtn.hidden = true; sky.appendChild(checkBtn);
+  checkBtn.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+  checkBtn.onclick = function () { check(); };
 
   var W = 0, H = 0, U = 0, G = {}, NEST = {};
   function layout() {
@@ -126,9 +147,9 @@ body.calm .sky .bird.flap{animation:none;}
   addEventListener('resize', layout);
 
   /* ---------- 상태 ---------- */
-  var cfg = LV[level], calm = O.settings().calm;
+  var cfg = (COUNT ? CL : LV)[level], calm = O.settings().calm;
   var kinds = [], birds = [], homes = [], want = null, got = 0, stats = null, playing = false, throwing = null, keys = {};
-  var spawnTimer = 0, last = 0, t0 = 0;
+  var spawnTimer = 0, last = 0, t0 = 0, N = 0, round = 0, total = 0;
 
   function birdW(k) { return Math.round(U * .13 * k.w); }
   function spawn(kind) {
@@ -187,7 +208,7 @@ body.calm .sky .bird.flap{animation:none;}
       if (dd <= step) { n.x = tx; n.y = ty; } else { n.x += ddx / dd * step; n.y += ddy / dd * step; }
       /* 지나가며 닿은 새 */
       var hit = null;
-      birds.forEach(function (b) { if (!hit && !b.caught && !b.away && n.x > b.x + b.w * .15 && n.x < b.x + b.w * .85 && n.y > b.y && n.y < b.y + b.h) hit = b; });
+      if (!n.t.bird) birds.forEach(function (b) { if (!hit && !b.caught && !b.away && n.x > b.x + b.w * .15 && n.x < b.x + b.w * .85 && n.y > b.y && n.y < b.y + b.h) hit = b; });
       if (hit) { n.back = true; catchBird(hit); }
       else if (dd <= step) {
         if (n.t.bird) { n.back = true; catchBird(n.t.bird); }
@@ -201,6 +222,7 @@ body.calm .sky .bird.flap{animation:none;}
 
   /* ---------- 잡았을 때 ---------- */
   function catchBird(b) {
+    if (b.kind === want && COUNT) { countCatch(b); return; }
     if (b.kind === want) {
       b.caught = true; b.el.classList.remove('flap', 'oks-glow'); O.clearPrompt();
       O.sfx('ok'); O.praise(); got++;
@@ -216,9 +238,10 @@ body.calm .sky .bird.flap{animation:none;}
     }
   }
   function placeHome(h, i) {
-    /* 둥지 위에 한 줄에 3마리씩, 둘째 줄은 조금 위에 */
-    var w = Math.round(NEST.w * .3), n = homes.length, row = Math.floor(i / 3), inRow = Math.min(3, n - row * 3), k = i % 3;
-    var cx = NEST.x + NEST.w * (inRow === 1 ? .5 : .27 + .46 * k / (inRow - 1));
+    /* 둥지 위에 한 줄에 3~5마리씩, 다음 줄은 조금 위에 */
+    var n = homes.length, per = n <= 6 ? 3 : n <= 8 ? 4 : 5;
+    var w = Math.round(NEST.w * (per === 3 ? .3 : per === 4 ? .25 : .21)), row = Math.floor(i / per), inRow = Math.min(per, n - row * per), k = i % per;
+    var cx = NEST.x + NEST.w * (inRow === 1 ? .5 : .22 + .56 * k / (inRow - 1));
     var x = cx - w / 2, y = NEST.y + NEST.h * .12 - w * .62 - row * w * .38;
     h.el.style.width = w + 'px'; h.el.style.zIndex = 3 - row; h.el.style.transform = 'translate(' + x + 'px,' + y + 'px)';
   }
@@ -240,11 +263,84 @@ body.calm .sky .bird.flap{animation:none;}
     O.target({ get: function () { return birds.filter(function (b) { return b.kind === want && !b.caught && !b.away && b.x > -b.w * .3 && b.x < G.x - b.w; }).map(function (b) { return b.el; }); },
       say: '반짝이는 ' + want.name + '를 눌러요' }, level);
   }
+  /* ---------- 수 세기 ---------- */
+  function countCatch(b) {
+    b.caught = true; b.el.classList.remove('flap', 'oks-glow'); O.clearPrompt();
+    got++; O.sfx('pop'); O.say(NUMW[got] || String(got));
+    count.textContent = got; count.classList.remove('pop'); void count.offsetWidth; count.classList.add('pop');
+    slots.children[got - 1] && slots.children[got - 1].classList.add('got');
+    goHome(b);
+    if (!cfg.check && got >= N) { playing = false; setTimeout(roundDone, 900); }
+    else setTarget();
+  }
+  function check() {
+    if (!playing) return;
+    O.unlock(); O.clearPrompt();
+    if (got === N) { playing = false; roundDone(); return; }
+    stats.mistakes++; O.sfx('no');
+    if (got < N) {
+      O.say('둥지에 ' + CNT[got] + ' 마리 있어요. ' + CNT[N] + ' 마리가 되려면 더 잡아요.');
+      showCount(1800);
+    } else {
+      var extra = got - N;
+      O.say('너무 많아요. ' + CNT[N] + ' 마리만 있으면 돼요. ' + CNT[extra] + ' 마리는 날려 보낼게요.');
+      homes.splice(N).forEach(function (h) { flyOff(h.el); });
+      got = N; showCount(1800); homes.forEach(placeHome);
+    }
+    setTarget();
+  }
+  function showCount(ms) { count.textContent = got; count.style.visibility = ''; if (!cfg.dots) setTimeout(function () { if (playing) count.style.visibility = 'hidden'; }, ms); }
+  function flyOff(el) {
+    el.style.transition = 'transform 1s ease-in, opacity 1s'; el.style.opacity = '0';
+    el.style.transform += ' translate(' + (-W * .25) + 'px,' + (-H * .7) + 'px)';
+    setTimeout(function () { el.remove(); }, 1000);
+  }
+  function roundDone() {
+    O.sfx('ok'); O.praise(CNT[N] + ' 마리!'); count.textContent = got; count.style.visibility = '';
+    O.say('맞아요! ' + want.name + ' ' + CNT[N] + ' 마리!');
+    round++; sh.setRounds(total, round);
+    setTimeout(function () {
+      homes.forEach(function (h) { flyOff(h.el); }); homes = [];
+      if (round >= total) setTimeout(done, 700); else { playing = true; nextRound(); }
+    }, 1800);
+  }
+  function nextRound() {
+    var prev = want;
+    want = kinds.length > 1 ? O.pick(kinds.filter(function (k) { return k !== prev; }))[0] : kinds[0];
+    var n; do { n = cfg.min + Math.floor(Math.random() * (cfg.max - cfg.min + 1)); } while (n === N && cfg.max > cfg.min);
+    N = n; got = 0;
+    count.textContent = '0'; count.style.visibility = cfg.dots ? '' : 'hidden';
+    slots.innerHTML = ''; if (cfg.dots) for (var i = 0; i < N; i++) slots.appendChild(E('i'));
+    checkBtn.hidden = !cfg.check;
+    var dots = cfg.dots ? '<span class="dots">' + new Array(N + 1).join('<i></i>') + '</span>' : '';
+    sh.ask(want.name + want.josa + ' ' + CNT[N] + ' 마리 잡아요!', { html: '<b>' + want.name + '</b>' + want.josa + ' <span class="num">' + N + '</span>마리 잡아요!' + dots,
+      img: IMG + want.id + '.webp', speak: want.name + want.josa + ' ' + CNT[N] + ' 마리 잡아요!' });
+    sh.setRounds(total, round);
+    fill(); setTarget();
+  }
+  function setTarget() {
+    O.target({ get: function () {
+      if (cfg.check && got >= N) return checkBtn;
+      return birds.filter(function (b) { return b.kind === want && !b.caught && !b.away && b.x > -b.w * .3 && b.x < G.x - b.w; }).map(function (b) { return b.el; }); },
+      say: cfg.check && got >= N ? '다 잡았으면 이 단추를 눌러요' : '반짝이는 ' + want.name + '를 눌러요' }, level);
+  }
+
   function done() {
     var st = stats;
+    if (COUNT) return doneCount();
     var entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'science', topic: '새 잡기 놀이', level: level, engine: 'birds', mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: Math.round((Date.now() - st.t0) / 1000) };
     O.finish({ stats: st, entry: entry, title: '새들이 모두 둥지에 왔어요!', text: '새 ' + got + '마리 · ' + O.LEVELS[level - 1].name, mission: { lesson: 1 },
       buttons: [{ label: '🔁 한 번 더', color: 'green', onClick: function () { location.reload(); } }, { label: '🏠 돌아가기', href: O.ret(O.ROOT + 'index.html') }] });
+  }
+
+  function doneCount() {
+    var st = stats, L = (window.OKS_LESSONS_BY_ID || {})[LESSON];
+    var entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'math', school: 'elem', topic: '새 잡기로 수 세기', level: level, engine: 'birds-count', rounds: total,
+      mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: Math.round((Date.now() - st.t0) / 1000) };
+    var btns = [{ label: '🔁 한 번 더', color: 'green', onClick: function () { location.reload(); } }];
+    if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(LESSON, level + 1); location.href = '?mode=count&lesson=' + LESSON + '&level=' + (level + 1); } });
+    btns.push({ label: '차시로 돌아가기', color: 'blue', href: BACK });
+    O.finish({ stats: st, entry: entry, title: '새를 모두 세었어요!', text: '수 세기 ' + total + '판 · ' + O.LEVELS[level - 1].name, mission: { lesson: 1 }, buttons: btns });
   }
 
   function tick(t) {
@@ -289,7 +385,8 @@ body.calm .sky .bird.flap{animation:none;}
     var ov = E('div', 'oks-start');
     var lvBtns = O.LEVELS.map(function (L) { return '<button type="button" data-lv="' + L.n + '" class="' + (L.n === level ? 'on' : '') + '" title="' + O.esc(L.desc) + '">' + L.short + '</button>'; }).join('');
     ov.innerHTML = '<div class="st-card"><div class="st-birds">' + KINDS.map(function (k) { return '<img src="' + IMG + k.id + '.webp" alt="' + k.name + '">'; }).join('') + '</div>' +
-      '<h1>🐦 새 잡기 놀이</h1><p>이름을 잘 듣고, 그 새를 <b>톡</b> 눌러요.<br>그물로 잡아서 둥지에 데려다줘요!</p>' +
+      (COUNT ? '<h1>🐦 새 잡기로 수 세기</h1><p>말한 <b>수만큼</b> 새를 잡아 둥지에 넣어요.<br>하나, 둘, 셋… 같이 세어 봐요!</p>'
+             : '<h1>🐦 새 잡기 놀이</h1><p>이름을 잘 듣고, 그 새를 <b>톡</b> 눌러요.<br>그물로 잡아서 둥지에 데려다줘요!</p>') +
       '<div class="st-lv">' + lvBtns + '</div><button type="button" class="oks-btn green st-go">시작! ▶</button>' +
       '<div class="keys">키보드: ↑ ↓ 로 움직이고 스페이스로 그물 던지기</div></div>';
     document.body.appendChild(ov);
@@ -300,11 +397,12 @@ body.calm .sky .bird.flap{animation:none;}
   }
   function begin() {
     sh.askEl.style.visibility = '';
-    cfg = LV[level]; O.rememberLevel(LESSON, level); sh.setLevel(level);
+    cfg = (COUNT ? CL : LV)[level]; O.rememberLevel(LESSON, level); sh.setLevel(level);
     kinds = level === 1 ? O.pick(KINDS.slice(0, 3), 1) : O.pick(KINDS, cfg.kinds);
     stats = O.newStats(); got = 0; count.textContent = '0';
     slots.innerHTML = ''; for (var i = 0; i < cfg.goal; i++) slots.appendChild(E('i'));
     playing = true; t0 = Date.now();
+    if (COUNT) { total = cfg.rounds; round = 0; slots.innerHTML = ''; nextRound(); return; }
     nextTarget();
   }
   sh.levelBtn.onclick = function () { location.reload(); };
@@ -312,7 +410,7 @@ body.calm .sky .bird.flap{animation:none;}
   layout();
   requestAnimationFrame(tick);
   startScreen();
-  window.BIRDS = { get want() { return want && want.id; }, get got() { return got; }, birds: function () { return birds; } };
+  window.BIRDS = { get want() { return want && want.id; }, get got() { return got; }, get N() { return N; }, get playing() { return playing; }, get check() { return !!cfg.check; }, birds: function () { return birds; } };
 })();
 </script>
 </body>
