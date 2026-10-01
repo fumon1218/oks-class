@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v69';
+const CACHE_NAME = 'oks-class-v70';
 const ASSETS = [
   './',
   './index.html',
@@ -52,6 +52,7 @@ const ASSETS = [
   './games/birds/index.html',
   './games/shapes/index.html',
   './games/fishing/index.html',
+  './games/balloons/index.html',
   './minigames/farm-v8/index.html',
   './career/cafe.html',
   './career/barista.html',
@@ -461,6 +462,22 @@ const ASSETS = [
   './games/fishing/img/fish_green.webp',
   './games/fishing/img/fish_orange.webp',
   './games/fishing/img/sea.webp',
+  './games/balloons/img/b_blue.webp',
+  './games/balloons/img/b_green.webp',
+  './games/balloons/img/b_orange.webp',
+  './games/balloons/img/b_purple.webp',
+  './games/balloons/img/b_red.webp',
+  './games/balloons/img/b_yellow.webp',
+  './games/balloons/img/confetti.webp',
+  './games/balloons/img/f_apple.webp',
+  './games/balloons/img/f_banana.webp',
+  './games/balloons/img/f_grapes.webp',
+  './games/balloons/img/f_kiwi.webp',
+  './games/balloons/img/f_lemon.webp',
+  './games/balloons/img/f_peach.webp',
+  './games/balloons/img/f_pear.webp',
+  './games/balloons/img/f_tangerine.webp',
+  './games/balloons/img/rocket.webp',
   './art/jj/animals/baby_monkey.webp',
   './art/jj/animals/bear.webp',
   './art/jj/animals/cat.webp',

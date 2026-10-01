@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#7cc8ff">
+<title>풍선 터트리기 · 옥쌤의 즐거운 교실</title>
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../icons/icon-192.png">
+<link rel="stylesheet" href="../../core/oks-core.css">
+<style>
+/* 스크래치 '숫자 맞히기 슈팅'을 부드럽게 바꾼 것: 옥쌤 로켓이 별빛을 쏘아 알맞은 풍선을 터트려요
+   놀이: 숫자 · 과일 · 낱말 · 색깔 · 색 섞기 · 악기 소리 · 높은 소리 낮은 소리 (과일·색깔은 영어로도) */
+body.oks{background:#7cc8ff url('../birds/img/sky.webp') center/cover no-repeat fixed;overflow:hidden;}
+body.oks::before{display:none;}
+.oks-app{max-width:none;padding:10px 14px 0;height:100dvh;display:flex;flex-direction:column;box-sizing:border-box;}
+.oks-top.compact{flex-wrap:nowrap;position:relative;}
+.oks-top.compact .oks-title{flex:0 1 680px;margin:0 auto;min-width:0;background:rgba(255,253,248,.94);border-radius:999px;color:var(--ink);text-shadow:none;box-shadow:0 4px 14px rgba(30,20,50,.2);padding:8px 26px;}
+.oks-top.compact > *:not(.oks-title):not(.oks-menu){flex-shrink:0;white-space:nowrap;}
+.oks-more{font-size:28px;font-weight:800;color:var(--ink);line-height:1;}
+.oks-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:22px;background:#fffdf7;box-shadow:0 14px 34px rgba(60,40,20,.28);min-width:240px;}
+.oks-menu[hidden]{display:none!important;}
+.oks-menu .eco-hud,.oks-menu .oks-level{justify-content:center;flex-wrap:wrap;}
+.oks-menu .oks-dots{justify-content:center;box-shadow:none;}
+@media (max-width:560px){.oks-top.compact .oks-title{display:none;} .oks-top.compact{justify-content:space-between;} .oks-top.compact .oks-pill > span{display:none;}}
+.oks-ask{margin:8px auto 0;max-width:860px;width:100%;}
+.oks-ask .oks-mascot{display:none;}
+.oks-ask-bubble::before,.oks-ask-bubble::after{display:none!important;}
+.oks-ask-bubble{font-size:25px;background:#fffdf8;box-shadow:0 6px 18px rgba(30,40,80,.22);border-radius:24px;display:flex;align-items:center;justify-content:center;gap:10px;min-height:64px;flex-wrap:wrap;}
+.oks-ask-img{height:60px;width:auto;margin:-8px 0;}
+.oks-ask-bubble .key{color:#e0457b;}
+.oks-ask-bubble .sw{display:inline-block;width:30px;height:30px;border-radius:50%;vertical-align:middle;border:3px solid #fff;box-shadow:0 0 0 2px rgba(0,0,0,.15);margin:0 2px;}
+.oks-ask-bubble .big{font-size:1.5em;line-height:1;}
+.sky{flex:1;min-height:0;position:relative;margin:8px -14px 0;padding:0;border-radius:0;background:transparent;box-shadow:none;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;}
+.sky .bal{position:absolute;left:0;top:0;pointer-events:none;will-change:transform;filter:drop-shadow(0 8px 8px rgba(20,40,80,.22));}
+.sky .bal > img{width:100%;display:block;pointer-events:none;-webkit-user-drag:none;}
+.sky .bal .lab{position:absolute;left:0;right:0;top:0;height:58%;display:flex;align-items:center;justify-content:center;pointer-events:auto;cursor:pointer;border-radius:50%;color:#fff;font-weight:400;text-shadow:0 2px 0 rgba(0,0,0,.25),0 0 8px rgba(0,0,0,.2);line-height:1;text-align:center;}
+.sky .bal .lab img{width:64%;height:auto;filter:drop-shadow(0 2px 2px rgba(0,0,0,.25));}
+.sky .bal .lab .dots{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;width:70%;margin-top:4px;}
+.sky .bal .lab .dots i{width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);}
+.sky .bal .lab .col{display:flex;flex-direction:column;align-items:center;}
+.sky .bal .lab.word{color:#fff;}
+.sky .bal.c-yellow .lab,.sky .bal.c-orange .lab{color:#5a2d0c;text-shadow:0 0 6px rgba(255,255,255,.9),0 1px 0 rgba(255,255,255,.8);}
+.sky .bal.c-yellow .lab .dots i,.sky .bal.c-orange .lab .dots i{background:#5a2d0c;}
+.sky .bal.oks-glow{animation:bal-glow .8s ease-in-out infinite;box-shadow:none;}
+@keyframes bal-glow{50%{filter:drop-shadow(0 0 14px #ffe066) drop-shadow(0 0 24px #ffb300);}}
+.sky .rocket{position:absolute;left:0;top:0;z-index:6;pointer-events:none;filter:drop-shadow(0 8px 10px rgba(20,40,80,.3));}
+.sky .shot{position:absolute;left:0;top:0;z-index:5;width:34px;height:34px;pointer-events:none;}
+.sky .boom{position:absolute;left:0;top:0;z-index:7;pointer-events:none;}
+.sky .ok-mark{position:absolute;z-index:8;pointer-events:none;font-size:30px;}
+.ctrl{position:absolute;z-index:8;right:14px;bottom:14px;display:flex;gap:10px;}
+.ctrl button{min-width:66px;height:60px;border:none;border-radius:20px;font:inherit;font-size:24px;cursor:pointer;background:rgba(255,253,248,.95);color:var(--ink);box-shadow:0 5px 0 #c9cfd8,0 8px 16px rgba(0,0,0,.2);}
+.ctrl button:active{transform:translateY(3px);box-shadow:0 2px 0 #c9cfd8;}
+.ctrl .fire{min-width:110px;background:#9b6bff;color:#fff;box-shadow:0 5px 0 #6c43c9,0 8px 16px rgba(0,0,0,.2);font-size:22px;}
+.cnt{position:absolute;z-index:8;left:14px;bottom:18px;min-width:56px;height:56px;padding:0 12px;border-radius:999px;background:#ff8a3d;color:#fff;border:4px solid #fff;display:flex;align-items:center;justify-content:center;gap:4px;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,.25);}
+.cnt.pop{animation:cnt .5s ease;}
+@keyframes cnt{50%{transform:scale(1.3)}}
+.oks-start{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;background:rgba(20,40,90,.35);overflow:auto;}
+.st-card{background:#fffdf8;border-radius:32px;padding:20px 22px;max-width:780px;width:calc(100% - 32px);text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3);margin:16px 0;}
+.st-card h1{margin:2px 0 6px;font-size:32px;font-weight:400;}
+.st-card p{margin:0 0 12px;color:var(--ink-soft);font-size:17px;line-height:1.5;}
+.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 14px;}
+.mode{border:3px solid #ece3f8;border-radius:20px;padding:8px 4px;background:#fff;cursor:pointer;font:inherit;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:2px;}
+.mode.on{border-color:#9b6bff;background:#f4eeff;box-shadow:0 0 0 3px rgba(155,107,255,.25);}
+.mode .ic{height:46px;font-size:32px;display:flex;align-items:center;justify-content:center;gap:2px;}
+.mode .ic img{height:100%;width:auto;}
+.mode b{font-weight:400;font-size:17px;} .mode small{color:var(--ink-soft);font-size:12px;}
+.st-lv{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px;}
+.st-lv button{border:3px solid #e1d8ee;background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:16px;cursor:pointer;color:var(--ink);}
+.st-lv button.on{background:#9b6bff;border-color:#9b6bff;color:#fff;}
+.st-go{font-size:24px!important;padding:14px 40px!important;}
+.keys{font-size:14px;color:var(--ink-soft);margin-top:10px;}
+@media (max-width:640px){
+  .oks-ask-bubble{font-size:18px;min-height:50px;} .oks-ask-img{height:42px;}
+  .modes{grid-template-columns:repeat(2,1fr);} .mode .ic{height:36px;font-size:26px;}
+  .ctrl{right:8px;bottom:10px;} .ctrl button{min-width:54px;height:52px;font-size:20px;} .ctrl .fire{min-width:84px;font-size:18px;}
+  .cnt{left:8px;bottom:12px;min-width:46px;height:46px;font-size:20px;}
+  .sky .bal .lab .dots i{width:7px;height:7px;}
+  .st-card h1{font-size:26px;}
+}
+body.calm .sky .bal{transition:none;}
+</style>
+</head>
+<body class="oks">
+<script src="../../core/oks-core.js"></script>
+<script src="../../core/oks-eco.js"></script>
+<script>
+(function () {
+  'use strict';
+  var O = window.OKS, E = O.el, A = '../../art/', M = 'img/';
+  function ie(w) { return w + josa(w, '이에요', '예요'); }
+  function josa(w, a, b) { var c = w.charCodeAt(w.length - 1) - 0xAC00; return (c >= 0 && c % 28) ? a : b; }
+  var EN = O.qs('lang') === 'en';
+  var NUMW = ['영', '하나', '둘', '셋', '넷', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
+  var SINO = ['영', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구', '십'];
+  var ENUM = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
+
+  /* ---------- 자료 ---------- */
+  var COLORS = [
+    { id: 'red', ko: '빨강', adj: '빨간', en: 'red', hex: '#ef3b36' }, { id: 'orange', ko: '주황', adj: '주황', en: 'orange', hex: '#ff8a1f' },
+    { id: 'yellow', ko: '노랑', adj: '노란', en: 'yellow', hex: '#ffd31a' }, { id: 'green', ko: '초록', adj: '초록', en: 'green', hex: '#2fb34a' },
+    { id: 'blue', ko: '파랑', adj: '파란', en: 'blue', hex: '#2f7fe8' }, { id: 'purple', ko: '보라', adj: '보라', en: 'purple', hex: '#9b42e6' }
+  ];
+  var CI = {}; COLORS.forEach(function (c) { CI[c.id] = c; });
+  var FRUITS = [
+    { id: 'apple', ko: '사과', en: 'apple', col: 'red', src: M + 'f_apple.webp' }, { id: 'banana', ko: '바나나', en: 'banana', col: 'yellow', src: M + 'f_banana.webp' },
+    { id: 'grapes', ko: '포도', en: 'grapes', col: 'purple', src: M + 'f_grapes.webp' }, { id: 'tangerine', ko: '귤', en: 'orange', col: 'orange', src: M + 'f_tangerine.webp' },
+    { id: 'pear', ko: '배', en: 'pear', col: 'green', src: M + 'f_pear.webp' }, { id: 'peach', ko: '복숭아', en: 'peach', col: 'pink', src: M + 'f_peach.webp' },
+    { id: 'lemon', ko: '레몬', en: 'lemon', col: 'yellow', src: M + 'f_lemon.webp' }, { id: 'kiwi', ko: '키위', en: 'kiwi', col: 'green', src: M + 'f_kiwi.webp' },
+    { id: 'cherry', ko: '체리', en: 'cherry', col: 'red', src: A + 'jj/coffee/cherry.webp' }, { id: 'strawberry', ko: '딸기', en: 'strawberry', col: 'red', src: A + 'stickers/strawberry.png' }
+  ];
+  var WORDS = ('자동차:car 버스:bus 기차:train 비행기:airplane 자전거:bicycle 우산:umbrella 시계:alarm 열쇠:key 거울:mirror 의자:chair 침대:bed ' +
+    '피아노:piano 북:drum 기타:guitar 전화기:telephone 칫솔:toothbrush 비누:soap 수건:towel 숟가락:spoon 나무:tree 꽃:flower 버섯:mushroom ' +
+    '감자:potato 호박:pumpkin 양파:onion 옥수수:corn 오리:duck 돼지:pig 소:cow 말:horse 양:sheep 거북이:turtle 게:crab 문어:octopus 고래:whale ' +
+    '달팽이:snail 나비:butterfly 별:star 해:sun 구름:cloud 무지개:rainbow 냉장고:fridge 가방:eco_bag 전구:bulb 종:bell 배추:cabbage 오이:cucumber').split(' ')
+    .map(function (s) { var p = s.split(':'); return { id: p[0], ko: p[0], src: A + 'obj/' + p[1] + '.webp' }; })
+    .concat(FRUITS.filter(function (f) { return f.src.indexOf(M) === 0; }).map(function (f) { return { id: f.ko, ko: f.ko, src: f.src }; }));
+  var INST = [
+    { id: 'drum', ko: '북', src: A + 'obj/drum.webp', play: function () { O.inst('drum'); setTimeout(function () { O.inst('drum'); }, 380); } },
+    { id: 'tambourine', ko: '탬버린', src: A + 'obj/tambourine.webp', play: function () { O.inst('tambourine'); setTimeout(function () { O.inst('tambourine'); }, 350); } },
+    { id: 'maracas', ko: '마라카스', src: A + 'obj/maracas.webp', play: function () { O.inst('maracas'); setTimeout(function () { O.inst('maracas'); }, 330); } },
+    { id: 'triangle', ko: '트라이앵글', src: A + 'obj/triangle.webp', play: function () { O.inst('triangle'); } },
+    { id: 'xylo', ko: '실로폰', src: A + 'obj/xylophone.webp', play: function () { [523, 659, 784].forEach(function (f, i) { O.inst('xylo', f, i * .22); }); } },
+    { id: 'piano', ko: '피아노', src: A + 'obj/piano.webp', play: function () { [262, 330, 392].forEach(function (f, i) { O.inst('piano', f, i * .25); }); } },
+    { id: 'bell', ko: '종', src: A + 'obj/bell.webp', play: function () { O.inst('bell', 880); setTimeout(function () { O.inst('bell', 880); }, 500); } }
+  ];
+  var MIX = [['red', 'yellow', 'orange'], ['yellow', 'blue', 'green'], ['red', 'blue', 'purple']];
+
+  /* 놀이 (교과 · 아이콘 · 수준) */
+  var MODES = {
+    number: { name: '숫자 풍선', icon: '🔢', desc: '수학 · 숫자 찾기', subject: 'math',
+      lv: { 1: { n: 2, max: 3, dots: true, rounds: 4 }, 2: { n: 3, max: 5, dots: true, rounds: 4 }, 3: { n: 3, max: 5, rounds: 5 }, 4: { n: 5, max: 9, rounds: 5 }, 5: { n: 5, max: 5, order: true, rounds: 3 } } },
+    fruit: { name: '과일 풍선', icon: '<img src="img/f_apple.webp" alt=""><img src="img/f_banana.webp" alt="">', desc: '국어 · 듣고 고르기', subject: 'korean',
+      lv: { 1: { n: 2, rounds: 4 }, 2: { n: 3, rounds: 4 }, 3: { n: 4, rounds: 5 }, 4: { n: 5, rounds: 5 }, 5: { n: 6, group: true, rounds: 3 } } },
+    word: { name: '낱말 풍선', icon: '가<small>나</small>', desc: '국어 · 그림과 낱말', subject: 'korean',
+      lv: { 1: { n: 2, speak: true, rounds: 4 }, 2: { n: 3, speak: true, rounds: 4 }, 3: { n: 3, speak: true, rounds: 5 }, 4: { n: 4, rounds: 5 }, 5: { n: 5, rounds: 5 } } },
+    color: { name: '색깔 풍선', icon: '<img src="img/b_red.webp" alt=""><img src="img/b_blue.webp" alt="">', desc: '미술 · 색 알기', subject: 'art',
+      lv: { 1: { n: 2, rounds: 4 }, 2: { n: 3, rounds: 4 }, 3: { n: 4, rounds: 5 }, 4: { n: 6, rounds: 5 }, 5: { n: 6, all: true, rounds: 3 } } },
+    mix: { name: '색 섞기 풍선', icon: '🎨', desc: '미술 · 색 혼합', subject: 'art',
+      lv: { 1: { n: 2, tell: true, rounds: 3 }, 2: { n: 3, tell: true, rounds: 3 }, 3: { n: 3, rounds: 3 }, 4: { n: 4, rounds: 3 }, 5: { n: 6, rounds: 3 } } },
+    sound: { name: '악기 소리 풍선', icon: '<img src="../../art/obj/drum.webp" alt="">', desc: '음악 · 소리 듣고 찾기', subject: 'music',
+      lv: { 1: { n: 2, tell: true, rounds: 4 }, 2: { n: 2, rounds: 4 }, 3: { n: 3, rounds: 5 }, 4: { n: 4, rounds: 5 }, 5: { n: 4, noName: true, rounds: 5 } } },
+    pitch: { name: '높은 소리 낮은 소리', icon: '🎵', desc: '음악 · 높낮이', subject: 'music',
+      lv: { 1: { n: 2, far: 1, rounds: 4 }, 2: { n: 2, far: 1, rounds: 5 }, 3: { n: 4, far: .7, rounds: 5 }, 4: { n: 4, far: .5, rounds: 6 }, 5: { n: 4, far: .35, rounds: 6 } } }
+  };
+  var mode = MODES[O.qs('mode')] ? O.qs('mode') : null;
+  var LESSON = O.qs('lesson') || 'mini-balloons';
+  var level = O.levelFor(LESSON);
+  var BACK = O.qs('lesson') ? O.ret(O.ROOT + 'play/?id=' + LESSON) : O.ret(O.ROOT + 'index.html');
+  function T(ko, en) { return EN && en ? en : ko; }
+  function say(ko, en) { return EN && en ? O.say(en, { lang: 'en-US' }) : O.say(ko); }
+
+  var sh = O.shell({ compact: true, title: EN ? 'Pop the Balloons!' : '풍선 터트리기', back: BACK, backLabel: '돌아가기', level: level });
+  if (O.eco) try { sh.menu.insertBefore(O.eco.hud(sh.menu), sh.levelBtn); } catch (e) {}
+  var sky = sh.board; sky.className = 'sky';
+  var rocket = E('img', 'rocket'); rocket.src = M + 'rocket.webp'; rocket.alt = ''; sky.appendChild(rocket);
+  var cnt = E('div', 'cnt', '🎈 0'); sky.appendChild(cnt);
+  var ctrl = E('div', 'ctrl', '<button type="button" class="l" aria-label="왼쪽">◀</button><button type="button" class="fire">⭐ 쏘기</button><button type="button" class="r" aria-label="오른쪽">▶</button>');
+  sky.appendChild(ctrl);
+  var STAR = '<svg viewBox="0 0 40 40"><path d="M20 2l5.3 11.6 12.7 1.4-9.5 8.6 2.7 12.5L20 29.8 8.8 36.1l2.7-12.5L2 15l12.7-1.4z" fill="#ffe066" stroke="#ffb300" stroke-width="2.5" stroke-linejoin="round"/></svg>';
+
+  /* ---------- 배치 ---------- */
+  var W = 0, H = 0, U = 0, R = { x: 0, w: 0, h: 0 }, calm = O.settings().calm;
+  function layout() {
+    W = sky.clientWidth; H = sky.clientHeight; U = W < 700 ? W * 1.45 : Math.min(W, H * 1.7);
+    R.w = Math.round(U * .11); R.h = R.w * 520 / 373; R.y = H - R.h - 8;
+    if (!R.x) R.x = W / 2; R.x = clamp(R.x, R.w / 2 + 8, W - R.w / 2 - 8);
+    rocket.style.width = R.w + 'px';
+    bals.forEach(sizeBal);
+  }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  addEventListener('resize', layout);
+  function zoneTop() { return 10; } function zoneBot() { return R.y - 30; }
+
+  /* ---------- 풍선 ---------- */
+  var bals = [], stats = null, playing = false, busy = false, cfg = null, round = 0, task = {}, popped = 0;
+  function sizeBal(b) { b.w = Math.round(U * (W < 700 ? .15 : .135) * (b.scale || 1)); b.h = b.w * 1.8; b.el.style.width = b.w + 'px'; var lab = b.el.querySelector('.lab'); lab.style.fontSize = Math.round(b.w * (b.fs || .42)) + 'px'; }
+  function addBal(o) {
+    var color = o.color || O.pick(COLORS)[0].id;
+    var el = E('div', 'bal c-' + color, '<img src="' + M + 'b_' + color + '.webp" alt=""><div class="lab' + (o.cls ? ' ' + o.cls : '') + '">' + (o.html || '') + '</div>');
+    var b = Object.assign({ el: el, color: color, done: false, hold: false, ph: Math.random() * 6 }, o);
+    el.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); if (playing && !busy && !b.done) shootAt(b); });
+    sky.insertBefore(el, rocket); bals.push(b); sizeBal(b);
+    return b;
+  }
+  function clearBals() { bals.forEach(function (b) { b.el.remove(); }); bals = []; }
+  function spread() {
+    var n = bals.length, cols = Math.min(n, W < 700 ? 3 : 6), rows = Math.ceil(n / cols), sl = O.shuffle(bals), top = zoneTop(), bot = zoneBot();
+    sl.forEach(function (b, i) {
+      var c = i % cols, r = Math.floor(i / cols);
+      var x0 = 20 + (W - 40) * c / cols, cw = (W - 40) / cols;
+      b.x = x0 + (cw - b.w) * (.2 + Math.random() * .6);
+      var rh = (bot - top) / rows;
+      b.y = b.fixY != null ? b.fixY : top + rh * r + Math.max(0, rh - b.h) * (.15 + Math.random() * .5);
+      b.minX = x0 + 2; b.maxX = x0 + cw - 2;
+      b.el.style.transform = 'translate(' + b.x + 'px,' + b.y + 'px)';   /* 바로 제자리에 */
+      b.vx = (Math.random() < .5 ? -1 : 1) * W * .012 * (b.fixY != null ? .5 : 1) * (level <= 2 ? .6 : 1);
+    });
+  }
+
+  /* ---------- 쏘기 ---------- */
+  function tween(fn, from, to, ms) {
+    return new Promise(function (res) {
+      var t0 = performance.now(); ms = Math.max(1, ms * (calm ? 1.3 : 1));
+      (function step(t) { var k = Math.min(1, (t - t0) / ms), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; fn(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); else res(); })(t0);
+    });
+  }
+  function moveTo(x) { x = clamp(x, R.w / 2 + 8, W - R.w / 2 - 8); var x0 = R.x; return tween(function (v) { R.x = v; }, x0, x, 150 + Math.abs(x - x0) * .8); }
+  function star() { var s = E('div', 'shot', STAR); sky.appendChild(s); return s; }
+  async function shootAt(b) {
+    busy = true; O.unlock(); O.hush(); O.clearPrompt(); b.hold = true;
+    await moveTo(b.x + b.w / 2);
+    var s = star(), x = R.x, y = R.y;
+    O.sfx('tick');
+    await new Promise(function (res) {
+      (function step() {
+        var tx = b.x + b.w / 2, ty = b.y + b.h * .3, dx = tx - x, dy = ty - y, d = Math.hypot(dx, dy), sp = Math.max(18, H * .03) * (calm ? .7 : 1);
+        if (d < sp) { s.remove(); res(); return; }
+        x += dx / d * sp; y += dy / d * sp; s.style.transform = 'translate(' + (x - 17) + 'px,' + (y - 17) + 'px) rotate(' + (y * 2) + 'deg)';
+        requestAnimationFrame(step);
+      })();
+    });
+    await judge(b);
+    busy = false;
+  }
+  async function fireUp() {
+    if (!playing || busy) return;
+    busy = true; O.unlock(); O.hush(); O.clearPrompt();
+    var s = star(), x = R.x, y = R.y, hit = null;
+    O.sfx('tick');
+    await new Promise(function (res) {
+      (function step() {
+        y -= Math.max(18, H * .03) * (calm ? .7 : 1); s.style.transform = 'translate(' + (x - 17) + 'px,' + (y - 17) + 'px) rotate(' + (y * 2) + 'deg)';
+        hit = bals.find(function (b) { return !b.done && x > b.x + b.w * .1 && x < b.x + b.w * .9 && y > b.y && y < b.y + b.h * .6; });
+        if (hit || y < -40) { s.remove(); res(); } else requestAnimationFrame(step);
+      })();
+    });
+    if (hit) { hit.hold = true; await judge(hit); }
+    busy = false;
+  }
+  async function judge(b) {
+    var ok = IMPL[mode].check(b);
+    if (ok === true) {
+      b.done = true; b.el.classList.remove('oks-glow');
+      pop(b); popped++; cnt.textContent = '🎈 ' + popped; cnt.classList.remove('pop'); void cnt.offsetWidth; cnt.classList.add('pop');
+      await O.wait(250);
+      IMPL[mode].got(b);
+    } else {
+      stats.mistakes++; O.sfx('no');
+      b.el.animate([{ rotate: '0deg' }, { rotate: '-10deg' }, { rotate: '10deg' }, { rotate: '0deg' }], { duration: 450, iterations: 2 });
+      if (typeof ok === 'string') O.say(ok); else if (ok && ok.en) O.say(ok.en, { lang: 'en-US' });
+      b.hold = false; setTarget();
+    }
+  }
+  function pop(b) {
+    O.sfx('pop'); O.sfx('ok');
+    var bx = b.x + b.w / 2, by = b.y + b.h * .3;
+    b.el.animate([{ transform: b.el.style.transform + ' scale(1)', opacity: 1 }, { transform: b.el.style.transform + ' scale(1.35)', opacity: 0 }], { duration: 220, fill: 'forwards' });
+    setTimeout(function () { b.el.remove(); }, 230);
+    var c = E('img', 'boom'); c.src = M + 'confetti.webp'; c.alt = ''; var cw = b.w * 2.2; c.style.width = cw + 'px'; sky.appendChild(c);
+    c.animate([{ transform: 'translate(' + (bx - cw / 2) + 'px,' + (by - cw / 2) + 'px) scale(.3) rotate(0deg)', opacity: 1 },
+               { transform: 'translate(' + (bx - cw / 2) + 'px,' + (by - cw / 2 + 20) + 'px) scale(1.15) rotate(25deg)', opacity: 0 }], { duration: calm ? 500 : 900, easing: 'ease-out', fill: 'forwards' });
+    setTimeout(function () { c.remove(); }, 950);
+  }
+
+  /* ---------- 놀이마다 ---------- */
+  function pickN(list, n, keep) { var r = keep ? [keep] : []; O.shuffle(list).forEach(function (x) { if (r.length < n && r.indexOf(x) < 0) r.push(x); }); return r; }
+  function others(colorOf) { return COLORS.map(function (c) { return c.id; }); }
+  var IMPL = {
+    number: {
+      start: function () {
+        var c = cfg;
+        if (c.order) {
+          task.seq = []; for (var i = 1; i <= c.max; i++) task.seq.push(i); task.step = 0;
+          task.seq.forEach(function (v) { addBal({ val: v, html: String(v) }); });
+          sh.ask('1부터 차례대로 터트려요!', { html: '<b class="key">1</b>부터 <b>차례대로</b> 터트려요! 1 → 2 → 3 …', speak: '일부터 차례대로 터트려요. 하나, 둘, 셋!' });
+        } else {
+          var nums = []; for (var k = 1; k <= c.max; k++) nums.push(k);
+          var want = task.want = O.pick(nums.filter(function (v) { return v !== task.prev; }))[0]; task.prev = want;
+          pickN(nums, c.n, want).forEach(function (v) {
+            addBal({ val: v, html: '<div class="col"><span>' + v + '</span>' + (c.dots ? '<span class="dots">' + new Array(v + 1).join('<i></i>') + '</span>' : '') + '</div>', fs: c.dots ? .36 : .46 });
+          });
+          sh.ask(want + '을 터트려요!', { html: '숫자 <b class="key big">' + want + '</b>' + josa(SINO[want], '을', '를') + ' 터트려요!', speak: '숫자 ' + SINO[want] + josa(SINO[want], '을', '를') + ' 터트려요!' });
+        }
+      },
+      want: function () { return cfg.order ? task.seq[task.step] : task.want; },
+      check: function (b) { var w = IMPL.number.want(); return b.val === w ? true : cfg.order ? '지금은 ' + NUMW[w] + ' 차례예요. ' + NUMW[w] + josa(NUMW[w], '을', '를') + ' 찾아봐요.' : '그건 ' + ie(SINO[b.val]) + '. ' + SINO[w] + josa(SINO[w], '을', '를') + ' 찾아봐요.'; },
+      got: function (b) {
+        O.say((cfg.order ? NUMW : SINO)[b.val] + '!');
+        if (cfg.order && ++task.step < task.seq.length) { setTarget(); return; }
+        next();
+      },
+      targets: function () { var w = IMPL.number.want(); return bals.filter(function (b) { return !b.done && b.val === w; }); }
+    },
+    fruit: {
+      start: function () {
+        var c = cfg;
+        if (c.group) {
+          var groups = ['red', 'yellow', 'green'].filter(function (g) { return g !== task.prev; });
+          var g = task.group = O.pick(groups)[0]; task.prev = g;
+          var mine = FRUITS.filter(function (f) { return f.col === g; }), rest = FRUITS.filter(function (f) { return f.col !== g; });
+          mine.concat(O.shuffle(rest).slice(0, c.n - mine.length)).forEach(function (f) { addBal({ val: f.id, f: f, html: '<img src="' + f.src + '" alt="">', color: bgFor(f) }); });
+          task.left = mine.length;
+          var C = CI[g];
+          sh.ask(T(C.adj + ' 과일을 모두 터트려요!', 'Pop all the ' + C.en + ' fruits!'), { html: EN ? 'Pop all the <b class="key">' + C.en + '</b> fruits!' : '<b class="key">' + C.adj + '</b> 과일을 <b>모두</b> 터트려요!', speak: EN ? 'Pop all the ' + C.en + ' fruits!' : C.adj + ' 과일을 모두 터트려요!', lang: EN ? 'en-US' : undefined });
+        } else {
+          var want = O.pick(FRUITS.filter(function (f) { return f.id !== task.prev; }))[0]; task.want = want.id; task.prev = want.id;
+          pickN(FRUITS, c.n, want).forEach(function (f) { addBal({ val: f.id, f: f, html: '<img src="' + f.src + '" alt="">', color: bgFor(f) }); });
+          sh.ask(T(want.ko + josa(want.ko, '을', '를') + ' 터트려요!', 'Pop the ' + want.en + '!'), { html: EN ? 'Pop the <b class="key">' + want.en + '</b>!' : '<b class="key">' + want.ko + '</b>' + josa(want.ko, '을', '를') + ' 터트려요!',
+            img: level <= 2 ? want.src : null, speak: EN ? 'Pop the ' + want.en + '!' : want.ko + josa(want.ko, '을', '를') + ' 터트려요!', lang: EN ? 'en-US' : undefined });
+        }
+      },
+      check: function (b) {
+        if (cfg.group) return b.f.col === task.group ? true : (EN ? { en: 'That is ' + b.f.en + '. Find ' + CI[task.group].en + ' fruits.' } : b.f.ko + josa(b.f.ko, '은', '는') + ' ' + (CI[b.f.col] ? CI[b.f.col].adj : '분홍') + ' 과일이에요. ' + CI[task.group].adj + ' 과일을 찾아봐요.');
+        return b.val === task.want ? true : (EN ? { en: 'That is ' + b.f.en + '.' } : '그건 ' + ie(b.f.ko) + '.');
+      },
+      got: function (b) { say(b.f.ko + '!', b.f.en + '!'); if (cfg.group && --task.left > 0) { setTarget(); return; } next(); },
+      targets: function () { return bals.filter(function (b) { return !b.done && (cfg.group ? b.f.col === task.group : b.val === task.want); }); }
+    },
+    word: {
+      start: function () {
+        var c = cfg, pool = O.shuffle(WORDS.filter(function (w) { return w.id !== task.prev; }));
+        var list = [pool[0]];
+        for (var i = 1; i < pool.length && list.length < c.n; i++) if (level > 3 || list.every(function (x) { return x.ko[0] !== pool[i].ko[0]; })) list.push(pool[i]);
+        var want = list[0]; task.want = want.id; task.prev = want.id;
+        list.forEach(function (w) { addBal({ val: w.id, html: w.ko, cls: 'word', fs: w.ko.length >= 4 ? .22 : w.ko.length === 3 ? .28 : .36 }); });
+        sh.ask('그림에 맞는 낱말을 터트려요!', { html: '그림에 맞는 <b class="key">낱말</b>을 터트려요!', img: want.src,
+          speak: c.speak ? '이 그림은 ' + want.ko + '. ' + want.ko + josa(want.ko, '을', '를') + ' 터트려요!' : '그림을 보고, 알맞은 낱말 풍선을 터트려요.' });
+      },
+      check: function (b) { return b.val === task.want ? true : '그건 ' + ie(b.val) + '. 그림을 다시 봐요.'; },
+      got: function (b) { O.say(b.val + '!'); next(); },
+      targets: function () { return bals.filter(function (b) { return !b.done && b.val === task.want; }); }
+    },
+    color: {
+      start: function () {
+        var c = cfg, want = O.pick(COLORS.filter(function (x) { return x.id !== task.prev; }))[0]; task.want = want.id; task.prev = want.id;
+        if (c.all) {
+          var k = 2 + Math.floor(Math.random() * 2), rest = COLORS.filter(function (x) { return x !== want; });
+          for (var i = 0; i < k; i++) addBal({ val: want.id, color: want.id });
+          O.shuffle(rest).slice(0, c.n - k).forEach(function (x) { addBal({ val: x.id, color: x.id }); });
+          task.left = k;
+        } else pickN(COLORS, c.n, want).forEach(function (x) { addBal({ val: x.id, color: x.id }); });
+        var en = 'Pop ' + (c.all ? 'all the ' : 'the ') + want.en + ' balloon' + (c.all ? 's' : '') + '!';
+        sh.ask(T(want.adj + ' 풍선을 터트려요!', en), { html: (EN ? en.replace(want.en, '<b class="key">' + want.en + '</b>') : '<b class="key">' + want.adj + '</b> 풍선을 ' + (c.all ? '<b>모두</b> ' : '') + '터트려요!') + (level <= 2 ? ' <span class="sw" style="background:' + want.hex + '"></span>' : ''),
+          speak: EN ? en : want.adj + ' 풍선을 ' + (c.all ? '모두 ' : '') + '터트려요!', lang: EN ? 'en-US' : undefined });
+      },
+      check: function (b) { var C = CI[b.color], Wt = CI[task.want]; return b.val === task.want ? true : (EN ? { en: 'That is ' + C.en + '. Find ' + Wt.en + '.' } : '그건 ' + ie(C.ko) + '. ' + Wt.adj + ' 풍선을 찾아봐요.'); },
+      got: function (b) { say(CI[b.color].ko + '!', CI[b.color].en + '!'); if (cfg.all && --task.left > 0) { setTarget(); return; } next(); },
+      targets: function () { return bals.filter(function (b) { return !b.done && b.val === task.want; }); }
+    },
+    mix: {
+      start: function () {
+        var c = cfg, m = O.pick(MIX.filter(function (x) { return x[2] !== task.prev; }))[0]; task.want = m[2]; task.prev = m[2]; task.m = m;
+        pickN(COLORS, c.n, CI[m[2]]).forEach(function (x) { addBal({ val: x.id, color: x.id }); });
+        var a = CI[m[0]], b = CI[m[1]], r = CI[m[2]];
+        sh.ask(a.ko + '과 ' + b.ko + '을 섞으면?', { html: '<span class="sw" style="background:' + a.hex + '"></span>' + a.ko + ' + <span class="sw" style="background:' + b.hex + '"></span>' + b.ko + ' = <b class="key big">?</b>',
+          speak: a.ko + josa(a.ko, '과', '와') + ' ' + b.ko + josa(b.ko, '을', '를') + ' 섞으면 무슨 색이 될까요?' + (c.tell ? ' ' + r.ko + '이 돼요. ' + r.adj + ' 풍선을 터트려요!' : ' 그 색 풍선을 터트려요.') });
+      },
+      check: function (b) { var C = CI[b.color], m = task.m; return b.val === task.want ? true : '그건 ' + ie(C.ko) + '. ' + CI[m[0]].ko + '과 ' + CI[m[1]].ko + '을 섞은 색을 생각해 봐요.'; },
+      got: function () { var m = task.m; O.say(CI[m[0]].ko + josa(CI[m[0]].ko, '과', '와') + ' ' + CI[m[1]].ko + josa(CI[m[1]].ko, '을', '를') + ' 섞으면 ' + CI[m[2]].ko + '!'); next(2000); },
+      targets: function () { return bals.filter(function (b) { return !b.done && b.val === task.want; }); }
+    },
+    sound: {
+      start: function () {
+        var c = cfg, want = O.pick(INST.filter(function (x) { return x.id !== task.prev; }))[0]; task.want = want.id; task.prev = want.id; task.inst = want;
+        pickN(INST, c.n, want).forEach(function (x) { addBal({ val: x.id, i: x, html: '<img src="' + x.src + '" alt="">' }); });
+        sh.ask('소리를 듣고 그 악기를 터트려요!', { html: '🔊 소리를 듣고 그 <b class="key">악기</b> 풍선을 터트려요!', speak: c.tell ? '이건 ' + want.ko + ' 소리예요. 잘 들어 봐요.' : '어떤 악기 소리일까요? 잘 들어 봐요.',
+          replay: function () { want.play(); return O.wait(900); } });
+      },
+      check: function (b) { return b.val === task.want ? true : '그건 ' + ie(b.i.ko) + '. 소리를 다시 들어 봐요. 🔊 단추를 눌러요.'; },
+      got: function (b) { O.say(b.i.ko + ' 소리였어요!'); b.i.play(); next(2000); },
+      targets: function () { return bals.filter(function (b) { return !b.done && b.val === task.want; }); }
+    },
+    pitch: {
+      start: function () {
+        var c = cfg; task.high = task.prevHigh == null ? Math.random() < .5 : (Math.random() < .7 ? !task.prevHigh : task.prevHigh); task.prevHigh = task.high;
+        var bh = U * (W < 700 ? .15 : .135) * .8 * 1.8, top = zoneTop() + 6, low = Math.max(top + bh * .75, zoneBot() - bh - 10);
+        for (var i = 0; i < c.n; i++) {
+          var hi = i % 2 === 0;
+          addBal({ scale: .8, val: hi ? 'high' : 'low', color: hi ? 'yellow' : 'blue', fixY: hi ? top : low, html: '<div class="col"><span>' + (hi ? '⬆' : '⬇') + '</span><span style="font-size:.42em;margin-top:4px">' + (hi ? '높은 소리' : '낮은 소리') + '</span></div>', fs: .4 });
+        }
+        var f = task.high ? 1047 - (1 - c.far) * 400 : 131 + (1 - c.far) * 120;
+        task.play = function () { [0, .45, .9].forEach(function (w) { O.inst('piano', f, w); }); };
+        sh.ask('높은 소리일까요, 낮은 소리일까요?', { html: '🔊 <b class="key">높은</b> 소리일까요, <b class="key">낮은</b> 소리일까요?', speak: '잘 들어 봐요. 높은 소리일까요, 낮은 소리일까요?',
+          replay: function () { task.play(); return O.wait(1400); } });
+      },
+      check: function (b) { var w = task.high ? 'high' : 'low'; return b.val === w ? true : '다시 들어 봐요. ' + (task.high ? '새처럼 높은 소리였어요.' : '곰처럼 낮은 소리였어요.'); },
+      got: function () { O.say(task.high ? '맞아요! 높은 소리!' : '맞아요! 낮은 소리!'); task.play(); next(2200); },
+      targets: function () { var w = task.high ? 'high' : 'low'; return bals.filter(function (b) { return !b.done && b.val === w; }); }
+    }
+  };
+  function bgFor(f) { var m = { red: 'yellow', yellow: 'blue', green: 'orange', purple: 'yellow', orange: 'blue', pink: 'green' }; return O.pick([m[f.col] || 'blue', 'blue', 'purple', 'green'].filter(function (c) { return c !== f.col; }))[0]; }
+
+  /* ---------- 진행 ---------- */
+  function setTarget() { O.target({ get: function () { return IMPL[mode].targets().map(function (b) { return b.el; }); }, say: '반짝이는 풍선을 눌러요' }, level); }
+  function next(ms) {
+    playing = false; round++; sh.setRounds(cfg.rounds, round);
+    setTimeout(function () { if (round >= cfg.rounds) done(); else newRound(); }, ms || 1500);
+  }
+  function newRound() {
+    clearBals(); playing = true;
+    IMPL[mode].start(); spread();
+    sh.setRounds(cfg.rounds, round); setTarget();
+  }
+  function done() {
+    var st = stats, MD = MODES[mode];
+    var entry = { at: new Date().toISOString(), lesson: LESSON, subject: EN ? 'english' : MD.subject, school: 'elem', topic: '풍선 터트리기 · ' + MD.name + (EN ? ' (영어)' : ''), level: level, engine: 'balloons-' + mode, rounds: cfg.rounds,
+      mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: Math.round((Date.now() - st.t0) / 1000) };
+    var q = function (lv) { return '?mode=' + mode + (EN ? '&lang=en' : '') + (O.qs('lesson') ? '&lesson=' + LESSON : '') + '&level=' + lv; };
+    var btns = [{ label: '🔁 한 번 더', color: 'green', onClick: function () { location.href = q(level); } }];
+    if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(LESSON, level + 1); location.href = q(level + 1); } });
+    if (!O.qs('lesson')) btns.push({ label: '🎈 다른 풍선 놀이', color: 'pink', onClick: function () { location.href = '?'; } });
+    btns.push({ label: O.qs('lesson') ? '차시로 돌아가기' : '🏠 돌아가기', color: 'blue', href: BACK });
+    O.finish({ stats: st, entry: entry, title: EN ? 'Great job!' : '풍선을 모두 터트렸어요!', text: MD.name + ' ' + cfg.rounds + '판 · 풍선 ' + popped + '개 · ' + O.LEVELS[level - 1].name, mission: { lesson: 1 }, buttons: btns });
+  }
+
+  function tick(now) {
+    var dt = Math.min(.05, (now - (tick.last || now)) / 1000); tick.last = now;
+    bals.forEach(function (b) {
+      if (b.done) return;
+      if (!b.hold && !calm) {
+        var slow = b.el.classList.contains('oks-glow') ? .4 : 1;
+        b.x += b.vx * slow * dt;
+        var lo = b.minX != null ? b.minX : 8, hi = (b.maxX != null ? b.maxX : W - 8) - b.w; if (hi < lo) hi = lo;
+        if (b.x < lo) { b.x = lo; b.vx = Math.abs(b.vx); } if (b.x > hi) { b.x = hi; b.vx = -Math.abs(b.vx); }
+      }
+      b.ph += dt * 1.4;
+      var dy = calm ? 0 : Math.sin(b.ph) * 6;
+      b.el.style.transform = 'translate(' + b.x + 'px,' + (b.y + dy) + 'px) rotate(' + (calm ? 0 : Math.sin(b.ph * .7) * 3) + 'deg)';
+    });
+    rocket.style.transform = 'translate(' + (R.x - R.w / 2) + 'px,' + (R.y + (calm ? 0 : Math.sin(now / 500) * 3)) + 'px)';
+    requestAnimationFrame(tick);
+  }
+  function step(dir) { if (!playing || busy) return; moveTo(R.x + dir * Math.max(40, W * .08)); }
+  ctrl.querySelector('.l').onclick = function () { step(-1); };
+  ctrl.querySelector('.r').onclick = function () { step(1); };
+  ctrl.querySelector('.fire').onclick = function () { fireUp(); };
+  ctrl.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+  addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+    if (e.key === ' ' || e.key === 'ArrowUp') { e.preventDefault(); fireUp(); }
+  });
+
+  /* ---------- 시작 화면 ---------- */
+  function startScreen() {
+    sh.askEl.style.visibility = 'hidden';
+    var ov = E('div', 'oks-start');
+    var cards = Object.keys(MODES).map(function (k) { var m = MODES[k]; return '<button type="button" class="mode" data-m="' + k + '"><div class="ic">' + m.icon + '</div><b>' + m.name + '</b><small>' + m.desc + '</small></button>'; }).join('');
+    var lvBtns = O.LEVELS.map(function (L) { return '<button type="button" data-lv="' + L.n + '" class="' + (L.n === level ? 'on' : '') + '" title="' + O.esc(L.desc) + '">' + L.short + '</button>'; }).join('');
+    ov.innerHTML = '<div class="st-card"><h1>🎈 ' + (EN ? 'Pop the Balloons!' : '풍선 터트리기') + '</h1><p>옥쌤 로켓이 <b>별빛</b>을 쏘아 풍선을 터트려요. 알맞은 풍선을 <b>톡</b> 누르세요!</p>' +
+      (O.qs('mode') ? '<p><b>' + MODES[mode].name + (EN ? ' (영어)' : '') + '</b></p>' : '<div class="modes">' + cards + '</div>') + '<div class="st-lv">' + lvBtns + '</div>' +
+      '<button type="button" class="oks-btn green st-go">시작! ▶</button><div class="keys">◀ ▶ 로 로켓을 움직이고 ⭐ 쏘기 (키보드: ← → 스페이스)</div></div>';
+    document.body.appendChild(ov);
+    if (!mode) mode = 'number';
+    ov.querySelectorAll('.mode').forEach(function (b) {
+      b.classList.toggle('on', b.dataset.m === mode);
+      b.onclick = function () { O.unlock(); mode = b.dataset.m; ov.querySelectorAll('.mode').forEach(function (x) { x.classList.toggle('on', x === b); }); O.say(MODES[mode].name); };
+    });
+    ov.querySelectorAll('.st-lv button').forEach(function (b) {
+      b.onclick = function () { level = +b.dataset.lv; ov.querySelectorAll('.st-lv button').forEach(function (x) { x.classList.toggle('on', x === b); }); };
+    });
+    ov.querySelector('.st-go').onclick = function () { O.unlock(); O.hush(); ov.remove(); begin(); };
+  }
+  function begin() {
+    sh.askEl.style.visibility = '';
+    cfg = MODES[mode].lv[level]; O.rememberLevel(LESSON, level); sh.setLevel(level);
+    document.title = '풍선 터트리기 · ' + MODES[mode].name;
+    stats = O.newStats(); round = 0; task = {}; popped = 0;
+    layout(); newRound();
+  }
+  sh.levelBtn.onclick = function () { location.reload(); };
+  layout(); requestAnimationFrame(tick); startScreen();
+  window.BALLOONS = { get mode() { return mode; }, get busy() { return busy; }, get playing() { return playing; }, targets: function () { return mode ? IMPL[mode].targets() : []; } };
+})();
+</script>
+</body>
+</html>

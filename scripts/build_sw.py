@@ -14,14 +14,14 @@ PAGES = [
     './core/oks-core.css', './core/oks-core.js', './core/oks-kit.js', './core/oks-eco.js', './curriculum/lessons.js',
     './shop/', './shop/index.html', './shop/shop.css', './shop/shop.js', './shop/shops.js', './shop/stations.js',
     './town/', './town/index.html', './town/town.css', './town/town.js', './town/cc.webp', './town/wj.webp',
-    './games/farm/index.html', './games/birds/index.html', './games/shapes/index.html', './games/fishing/index.html', './minigames/farm-v8/index.html',
+    './games/farm/index.html', './games/birds/index.html', './games/shapes/index.html', './games/fishing/index.html', './games/balloons/index.html', './minigames/farm-v8/index.html',
     './career/cafe.html', './career/barista.html', './korean/index.html', './korean/catch.html',
     './lobby/lobby-v2.css', './lobby/lobby-v3.css', './curriculum/catalog.json', './curriculum/game-blueprint.json',
     './minigames/index.html', './minigames/art-tycoon.html', './minigames/packs.js',
     './quests/index.html', './curriculum/teacher-guide.html', './curriculum/reports.html',
 ]
 files = []
-for pat in ['core/ui/*.webp', 'art/scene/*.webp', 'art/space/*.webp', 'art/3d/*.glb', 'art/build/*.webp', 'art/char/*.webp', 'art/obj/*.webp', 'art/act/*.webp', 'art/people/*.webp', 'art/avatar/*.webp', 'games/farm/assets/*.webp', 'games/birds/img/*.webp', 'games/shapes/img/*.webp', 'games/fishing/img/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
+for pat in ['core/ui/*.webp', 'art/scene/*.webp', 'art/space/*.webp', 'art/3d/*.glb', 'art/build/*.webp', 'art/char/*.webp', 'art/obj/*.webp', 'art/act/*.webp', 'art/people/*.webp', 'art/avatar/*.webp', 'games/farm/assets/*.webp', 'games/birds/img/*.webp', 'games/shapes/img/*.webp', 'games/fishing/img/*.webp', 'games/balloons/img/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
     files += sorted(glob.glob(pat))
 assets = [p for p in PAGES if p.endswith('/') or os.path.exists(p)] + ['./' + f for f in files]
 src = open('sw.js', encoding='utf-8').read()
