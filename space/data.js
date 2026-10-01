@@ -5,8 +5,8 @@
 (function () {
   'use strict';
   var STARS = [
-    { id: 'center', model: 'star_center', name: '학생회관 별', short: '학생회관', img: 'star_center', land: 'land_center', guide: 'ok_wave', guideName: '옥쌤',
-      subjects: ['korean', 'english'], color: '#f3c24b', hello: '학생회관 별이에요! 국어와 영어를 배우고, 복습 모험도 할 수 있어요.',
+    { id: 'center', model: 'star_center', name: '모두가 빛나는 별', short: '빛나는 별', img: 'star_center', land: 'land_center', guide: 'ok_wave', guideName: '옥쌤',
+      subjects: ['korean', 'english'], color: '#f3c24b', hello: '모두가 빛나는 별이에요! 국어와 영어를 배우고, 복습 모험도 할 수 있어요.',
       map: { x: 50, y: 56, w: 30 }, mapP: { x: 50, y: 36.0, w: 70 } },
     { id: 'sea', model: 'star_sea', name: '바다별', short: '바다별', img: 'star_sea', land: 'land_sea', guide: 'sea_wave', guideName: '물결이',
       subjects: ['music', 'art'], color: '#3fc1d0', hello: '바다별에 온 걸 환영해요! 음악과 미술을 배워요.',
