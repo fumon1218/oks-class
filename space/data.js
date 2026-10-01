@@ -52,7 +52,7 @@
       { id: 'b_broadcast', name: '방송국', sub: '국어 · 말하기·듣기', kind: 'lessons', subject: 'korean', x: 34, y: 90, s: .95, emo: '🎙️', rest: true },
       { id: 'b_adventure', name: '복습 모험장', sub: '배운 것 다시 하기 · 추천', kind: 'review', x: 66, y: 90, s: .95, emo: '🌿' },
       { id: 'b_arcade', name: '미니게임 놀이터', sub: '미니게임 · 예전 마을', kind: 'link', x: 83, y: 90, s: .9, emo: '🎪',
-        links: [['🎮 미니게임 모음', 'minigames/index.html'], ['🐦 새 잡기 놀이', 'games/birds/index.html'], ['🎪 모양 뽑기', 'games/shapes/index.html'], ['🏡 예전 학교 마을', 'classic.html'], ['🌸 마을 퀘스트', 'quests/index.html']] },
+        links: [['🎮 미니게임 모음', 'minigames/index.html'], ['🐦 새 잡기 놀이', 'games/birds/index.html'], ['🎪 모양 뽑기', 'games/shapes/index.html'], ['🎣 바다 낚시', 'games/fishing/index.html'], ['🏡 예전 학교 마을', 'classic.html'], ['🌸 마을 퀘스트', 'quests/index.html']] },
       { id: 'b_myroom', name: '내 방', sub: '내 기록 · 배지', kind: 'room', x: 50, y: 90, s: .8, emo: '🏠' },
       { id: 'b_dock', name: '우주 정거장', sub: '다른 별로 떠나요', kind: 'dock', x: 33, y: 31, s: .6, emo: '🚀', far: true }
     ],
@@ -71,7 +71,7 @@
     love: [
       { id: 'b_bakery', name: '동물 베이커리', sub: '수학 · 수·나누기', kind: 'lessons', subject: 'math', x: 20, y: 52, s: 1, emo: '🎂', keys: ['베이커리'] },
       { id: 'b_block_factory', name: '숫자 블록 공장', sub: '수학 · 수·도형·규칙', kind: 'lessons', subject: 'math', x: 50, y: 52, s: 1.1, emo: '🧱', rest: true,
-        links: [['🎪 모양 뽑기', 'games/shapes/index.html']] },
+        links: [['🎪 모양 뽑기', 'games/shapes/index.html'], ['🎣 바다 낚시', 'games/fishing/index.html']] },
       { id: 'b_mart', name: '동물 마트', sub: '수학 · 돈·자료', kind: 'lessons', subject: 'math', x: 80, y: 52, s: 1, emo: '🛒',
         keys: ['마트', '확률', '통계', '분류'] },
       { id: 'b_lab', name: '실험실', sub: '과학 · 물질·에너지', kind: 'lessons', subject: 'science', x: 18, y: 90, s: 1, emo: '🧪', rest: true },

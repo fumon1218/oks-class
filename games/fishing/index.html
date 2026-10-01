@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#2a8be6">
+<title>옥쌤의 바다 낚시 · 옥쌤의 즐거운 교실</title>
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../icons/icon-192.png">
+<link rel="stylesheet" href="../../core/oks-core.css">
+<style>
+/* 스크래치 「6을 모을 수 있어요(물고기를 모아라)」를 넓힌 종합 낚시 게임
+   놀이 4가지: 모으기(수) · 모양 건지기 · 큰 물고기 작은 물고기 · 낱말 카드 낚시 */
+body.oks{background:#1a86f0;overflow:hidden;}
+body.oks::before{display:none;}
+.oks-app{max-width:none;padding:10px 14px 0;height:100dvh;display:flex;flex-direction:column;box-sizing:border-box;}
+.oks-top.compact{flex-wrap:nowrap;position:relative;}
+.oks-top.compact .oks-title{flex:0 1 680px;margin:0 auto;min-width:0;background:rgba(255,253,248,.94);border-radius:999px;color:var(--ink);text-shadow:none;box-shadow:0 4px 14px rgba(30,20,50,.2);padding:8px 26px;}
+.oks-top.compact > *:not(.oks-title):not(.oks-menu){flex-shrink:0;white-space:nowrap;}
+.oks-more{font-size:28px;font-weight:800;color:var(--ink);line-height:1;}
+.oks-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:22px;background:#fffdf7;box-shadow:0 14px 34px rgba(60,40,20,.28);min-width:240px;}
+.oks-menu[hidden]{display:none!important;}
+.oks-menu .eco-hud,.oks-menu .oks-level{justify-content:center;flex-wrap:wrap;}
+.oks-menu .oks-dots{justify-content:center;box-shadow:none;}
+@media (max-width:560px){.oks-top.compact .oks-title{display:none;} .oks-top.compact{justify-content:space-between;} .oks-top.compact .oks-pill > span{display:none;}}
+.oks-ask{margin:8px auto 0;max-width:860px;width:100%;}
+.oks-ask .oks-mascot{display:none;}
+.oks-ask-bubble::before,.oks-ask-bubble::after{display:none!important;}
+.oks-ask-bubble{font-size:25px;background:#fffdf8;box-shadow:0 6px 18px rgba(10,40,90,.25);border-radius:24px;display:flex;align-items:center;justify-content:center;gap:10px;min-height:64px;flex-wrap:wrap;}
+.oks-ask-img{height:54px;width:auto;margin:-6px 0;}
+.oks-ask-bubble .fi{height:40px;vertical-align:middle;margin:0 2px;}
+.oks-ask-bubble .num{display:inline-block;min-width:1.3em;padding:0 .2em;border-radius:12px;background:#ff8a3d;color:#fff;text-align:center;}
+.oks-ask-bubble .key{color:#e0457b;}
+
+.oks-board.sea{flex:1;min-height:0;position:relative;margin:8px -14px 0;padding:0;border-radius:0;box-shadow:none;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;
+  background:linear-gradient(#1a86f0,#1f90fb) top/100% calc(var(--skyx,0px) + 2px) no-repeat,url('img/sea.webp') center var(--skyx,0px)/var(--bgw,cover) no-repeat,#1f7fe0;}
+.sea img{position:absolute;left:0;top:0;pointer-events:none;-webkit-user-drag:none;}
+.sea .thing{pointer-events:auto;cursor:pointer;filter:drop-shadow(0 6px 6px rgba(0,30,60,.25));will-change:transform;}
+.sea .thing.oks-glow{animation:th-glow .8s ease-in-out infinite;box-shadow:none;}
+@keyframes th-glow{50%{filter:drop-shadow(0 0 12px #ffe066) drop-shadow(0 0 22px #ffb300);}}
+.sea .boat{z-index:6;filter:drop-shadow(0 6px 6px rgba(0,30,60,.25));}
+.sea svg.line{position:absolute;inset:0;width:100%;height:100%;z-index:7;pointer-events:none;overflow:visible;}
+.sea .bowl{z-index:3;}
+.sea .cloud{z-index:4;}
+.word{position:absolute;z-index:5;pointer-events:none;color:#5a3412;text-align:center;display:flex;align-items:center;justify-content:center;font-weight:400;letter-spacing:.04em;}
+.word img{position:static;height:1.1em;margin-left:.15em;opacity:.95;}
+.cnt{position:absolute;z-index:5;min-width:52px;height:52px;padding:0 8px;border-radius:999px;background:#ff8a3d;color:#fff;border:4px solid #fff;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 4px 12px rgba(0,0,0,.25);}
+.cnt.pop{animation:cnt .5s ease;}
+@keyframes cnt{50%{transform:scale(1.35)}}
+.tally{position:absolute;z-index:5;left:12px;display:flex;gap:8px;flex-wrap:wrap;}
+.tally span{background:rgba(255,253,248,.95);border-radius:999px;padding:4px 12px 4px 6px;display:flex;align-items:center;gap:6px;font-size:20px;box-shadow:0 3px 10px rgba(0,0,0,.18);}
+.tally span img{position:static;height:30px;}
+.tally span.full{background:#e3f6e6;box-shadow:0 0 0 3px #2fa84f;}
+.ctrl{position:absolute;z-index:8;left:50%;bottom:12px;transform:translateX(-50%);display:flex;gap:12px;}
+.ctrl button{min-width:76px;height:62px;border:none;border-radius:20px;font:inherit;font-size:26px;cursor:pointer;background:rgba(255,253,248,.95);color:var(--ink);box-shadow:0 5px 0 #b9c7d6,0 8px 16px rgba(0,0,0,.2);}
+.ctrl button:active{transform:translateY(3px);box-shadow:0 2px 0 #b9c7d6;}
+.ctrl .cast{min-width:130px;background:#ff8a3d;color:#fff;box-shadow:0 5px 0 #d0631d,0 8px 16px rgba(0,0,0,.2);font-size:23px;}
+.quiz{position:absolute;z-index:9;left:50%;top:50%;transform:translate(-50%,-50%);background:#fffdf8;border-radius:28px;padding:18px 24px;box-shadow:0 18px 44px rgba(0,0,0,.3);text-align:center;animation:sc-pop .4s ease;width:min(92%,520px);}
+.quiz h3{margin:0 0 12px;font-weight:400;font-size:26px;}
+.quiz .opts{display:flex;gap:14px;justify-content:center;}
+.quiz .opts button{width:90px;height:90px;border-radius:24px;border:4px solid #f1e3c8;background:#fff;font:inherit;font-size:44px;cursor:pointer;color:var(--ink);}
+.quiz .opts button.no{animation:shake .4s;border-color:#e5534b;}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes sc-pop{0%{transform:translate(-50%,-50%) scale(.4)}100%{transform:translate(-50%,-50%) scale(1)}}
+.oks-start{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;background:rgba(10,40,90,.4);overflow:auto;}
+.st-card{background:#fffdf8;border-radius:32px;padding:20px 24px;max-width:720px;width:calc(100% - 32px);text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3);margin:16px 0;}
+.st-card h1{margin:2px 0 6px;font-size:32px;font-weight:400;}
+.st-card p{margin:0 0 12px;color:var(--ink-soft);font-size:17px;line-height:1.5;}
+.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0 0 14px;}
+.mode{border:3px solid #e3eef8;border-radius:22px;padding:10px 6px;background:#fff;cursor:pointer;font:inherit;color:var(--ink);display:flex;flex-direction:column;align-items:center;gap:4px;}
+.mode.on{border-color:#2a8be6;background:#eaf4ff;box-shadow:0 0 0 3px rgba(42,139,230,.25);}
+.mode .ic{height:56px;display:flex;align-items:center;justify-content:center;gap:2px;font-size:34px;}
+.mode .ic img{height:100%;width:auto;}
+.mode b{font-weight:400;font-size:19px;} .mode small{color:var(--ink-soft);font-size:13px;}
+.st-lv{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px;}
+.st-lv button{border:3px solid #dbe6ef;background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:16px;cursor:pointer;color:var(--ink);}
+.st-lv button.on{background:#2a8be6;border-color:#2a8be6;color:#fff;}
+.st-go{font-size:24px!important;padding:14px 40px!important;}
+.keys{font-size:14px;color:var(--ink-soft);margin-top:10px;}
+@media (max-width:640px){
+  .oks-ask-bubble{font-size:18px;min-height:50px;} .oks-ask-img{height:38px;} .oks-ask-bubble .fi{height:28px;}
+  .modes{grid-template-columns:repeat(2,1fr);} .mode .ic{height:40px;font-size:26px;}
+  .ctrl button{min-width:60px;height:54px;font-size:22px;} .ctrl .cast{min-width:104px;font-size:19px;}
+  .tally span{font-size:15px;} .tally span img{height:22px;}
+  .st-card h1{font-size:26px;}
+}
+</style>
+</head>
+<body class="oks">
+<script src="../../core/oks-core.js"></script>
+<script src="../../core/oks-eco.js"></script>
+<script>
+(function () {
+  'use strict';
+  var O = window.OKS, E = O.el, A = '../../art/', M = 'img/';
+  function josa(w, a, b) { var c = w.charCodeAt(w.length - 1) - 0xAC00; return (c >= 0 && c % 28) ? a : b; }
+  var CNT = ['', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'];
+  var NUMW = ['영', '하나', '둘', '셋', '넷', '다섯', '여섯', '일곱', '여덟', '아홉', '열', '열하나', '열둘'];
+
+  /* ---------- 자료 ---------- */
+  var FISH = { gray: '회색', green: '초록', orange: '주황', blue: '파랑' };
+  var SHAPES = {
+    box: { name: '상자 모양', say: '평평한 면과 뾰족한 모서리가 있어요.' },
+    cyl: { name: '둥근 기둥 모양', say: '위와 아래는 평평하고, 옆은 둥글어요.' },
+    ball: { name: '공 모양', say: '어느 쪽이나 둥글어서 잘 굴러가요.' }
+  };
+  var SH = '../shapes/img/';
+  var SHAPE_ITEMS = [
+    ['box', '냉장고', A + 'obj/fridge.webp'], ['box', '우유갑', A + 'jj/kitchen/ing_milk.webp'], ['box', '얼음', A + 'jj/kitchen/ing_ice.webp'],
+    ['box', '책', A + 'jj/recycle/notebook.webp'], ['box', '초콜릿', A + 'jj/kitchen/ing_choco.webp'], ['box', '물감 상자', A + 'obj/watercolor.webp'],
+    ['box', '선물 상자', SH + 'gift.webp'], ['box', '휴지 상자', SH + 'tissue.webp'], ['box', '서랍장', SH + 'cabinet.webp'],
+    ['cyl', '음료 캔', A + 'jj/recycle/can.webp'], ['cyl', '북', A + 'obj/drum.webp'], ['cyl', '비커', A + 'obj/beaker.webp'],
+    ['cyl', '요구르트', A + 'jj/kitchen/ing_yogurt.webp'], ['cyl', '김밥', A + 'jj/snack/kimbap_roll.webp'], ['cyl', '가래떡', A + 'jj/snack/ricecake.webp'],
+    ['cyl', '딱풀', SH + 'gluestick.webp'], ['cyl', '컵', SH + 'bottle.webp'],
+    ['ball', '축구공', SH + 'soccer.webp'], ['ball', '배구공', SH + 'volleyball.webp'], ['ball', '눈덩이', A + 'stickers/snowball.png'],
+    ['ball', '호박', A + 'obj/pumpkin.webp'], ['ball', '체리', A + 'jj/coffee/cherry.webp'], ['ball', '양파', A + 'obj/onion.webp']
+  ].map(function (a) { return { key: a[0], name: a[1], src: a[2] }; });
+  /* 낱말 카드: 받침이 적고 짧은 생활 낱말부터 */
+  var WORDS = ('자동차:car 버스:bus 기차:train 비행기:airplane 자전거:bicycle 우산:umbrella 시계:alarm 열쇠:key 거울:mirror 의자:chair 침대:bed ' +
+    '피아노:piano 북:drum 기타:guitar 전화기:telephone 칫솔:toothbrush 비누:soap 수건:towel 숟가락:spoon 나무:tree 꽃:flower 버섯:mushroom ' +
+    '감자:potato 호박:pumpkin 양파:onion 옥수수:corn 오리:duck 돼지:pig 소:cow 말:horse 양:sheep 거북이:turtle 게:crab 문어:octopus 고래:whale ' +
+    '달팽이:snail 나비:butterfly 별:star 해:sun 구름:cloud 무지개:rainbow 냉장고:fridge 가방:eco_bag 전구:bulb 종:bell 배추:cabbage 오이:cucumber').split(' ')
+    .map(function (s) { var p = s.split(':'); return { key: p[0], name: p[0], src: A + 'obj/' + p[1] + '.webp' }; })
+    .concat([['토끼', 'rabbit'], ['고양이', 'cat'], ['강아지', 'dog'], ['당근', 'carrot'], ['딸기', 'strawberry'], ['수박', 'watermelon'], ['코끼리', 'elephant'], ['개구리', 'frog']]
+      .map(function (p) { return { key: p[0], name: p[0], src: A + 'stickers/' + p[1] + '.png' }; }));
+
+  /* 놀이별 수준 */
+  var MODES = {
+    count: { name: '모으기', icon: '<img src="img/fish_gray.webp" alt=""><img src="img/fish_green.webp" alt="">', desc: '수 세고 모으기', subject: 'math',
+      lv: { 1: { two: false, min: 1, max: 3, extra: 2, others: 0, dots: true, rounds: 3, speed: .35 },
+            2: { two: false, min: 2, max: 5, extra: 1, others: 3, dots: true, rounds: 3, speed: .45 },
+            3: { two: true, min: 1, max: 3, extra: 1, others: 1, dots: true, rounds: 3, speed: .5, sum: 'say' },
+            4: { two: true, min: 1, max: 4, total: 7, extra: 1, others: 1, dots: false, rounds: 3, speed: .6, sum: 'ask' },
+            5: { two: true, min: 1, max: 5, total: 10, extra: 1, others: 2, dots: false, rounds: 3, speed: .7, sum: 'ask' } } },
+    shape: { name: '모양 건지기', icon: '<img src="../shapes/img/gift.webp" alt=""><img src="../../art/jj/recycle/can.webp" alt=""><img src="../shapes/img/soccer.webp" alt="">', desc: '상자·기둥·공 모양', subject: 'math',
+      lv: { 1: { keys: ['box'], pair: 'ball', items: 3, rounds: 3 }, 2: { keys: ['box'], items: 3, rounds: 4 }, 3: { keys: ['box', 'cyl', 'ball'], items: 4, rounds: 5 },
+            4: { keys: ['box', 'cyl', 'ball'], items: 5, rounds: 6 }, 5: { keys: ['box', 'cyl', 'ball'], items: 6, rounds: 3, all: true } } },
+    size: { name: '큰 물고기 작은 물고기', icon: '<img src="img/fish_orange.webp" alt="" style="height:100%"><img src="img/fish_orange.webp" alt="" style="height:50%">', desc: '크기 비교', subject: 'math',
+      lv: { 1: { sizes: [.55, 1.6], rounds: 4, speed: .25 }, 2: { sizes: [.8, 1.4], rounds: 4, speed: .35 }, 3: { sizes: [.6, 1, 1.5], most: true, rounds: 4, speed: .4 },
+            4: { sizes: [.55, .85, 1.15, 1.5], most: true, rounds: 5, speed: .5 }, 5: { sizes: [.55, .85, 1.15, 1.5], order: true, rounds: 3, speed: .45 } } },
+    word: { name: '낱말 카드 낚시', icon: '<img src="img/cloud.webp" alt="">', desc: '낱말 읽고 찾기', subject: 'korean',
+      lv: { 1: { items: 2, rounds: 4, speak: true, pic: true }, 2: { items: 3, rounds: 4, speak: true }, 3: { items: 3, rounds: 5, speak: true },
+            4: { items: 4, rounds: 5, speak: false }, 5: { items: 5, rounds: 5, speak: false } } }
+  };
+  var mode = MODES[O.qs('mode')] ? O.qs('mode') : null;
+  var LESSON = O.qs('lesson') || 'mini-fishing';
+  var level = O.levelFor(LESSON);
+  var BACK = O.qs('lesson') ? O.ret(O.ROOT + 'play/?id=' + LESSON) : O.ret(O.ROOT + 'index.html');
+
+  var sh = O.shell({ compact: true, title: '옥쌤의 바다 낚시', back: BACK, backLabel: '돌아가기', level: level });
+  if (O.eco) try { sh.menu.insertBefore(O.eco.hud(sh.menu), sh.levelBtn); } catch (e) {}
+  var sea = sh.board; sea.classList.add('sea');
+  function img(src, cls) { var i = E('img', cls); i.src = src; i.alt = ''; i.draggable = false; sea.appendChild(i); return i; }
+  var bowl = img(M + 'bowl.webp', 'bowl'), cloud = img(M + 'cloud.webp', 'cloud'), boat = img(M + 'boat.webp', 'boat');
+  var wordEl = E('div', 'word'); sea.appendChild(wordEl);
+  var cnt = E('div', 'cnt', '0'); sea.appendChild(cnt);
+  var tally = E('div', 'tally'); sea.appendChild(tally);
+  var line = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); line.setAttribute('class', 'line');
+  line.innerHTML = '<line x1="0" y1="0" x2="0" y2="0" stroke="#f5f5f5" stroke-width="2"/><g class="hook"><circle r="7" fill="#ff5252" stroke="#fff" stroke-width="2" cy="-14"/><path d="M0 -6 v14 a7 7 0 0 1 -12 4" fill="none" stroke="#d9dde3" stroke-width="3.5" stroke-linecap="round"/></g>';
+  sea.appendChild(line);
+  var ln = line.querySelector('line'), hook = line.querySelector('.hook');
+  var ctrl = E('div', 'ctrl', '<button type="button" class="l" aria-label="왼쪽">◀</button><button type="button" class="cast">⬇ 낚시</button><button type="button" class="r" aria-label="오른쪽">▶</button>');
+  sea.appendChild(ctrl);
+
+  /* ---------- 화면 배치 ---------- */
+  var W = 0, H = 0, U = 0, SURF = 0, B = { x: 0, w: 0, h: 0 }, BOWL = {}, HK = { x: 0, y: 0, on: false };
+  var calm = O.settings().calm;
+  function layout() {
+    W = sea.clientWidth; H = sea.clientHeight; U = W < 700 ? W * 1.45 : Math.min(W, H * 1.7);
+    /* 배경: 위쪽 하늘이 화면의 28%는 되도록 하늘색을 덧대요 */
+    var sc = Math.max(W / 1672, (H * .85) / 941), surf = 200 * sc;
+    var skyx = Math.max(0, H * .28 - surf); SURF = skyx + surf;
+    sea.style.setProperty('--skyx', skyx + 'px'); sea.style.setProperty('--bgw', Math.round(1672 * sc) + 'px ' + Math.round(941 * sc) + 'px');
+    B.w = Math.round(U * .2); B.h = Math.round(B.w * 543 / 640);
+    B.y = SURF - B.h * .86;
+    var WM = mode === 'word', cw = Math.round(Math.min(U * .24, 260)), chh = cw * 508 / 520;
+    CW = WM ? cw + 16 : 0;
+    BOWL.w = Math.round(U * .13); BOWL.h = BOWL.w * 379 / 420; BOWL.x = WM ? 10 : W - BOWL.w - 10; BOWL.y = Math.max(6, SURF - BOWL.h - 6);
+    if (!B.x) B.x = W * .3; B.x = clamp(B.x, -B.w * .3, boatMax());
+    boat.style.width = B.w + 'px';
+    bowl.style.width = BOWL.w + 'px'; bowl.style.transform = 'translate(' + BOWL.x + 'px,' + BOWL.y + 'px)';
+    cnt.style.left = (WM ? BOWL.x + BOWL.w - 24 : BOWL.x - 24) + 'px'; cnt.style.top = (BOWL.y - 4) + 'px';
+    tally.style.top = '10px';
+    /* 낱말 구름은 오른쪽 위 (배는 그 왼쪽에서만 다녀요) */
+    var cx = W - cw - 8, cy = Math.max(4, SURF - chh * .8);
+    cloud.style.width = cw + 'px'; cloud.style.transform = 'translate(' + cx + 'px,' + cy + 'px)';
+    wordEl.style.left = (cx + cw * .12) + 'px'; wordEl.style.width = (cw * .76) + 'px';
+    wordEl.style.top = (cy + chh * .58) + 'px'; wordEl.style.height = (chh * .33) + 'px'; wordEl.style.fontSize = Math.round(cw * .15) + 'px';
+    things.forEach(sizeThing);
+    drawBoat();
+  }
+  var CW = 0;
+  function boatMax() { return CW ? W - CW - B.w * 1.0 : W - B.w * 1.05 - BOWL.w; }
+  function rightLimit() { return CW ? W - CW - 10 : W - BOWL.w - 10; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  addEventListener('resize', layout);
+  function tip() { return { x: B.x + B.w * .99, y: B.y + B.h * .01 + bob() }; }
+  function bob() { return calm ? 0 : Math.sin(performance.now() / 700) * 3; }
+  function drawBoat() {
+    boat.style.transform = 'translate(' + B.x + 'px,' + (B.y + bob()) + 'px)';
+    var t = tip(), hx = HK.on ? HK.x : t.x, hy = HK.on ? HK.y : SURF - 4;
+    ln.setAttribute('x1', t.x); ln.setAttribute('y1', t.y); ln.setAttribute('x2', hx); ln.setAttribute('y2', hy);
+    hook.setAttribute('transform', 'translate(' + hx + ',' + hy + ')');
+  }
+
+  /* ---------- 물속 것들 ---------- */
+  var things = [], stats = null, playing = false, busy = false, cfg = null, round = 0, task = null;
+  function waterTop() { return SURF + H * .06; }
+  function sizeThing(t) {
+    t.w = Math.round(U * (t.fish ? .11 : .1) * (t.scale || 1)); t.h = t.w * (t.ar || .8);
+    t.el.style.width = t.w + 'px';
+    if (t.fx == null) { t.fx = Math.random(); t.fy = Math.random(); }
+    if (t.x == null) place(t);
+  }
+  function place(t) {
+    var top = waterTop(), bot = H - 90 - t.h;
+    var lo = CW ? Math.max(20, BOWL.x + BOWL.w * .2) : 20;
+    t.x = lo + t.fx * Math.max(10, (rightLimit() - lo - t.w));
+    t.y = top + t.fy * Math.max(10, bot - top);
+  }
+  function addThing(o) {
+    var el = img(o.src, 'thing');
+    var t = Object.assign({ el: el, vx: 0, ph: Math.random() * 6, done: false, hold: false }, o);
+    el.onload = function () { t.ar = el.naturalHeight / el.naturalWidth; sizeThing(t); };
+    el.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); if (playing && !busy && !t.done) catchIt(t); });
+    things.push(t); sizeThing(t);
+    return t;
+  }
+  function clearThings() { things.forEach(function (t) { t.el.remove(); }); things = []; }
+  /* 겹치지 않게 칸에 나눠 놓기 */
+  function spread(list) {
+    var n = list.length, cols = Math.min(n, W < 700 ? 2 : 4), rows = Math.ceil(n / cols), sl = O.shuffle(list);
+    sl.forEach(function (t, i) {
+      var c = i % cols, r = Math.floor(i / cols);
+      t.fx = (c + .2 + Math.random() * .6) / cols; t.fy = rows === 1 ? .35 + Math.random() * .3 : (r + .15 + Math.random() * .5) / rows;
+      t.x = null; sizeThing(t);
+    });
+  }
+
+  /* ---------- 낚시 ---------- */
+  function tween(fn, from, to, ms) {
+    return new Promise(function (res) {
+      var t0 = performance.now(); ms = Math.max(1, ms * (calm ? 1.3 : 1));
+      (function step(t) { var k = Math.min(1, (t - t0) / ms), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; fn(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); else res(); })(t0);
+    });
+  }
+  function boatTo(x) { x = clamp(x - B.w * .99, -B.w * .3, boatMax()); var x0 = B.x; return tween(function (v) { B.x = v; }, x0, x, 200 + Math.abs(x - x0) * 1.2); }
+  async function catchIt(t) {
+    busy = true; O.unlock(); O.hush(); O.clearPrompt();
+    t.hold = true;
+    await boatTo(t.x + t.w / 2);
+    var tp = tip(); HK.on = true; HK.x = tp.x; HK.y = SURF - 4;
+    var ty = t.y + t.h * .35;
+    await tween(function (v) { HK.x = tp.x + (t.x + t.w / 2 - tp.x) * Math.min(1, (v - SURF) / Math.max(1, ty - SURF)); HK.y = v; }, SURF - 4, ty, 450 + (ty - SURF) * 1.1);
+    await judge(t);
+    busy = false;
+  }
+  async function castDown() {     /* ⬇ 버튼: 배 아래로 곧장 */
+    if (!playing || busy) return;
+    busy = true; O.unlock(); O.hush(); O.clearPrompt();
+    var tp = tip(); HK.on = true; HK.x = tp.x; HK.y = SURF - 4;
+    var hit = null, bottom = H - 70;
+    await new Promise(function (res) {
+      var t0 = performance.now(), y0 = HK.y;
+      (function step(now) {
+        HK.y = y0 + (now - t0) * .5 * (calm ? .75 : 1);
+        hit = things.find(function (t) { return !t.done && !t.away && HK.x > t.x + t.w * .1 && HK.x < t.x + t.w * .9 && HK.y > t.y && HK.y < t.y + t.h; });
+        if (hit || HK.y >= bottom) res(); else requestAnimationFrame(step);
+      })(t0);
+    });
+    if (hit) { hit.hold = true; await judge(hit); }
+    else { O.say('여기에는 아무것도 없어요. 배를 움직여 봐요.'); await reel(null); }
+    busy = false;
+  }
+  async function reel(t) {
+    var y0 = HK.y;
+    await tween(function (v) { HK.y = v; var tp = tip(); HK.x = HK.x + (tp.x - HK.x) * .12; if (t) { t.x = HK.x - t.w / 2; t.y = HK.y - t.h * .35; } }, y0, SURF - 4, 500 + (y0 - SURF));
+    HK.on = false;
+  }
+  async function judge(t) {
+    var ok = IMPL[mode].check(t);
+    if (ok === true) {
+      O.sfx('pop');
+      await reel(t);
+      t.done = true; t.el.classList.remove('oks-glow');
+      /* 어항(바구니)으로 */
+      var x0 = t.x, y0 = t.y, x1 = BOWL.x + BOWL.w / 2 - t.w * .25, y1 = BOWL.y + BOWL.h * .35;
+      await tween(function (v) { t.x = x0 + (x1 - x0) * v; t.y = y0 + (y1 - y0) * v - Math.sin(v * Math.PI) * 60; t.el.style.opacity = 1 - v * .6; t.sc = 1 - v * .5; }, 0, 1, 550);
+      t.el.remove(); things.splice(things.indexOf(t), 1);
+      O.sfx('ok');
+      IMPL[mode].got(t);
+    } else {
+      stats.mistakes++; O.sfx('no');
+      t.el.animate([{ translate: '0 0' }, { translate: '-10px 0' }, { translate: '10px 0' }, { translate: '0 0' }], { duration: 400, iterations: 2 });
+      O.say(ok);
+      await reel(null);
+      t.hold = false; setTarget();
+    }
+  }
+  function bump() { cnt.classList.remove('pop'); void cnt.offsetWidth; cnt.classList.add('pop'); }
+
+  /* ---------- 놀이 1: 모으기 ---------- */
+  var COUNT = {
+    start: function () {
+      var c = cfg, cols = O.shuffle(['gray', 'green', 'orange', 'blue']);
+      var a, b;
+      if (c.two) {
+        do { a = rnd(c.min, c.max); b = rnd(c.min, c.max); } while (c.total && a + b > c.total);
+        task.need = [[cols[0], a], [cols[1], b]];
+      } else { a = rnd(c.min, c.max); task.need = [[cols[0], a]]; }
+      task.have = {}; task.need.forEach(function (n) { task.have[n[0]] = 0; });
+      task.total = 0; task.need.forEach(function (n) { task.total += n[1]; });
+      var list = [];
+      task.need.forEach(function (n) { for (var i = 0; i < n[1] + c.extra; i++) list.push(fishObj(n[0], 1)); });
+      var rest = cols.slice(task.need.length);
+      for (var i = 0; i < c.others; i++) list.push(fishObj(rest[i % rest.length], 1));   /* 다른 색 물고기 (헷갈리게) */
+      list.forEach(addThing); spread(things); things.forEach(function (t) { t.vx = (Math.random() < .5 ? -1 : 1) * W * .03 * c.speed * (.7 + Math.random() * .6); });
+      cnt.textContent = '0'; cnt.style.visibility = c.dots ? '' : 'hidden';
+      var parts = task.need.map(function (n) { return '<img class="fi" src="img/fish_' + n[0] + '.webp" alt="">' + FISH[n[0]] + ' <span class="num">' + n[1] + '</span>마리'; });
+      var says = task.need.map(function (n) { return FISH[n[0]] + ' 물고기 ' + CNT[n[1]] + ' 마리'; });
+      sh.ask(says.join('와 ') + '를 잡아요!', { html: parts.join(' 와 ') + ' 잡아요!', speak: says.join('와, ') + '를 잡아요!' });
+      drawTally();
+    },
+    check: function (t) {
+      if (!t.color || task.have[t.color] == null) return '그건 ' + FISH[t.color] + ' 물고기예요. ' + task.need.map(function (n) { return FISH[n[0]]; }).join('과 ') + ' 물고기를 잡아요.';
+      var need = task.need.filter(function (n) { return n[0] === t.color; })[0][1];
+      if (task.have[t.color] >= need) return FISH[t.color] + ' 물고기는 ' + CNT[need] + ' 마리 다 잡았어요. 다른 물고기를 잡아요.';
+      return true;
+    },
+    got: function (t) {
+      task.have[t.color]++; var sum = 0; for (var k in task.have) sum += task.have[k];
+      cnt.textContent = sum; bump(); O.say(NUMW[sum]); drawTally();
+      if (task.need.every(function (n) { return task.have[n[0]] >= n[1]; })) {
+        playing = false;
+        setTimeout(function () {
+          if (cfg.sum === 'ask') return askSum();
+          if (cfg.sum === 'say') { var n = task.need; O.say(FISH[n[0][0]] + ' ' + CNT[n[0][1]] + ' 마리와 ' + FISH[n[1][0]] + ' ' + CNT[n[1][1]] + ' 마리를 모으면 ' + CNT[task.total] + ' 마리!'); O.praise(task.total + '마리!'); }
+          else { O.praise(task.total + '마리!'); O.say('잘했어요! ' + CNT[task.total] + ' 마리!'); }
+          next(2200);
+        }, 600);
+      } else setTarget();
+    },
+    targets: function () { return things.filter(function (t) { return !t.done && t.color && task.have[t.color] != null && task.have[t.color] < task.need.filter(function (n) { return n[0] === t.color; })[0][1]; }); }
+  };
+  function fishObj(color, scale) { return { fish: true, color: color, scale: scale, src: M + 'fish_' + color + '.webp' }; }
+  function rnd(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
+  function drawTally() {
+    tally.innerHTML = task.need.map(function (n) {
+      var h = task.have[n[0]], show = cfg.dots ? h + ' / ' + n[1] : n[1] + '마리';
+      return '<span class="' + (h >= n[1] && cfg.dots ? 'full' : '') + '"><img src="img/fish_' + n[0] + '.webp" alt="">' + FISH[n[0]] + ' ' + show + '</span>';
+    }).join('');
+  }
+  function askSum() {
+    var n = task.need, T = task.total, opts = O.shuffle([T, T + 1 > 10 ? T - 2 : T + 1, T - 1 < 1 ? T + 2 : T - 1]);
+    var q = E('div', 'quiz', '<h3><img class="fi" src="img/fish_' + n[0][0] + '.webp" style="height:34px" alt=""> ' + n[0][1] + ' 와 <img class="fi" src="img/fish_' + n[1][0] + '.webp" style="height:34px" alt=""> ' + n[1][1] + ' — 모두 몇 마리일까요?</h3><div class="opts"></div>');
+    opts.forEach(function (v) {
+      var b = E('button', '', String(v)); b.type = 'button';
+      b.onclick = function () {
+        if (v === T) { q.remove(); O.sfx('ok'); O.praise(T + '마리!'); O.say(FISH[n[0][0]] + ' ' + CNT[n[0][1]] + ' 마리와 ' + FISH[n[1][0]] + ' ' + CNT[n[1][1]] + ' 마리를 모으면 ' + CNT[T] + ' 마리!'); cnt.style.visibility = ''; cnt.textContent = T; next(2600); }
+        else { stats.mistakes++; O.sfx('no'); b.classList.remove('no'); void b.offsetWidth; b.classList.add('no'); O.say('어항 속 물고기를 하나씩 세어 봐요.'); }
+      };
+      q.querySelector('.opts').appendChild(b);
+    });
+    sea.appendChild(q);
+    O.say(FISH[n[0][0]] + ' ' + CNT[n[0][1]] + ' 마리와 ' + FISH[n[1][0]] + ' ' + CNT[n[1][1]] + ' 마리. 모두 몇 마리일까요?');
+    O.target({ get: function () { return Array.prototype.filter.call(q.querySelectorAll('button'), function (b) { return +b.textContent === T; }); } }, level);
+  }
+
+  /* ---------- 놀이 2: 모양 건지기 ---------- */
+  var SHAPE = {
+    start: function () {
+      var c = cfg, prev = task.prevKey, opts = c.keys.filter(function (k) { return k !== prev; });
+      var want = task.want = (opts.length ? O.pick(opts)[0] : c.keys[0]); task.prevKey = want;
+      var pool = function (k) { return O.shuffle(SHAPE_ITEMS.filter(function (x) { return x.key === k; })); };
+      var list;
+      if (c.all) { var k = 2 + Math.floor(Math.random() * 2); list = pool(want).slice(0, k).concat(O.shuffle(SHAPE_ITEMS.filter(function (x) { return x.key !== want; })).slice(0, c.items - k)); }
+      else {
+        var others = c.pair ? pool(c.pair) : (function () { var o = ['box', 'cyl', 'ball'].filter(function (s) { return s !== want; }), a = pool(o[0]), b = pool(o[1]), r = []; while (a.length || b.length) { if (a.length) r.push(a.shift()); if (b.length) r.push(b.shift()); } return r; })();
+        list = pool(want).slice(0, 1).concat(others.slice(0, c.items - 1));
+      }
+      list.forEach(function (d) { addThing({ src: d.src, key: d.key, name: d.name }); });
+      spread(things);
+      task.left = things.filter(function (t) { return t.key === want; }).length;
+      cnt.style.visibility = ''; cnt.textContent = task.gotN || 0;
+      var S = SHAPES[want], text = S.name + josa(S.name, '을', '를') + (c.all ? ' 모두 건져요!' : ' 건져요!');
+      sh.ask(text, { html: '바다에 빠진 <b class="key">' + S.name + '</b>' + josa(S.name, '을', '를') + (c.all ? ' <b>모두</b>' : '') + ' 건져요!',
+        speak: '바다에 빠진 ' + text + (level <= 3 ? ' ' + S.name + '은 ' + S.say : '') });
+      tally.innerHTML = '';
+    },
+    check: function (t) { var S = SHAPES[t.key], T = SHAPES[task.want]; return t.key === task.want ? true : t.name + josa(t.name, '은', '는') + ' ' + S.name + '이에요. ' + T.name + josa(T.name, '을', '를') + ' 찾아봐요.'; },
+    got: function (t) {
+      task.gotN = (task.gotN || 0) + 1; cnt.textContent = task.gotN; bump(); O.praise();
+      O.say(t.name + josa(t.name, '은', '는') + ' ' + SHAPES[t.key].name + '이에요!');
+      task.left--;
+      if (cfg.all && task.left > 0) setTarget(); else { playing = false; next(1500); }
+    },
+    targets: function () { return things.filter(function (t) { return !t.done && t.key === task.want; }); }
+  };
+
+  /* ---------- 놀이 3: 큰 물고기 작은 물고기 ---------- */
+  var SIZE = {
+    start: function () {
+      var c = cfg, color = O.pick(['gray', 'green', 'orange', 'blue'])[0];
+      var sizes = O.shuffle(c.sizes.slice());
+      sizes.forEach(function (s) { addThing(Object.assign(fishObj(color, s), { size: s })); });
+      spread(things);
+      things.forEach(function (t) { t.vx = (Math.random() < .5 ? -1 : 1) * W * .03 * c.speed * (.7 + Math.random() * .6); });
+      cnt.style.visibility = ''; cnt.textContent = task.gotN || 0; tally.innerHTML = '';
+      if (c.order) {
+        task.order = c.sizes.slice().sort(function (a, b) { return b - a; }); task.step = 0;
+        sh.ask('큰 물고기부터 차례대로 잡아요!', { html: '<b class="key">큰</b> 물고기부터 <b>차례대로</b> 잡아요!', speak: '큰 물고기부터, 작은 물고기까지 차례대로 잡아요!' });
+      } else {
+        task.big = task.prevBig == null ? Math.random() < .5 : !task.prevBig; task.prevBig = task.big;
+        var w = (c.most ? '가장 ' : '') + (task.big ? '큰' : '작은');
+        sh.ask(w + ' 물고기를 잡아요!', { html: '<b class="key">' + w + '</b> 물고기를 잡아요!', speak: w + ' 물고기를 잡아요!' });
+      }
+    },
+    want: function () {
+      var left = things.filter(function (t) { return !t.done; }).map(function (t) { return t.size; });
+      if (cfg.order) return task.order[task.step];
+      return task.big ? Math.max.apply(null, left) : Math.min.apply(null, left);
+    },
+    check: function (t) {
+      if (t.size === SIZE.want()) return true;
+      if (cfg.order) return '더 큰 물고기가 있어요. 남은 물고기 중에서 가장 큰 물고기를 찾아봐요.';
+      return task.big ? '더 큰 물고기가 있어요. 크기를 비교해 봐요.' : '더 작은 물고기가 있어요. 크기를 비교해 봐요.';
+    },
+    got: function () {
+      task.gotN = (task.gotN || 0) + 1; cnt.textContent = task.gotN; bump(); O.praise();
+      if (cfg.order) {
+        task.step++;
+        if (task.step < task.order.length) { O.say(task.step === task.order.length - 1 ? '마지막은 가장 작은 물고기!' : '잘했어요! 다음으로 큰 물고기!'); setTarget(); return; }
+        O.say('큰 것부터 작은 것까지 차례대로 잡았어요!');
+      } else O.say(task.big ? '맞아요! 큰 물고기예요!' : '맞아요! 작은 물고기예요!');
+      playing = false; next(1500);
+    },
+    targets: function () { var w = SIZE.want(); return things.filter(function (t) { return !t.done && t.size === w; }); }
+  };
+
+  /* ---------- 놀이 4: 낱말 카드 낚시 ---------- */
+  var WORD = {
+    start: function () {
+      var c = cfg, prev = task.prevKey;
+      var pool = O.shuffle(WORDS.filter(function (w) { return w.key !== prev; }));
+      /* 첫 글자가 같은 낱말은 같이 내지 않아요 (3수준 이하) */
+      var list = [pool[0]];
+      for (var i = 1; i < pool.length && list.length < c.items; i++) if (level > 3 || list.every(function (x) { return x.name[0] !== pool[i].name[0]; })) list.push(pool[i]);
+      task.want = list[0].key; task.prevKey = task.want;
+      O.shuffle(list).forEach(function (d) { addThing({ src: d.src, key: d.key, name: d.name }); });
+      spread(things);
+      wordEl.innerHTML = list[0].name + (c.pic ? '<img src="' + list[0].src + '" alt="">' : '');
+      cnt.style.visibility = ''; cnt.textContent = task.gotN || 0; tally.innerHTML = '';
+      var spk = c.speak ? '구름 카드의 낱말은 ' + list[0].name + '. ' + list[0].name + josa(list[0].name, '을', '를') + ' 찾아 낚아요!' : '구름 카드의 낱말을 읽고, 알맞은 그림을 낚아요!';
+      sh.ask('구름 카드의 낱말을 읽고 낚아요!', { html: '☁️ 구름 카드의 <b class="key">낱말</b>을 읽고 알맞은 것을 낚아요!', speak: spk });
+    },
+    check: function (t) { return t.key === task.want ? true : '그건 ' + t.name + '예요. 구름 카드를 다시 읽어 봐요.'; },
+    got: function (t) { task.gotN = (task.gotN || 0) + 1; cnt.textContent = task.gotN; bump(); O.praise(); O.say('맞아요! ' + t.name + '!'); playing = false; next(1500); },
+    targets: function () { return things.filter(function (t) { return !t.done && t.key === task.want; }); }
+  };
+  var IMPL = { count: COUNT, shape: SHAPE, size: SIZE, word: WORD };
+
+  /* ---------- 진행 ---------- */
+  function setTarget() {
+    O.target({ get: function () { return IMPL[mode].targets().map(function (t) { return t.el; }); }, say: '반짝이는 것을 눌러요' }, level);
+  }
+  function next(ms) {
+    round++; sh.setRounds(cfg.rounds, round);
+    setTimeout(function () { if (round >= cfg.rounds) done(); else newRound(); }, ms || 1200);
+  }
+  function newRound() {
+    clearThings(); playing = true;
+    cloud.style.display = wordEl.style.display = mode === 'word' ? '' : 'none';
+    bowl.src = (mode === 'shape' || mode === 'word') ? '../farm/assets/basket.webp' : M + 'bowl.webp';
+    layout();
+    IMPL[mode].start();
+    sh.setRounds(cfg.rounds, round);
+    setTarget();
+  }
+  function done() {
+    var st = stats, MD = MODES[mode];
+    var entry = { at: new Date().toISOString(), lesson: LESSON, subject: MD.subject, school: 'elem', topic: '바다 낚시 · ' + MD.name, level: level, engine: 'fishing-' + mode, rounds: cfg.rounds,
+      mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: Math.round((Date.now() - st.t0) / 1000) };
+    var q = function (lv) { return '?mode=' + mode + (O.qs('lesson') ? '&lesson=' + LESSON : '') + '&level=' + lv; };
+    var btns = [{ label: '🔁 한 번 더', color: 'green', onClick: function () { location.href = q(level); } }];
+    if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(LESSON, level + 1); location.href = q(level + 1); } });
+    if (!O.qs('lesson')) btns.push({ label: '🎣 다른 낚시 놀이', color: 'pink', onClick: function () { location.href = '?'; } });
+    btns.push({ label: O.qs('lesson') ? '차시로 돌아가기' : '🏠 돌아가기', color: 'blue', href: BACK });
+    O.finish({ stats: st, entry: entry, title: '바다 낚시 성공!', text: MD.name + ' ' + cfg.rounds + '판 · ' + O.LEVELS[level - 1].name, mission: { lesson: 1 }, buttons: btns });
+  }
+
+  function tick(now) {
+    var dt = Math.min(.05, (now - (tick.last || now)) / 1000); tick.last = now;
+    var top = waterTop();
+    things.forEach(function (t) {
+      if (t.done) return;
+      if (!t.hold && t.vx) {
+        var slow = t.el.classList.contains('oks-glow') ? .4 : 1;
+        t.x += t.vx * slow * dt;
+        if (t.x < 10) { t.x = 10; t.vx = Math.abs(t.vx); } if (t.x > rightLimit() - t.w) { t.x = rightLimit() - t.w; t.vx = -Math.abs(t.vx); }
+      }
+      t.ph += dt * 1.6;
+      var dy = t.hold || calm ? 0 : Math.sin(t.ph) * 5;
+      var flip = t.fish && t.vx > 0 ? -1 : 1;
+      t.el.style.transform = 'translate(' + t.x + 'px,' + (t.y + dy) + 'px) scale(' + (flip * (t.sc || 1)) + ',' + (t.sc || 1) + ')';
+    });
+    drawBoat();
+    requestAnimationFrame(tick);
+  }
+  async function move(dir) { if (!playing || busy) return; await boatTo(tip().x + dir * Math.max(40, W * .08)); }
+  ctrl.querySelector('.l').onclick = function () { move(-1); };
+  ctrl.querySelector('.r').onclick = function () { move(1); };
+  ctrl.querySelector('.cast').onclick = function () { castDown(); };
+  ctrl.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
+  addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); move(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); move(1); }
+    if (e.key === ' ') { e.preventDefault(); castDown(); }
+  });
+
+  /* ---------- 시작 화면 ---------- */
+  function startScreen() {
+    sh.askEl.style.visibility = 'hidden';
+    var ov = E('div', 'oks-start');
+    var cards = Object.keys(MODES).map(function (k) { var m = MODES[k]; return '<button type="button" class="mode' + (k === mode ? ' on' : '') + '" data-m="' + k + '"><div class="ic">' + m.icon + '</div><b>' + m.name + '</b><small>' + m.desc + '</small></button>'; }).join('');
+    var lvBtns = O.LEVELS.map(function (L) { return '<button type="button" data-lv="' + L.n + '" class="' + (L.n === level ? 'on' : '') + '" title="' + O.esc(L.desc) + '">' + L.short + '</button>'; }).join('');
+    ov.innerHTML = '<div class="st-card"><h1>🎣 옥쌤의 바다 낚시</h1><p>배를 탄 옥쌤과 함께 낚시해요. 잡을 것을 <b>톡</b> 누르면 낚싯줄이 내려가요.</p>' +
+      (O.qs('mode') ? '' : '<div class="modes">' + cards + '</div>') + '<div class="st-lv">' + lvBtns + '</div>' +
+      '<button type="button" class="oks-btn green st-go">시작! ▶</button><div class="keys">◀ ▶ 로 배를 움직이고 ⬇ 낚시 (키보드: ← → 스페이스)</div></div>';
+    document.body.appendChild(ov);
+    if (!mode) mode = 'count';
+    ov.querySelectorAll('.mode').forEach(function (b) {
+      if (b.dataset.m === mode) b.classList.add('on');
+      b.onclick = function () { O.unlock(); mode = b.dataset.m; ov.querySelectorAll('.mode').forEach(function (x) { x.classList.toggle('on', x === b); }); O.say(MODES[mode].name); };
+    });
+    ov.querySelectorAll('.st-lv button').forEach(function (b) {
+      b.onclick = function () { level = +b.dataset.lv; ov.querySelectorAll('.st-lv button').forEach(function (x) { x.classList.toggle('on', x === b); }); };
+    });
+    ov.querySelector('.st-go').onclick = function () { O.unlock(); O.hush(); ov.remove(); begin(); };
+  }
+  function begin() {
+    sh.askEl.style.visibility = '';
+    cfg = MODES[mode].lv[level]; O.rememberLevel(LESSON, level); sh.setLevel(level);
+    document.title = '바다 낚시 · ' + MODES[mode].name;
+    stats = O.newStats(); round = 0; task = {};
+    newRound();
+  }
+  sh.levelBtn.onclick = function () { location.reload(); };
+  cloud.style.display = wordEl.style.display = 'none';
+  layout(); requestAnimationFrame(tick); startScreen();
+  window.FISHING = { get mode() { return mode; }, get busy() { return busy; }, get playing() { return playing; }, targets: function () { return mode ? IMPL[mode].targets() : []; }, things: function () { return things; } };
+})();
+</script>
+</body>
+</html>
