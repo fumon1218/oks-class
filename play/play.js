@@ -92,7 +92,7 @@
     var btns = [{ label: '한 번 더', color: '', onClick: function () { location.reload(); } }];
     if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(id, level + 1); location.href = '?id=' + id + '&level=' + (level + 1); } });
     (window.OKS_SHOP_BY_LESSON ? window.OKS_SHOP_BY_LESSON(id) : []).slice(0, 1).forEach(function (S) { btns.push({ label: '🏪 ' + S.name + '에서 일하기', color: 'pink', href: '../shop/?id=' + S.id + '&level=' + level }); });
-    if (extraHref) btns.push({ label: '🐦 새 잡기로 세기', color: 'green', href: extraHref });
+    if (extraHref) btns.push({ label: extra[0], color: 'green', href: extraHref });
     btns.push({ label: O.fromSpace() ? '건물로 돌아가기' : '배움 지도', color: 'blue', href: O.ret('../learn/?subject=' + lesson.subject + '&school=' + lesson.school + '#' + id) });
     var sc = scene ? scene.stats() : { maxCombo: 0 };
     if (sc.maxCombo >= 2) entry.combo = sc.maxCombo;
@@ -107,9 +107,10 @@
   var go = E('button', 'oks-btn', '▶ 시작하기'); go.type = 'button';
   start.appendChild(go);
   /* 같은 목표를 다른 놀이로: 수 세기 차시 → 새 잡기 */
-  var EXTRA = { '02-01-01-01': 1, '02-01-03-02': 1 };
-  var extraHref = EXTRA[id] ? O.ROOT + 'games/birds/?mode=count&lesson=' + id + '&level=' + level : null;
-  if (extraHref) { var ex = E('a', 'oks-btn orange oks-extra', '🐦 새 잡기로 세기'); ex.href = extraHref; start.appendChild(ex); }
+  var BIRDS = ['🐦 새 잡기로 세기', 'games/birds/?mode=count&'], SHAPEG = ['🎪 모양 뽑기', 'games/shapes/?'];
+  var EXTRA = { '02-01-01-01': BIRDS, '02-01-03-02': BIRDS, '02-01-02-01': SHAPEG, '02-02-03-01': SHAPEG };
+  var extra = EXTRA[id], extraHref = extra ? O.ROOT + extra[1] + 'lesson=' + id + '&level=' + level : null;
+  if (extraHref) { var ex = E('a', 'oks-btn orange oks-extra', extra[0]); ex.href = extraHref; start.appendChild(ex); }
   sh.board.appendChild(start);
   O.target({ get: function () { return go; } }, Math.min(level, 2));
   go.onclick = function () { O.unlock(); O.clearPrompt(); st.t0 = Date.now(); st.glow = 0; st.hand = 0; ctx.clear(); run(); };

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff7eb3">
+<title>모양 뽑기 · 옥쌤의 즐거운 교실</title>
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../icons/icon-192.png">
+<link rel="stylesheet" href="../../core/oks-core.css">
+<style>
+/* 스크래치 '상자 모양 찾기(인형뽑기)' 게임을 옥쌤 교실 방식으로 다시 만든 것:
+   상자·둥근 기둥·공 모양을 듣고, 집게로 그 모양 물건을 뽑아요 */
+body.oks{background:#ffe6f0 url('../../art/scenes/town_spring_hd.webp') center/cover no-repeat fixed;overflow:hidden;}
+body.oks::before{background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(25,18,45,.35));}
+.oks-app{max-width:none;padding:10px 14px 10px;height:100dvh;display:flex;flex-direction:column;box-sizing:border-box;}
+.oks-top.compact{flex-wrap:nowrap;position:relative;}
+.oks-top.compact .oks-title{flex:0 1 680px;margin:0 auto;min-width:0;background:rgba(255,253,248,.94);border-radius:999px;color:var(--ink);text-shadow:none;box-shadow:0 4px 14px rgba(30,20,50,.2);padding:8px 26px;}
+.oks-top.compact > *:not(.oks-title):not(.oks-menu){flex-shrink:0;white-space:nowrap;}
+.oks-more{font-size:28px;font-weight:800;color:var(--ink);line-height:1;}
+.oks-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:22px;background:#fffdf7;box-shadow:0 14px 34px rgba(60,40,20,.28);min-width:240px;}
+.oks-menu[hidden]{display:none!important;}
+.oks-menu .eco-hud,.oks-menu .oks-level{justify-content:center;flex-wrap:wrap;}
+.oks-menu .oks-dots{justify-content:center;box-shadow:none;}
+@media (max-width:560px){.oks-top.compact .oks-title{display:none;} .oks-top.compact{justify-content:space-between;} .oks-top.compact .oks-pill > span{display:none;}}
+.oks-ask{margin:8px auto 0;max-width:820px;width:100%;}
+.oks-ask .oks-mascot{display:none;}
+.oks-ask-bubble::before,.oks-ask-bubble::after{display:none!important;}
+.oks-ask-bubble{font-size:26px;background:#fffdf8;box-shadow:0 6px 18px rgba(30,40,80,.22);border-radius:24px;display:flex;align-items:center;justify-content:center;gap:12px;min-height:64px;}
+.oks-ask-img{height:58px;width:auto;margin:-6px 0;}
+.oks-ask-bubble .shape-word{color:#e0457b;}
+
+/* 뽑기 기계 */
+.oks-board.machine{flex:1;min-height:0;position:relative;margin:10px auto 0;width:100%;max-width:1100px;padding:0;background:transparent;box-shadow:none;display:flex;flex-direction:column;}
+.mc{flex:1;min-height:0;position:relative;border-radius:34px 34px 20px 20px;background:linear-gradient(180deg,#ff8fbd,#ff6fa6);padding:54px 16px 16px;box-shadow:0 18px 44px rgba(60,20,50,.35),inset 0 -6px 0 rgba(0,0,0,.08);}
+.mc-sign{position:absolute;left:50%;top:8px;transform:translateX(-50%);background:#fff7d6;color:#d23f7a;border-radius:999px;padding:4px 26px;font-size:24px;box-shadow:0 3px 0 #f2c94c;white-space:nowrap;}
+.mc-sign i{font-style:normal;display:inline-block;animation:bulb 1.2s infinite alternate;}
+@keyframes bulb{to{opacity:.35}}
+.glass{position:relative;height:100%;border-radius:20px;overflow:hidden;background:linear-gradient(180deg,#e9f7ff 0%,#d6efff 70%,#bfe3f7 100%);box-shadow:inset 0 0 0 5px rgba(255,255,255,.75);touch-action:manipulation;}
+.glass::after{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,rgba(255,255,255,.55) 0 8%,transparent 8% 14%,rgba(255,255,255,.25) 14% 17%,transparent 17%);}
+.rail{position:absolute;left:0;right:0;top:0;height:16px;background:linear-gradient(#9aa4b8,#6f7a90);}
+.floor{position:absolute;left:0;right:0;bottom:0;height:16%;background:linear-gradient(180deg,#ffd6e6,#ffc0d8);border-top:4px solid #ffb0cc;}
+.chute{position:absolute;right:0;bottom:0;width:15%;height:34%;background:linear-gradient(180deg,#5a4a6e,#3c3150);border-radius:16px 0 0 0;box-shadow:inset 0 8px 0 rgba(255,255,255,.12);display:flex;align-items:flex-start;justify-content:center;color:#fff;font-size:26px;padding-top:6px;box-sizing:border-box;z-index:1;}
+.item{position:absolute;bottom:9%;cursor:pointer;z-index:2;filter:drop-shadow(0 8px 6px rgba(60,40,80,.25));transition:filter .2s;transform-origin:50% 100%;}
+.item img{max-width:100%;max-height:var(--ih,160px);width:auto;height:auto;display:block;margin:0 auto;pointer-events:none;-webkit-user-drag:none;}
+.item .lab{position:absolute;left:50%;bottom:-30px;transform:translateX(-50%);background:#fff;border-radius:999px;padding:1px 10px;font-size:15px;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.12);}
+.item.oks-glow{animation:item-glow .8s ease-in-out infinite;box-shadow:none;}
+@keyframes item-glow{50%{filter:drop-shadow(0 0 12px #ffd54f) drop-shadow(0 0 22px #ffb300);}}
+.item.wobble{animation:wob .5s ease 2;}
+@keyframes wob{25%{transform:rotate(-9deg)}75%{transform:rotate(9deg)}}
+.item.held{transition:none;z-index:4;}
+.claw{position:absolute;top:8px;left:0;z-index:5;pointer-events:none;}
+.claw svg{display:block;overflow:visible;}
+.claw .arm{transition:transform .35s ease;}
+.ctrl{display:flex;justify-content:center;gap:14px;padding:12px 0 0;}
+.ctrl button{min-width:88px;height:70px;border:none;border-radius:22px;font:inherit;font-size:30px;cursor:pointer;background:#fffdf8;color:var(--ink);box-shadow:0 6px 0 #d9c7a6,0 10px 18px rgba(0,0,0,.18);}
+.ctrl button:active{transform:translateY(4px);box-shadow:0 2px 0 #d9c7a6;}
+.ctrl .grab{min-width:150px;background:#ff8a3d;color:#fff;box-shadow:0 6px 0 #d0631d,0 10px 18px rgba(0,0,0,.18);font-size:26px;}
+.tray{position:absolute;right:16px;bottom:16px;width:15%;height:34%;z-index:3;pointer-events:none;}
+.got-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;min-height:54px;margin-top:8px;}
+.got-row .g{background:rgba(255,253,248,.92);border-radius:16px;padding:4px 8px;display:flex;align-items:center;gap:4px;box-shadow:0 3px 10px rgba(0,0,0,.12);font-size:14px;animation:sc-pop .45s ease;}
+.got-row .g img{height:40px;width:auto;}
+@keyframes sc-pop{0%{transform:scale(.3)}60%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* 시작 화면 */
+.oks-start{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;background:rgba(60,20,60,.35);overflow:auto;}
+.st-card{background:#fffdf8;border-radius:32px;padding:22px 26px;max-width:680px;width:calc(100% - 32px);text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3);margin:16px 0;}
+.st-card h1{margin:2px 0 6px;font-size:32px;font-weight:400;}
+.st-card p{margin:0 0 12px;color:var(--ink-soft);font-size:17px;line-height:1.5;}
+.shape-cards{display:flex;gap:10px;justify-content:center;margin:0 0 14px;flex-wrap:wrap;}
+.shape-card{flex:1 1 170px;max-width:200px;border:3px solid #f1e3c8;border-radius:22px;padding:10px 8px;background:#fff;cursor:pointer;font:inherit;color:var(--ink);}
+.shape-card:hover,.shape-card.talk{border-color:#ff8fbd;background:#fff3f8;}
+.shape-card b{display:block;font-size:20px;font-weight:400;margin:4px 0;}
+.shape-card .ex{display:flex;justify-content:center;gap:2px;}
+.shape-card .ex img{height:44px;width:auto;}
+.shape-card svg{height:56px;}
+.st-lv{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 14px;}
+.st-lv button{border:3px solid #e6d7bb;background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:16px;cursor:pointer;color:var(--ink);}
+.st-lv button.on{background:#ff6fa6;border-color:#ff6fa6;color:#fff;}
+.st-go{font-size:24px!important;padding:14px 40px!important;}
+.keys{font-size:14px;color:var(--ink-soft);margin-top:10px;}
+@media (max-width:640px){
+  .oks-ask-bubble{font-size:19px;min-height:52px;} .oks-ask-img{height:42px;}
+  .mc{padding:46px 8px 8px;} .mc-sign{font-size:18px;}
+  .ctrl button{min-width:70px;height:60px;font-size:24px;} .ctrl .grab{min-width:120px;font-size:21px;}
+  .item .lab{font-size:12px;bottom:-24px;padding:0 6px;}
+  .st-card h1{font-size:26px;} .shape-card{flex-basis:30%;padding:6px 4px;} .shape-card .ex img{height:30px;} .shape-card b{font-size:16px;}
+}
+body.calm .mc-sign i{animation:none;}
+</style>
+</head>
+<body class="oks">
+<script src="../../core/oks-core.js"></script>
+<script src="../../core/oks-eco.js"></script>
+<script>
+(function () {
+  'use strict';
+  var O = window.OKS, E = O.el, A = '../../art/', M = 'img/';
+  /* 모양 세 가지: 이름, 설명(소리), 그림 아이콘 */
+  var SHAPES = {
+    box: { name: '상자 모양', say: '평평한 면과 뾰족한 모서리가 있어요.', svg: '<svg viewBox="0 0 60 60"><path d="M10 20 30 10 50 20 50 44 30 54 10 44Z" fill="#ffb74d"/><path d="M10 20 30 30 50 20 30 10Z" fill="#ffe0a3"/><path d="M30 30v24L50 44V20Z" fill="#f08c2e"/><path d="M10 20 30 10 50 20 50 44 30 54 10 44ZM10 20l20 10 20-10M30 30v24" fill="none" stroke="#7a4a1a" stroke-width="2.4" stroke-linejoin="round"/></svg>' },
+    cyl: { name: '둥근 기둥 모양', say: '위와 아래는 평평하고, 옆은 둥글어요.', svg: '<svg viewBox="0 0 60 60"><path d="M14 14v32a16 7 0 0 0 32 0V14Z" fill="#64b5f6"/><ellipse cx="30" cy="14" rx="16" ry="7" fill="#bbdefb"/><path d="M14 14v32a16 7 0 0 0 32 0V14" fill="none" stroke="#1a4a7a" stroke-width="2.4"/><ellipse cx="30" cy="14" rx="16" ry="7" fill="none" stroke="#1a4a7a" stroke-width="2.4"/></svg>' },
+    ball: { name: '공 모양', say: '어느 쪽이나 둥글어서 잘 굴러가요.', svg: '<svg viewBox="0 0 60 60"><defs><radialGradient id="g" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff59d"/><stop offset=".5" stop-color="#ff8a65"/><stop offset="1" stop-color="#e64a19"/></radialGradient></defs><circle cx="30" cy="30" r="22" fill="url(#g)" stroke="#7a2a1a" stroke-width="2.4"/></svg>' }
+  };
+  function svgUrl(k) { return 'data:image/svg+xml;utf8,' + encodeURIComponent(SHAPES[k].svg.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ')); }
+  /* 물건: 우리 교실 그림 + 원래 스크래치 게임 그림 */
+  var ITEMS = [
+    ['box', '냉장고', A + 'obj/fridge.webp'], ['box', '우유갑', A + 'jj/kitchen/ing_milk.webp'], ['box', '얼음', A + 'jj/kitchen/ing_ice.webp'],
+    ['box', '책', A + 'jj/recycle/notebook.webp'], ['box', '초콜릿', A + 'jj/kitchen/ing_choco.webp'], ['box', '물감 상자', A + 'obj/watercolor.webp'],
+    ['box', '선물 상자', M + 'gift.webp'], ['box', '휴지 상자', M + 'tissue.webp'], ['box', '서랍장', M + 'cabinet.webp'],
+    ['cyl', '음료 캔', A + 'jj/recycle/can.webp'], ['cyl', '북', A + 'obj/drum.webp'], ['cyl', '비커', A + 'obj/beaker.webp'],
+    ['cyl', '요구르트', A + 'jj/kitchen/ing_yogurt.webp'], ['cyl', '김밥', A + 'jj/snack/kimbap_roll.webp'], ['cyl', '가래떡', A + 'jj/snack/ricecake.webp'],
+    ['cyl', '딱풀', M + 'gluestick.webp'], ['cyl', '컵', M + 'bottle.webp'],
+    ['ball', '축구공', M + 'soccer.webp'], ['ball', '배구공', M + 'volleyball.webp'], ['ball', '눈덩이', A + 'stickers/snowball.png'],
+    ['ball', '호박', A + 'obj/pumpkin.webp'], ['ball', '체리', A + 'jj/coffee/cherry.webp'], ['ball', '양파', A + 'obj/onion.webp']
+  ].map(function (a, i) { return { id: i, shape: a[0], name: a[1], src: a[2] }; });
+
+  /* 수준: 찾을 모양 · 물건 수 · 판 수 · 모두 찾기 */
+  var LV = {
+    1: { shapes: ['box'], pair: 'ball', items: 3, rounds: 3 },
+    2: { shapes: ['box'], items: 3, rounds: 4 },
+    3: { shapes: ['box', 'cyl', 'ball'], items: 4, rounds: 5 },
+    4: { shapes: ['box', 'cyl', 'ball'], items: 5, rounds: 6 },
+    5: { shapes: ['box', 'cyl', 'ball'], items: 6, rounds: 3, all: true }
+  };
+  var LESSON = O.qs('lesson') || 'mini-shapes';
+  var level = O.levelFor(LESSON);
+  var BACK = O.qs('lesson') ? O.ret(O.ROOT + 'play/?id=' + LESSON) : O.ret(O.ROOT + 'index.html');
+  function josa(w, a, b) { var c = w.charCodeAt(w.length - 1) - 0xAC00; return (c >= 0 && c % 28) ? a : b; }
+
+  var sh = O.shell({ compact: true, title: '모양 뽑기', back: BACK, backLabel: '돌아가기', level: level });
+  if (O.eco) try { sh.menu.insertBefore(O.eco.hud(sh.menu), sh.levelBtn); } catch (e) {}
+  var board = sh.board; board.classList.add('machine');
+  board.innerHTML = '<div class="mc"><div class="mc-sign"><i>✨</i> 모양 뽑기 <i>✨</i></div><div class="glass"><div class="rail"></div><div class="floor"></div><div class="chute">⬇</div></div></div>' +
+    '<div class="ctrl"><button type="button" class="left" aria-label="왼쪽">◀</button><button type="button" class="grab">⬇ 뽑기</button><button type="button" class="right" aria-label="오른쪽">▶</button></div><div class="got-row"></div>';
+  var glass = board.querySelector('.glass'), gotRow = board.querySelector('.got-row'), grabBtn = board.querySelector('.grab');
+
+  /* 집게 (그림 대신 직접 그려요) */
+  var claw = E('div', 'claw');
+  claw.innerHTML = '<svg width="90" height="400" viewBox="0 0 90 400"><rect x="25" y="0" width="40" height="18" rx="6" fill="#5c6478"/><line class="cable" x1="45" y1="18" x2="45" y2="60" stroke="#4a4f5c" stroke-width="4"/>' +
+    '<g class="head" transform="translate(0,60)"><rect x="28" y="0" width="34" height="22" rx="8" fill="#ff6fa6" stroke="#b83c70" stroke-width="3"/>' +
+    '<g class="arm la"><path d="M33 20 C16 34 12 52 24 70" fill="none" stroke="#7a8296" stroke-width="7" stroke-linecap="round"/></g>' +
+    '<g class="arm ra"><path d="M57 20 C74 34 78 52 66 70" fill="none" stroke="#7a8296" stroke-width="7" stroke-linecap="round"/></g></g></svg>';
+  glass.appendChild(claw);
+  var cable = claw.querySelector('.cable'), head = claw.querySelector('.head'), la = claw.querySelector('.la'), ra = claw.querySelector('.ra');
+  var C = { x: 0, drop: 0 };      /* 집게 가운데 x, 내려간 길이 */
+  function drawClaw() {
+    claw.style.transform = 'translateX(' + (C.x - 45) + 'px)';
+    cable.setAttribute('y2', 60 + C.drop); head.setAttribute('transform', 'translate(0,' + (60 + C.drop) + ')');
+  }
+  function arms(open) {
+    la.style.transformOrigin = '33px 20px'; ra.style.transformOrigin = '57px 20px';
+    la.style.transform = open ? 'rotate(18deg)' : 'rotate(-14deg)'; ra.style.transform = open ? 'rotate(-18deg)' : 'rotate(14deg)';
+  }
+  function tween(fn, from, to, ms) {
+    return new Promise(function (res) {
+      var t0 = performance.now(); ms = Math.max(1, ms * (calm ? 1.3 : 1));
+      (function step(t) { var k = Math.min(1, (t - t0) / ms), e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; fn(from + (to - from) * e); if (k < 1) requestAnimationFrame(step); else res(); })(t0);
+    });
+  }
+
+  /* ---------- 상태 ---------- */
+  var cfg = LV[level], calm = O.settings().calm;
+  var stats = null, round = 0, want = null, items = [], busy = false, playing = false, W = 0, H = 0;
+
+  function layout() {
+    W = glass.clientWidth; H = glass.clientHeight;
+    var n = items.length || 1, size = Math.min(W * .72 / n, H * .34, 190);
+    items.forEach(function (it, i) {
+      var cx = W * .06 + (W * .74) * (i + .5) / n;
+      it.w = size * (it.big || 1); it.cx = cx;
+      it.el.style.width = it.w + 'px'; it.el.style.left = (cx - it.w / 2) + 'px'; it.el.style.setProperty('--ih', Math.round(size * .95) + 'px');
+    });
+    if (!C.x) C.x = W * .45;
+    C.x = Math.max(45, Math.min(W - 45, C.x)); drawClaw();
+  }
+  addEventListener('resize', layout);
+
+  function newRound() {
+    gotRow.style.visibility = '';
+    items.forEach(function (it) { it.el.remove(); }); items = [];
+    var prev = want;
+    var opts = cfg.shapes.filter(function (s) { return s !== prev; });
+    want = (opts.length ? O.pick(opts)[0] : cfg.shapes[0]);
+    var pool = function (s) { return O.shuffle(ITEMS.filter(function (x) { return x.shape === s; })); };
+    var list = [];
+    if (cfg.all) {
+      var k = 2 + Math.floor(Math.random() * 2);
+      list = pool(want).slice(0, k).concat(O.shuffle(ITEMS.filter(function (x) { return x.shape !== want; })).slice(0, cfg.items - k));
+    } else {
+      list = pool(want).slice(0, 1);
+      var others = cfg.pair ? pool(cfg.pair) : O.shuffle(ITEMS.filter(function (x) { return x.shape !== want; }));
+      /* 다른 모양이 골고루 섞이게 */
+      if (!cfg.pair) { var a = pool(cfg.shapes.length > 1 ? cfg.shapes.filter(function (s) { return s !== want; })[0] : 'cyl'), b = pool(['box', 'cyl', 'ball'].filter(function (s) { return s !== want && s !== (cfg.shapes.length > 1 ? cfg.shapes.filter(function (q) { return q !== want; })[0] : 'cyl'); })[0]); others = []; while (a.length || b.length) { if (a.length) others.push(a.shift()); if (b.length) others.push(b.shift()); } }
+      list = list.concat(others.slice(0, cfg.items - 1));
+    }
+    O.shuffle(list).forEach(function (d) {
+      var el = E('div', 'item', '<img src="' + d.src + '" alt="' + d.name + '">' + (level <= 2 ? '<span class="lab">' + d.name + '</span>' : ''));
+      var it = { d: d, el: el, done: false }; el.dataset.shape = d.shape;
+      el.addEventListener('pointerdown', function (e) { e.preventDefault(); e.stopPropagation(); if (playing && !busy && !it.done) grab(it); });
+      glass.insertBefore(el, claw); items.push(it);
+    });
+    layout();
+    var S = SHAPES[want], left = cfg.all ? items.filter(function (it) { return it.d.shape === want; }).length : 1;
+    var text = cfg.all ? S.name + josa(S.name, '을', '를') + ' 모두 뽑아요!' : S.name + josa(S.name, '을', '를') + ' 찾아 뽑아요!';
+    sh.ask(text, { html: '<b class="shape-word">' + S.name + '</b>' + josa(S.name, '을', '를') + (cfg.all ? ' <b>모두</b> 뽑아요!' : ' 찾아 뽑아요!'), img: svgUrl(want),
+      speak: text + (level <= 3 ? ' ' + S.name + '은 ' + S.say : '') });
+    sh.setRounds(cfg.rounds, round);
+    setTarget();
+  }
+  function setTarget() {
+    O.target({ get: function () { return items.filter(function (it) { return !it.done && it.d.shape === want; }).map(function (it) { return it.el; }); },
+      say: '반짝이는 물건을 눌러요' }, level);
+  }
+
+  /* ---------- 뽑기 ---------- */
+  function under(x) { var best = null; items.forEach(function (it) { if (!it.done && Math.abs(it.cx - x) < it.w * .45 && (!best || Math.abs(it.cx - x) < Math.abs(best.cx - x))) best = it; }); return best; }
+  function topOf(it) { var r = it.el.getBoundingClientRect(), g = glass.getBoundingClientRect(); return r.top - g.top; }
+  async function grab(it) {
+    busy = true; O.unlock(); O.hush(); O.clearPrompt();
+    arms(true);
+    if (it) await tween(function (v) { C.x = v; drawClaw(); }, C.x, it.cx, 250 + Math.abs(it.cx - C.x) * 1.1);
+    it = it || under(C.x);
+    /* 집게 끝(y) = 8 + 60 + 내려간 길이 + 70 → 물건 윗부분을 감싸도록 */
+    var target = it ? Math.max(10, topOf(it) + it.el.offsetHeight * .3 - 138) : Math.max(10, H * .84 - 138);
+    O.sfx('tick');
+    await tween(function (v) { C.drop = v; drawClaw(); }, 0, target, 600 + target * 1.2);
+    arms(false); await O.wait(380);
+    if (!it) {   /* 빈 곳 */
+      await tween(function (v) { C.drop = v; drawClaw(); }, target, 0, 600); arms(true);
+      O.say('여기는 비어 있어요. 물건 위에서 뽑아요.'); busy = false; return;
+    }
+    if (it.d.shape === want) await win(it, target); else await lose(it, target);
+    busy = false;
+  }
+  async function win(it, target) {
+    it.done = true; it.el.classList.remove('oks-glow'); it.el.classList.add('held');
+    var lab = it.el.querySelector('.lab'); if (lab) lab.remove();
+    var y0 = parseFloat(getComputedStyle(it.el).bottom), h0 = it.el.offsetHeight, top0 = topOf(it);
+    O.sfx('pop');
+    /* 위로 올리고 → 나오는 곳으로 */
+    await tween(function (v) { C.drop = v; drawClaw(); it.el.style.transform = 'translateY(' + (-(target - v)) + 'px)'; }, target, 0, 700 + target);
+    var x0 = C.x, dx = W * .925 - x0;
+    await tween(function (v) { C.x = x0 + dx * v; drawClaw(); it.el.style.left = (C.x - it.w / 2) + 'px'; }, 0, 1, 500 + Math.abs(dx));
+    arms(true);
+    await tween(function (v) { it.el.style.transform = 'translateY(' + (-target + v * (target + 10)) + 'px) scale(' + (1 - v * .4) + ')'; it.el.style.opacity = 1 - v * .9; }, 0, 1, 450);
+    it.el.style.visibility = 'hidden';
+    O.sfx('ok'); O.praise();
+    var S = SHAPES[want];
+    O.say(it.d.name + josa(it.d.name, '은', '는') + ' ' + S.name + '이에요!');
+    var g = E('div', 'g', '<img src="' + it.d.src + '" alt="">' + it.d.name); gotRow.appendChild(g);
+    await tween(function (v) { C.x = W * .925 + (W * .45 - W * .925) * v; drawClaw(); }, 0, 1, 500);
+    var left = items.filter(function (x) { return !x.done && x.d.shape === want; }).length;
+    if (cfg.all && left > 0) { setTarget(); return; }
+    round++; sh.setRounds(cfg.rounds, round);
+    await O.wait(1100);
+    if (round >= cfg.rounds) { playing = false; done(); } else newRound();
+  }
+  async function lose(it, target) {
+    stats.mistakes++; O.sfx('no');
+    await tween(function (v) { C.drop = v; drawClaw(); }, target, target - 40, 300);
+    arms(true); it.el.classList.add('wobble'); setTimeout(function () { it.el.classList.remove('wobble'); }, 1100);
+    var S = SHAPES[it.d.shape], T = SHAPES[want];
+    O.say(it.d.name + josa(it.d.name, '은', '는') + ' ' + S.name + '이에요. ' + T.name + josa(T.name, '을', '를') + ' 찾아봐요.');
+    await tween(function (v) { C.drop = v; drawClaw(); }, target - 40, 0, 600);
+    setTarget();
+  }
+  async function move(dir) {
+    if (!playing || busy) return;
+    C.x = Math.max(45, Math.min(W * .84, C.x + dir * Math.max(30, W * .06))); drawClaw();
+  }
+  function done() {
+    var st = stats;
+    var entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'math', school: 'elem', topic: '모양 뽑기', level: level, engine: 'shapes', rounds: cfg.rounds,
+      mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: Math.round((Date.now() - st.t0) / 1000) };
+    var btns = [{ label: '🔁 한 번 더', color: 'green', onClick: function () { location.reload(); } }];
+    if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(LESSON, level + 1); location.href = '?' + (O.qs('lesson') ? 'lesson=' + LESSON + '&' : '') + 'level=' + (level + 1); } });
+    btns.push({ label: O.qs('lesson') ? '차시로 돌아가기' : '🏠 돌아가기', color: 'blue', href: BACK });
+    O.finish({ stats: st, entry: entry, title: '모양 박사가 되었어요!', text: '모양 뽑기 ' + cfg.rounds + '판 · ' + O.LEVELS[level - 1].name, mission: { lesson: 1 }, buttons: btns });
+  }
+
+  board.querySelector('.left').onclick = function () { move(-1); };
+  board.querySelector('.right').onclick = function () { move(1); };
+  grabBtn.onclick = function () { if (playing && !busy) grab(null); };
+  addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); move(-1); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); move(1); }
+    if (e.key === ' ') { e.preventDefault(); if (playing && !busy) grab(null); }
+  });
+
+  /* ---------- 시작 화면: 세 모양 알아보기 (눌러서 듣기) ---------- */
+  function startScreen() {
+    sh.askEl.style.visibility = 'hidden';
+    var ov = E('div', 'oks-start');
+    var cards = ['box', 'cyl', 'ball'].map(function (k) {
+      var ex = O.shuffle(ITEMS.filter(function (x) { return x.shape === k; })).slice(0, 3).map(function (x) { return '<img src="' + x.src + '" alt="' + x.name + '">'; }).join('');
+      return '<button type="button" class="shape-card" data-k="' + k + '">' + SHAPES[k].svg + '<b>' + SHAPES[k].name + '</b><div class="ex">' + ex + '</div></button>';
+    }).join('');
+    var lvBtns = O.LEVELS.map(function (L) { return '<button type="button" data-lv="' + L.n + '" class="' + (L.n === level ? 'on' : '') + '" title="' + O.esc(L.desc) + '">' + L.short + '</button>'; }).join('');
+    ov.innerHTML = '<div class="st-card"><h1>🎪 모양 뽑기</h1><p>말한 <b>모양</b>의 물건을 집게로 뽑아요.<br>모양 카드를 누르면 설명을 들을 수 있어요.</p>' +
+      '<div class="shape-cards">' + cards + '</div><div class="st-lv">' + lvBtns + '</div>' +
+      '<button type="button" class="oks-btn green st-go">시작! ▶</button><div class="keys">물건을 톡 누르거나, ◀ ▶ 로 움직이고 ⬇ 뽑기 (키보드: ← → 스페이스)</div></div>';
+    document.body.appendChild(ov);
+    ov.querySelectorAll('.shape-card').forEach(function (b) {
+      b.onclick = function () { O.unlock(); ov.querySelectorAll('.shape-card').forEach(function (x) { x.classList.toggle('talk', x === b); }); var S = SHAPES[b.dataset.k]; O.say(S.name + '. ' + S.say); };
+    });
+    ov.querySelectorAll('.st-lv button').forEach(function (b) {
+      b.onclick = function () { level = +b.dataset.lv; ov.querySelectorAll('.st-lv button').forEach(function (x) { x.classList.toggle('on', x === b); }); };
+    });
+    ov.querySelector('.st-go').onclick = function () { O.unlock(); O.hush(); ov.remove(); begin(); };
+  }
+  function begin() {
+    sh.askEl.style.visibility = '';
+    cfg = LV[level]; O.rememberLevel(LESSON, level); sh.setLevel(level);
+    stats = O.newStats(); round = 0; playing = true; arms(true);
+    newRound();
+  }
+  sh.levelBtn.onclick = function () { location.reload(); };
+  arms(true); layout(); startScreen();
+  window.SHAPES_GAME = { get want() { return want; }, get busy() { return busy; }, items: function () { return items; }, get playing() { return playing; } };
+})();
+</script>
+</body>
+</html>
