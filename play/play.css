@@ -354,3 +354,51 @@ body.oks-play .oks-app{max-width:min(1560px,100%);}
 .oks-top.compact .oks-title{flex:0 1 680px;margin:0 auto;}
 @media (max-width:560px){ .oks-top.compact .oks-title{display:none;} .oks-top.compact{justify-content:space-between;} }
 .oks-top.compact > *:not(.oks-title):not(.oks-menu){flex-shrink:0;white-space:nowrap;}
+
+/* ===== 장면 하나 + 또렷한 놀이판 (2차 정리) ===== */
+/* 배경: 차시 장면 하나만 선명하게, 가장자리만 살짝 어둡게 */
+body.oks.oks-play.has-scene-bg{background:var(--play-bg) center/cover no-repeat fixed;}
+body.oks-play.has-scene-bg::before{background:radial-gradient(ellipse at center,rgba(0,0,0,0) 50%,rgba(25,18,45,.38));}
+body.oks-play.has-scene-bg.calm::before{background:rgba(255,250,240,.55);}
+/* 놀이판: 불투명한 흰 판, 내용은 가운데로 */
+.oks-play .oks-fit > .oks-board,
+.oks-play .oks-fit > .oks-board.in-scene,
+.oks-play .oks-fit > .oks-board.farm,
+.oks-play .oks-fit > .oks-board.stage{background:#fffdf8!important;backdrop-filter:none;border-radius:30px;
+  box-shadow:0 0 0 6px rgba(255,255,255,.55),0 18px 44px rgba(30,20,50,.32);display:flex;flex-direction:column;justify-content:center;}
+.oks-play .oks-fit > .oks-board > *{flex-shrink:0;}
+/* 장면 띠: 흰 카드 (흐린 그림 겹치지 않기) */
+.scene-strip.has-ask{background-image:none!important;background:#fffdf8;box-shadow:0 0 0 6px rgba(255,255,255,.55),0 12px 30px rgba(30,20,50,.28);}
+.scene-strip.has-ask::after{display:none;}
+.scene-strip.has-ask .sc-title{top:10px;right:16px;background:#fff1dc;color:#9a5a1e;box-shadow:none;font-size:14px;}
+.scene-strip.has-ask .sc-main{padding-right:150px;}
+.sc-main .oks-ask-bubble{box-shadow:none;background:#f4f0ff;border-radius:22px;}
+/* 진행 칸: 진하게 */
+.scene-strip.has-ask .sc-slot{background:#f3ead8;border:3px solid #dccbab;}
+.scene-strip.has-ask .sc-slot.now{background:#fff3d6;border:4px solid #ff9a2e;box-shadow:0 0 0 4px rgba(255,154,46,.22);}
+.scene-strip.has-ask .sc-slot.last{border-color:#f5c542;}
+.scene-strip.has-ask .sc-slot.got{background:#fff;}
+.scene-strip.has-ask .sc-slot.got.good{background:#e3f6e6;border-color:#2fa84f;}
+.scene-strip.has-ask .sc-slot.got.ok{background:#eef2f4;border-color:#8fa3ad;}
+/* 제목: 둥근 알약 */
+.oks-play .oks-top.compact .oks-title{background:rgba(255,253,248,.94);border-radius:999px;color:var(--ink);text-shadow:none;
+  box-shadow:0 4px 14px rgba(30,20,50,.22);padding:8px 26px;}
+/* 옮기는 곳: 진짜 바구니 */
+.dropzone.target-zone{max-width:520px;width:100%;margin:0 auto;min-height:170px;border:none;border-radius:28px;background:#fdf3df;
+  box-shadow:inset 0 0 0 3px #efdcb6;flex-direction:row;gap:14px;font-size:22px;color:#8a6234;}
+.dropzone.target-zone.hover{background:#e3f6f3;box-shadow:inset 0 0 0 4px var(--teal);}
+.dropzone.target-zone .dz-img{width:130px;height:auto;filter:drop-shadow(0 6px 6px rgba(90,55,20,.25));pointer-events:none;}
+.dropzone.target-zone .dz-ico{font-size:64px;}
+@media (max-width:640px){
+  .scene-strip.has-ask .sc-main{padding-right:10px;padding-top:34px;}
+  .dropzone.target-zone{min-height:120px;font-size:18px;} .dropzone.target-zone .dz-img{width:84px;}
+}
+.scene-strip.has-ask .sc-title{display:none;}
+.scene-strip.has-ask .sc-main{padding-right:16px;}
+.oks-play .oks-fit > .oks-board{gap:22px;}
+.dropzone.target-zone{margin-top:14px;}
+.oks-play .oks-top.compact .oks-title b{font-size:21px;}
+@media (max-width:640px){ .scene-strip.has-ask .sc-main{padding-top:10px;} }
+/* 빈칸·분류 칸: 점선 대신 또렷한 연한 칸 */
+:where(.oks-play) .dropzone{border:3px solid #ecdcbc;background:#fbf3e3;}
+:where(.oks-play) .dropzone.hover{border-color:var(--teal);background:#e3f6f3;}

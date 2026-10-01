@@ -276,15 +276,18 @@
     function fit() {
       raf = 0;
       if (!wrap.isConnected) return;
-      if (innerWidth < 760) { board.style.width = ''; board.style.transform = ''; wrap.style.height = ''; return; }
+      if (innerWidth < 760) { board.style.width = ''; board.style.transform = ''; board.style.minHeight = ''; wrap.style.height = ''; return; }
       var availW = wrap.clientWidth, top = wrap.getBoundingClientRect().top + scrollY;
-      var availH = Math.max(300, innerHeight - top - 14);
-      board.style.width = W0 + 'px';
+      var availH = Math.max(320, innerHeight - top - 16);
+      board.style.width = W0 + 'px'; board.style.minHeight = '';
       var natH = board.offsetHeight;
-      var s = Math.min(availW / W0, availH / natH, 1.6);
-      s = Math.max(s, Math.min(1, availW / W0));          /* 높이가 모자라면 아래로 넘치게 두되, 너비는 꼭 맞추기 */
+      /* 너비에 맞춰 키우되(최대 1.5배), 높이를 넘으면 높이에 맞춤 (최소 0.8배) */
+      var s = Math.min(availW / W0, 1.5);
+      if (natH * s > availH) s = Math.max(0.8, availH / natH);
+      /* 남는 높이는 판을 늘려서 채우고, 내용은 판 가운데에 */
+      board.style.minHeight = Math.max(natH, Math.floor(availH / s)) + 'px';
       board.style.transform = 'scale(' + s.toFixed(3) + ')';
-      wrap.style.height = Math.ceil(natH * s) + 'px';
+      wrap.style.height = Math.ceil(board.offsetHeight * s) + 'px';
     }
     function later() { if (!raf) raf = requestAnimationFrame(fit); }
     addEventListener('resize', later);

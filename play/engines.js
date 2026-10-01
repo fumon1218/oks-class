@@ -91,7 +91,10 @@
       ctx.board.appendChild(ctx.grid(cardsB));
       var dragMode = lv === 3 && !R.free && okEls.length === 1 && !c.noDrag;
       var dz;
-      if (dragMode) { dz = zone(ctx, '<span class="dz-ico">' + (c.zoneIcon || '🧺') + '</span><span>' + (c.zoneLabel || '여기에 옮겨요') + '</span>'); ctx.board.appendChild(dz); }
+      if (dragMode) {
+        var zIco = (!c.zoneIcon || c.zoneIcon === '🧺') ? '<img class="dz-img" src="' + ctx.img('games/farm/assets/basket.webp') + '" alt="">' : '<span class="dz-ico">' + c.zoneIcon + '</span>';
+        dz = zone(ctx, zIco + '<span class="dz-lab">' + (c.zoneLabel || '여기에 옮겨요') + '</span>', 'target-zone'); ctx.board.appendChild(dz);
+      }
       return askRound(ctx, R).then(function () {
         var need = R.free ? 1 : okEls.length;
         ctx.target({ get: function () { return okEls.filter(function (x) { return !x._done; }); }, to: dz ? function () { return dz; } : null });

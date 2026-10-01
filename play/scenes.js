@@ -61,6 +61,8 @@
     /* 안내 말풍선을 장면 띠 안으로: 안내자(별지기) 한 명 + 문제 + 진행 칸을 한곳에 */
     if (sh.askEl) { var main = E('div', 'sc-main'); main.appendChild(sh.askEl); main.appendChild(strip.querySelector('.sc-track')); strip.appendChild(main); strip.classList.add('has-ask'); }
     sh.board.style.setProperty('--scene', 'url(' + O.ROOT + bg + ')');
+    /* 화면 전체 배경 = 이 차시의 장면 하나 (선명하게) */
+    document.body.style.setProperty('--play-bg', 'url(' + O.ROOT + bg + ')'); document.body.classList.add('has-scene-bg');
     var combo = 0, maxCombo = 0, goodN = 0;
     var guide = strip.querySelector('.sc-guide'), comboEl = strip.querySelector('.sc-combo');
     function hop() { guide.classList.remove('hop'); void guide.offsetWidth; guide.classList.add('hop'); }
