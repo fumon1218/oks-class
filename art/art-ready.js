@@ -189,6 +189,7 @@ window.OKS_ART = {
 "art/space/star_dream.webp",
 "art/space/star_farm.webp",
 "art/space/star_jungle.webp",
+"art/space/star_word.webp",
 "art/space/egg_sleep.webp",
 "art/space/egg_crack.webp",
 "art/space/egg_born.webp",

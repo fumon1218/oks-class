@@ -27,8 +27,8 @@
     { id: 'jungle', name: '정글 점프 별', chip: '모험 게임', img: 'star_jungle', model: 'star_jungle', emo: '🌴', color: '#5fcf6a',
       url: 'https://fumon1218.github.io/jungle-jump/', say: '정글 점프 별로 날아가요! 나뭇가지를 뛰어넘으며 열매를 모아요.',
       map: { x: 37, y: 20, w: 12.5 }, mapP: { x: 28, y: 91, w: 36 } },
-    { id: 'word', name: '워드 마스터 별', chip: '한글 게임', img: 'star_word', model: 'star_word', emo: '🔤', color: '#ffb74d',
-      url: 'https://fumon1218.github.io/word-master/?from=oks', say: '워드 마스터 별로 날아가요! 자음·모음부터 문장까지 한글을 익혀요.',
+    { id: 'word', name: '한글별', chip: '워드 마스터', img: 'star_word', model: 'star_word', emo: '🔤', color: '#ffb74d',
+      url: 'https://fumon1218.github.io/word-master/?from=oks', say: '한글별로 날아가요! 자음·모음부터 문장까지 한글을 익혀요.',
       map: { x: 62, y: 23, w: 11 }, mapP: { x: 73, y: 91, w: 34 } }
   ];
   var EGGS = [

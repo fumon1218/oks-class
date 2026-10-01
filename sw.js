@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v57';
+const CACHE_NAME = 'oks-class-v58';
 const ASSETS = [
   './',
   './index.html',
@@ -110,6 +110,7 @@ const ASSETS = [
   './art/space/star_jungle.webp',
   './art/space/star_love.webp',
   './art/space/star_sea.webp',
+  './art/space/star_word.webp',
   './art/space/telescope.webp',
   './art/3d/b_block_factory.glb',
   './art/3d/b_lab.glb',
@@ -135,6 +136,7 @@ const ASSETS = [
   './art/3d/star_jungle.glb',
   './art/3d/star_love.glb',
   './art/3d/star_sea.glb',
+  './art/3d/star_word.glb',
   './art/3d/tree.glb',
   './art/3d/wave.glb',
   './art/build/b_adventure.webp',
