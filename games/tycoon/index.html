@@ -117,6 +117,82 @@ body.oks::before{background:rgba(255,250,235,.15);}
   .tb span{display:none;}
 }
 body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
+/* ===== 시안 배치 ===== */
+.top{gap:10px;}
+.tb.round{width:52px;height:52px;justify-content:center;padding:0;font-size:22px;border-radius:50%;}
+.sign{background:linear-gradient(#c4844a,#9c5f2d);border:4px solid #7a4520;border-radius:20px;padding:4px 22px;font-size:30px;box-shadow:0 5px 0 #5e3416,0 8px 16px rgba(0,0,0,.3);}
+.sign span{font-size:26px;}
+.goal{flex:1;max-width:540px;margin-right:30px!important;display:flex;align-items:center;gap:0;position:relative;margin:0 auto;}
+.lvstar{position:relative;width:62px;height:62px;flex:none;z-index:2;}
+.lvstar img{width:100%;height:100%;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25));}
+.lvstar b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:400;font-size:22px;color:#8a4b00;padding-top:4px;}
+.gbox{flex:1;background:rgba(80,45,20,.86);border-radius:0 999px 999px 0;margin-left:-14px;padding:5px 46px 7px 22px;color:#fff;}
+.gtext{font-size:16px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.gbox .bar{height:12px;border-radius:99px;background:#5a3418;overflow:hidden;margin-top:3px;box-shadow:inset 0 1px 2px rgba(0,0,0,.4);}
+.gbox .bar i{display:block;height:100%;background:linear-gradient(90deg,#ffd54f,#ffb300);border-radius:99px;transition:width .5s;}
+.goal .gift{position:absolute;right:-18px;top:50%;transform:translateY(-50%);width:66px;z-index:2;filter:drop-shadow(0 3px 4px rgba(0,0,0,.25));}
+.pill{background:linear-gradient(#6a3d1c,#4a2810);border:3px solid #8a5228;font-size:22px;padding:3px 18px 3px 3px;}
+.pill img{width:40px;height:40px;}
+.tb.help{border-radius:999px;padding:4px 16px 4px 4px;font-size:17px;}
+.tb.help img{width:40px;height:40px;}
+.stage{flex:1;min-height:0;position:relative;display:grid;grid-template-columns:1.2fr 1fr;gap:18px;padding:4px 4px 0;}
+.farmwrap{position:relative;border-radius:30px;padding:46px 14px 10px;background:repeating-linear-gradient(90deg,#d49a5c 0 46px,#c88b4e 46px 50px);box-shadow:inset 0 0 0 6px #e6b27a,inset 0 0 0 9px #a86c34,0 12px 26px rgba(60,30,10,.3);display:flex;}
+.farmwrap .farm{flex:1;padding:0;}
+.farmsign{position:absolute;left:50%;top:-14px;transform:translateX(-50%);background:linear-gradient(#b9773d,#94582a);color:#fff8e6;border:3px solid #6d3f1b;border-radius:14px;padding:4px 26px;font-size:24px;text-align:center;line-height:1.1;box-shadow:0 4px 0 #5e3416;z-index:4;white-space:nowrap;}
+.farmsign small{display:block;font-size:12px;opacity:.85;}
+.plot .tag{background:linear-gradient(#fff7e2,#f3e2bd);border:2px solid #c99a62;border-radius:12px;font-size:15px;box-shadow:0 2px 0 #b0844f;}
+.plot.locked::before{content:'';position:absolute;left:6%;right:6%;top:18%;bottom:12%;border:4px dashed rgba(255,250,235,.9);border-radius:18px;z-index:1;}
+.right{display:flex;flex-direction:column;gap:12px;min-height:0;padding-right:4px;}
+.counter{position:relative;flex:1;min-height:0;display:flex;align-items:flex-end;}
+.counter::after{content:'';position:absolute;left:-6px;right:-6px;bottom:0;height:56px;background:linear-gradient(#c98a4c,#a5682f);border-radius:16px 16px 10px 10px;box-shadow:inset 0 6px 0 #dda56a,0 8px 16px rgba(60,30,10,.25);z-index:1;}
+.counter .custs{position:relative;z-index:0;width:100%;height:100%;align-items:end;}
+.cust{height:100%;justify-content:flex-end;}
+.cust .who{height:clamp(90px,25vh,210px);margin:8px 0 0;transform:translateY(22px);}
+.cust .ord{border-radius:20px;padding:6px 8px 4px;font-size:20px;border:3px solid #f1e3c8;}
+.cust .ord img{height:40px;}
+.lower{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;height:clamp(130px,26vh,210px);}
+.basket{height:auto;background:linear-gradient(#e7c08a,#cf9a5c);border-radius:24px;box-shadow:inset 0 0 0 5px #f3d4a3,0 8px 16px rgba(60,30,10,.25);flex-direction:column;justify-content:flex-end;gap:2px;padding:6px 8px 8px;}
+.basket .bk{height:auto;width:78%;max-height:72%;}
+.basket .plank{background:linear-gradient(#b9773d,#94582a);color:#fff8e6;border-radius:10px;padding:1px 16px;font-size:16px;box-shadow:0 3px 0 #6d3f1b;}
+.basket .stock{flex:none;justify-content:center;gap:4px;}
+.basket .stock span{font-size:15px;padding:0 6px;} .basket .stock img{height:24px;}
+.board{display:flex;flex-direction:column;gap:8px;}
+.chalk{flex:1;position:relative;background:#2f4b3a;border:7px solid #a86c34;border-radius:16px;color:#f4f1e8;font-size:18px;padding:8px 12px;line-height:1.35;box-shadow:inset 0 0 18px rgba(0,0,0,.45),0 6px 12px rgba(0,0,0,.25);font-family:inherit;}
+.chalk img{position:absolute;right:6px;bottom:4px;width:44%;filter:drop-shadow(0 3px 3px rgba(0,0,0,.3));}
+.bigdeliver{border:none;border-radius:999px;background:linear-gradient(#5fd06a,#2fa846);color:#fff;font:inherit;font-size:20px;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 12px;box-shadow:0 5px 0 #1f7a33,0 8px 14px rgba(0,0,0,.2);cursor:pointer;white-space:nowrap;}
+.bigdeliver img{height:40px;}
+.bigdeliver.oks-glow{animation:pglow 1s ease-in-out infinite;}
+.farmer{position:absolute;left:55%;top:30%;width:clamp(90px,12vw,170px);z-index:6;pointer-events:none;transform:translateX(-50%);}
+.farmer img{width:100%;filter:drop-shadow(0 8px 8px rgba(0,0,0,.25));}
+.speech{position:absolute;left:-40%;right:-40%;bottom:100%;margin-bottom:8px;background:#fffdf6;border-radius:18px;padding:8px 12px;font-size:17px;text-align:center;box-shadow:0 6px 16px rgba(0,0,0,.2);opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;}
+.speech::after{content:'';position:absolute;left:50%;bottom:-10px;margin-left:-10px;border:10px solid transparent;border-top-color:#fffdf6;border-bottom:0;}
+.speech.on{opacity:1;transform:none;}
+.say{display:none;}
+.tools{gap:10px;align-items:stretch;flex-wrap:nowrap;}
+.tool{border-radius:999px;padding:5px 16px 5px 6px;font-size:19px;min-height:60px;white-space:nowrap;background-image:linear-gradient(rgba(255,255,255,.28),rgba(255,255,255,0) 55%);border:3px solid rgba(255,255,255,.6);}
+.tool.t1{background-color:#ff9f2e;} .tool.t2{background-color:#3d8fe8;} .tool.t3{background-color:#3fb05a;} .tool.t4{background-color:#9b6bff;} .tool.t5{background-color:#ff5d8f;}
+.tool img{height:44px;margin-right:2px;}
+.tool b{background:#fff;color:#7a5a2e;width:28px;height:28px;}
+.tool.oks-glow{position:relative;}
+.tool.oks-glow::after{content:'';position:absolute;right:-18px;bottom:-22px;width:58px;height:58px;background:url('../farm/assets/pointer.webp') center/contain no-repeat;animation:tap 1s ease-in-out infinite;pointer-events:none;}
+@keyframes tap{50%{transform:translate(-4px,-6px) scale(.92)}}
+.tile{border:3px solid #e6d2ad;border-radius:20px;background:#fffaf0;font:inherit;font-size:14px;white-space:nowrap;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 12px;cursor:pointer;text-decoration:none;box-shadow:0 4px 0 #d2b98e;min-width:86px;}
+.tile img{height:32px;}
+@media (max-width:1200px){
+  .tools{gap:6px;} .tool{font-size:15px;min-height:50px;padding:3px 10px 3px 4px;} .tool img{height:32px;} .tool b{width:22px;height:22px;font-size:13px;}
+  .tile{min-width:0;padding:2px 8px;font-size:12px;} .tile img{height:26px;}
+  .sign{font-size:22px;padding:4px 14px;} .goal{margin-right:24px!important;} .gtext{font-size:13px;} .pill{font-size:18px;} .pill img{width:32px;height:32px;}
+  .tb.help span{display:none;} .tb.help{padding:4px;}
+}
+.top > *{flex-shrink:0;} .top .goal{flex-shrink:1;min-width:0;}
+@media (max-width:900px){
+  .stage{display:flex;flex-direction:column;} .farmwrap{height:46vh;flex:none;padding-top:40px;} .farmer{display:none;}
+  .say{display:block;} .goal{order:5;flex-basis:100%;max-width:none;} .sign{font-size:20px;}
+  .lower{grid-template-columns:1fr;height:auto;} .basket{min-height:0;} .basket .bk{width:190px;} .chalk{display:none;}
+  .counter{flex:none;} .counter::after{height:34px;} .cust .who{height:80px;transform:translateY(12px);} .cust .ord{font-size:14px;padding:4px;min-height:40px;} .cust .ord img{height:26px;} .cust .ord .pay{font-size:12px;}
+  .tools{position:sticky;bottom:0;z-index:20;background:rgba(255,248,230,.95);} .say{bottom:auto!important;top:12px;z-index:30;}
+  .tools{flex-wrap:wrap;} .tool{font-size:15px;min-height:52px;padding:4px 14px 4px 6px;} .tool img{height:34px;} .tile{min-width:80px;}
+}
 </style>
 </head>
 <body class="oks">
@@ -153,6 +229,8 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
   var S = O.jget(KEY, null) || { coins: 10, stars: 0, xp: 0, lv: 1, plots: [{}, {}, {}, {}, {}, {}], barn: {}, orders: [], deco: {}, help: true, delivered: 0 };
   function save() { O.jset(KEY, S); }
   function need(lv) { return 20 + lv * 20; }
+  var GOAL = 3;
+  function today() { var d = new Date().toISOString().slice(0, 10); if (!S.today || S.today.d !== d) S.today = { d: d, n: 0, got: false }; return S.today; }
   function cropsOpen() { return Object.keys(CROPS).filter(function (k) { return CROPS[k].lv <= S.lv; }); }
 
   /* ---------- 화면 ---------- */
@@ -160,30 +238,41 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
   var app = E('div', 'app'); document.body.appendChild(app);
   var back = O.ret(O.ROOT + 'index.html');
   app.innerHTML =
-    '<div class="top"><a class="tb" href="' + back + '">⬅<span> 돌아가기</span></a><div class="sign">🌱 쑥쑥 햇살 농장</div>' +
-    '<div class="lvbar"><div class="lv">Lv.1</div><div class="bar"><i></i></div><small></small></div>' +
+    '<div class="top"><a class="tb round" href="' + back + '" title="돌아가기">⬅</a><div class="sign"><span>🌱</span> 내 농장</div>' +
+    '<div class="goal"><div class="lvstar" title="농장 레벨"><img src="' + FA + 'star_gold.webp" alt=""><b class="lv">1</b></div><div class="gbox"><div class="gtext"></div><div class="bar"><i></i></div></div><img class="gift" src="' + FA + 'reward_coins.webp" alt=""></div>' +
     '<div class="pill coins"><img src="' + FA + 'coin.webp" alt=""><span>0</span></div><div class="pill stars"><img src="' + FA + 'star_gold.webp" alt=""><span>0</span></div>' +
-    '<button class="tb help" type="button">🐰<span> 도움 모드</span></button><button class="tb snd" type="button">🔊</button></div>' +
-    '<div class="main"><div class="farm"></div><div class="side"><div class="custs"></div><div class="basket"><h4>수확한 작물</h4><div class="bk"><img class="bk-back" src="' + FA + 'basket.webp" alt=""><div class="pile"></div><img class="bk-rim" src="' + FA + 'basket_rim.webp" alt=""></div><div class="stock"></div></div></div></div>' +
+    '<button class="tb help" type="button"><img src="' + FA + 'rabbit_face.webp" alt=""><span>도움 모드</span></button><button class="tb round snd" type="button">🔊</button></div>' +
+    '<div class="stage">' +
+    '<div class="farmwrap"><div class="farmsign">쑥쑥 농장<small>(FARM)</small></div><div class="farm"></div></div>' +
+    '<div class="right"><div class="counter"><div class="custs"></div></div>' +
+    '<div class="lower"><div class="basket"><div class="bk"><img class="bk-back" src="' + FA + 'basket.webp" alt=""><div class="pile"></div><img class="bk-rim" src="' + FA + 'basket_rim.webp" alt=""></div><div class="plank">수확한 작물</div><div class="stock"></div></div>' +
+    '<div class="board"><div class="chalk">오늘의<br>손님 주문 🐰<img src="' + FA + 'parcel_seed.webp" alt=""></div><button class="bigdeliver" type="button"><img src="' + M + 'truck.webp" alt="">주문 배달하기</button></div></div></div>' +
+    '<div class="farmer"><div class="speech"></div><img src="' + FA + 'rabbit_farmer.webp" alt=""></div></div>' +
     '<div class="tools">' +
-    '<button class="tool t1" data-t="seed" type="button"><b>1</b><img src="' + M + 'seed_strawberry.webp" alt="">씨앗 심기</button>' +
-    '<button class="tool t2" data-t="water" type="button"><b>2</b><img src="' + JJ + 'farm/can.webp" alt="">물 주기</button>' +
-    '<button class="tool t3" data-t="harvest" type="button"><b>3</b><img src="' + FA + 'sprout_pot.webp" alt="">수확하기</button>' +
-    '<button class="tool t4" data-t="pack" type="button"><b>4</b><img src="' + FA + 'parcel.webp" alt="">포장하기</button>' +
-    '<button class="tool t5" data-t="deliver" type="button"><b>5</b><img src="' + M + 'truck.webp" alt="">배달하기</button>' +
-    '<button class="tb deco-btn" type="button" style="border-radius:20px;min-height:58px">🏡 농장 꾸미기</button>' +
-    '<a class="tb" href="../../play/?id=02-01-01-01" style="border-radius:20px;min-height:58px">📚 농장 차시 연습</a></div>';
+    '<button class="tool t1" data-t="seed" type="button"><img src="' + M + 'seed_strawberry.webp" alt=""><b>1</b><span>씨앗 심기</span></button>' +
+    '<button class="tool t2" data-t="water" type="button"><img src="' + JJ + 'farm/can.webp" alt=""><b>2</b><span>물 주기</span></button>' +
+    '<button class="tool t3" data-t="harvest" type="button"><img src="' + FA + 'sprout_pot.webp" alt=""><b>3</b><span>수확하기</span></button>' +
+    '<button class="tool t4" data-t="pack" type="button"><img src="' + FA + 'parcel.webp" alt=""><b>4</b><span>포장하기</span></button>' +
+    '<button class="tool t5" data-t="deliver" type="button"><img src="' + M + 'truck.webp" alt=""><b>5</b><span>배달하기</span></button>' +
+    '<button class="tile deco-btn" type="button"><img src="' + FA + 'shop_home.webp" alt="">농장 꾸미기</button>' +
+    '<a class="tile" href="../../play/?id=02-01-01-01"><img src="' + FA + 'chalkboard.webp" alt="">농장 차시 연습</a></div>';
   var farm = app.querySelector('.farm'), custs = app.querySelector('.custs'), stock = app.querySelector('.stock');
-  var sayEl = E('div', 'say'); sayEl.style.opacity = 0; document.body.appendChild(sayEl);
+  var sayEl = app.querySelector('.speech');
   var tool = null;
-  function talk(t, speak) { sayEl.textContent = t; sayEl.style.opacity = 1; clearTimeout(talk.tm); talk.tm = setTimeout(function () { sayEl.style.opacity = 0; }, 3200); O.say(speak || t); }
+  var sayBar = E('div', 'say'); sayBar.style.opacity = 0; document.body.appendChild(sayBar);   /* 휴대폰: 토끼가 숨으면 아래 말풍선 */
+  function talk(t, speak) {
+    sayEl.textContent = t; sayEl.classList.add('on'); sayBar.textContent = t; sayBar.style.opacity = 1;
+    clearTimeout(talk.tm); talk.tm = setTimeout(function () { sayEl.classList.remove('on'); sayBar.style.opacity = 0; }, 4200); O.say(speak || t);
+  }
 
   /* ---------- 그리기 ---------- */
   function drawTop() {
     app.querySelector('.coins span').textContent = S.coins; app.querySelector('.stars span').textContent = S.stars;
-    app.querySelector('.lv').textContent = 'Lv.' + S.lv;
-    app.querySelector('.bar i').style.width = Math.min(100, S.xp / need(S.lv) * 100) + '%';
-    app.querySelector('.lvbar small').textContent = '다음 레벨까지 배달 ' + Math.ceil((need(S.lv) - S.xp) / 10) + '번';
+    app.querySelector('.lv').textContent = S.lv;
+    var T = today(), gn = Math.min(GOAL, T.n);
+    app.querySelector('.gtext').textContent = T.got ? '오늘의 목표 완료! 🎉 (레벨 ' + (S.lv + 1) + '까지 배달 ' + Math.ceil((need(S.lv) - S.xp) / 10) + '번)' : '오늘의 목표: 배달 ' + GOAL + '번 하기 (' + gn + '/' + GOAL + ')';
+    app.querySelector('.bar i').style.width = (gn / GOAL * 100) + '%';
+    app.querySelector('.lvstar').title = '농장 레벨 ' + S.lv + ' · 다음 레벨까지 배달 ' + Math.ceil((need(S.lv) - S.xp) / 10) + '번';
     app.querySelector('.help').classList.toggle('on', S.help);
   }
   function drawPlots() {
@@ -195,7 +284,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
       var html = '';
       if (C && C.full && p.stage >= 3) html += '<img class="full" src="' + C.full + '" alt="">';
       else html += '<img class="box" src="' + FA + 'empty_planter.webp" alt="">';
-      if (locked) { html += '<div class="lock">🔒</div><div class="tag">Lv.' + PLOT_LV[i] + '에 열려요</div>'; el.classList.add('locked'); }
+      if (locked) { html += '<div class="lock">🔒</div><div class="tag">' + (i + 1) + '번 밭<br>잠김 · Lv.' + PLOT_LV[i] + '</div>'; el.classList.add('locked'); }
       else if (!C) html += '<div class="bubble">🌰</div><div class="tag">' + (i + 1) + '번 밭<br>빈 밭</div>';
       else {
         if (p.stage === 0) html += '<div class="seed"></div>';
@@ -383,6 +472,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
       ov.appendChild(card); document.body.appendChild(ov);
       O.say('배달 완료! ' + pay + '코인을 받았어요!');
       S.coins += pay; S.stars += 1; S.xp += 10; S.delivered++;
+      var T = today(); T.n++; var goalNow = !T.got && T.n >= GOAL; if (goalNow) { T.got = true; S.coins += 10; }
       S.orders.splice(i, 1); S.orders.push(newOrder());
       var up = false; if (S.xp >= need(S.lv)) { S.xp -= need(S.lv); S.lv++; up = true; }
       save();
@@ -390,6 +480,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
       O.log({ at: new Date().toISOString(), lesson: 'farm-tycoon', subject: 'math', school: 'elem', topic: '쑥쑥 햇살 농장 배달', level: S.help ? 2 : 4, engine: 'farm-tycoon', stars: 3, mistakes: 0, glow: 0, hand: 0, asked: 0, sec: 0 });
       card.querySelector('.btn').onclick = function () {
         ov.remove(); setTool(null); drawAll(); bump('.coins'); bump('.stars');
+        if (goalNow) { O.praise('오늘의 목표 완료!'); talk('오늘의 목표 완료! 선물로 10코인을 더 받았어요!'); bump('.coins'); }
         if (up) levelUp();
       };
     }, 1150);
@@ -440,6 +531,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
     if (!S.help) { O.clearPrompt(); return; }
     var n = nextStep(); if (!n) return;
     var tb = app.querySelector('.tool[data-t="' + n.t + '"]'); if (tb) tb.classList.add('oks-glow');
+    app.querySelector('.bigdeliver').classList.toggle('oks-glow', n.t === 'deliver');
     O.target({ get: n.el }, 1);
     if (innerWidth < 900) { var te = n.el(); if (te) { var r = te.getBoundingClientRect(); if (r.top < 60 || r.bottom > innerHeight - 160) te.scrollIntoView({ block: 'center', behavior: 'smooth' }); } }   /* 휴대폰: 할 곳이 보이게 */
   }
@@ -453,6 +545,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
       if (t === 'deliver') { var pi = S.orders.findIndex(function (o) { return o.packed; }); if (pi >= 0) deliver(pi); else talk('먼저 포장을 해요.'); }
     };
   });
+  app.querySelector('.bigdeliver').onclick = function () { O.unlock(); var pi = S.orders.findIndex(function (o) { return o.packed; }); if (pi >= 0) deliver(pi); else talk('먼저 손님 주문만큼 포장해요.'); };
   app.querySelector('.deco-btn').onclick = function () { O.unlock(); decoShop(); };
   app.querySelector('.help').onclick = function () { S.help = !S.help; save(); talk(S.help ? '도움 모드: 다음에 할 일을 반짝여 알려 줄게요.' : '혼자 해 보기! 도움이 필요하면 다시 눌러요.'); drawTop(); guide(); };
   app.querySelector('.snd').onclick = function () { O.unlock(); var s = O.settings(); O.saveSetting('voice', !s.voice); O.saveSetting('sound', !s.voice); this.textContent = !s.voice ? '🔊' : '🔇'; };
