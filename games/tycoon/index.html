@@ -213,7 +213,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
 <body class="oks">
 <script src="../../core/oks-core.js"></script>
 <script src="../../core/oks-eco.js"></script>
-<script src="town.js"></script>
+<script src="town.js"></script><script src="town2.js"></script>
 <script src="delivery.js"></script>
 <script>
 (function () {
@@ -350,7 +350,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
     custs.innerHTML = '';
     S.orders.forEach(function (o, i) {
       var pay = orderPay(o), c = E('div', 'cust' + (o.packed ? ' ready' : ''));
-      c.innerHTML = '<div class="ord">' + o.items.map(function (it) { return '<img src="' + CROPS[it[0]].item + '" alt="">×' + it[1]; }).join(' ') + '<div class="pay">🪙 ' + pay + '코인' + (o.house != null ? ' · 🏠' + (o.house + 1) + '번지' : '') + '</div></div>' +
+      c.innerHTML = '<div class="ord">' + o.items.map(function (it) { return '<img src="' + CROPS[it[0]].item + '" alt="">×' + it[1]; }).join(' ') + '<div class="pay">🪙 ' + pay + '코인' + (o.house != null ? ' · 🏠' + (addrOf(o, curLv()).idx + 1) + '번지' : '') + '</div></div>' +
         '<img class="who" src="' + GUESTS[o.g % GUESTS.length] + '" alt="">' + (o.packed ? '<img class="boxok" src="' + FA + 'parcel.webp" alt="">' : '');
       c.onclick = function () { tapCust(i); };
       custs.appendChild(c);
@@ -480,11 +480,22 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
   /* 배달 방법 고르기: 🚚 트럭(지도 보고 찾아가기) · 🚁 드론(날아서) · ⚡ 바로 */
   var GNAME = { cat: '고양이', panda: '판다', monkey: '원숭이', bear: '곰', dog: '강아지', fox: '여우', koala: '코알라', penguin: '펭귄', elephant: '코끼리', tiger: '호랑이' };
   function guestOf(o) { var src = GUESTS[o.g % GUESTS.length], k = (src.match(/(\w+)\.webp$/) || [])[1]; return { img: src, name: GNAME[k] || '손님' }; }
+  /* 4·5수준은 더 큰 무지개 마을(집 13채). 주문마다 두 마을의 번지를 따로 정해 둬요. */
+  function townOf(lv) { return lv >= 4 && window.OKS_TOWN2 ? 2 : 1; }
+  function curLv() { return S.dlv || (S.help ? 1 : 3); }
+  function addrOf(o, lv) {
+    if (townOf(lv) === 2) {
+      if (o.h2 == null) { var hs = S.orders.map(function (x) { return x.h2; }), z; do { z = Math.floor(Math.random() * 13); } while (hs.indexOf(z) >= 0); o.h2 = z; save(); }
+      return { town: 2, idx: o.h2 };
+    }
+    if (o.house == null) { o.house = Math.floor(Math.random() * 9); save(); }
+    return { town: 1, idx: o.house };
+  }
   function deliver(i) {
-    var o = S.orders[i]; if (o.house == null) { o.house = Math.floor(Math.random() * 9); save(); }
+    var o = S.orders[i];
     if (!window.OKS_DELIVERY) return quickDeliver(i);
-    var dlv = S.dlv || (S.help ? 1 : 3), gst = guestOf(o);
-    var ov = E('div', 'ov'), card = E('div', 'card', '<h3>🚚 어떻게 배달할까요?</h3><p style="margin:0 0 10px;font-size:17px">' + gst.name + '네 집 · ' + (o.house + 1) + '번지</p><div class="row dl-modes"></div>' +
+    var dlv = curLv(), gst = guestOf(o), ad = addrOf(o, dlv);
+    var ov = E('div', 'ov'), card = E('div', 'card', '<h3>🚚 어떻게 배달할까요?</h3><p class="dl-addr" style="margin:0 0 10px;font-size:17px"></p><div class="row dl-modes"></div>' +
       '<p style="margin:12px 0 4px;font-size:15px;color:#8a7a5e">배달 수준</p><div class="row dl-lv"></div>');
     var modes = [['truck', M + 'truck.webp', '트럭', '지도 보고 집 찾기'], ['drone', M + 'drone/drone_box.webp', '드론', '날아서 고리 지나기'], ['quick', FA + 'parcel.webp', '바로 배달', '쉽고 빠르게']];
     modes.forEach(function (m) {
@@ -493,15 +504,17 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
       b.onclick = function () {
         O.unlock(); ov.remove(); O.clearPrompt();
         if (m[0] === 'quick') return quickDeliver(i);
-        window.OKS_DELIVERY.start({ mode: m[0], level: dlv, guest: gst, house: o.house, onDone: function (r) { if (r.ok) quickDeliver(i, r); else { talk('배달을 멈췄어요. 다시 배달해요.'); guide(); } } });
+        ad = addrOf(o, dlv); window.OKS_DELIVERY.start({ mode: m[0], level: dlv, guest: gst, house: ad.idx, town: ad.town, onDone: function (r) { if (r.ok) quickDeliver(i, r); else { talk('배달을 멈췄어요. 다시 배달해요.'); guide(); } } });
       };
       card.querySelector('.dl-modes').appendChild(b);
     });
     [1, 2, 3, 4, 5].forEach(function (n) {
       var b = E('button', 'tb' + (n === dlv ? ' on' : ''), String(n)); b.type = 'button'; b.style.minWidth = '46px'; b.style.justifyContent = 'center';
-      b.onclick = function () { dlv = S.dlv = n; save(); [].forEach.call(card.querySelectorAll('.dl-lv .tb'), function (x) { x.classList.toggle('on', x === b); }); };
+      b.onclick = function () { dlv = S.dlv = n; save(); [].forEach.call(card.querySelectorAll('.dl-lv .tb'), function (x) { x.classList.toggle('on', x === b); }); showAddr(); drawCusts(); };
       card.querySelector('.dl-lv').appendChild(b);
     });
+    function showAddr() { ad = addrOf(o, dlv); card.querySelector('.dl-addr').textContent = gst.name + '네 집 · ' + (ad.town === 2 ? '무지개 마을 ' : '') + (ad.idx + 1) + '번지'; }
+    showAddr();
     ov.appendChild(card); document.body.appendChild(ov);
     O.say('트럭으로 갈까요, 드론으로 갈까요?');
   }

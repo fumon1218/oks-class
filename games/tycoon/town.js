@@ -37,5 +37,5 @@ window.OKS_TOWN = (function () {
     }
     var out = [b]; while (out[0] !== a && prev[out[0]]) out.unshift(prev[out[0]]); return out;
   }
-  return { W: 1672, H: 941, N: N, ADJ: ADJ, HOUSES: HOUSES, PLACES: PLACES, START: 'ST', dir: dir, path: path, img: 'town.webp' };
+  return { id: 1, name: '햇살 마을', LABELS: [['🏫 학교', 1450, 60], ['🌱 출발', 175, 600]], bdy: 115, W: 1672, H: 941, N: N, ADJ: ADJ, HOUSES: HOUSES, PLACES: PLACES, START: 'ST', dir: dir, path: path, img: 'town.webp' };
 })();

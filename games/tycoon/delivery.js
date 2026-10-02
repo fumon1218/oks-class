@@ -1,5 +1,5 @@
 /* 배달 놀이: 🚚 트럭(항공 지도에서 주소 보고 집 찾기) · 🚁 드론(꾹 눌러 날아서 고리 지나 배달)
-   OKS_DELIVERY.start({ mode:'truck'|'drone', level:1~5, guest:{img,name}, house:0~8, onDone:function(r){} })  r = { ok, mistakes, rings } */
+   OKS_DELIVERY.start({ mode:'truck'|'drone', level:1~5, guest:{img,name}, house:0~8(1마을)·0~12(2마을), town:1|2, onDone:function(r){} })  r = { ok, mistakes, rings } */
 window.OKS_DELIVERY = (function () {
   'use strict';
   var O = window.OKS, T = window.OKS_TOWN, IMG = 'img/', E = O.el;
@@ -52,7 +52,7 @@ window.OKS_DELIVERY = (function () {
     var sw = '<span class="sw" style="background:' + h.hex + '"></span>', num = '<span class="num">' + h.no + '</span>';
     if (lv <= 1) return { html: [sw + ' ' + h.color + ' 지붕 집'], say: h.color + ' 지붕 집으로 가요' };
     if (lv === 2) return { html: [num + ' ' + h.no + '번지', sw + ' ' + h.color + ' 지붕'], say: h.no + '번지, ' + h.color + ' 지붕 집으로 가요' };
-    if (lv === 3) return { html: [num + ' 햇살 마을 ' + h.no + '번지'], say: '햇살 마을 ' + h.no + '번지로 가요' };
+    if (lv === 3) return { html: [num + ' ' + T.name + ' ' + h.no + '번지'], say: T.name + ' ' + h.no + '번지로 가요' };
     return { html: ['📍 ' + h.near, num + ' ' + h.no + '번지'], say: h.near + ', ' + h.no + '번지로 가요' };
   }
 
@@ -60,16 +60,15 @@ window.OKS_DELIVERY = (function () {
   function truck(o) {
     var lv = o.level, h = T.HOUSES[o.house], cur = T.START, mistakes = 0, moving = false, helpOn = lv <= 1;
     var root = E('div', 'dl'), map = E('div', 'map');
-    map.innerHTML = '<img class="town" src="' + IMG + T.img + '" alt="햇살 마을 지도"><svg class="dlov" viewBox="0 0 ' + T.W + ' ' + T.H + '" preserveAspectRatio="none"><path class="hint" d="" fill="none" stroke="#ff9800" stroke-width="14" stroke-dasharray="4 26" stroke-linecap="round" opacity=".95"/></svg>';
+    map.innerHTML = '<img class="town" src="' + IMG + T.img + '" alt="' + T.name + ' 지도"><svg class="dlov" viewBox="0 0 ' + T.W + ' ' + T.H + '" preserveAspectRatio="none"><path class="hint" d="" fill="none" stroke="#ff9800" stroke-width="14" stroke-dasharray="4 26" stroke-linecap="round" opacity=".95"/></svg>';
     root.appendChild(map);
     var hint = map.querySelector('.hint');
     /* 집 번호표: 1·2수준은 번호, 3수준부터는 번호 + (4수준부터) 문패 없이 */
     T.HOUSES.forEach(function (x, i) {
       var b = E('div', 'badge' + (helpOn && i === o.house ? ' goal' : ''), lv >= 2 ? String(x.no) : '<span class="sw" style="display:inline-block;width:18px;height:18px;border-radius:4px;background:' + x.hex + ';border:2px solid #6d4c41"></span>');
-      b.style.left = (x.at[0] / T.W * 100) + '%'; b.style.top = ((x.at[1] - 115) / T.H * 100) + '%'; b.dataset.i = i; map.appendChild(b);
+      b.style.left = (x.at[0] / T.W * 100) + '%'; b.style.top = ((x.at[1] - T.bdy) / T.H * 100) + '%'; b.dataset.i = i; map.appendChild(b);
     });
-    var sch = E('div', 'badge', '🏫 학교'); sch.style.left = (1450 / T.W * 100) + '%'; sch.style.top = (60 / T.H * 100) + '%'; map.appendChild(sch);
-    var gh = E('div', 'badge', '🌱 출발'); gh.style.left = (175 / T.W * 100) + '%'; gh.style.top = (600 / T.H * 100) + '%'; map.appendChild(gh);
+    T.LABELS.forEach(function (l) { var b = E('div', 'badge', l[0]); b.style.left = (l[1] / T.W * 100) + '%'; b.style.top = (l[2] / T.H * 100) + '%'; map.appendChild(b); });
     var tr = E('div', 'truck', '<img src="' + IMG + 'truck.webp" alt="">'); map.appendChild(tr);
     var ad = addrLines(h, o.guest, lv);
     var card = E('div', 'addr', '<h4>📦 배달 주소</h4><div class="who"><img src="' + o.guest.img + '" alt="">' + o.guest.name + '네 집</div>' + ad.html.map(function (l) { return '<div class="line">' + l + '</div>'; }).join(''));
@@ -116,7 +115,7 @@ window.OKS_DELIVERY = (function () {
         mistakes++; O.sfx('no'); var x = T.HOUSES[hi];
         var t = '여기는 ' + x.no + '번지 ' + x.color + ' 지붕 집이에요. 주소를 다시 봐요.'; msg.textContent = t; O.say(t);
         if (mistakes >= 2 && !helpOn) { helpOn = true; badgeGoal(); }
-      } else if (T.PLACES[cur]) { msg.textContent = '여기는 ' + T.PLACES[cur] + '이에요.'; }
+      } else if (T.PLACES[cur]) { msg.textContent = '여기는 ' + T.PLACES[cur] + josa(T.PLACES[cur], '이에요', '예요') + '.'; }
       drawHint(); arrows();
     }
     function badgeGoal() { [].forEach.call(map.querySelectorAll('.badge'), function (b) { b.classList.toggle('goal', +b.dataset.i === o.house); }); drawHint(); arrows(); }
@@ -219,5 +218,5 @@ window.OKS_DELIVERY = (function () {
     return { state: function () { return { y: y, landing: landing, done: doneT >= 0, rings: rings, wx: wx, DX: DX }; }, hold: setHold };
   }
 
-  return { start: function (o) { return (o.mode === 'drone' ? drone : truck)(o); } };
+  return { start: function (o) { T = (o.town === 2 && window.OKS_TOWN2) || window.OKS_TOWN; if (!T.HOUSES[o.house]) o.house = o.house % T.HOUSES.length; return (o.mode === 'drone' ? drone : truck)(o); } };
 })();

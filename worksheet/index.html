@@ -106,7 +106,7 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
 <script src="../play/content-extra.js"></script>
 <script src="../play/custom.js"></script>
 <script src="generic.js"></script>
-<script src="../games/tycoon/town.js"></script>
+<script src="../games/tycoon/town.js"></script><script src="../games/tycoon/town2.js"></script>
 <script>
 (function () {
   'use strict';
@@ -152,22 +152,22 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   /* ---------- 차시별 문제 ---------- */
   var MAKE = {
     'farm-delivery': function () {
-      var TW = window.OKS_TOWN, H = TW.HOUSES, qs = [];
+      var TW = (level >= 4 && window.OKS_TOWN2) || window.OKS_TOWN, H = TW.HOUSES, qs = [];
       var ANI = [['판다', 'panda'], ['고양이', 'cat'], ['원숭이', 'monkey'], ['곰', 'bear'], ['강아지', 'dog'], ['여우', 'fox'], ['코알라', 'koala'], ['펭귄', 'penguin'], ['코끼리', 'elephant']];
       var who = shuf(ANI), hs = shuf(H.map(function (h, i) { return i; }));
       var mapHtml = function (w) {
-        var b = '<div style="position:relative;width:' + w + 'px;height:' + Math.round(w * TW.H / TW.W) + 'px;border:2px solid #3d3a35;border-radius:8px;overflow:hidden"><img src="../games/tycoon/img/town.webp" style="position:absolute;inset:0;width:100%;height:100%">';
-        H.forEach(function (h) { b += '<span style="position:absolute;left:' + (h.at[0] / TW.W * 100) + '%;top:' + ((h.at[1] - 110) / TW.H * 100) + '%;transform:translate(-50%,-50%);background:#fff;border:2px solid #3d3a35;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:16px">' + h.no + '</span>'; });
-        return b + '<span style="position:absolute;left:6%;top:61%;background:#fff;border:2px solid #3d3a35;border-radius:10px;padding:0 6px;font-size:14px">🌱 출발</span><span style="position:absolute;left:83%;top:4%;background:#fff;border:2px solid #3d3a35;border-radius:10px;padding:0 6px;font-size:14px">🏫 학교</span></div>';
+        var b = '<div style="position:relative;width:' + w + 'px;height:' + Math.round(w * TW.H / TW.W) + 'px;border:2px solid #3d3a35;border-radius:8px;overflow:hidden"><img src="../games/tycoon/img/' + TW.img + '" style="position:absolute;inset:0;width:100%;height:100%">';
+        H.forEach(function (h) { b += '<span style="position:absolute;left:' + (h.at[0] / TW.W * 100) + '%;top:' + ((h.at[1] - (TW.bdy ? 110 : 0)) / TW.H * 100) + '%;transform:translate(-50%,-50%);background:#fff;border:2px solid #3d3a35;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:16px">' + h.no + '</span>'; });
+        return b + TW.LABELS.map(function (l) { return '<span style="position:absolute;left:' + (l[1] / TW.W * 100) + '%;top:' + (l[2] / TW.H * 100) + '%;transform:translate(-50%,-50%);background:#fff;border:2px solid #3d3a35;border-radius:10px;padding:0 6px;font-size:14px;white-space:nowrap">' + l[0] + '</span>'; }).join('') + '</div>';
       };
       var k1 = level <= 2 ? 3 : 4;
       var rows = hs.slice(0, k1).map(function (hi, j) { var h = H[hi];
-        var addr = level <= 1 ? h.color + ' 지붕 집' : level === 2 ? h.no + '번지 ' + h.color + ' 지붕' : level === 3 ? '햇살 마을 ' + h.no + '번지' : h.near + ' 집';
+        var addr = level <= 1 ? h.color + ' 지붕 집' : level === 2 ? h.no + '번지 ' + h.color + ' 지붕' : level === 3 ? TW.name + ' ' + h.no + '번지' : h.near + ' 집';
         var ask = level <= 2 ? '번지: ' + box(h.no, trace) : level === 3 ? '지붕 색: <span class="fillans" data-a="' + h.color + '">________</span>' : '번지: ' + box(h.no);
         return '<tr><td style="text-align:left"><img src="../art/jj/animals/' + who[j][1] + '.webp" style="width:40px;height:40px;object-fit:contain;vertical-align:middle"> ' + who[j][0] + '네</td><td>' + addr + '</td><td>' + ask + '</td></tr>'; }).join('');
       qs.push({ t: '지도를 보고 배달 주소의 집을 찾아 빈칸을 채우세요.', b: mapHtml(level <= 2 ? 660 : 600) + '<table class="tbl" style="margin-top:8px"><tr><th>손님</th><th>배달 주소</th><th>찾아 쓰기</th></tr>' + rows + '</table>' });
       var tgt = H[hs[k1]];
-      qs.push({ t: '위 지도에 출발(햇살 농장)부터 ' + (level <= 2 ? tgt.color + ' 지붕 집(' + tgt.no + '번지)' : tgt.no + '번지') + '까지 가는 길을 색연필로 그리세요.', b: (level >= 4 ? '<div style="font-size:18px">어느 쪽으로 갔는지 차례대로 쓰세요. (위·아래·왼쪽·오른쪽)<br>______________________________________</div>' : '<div style="font-size:16px;color:#8a8174">길을 따라 선을 이어 그려요.</div>') + '<div class="ansline">답: 길을 따라 ' + tgt.no + '번지 집 앞까지 이어지면 정답</div>' });
+      qs.push({ t: '위 지도에 출발(' + (TW.id === 2 ? '버스 정류장' : '햇살 농장') + ')부터 ' + (level <= 2 ? tgt.color + ' 지붕 집(' + tgt.no + '번지)' : tgt.no + '번지') + '까지 가는 길을 색연필로 그리세요.', b: (level >= 4 ? '<div style="font-size:18px">어느 쪽으로 갔는지 차례대로 쓰세요. (위·아래·왼쪽·오른쪽)<br>______________________________________</div>' : '<div style="font-size:16px;color:#8a8174">길을 따라 선을 이어 그려요.</div>') + '<div class="ansline">답: 길을 따라 ' + tgt.no + '번지 집 앞까지 이어지면 정답</div>' });
       if (level >= 2) {
         var ps = shuf(H).slice(0, level <= 3 ? 2 : 3);
         qs.push({ t: '알맞은 번지에 ○ 하세요.', b: ps.map(function (h, i) { var opts = shuf([h.no].concat(shuf(H.filter(function (x) { return x !== h; })).slice(0, 2).map(function (x) { return x.no; })));
