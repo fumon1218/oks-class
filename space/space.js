@@ -202,7 +202,7 @@
     cur = { view: 'map', star: null, b: null }; document.body.dataset.view = 'map'; if (land3d) land3d.stop();
     landEl.hidden = true; mapEl.hidden = false; setBg('space_bg');
     document.getElementById('backBtn').hidden = true;
-    document.getElementById('title').innerHTML = '<b>옥쌤의 즐거운 교실</b><span>우주선을 타고 공부하러 떠나요</span><em class="sp-maker"><img src="space/img/maker.webp" alt="">Made by 박장학사</em>';
+    document.getElementById('title').innerHTML = '<b>옥쌤의 즐거운 교실</b><span>우주선을 타고 공부하러 떠나요</span><button class="sp-maker" type="button" aria-label="만든 사람"><span class="mk-f"><img src="space/img/maker.webp" alt="">Made by</span><span class="mk-b">우리 아이들과 옥선생님을 위하여<br><i>박장학사</i>가 만들다 ✨</span></button>';
     renderMap(); startTwinkle(); closeSheet(true);
     var target = fromStar && mapEl.querySelector('.sp-star[data-id="' + fromStar + '"]');
     centerScroll(50, portrait() ? 0 : 50);
@@ -375,6 +375,17 @@
     if (stage.getAnimations) stage.getAnimations().forEach(function (an) { an.cancel(); });
     if (cur.view === 'map') { if (window.OKS_ZOOM) OKS_ZOOM.enter({ noIntro: true }); if (view3d) view3d.start(); startTwinkle(); }
     else if (land3d) land3d.start();
+  });
+
+  /* 만든 사람 배지: 누르면 뒤집혀서 한 마디, 6초 뒤 다시 앞면 */
+  document.addEventListener('click', function (e) {
+    var m = e.target.closest && e.target.closest('.sp-maker'); if (!m) return;
+    O.sfx && O.sfx('pop');
+    var wasBack = m.classList.contains('back'), flip = function () { m.classList.toggle('back'); };
+    clearTimeout(m._t);
+    if (calm() || !m.animate) flip();
+    else m.animate([{ transform: 'scaleX(1)' }, { transform: 'scaleX(0)' }], { duration: 180, easing: 'ease-in' }).onfinish = function () { flip(); m.animate([{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { duration: 220, easing: 'ease-out' }); };
+    if (!wasBack) m._t = setTimeout(function () { if (m.classList.contains('back')) m.click(); }, 6000);
   });
 
   /* ---------- 시작 ---------- */

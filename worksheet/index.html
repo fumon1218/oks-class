@@ -86,6 +86,9 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
 .foot{margin-top:auto;padding-top:8px;border-top:2px dashed #cfc6b5;display:flex;gap:10px;align-items:center;font-size:13px;}
 .foot .chk{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
 .foot .chk span{border:1.5px solid #bbb;border-radius:6px;padding:2px 6px;}
+.maker{display:flex;align-self:flex-end;flex:none;}
+.maker span{display:inline-flex;align-items:center;gap:5px;padding:2px 9px 2px 2px;border-radius:999px;border:1px solid #e3c27a;font-size:11px;color:#8a7350;letter-spacing:.02em;}
+.maker img{width:7mm;height:7mm;border-radius:50%;}
 .foot .stamp{width:24mm;height:24mm;border:2px dashed #cfc6b5;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#c9c2b6;font-size:13px;flex:none;}
 .anslabel{position:absolute;right:11mm;top:4mm;color:#e53935;font-size:16px;}
 @media print{.anslabel{top:-4mm;right:0;}}
@@ -304,18 +307,20 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
       '<div class="score"><b>점수</b><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ 100</span></div></div>' +
       '<div class="info"><div>학년<i></i></div><div>반<i></i></div><div>번호<i></i></div><div>이름<i></i></div><div>날짜<i>&nbsp;&nbsp;&nbsp;월&nbsp;&nbsp;&nbsp;&nbsp;일</i></div></div>' +
       qs.map(function (q, i) { return '<div class="q"><div class="qh"><span class="no">' + (i + 1) + '</span><span>' + q.t + '</span><span class="pt">(' + pts[i] + '점)</span></div><div class="qb">' + q.b + '</div></div>'; }).join('') +
-      '<div class="foot"><b style="font-weight:400">선생님 확인</b><div class="chk"><span>□ 독립</span><span>□ 언어힌트</span><span>□ 시각힌트</span><span>□ 시범</span><span>□ 신체지원</span></div><div class="stamp">참 잘했어요</div></div></div></section>';
+      '<div class="foot"><b style="font-weight:400">선생님 확인</b><div class="chk"><span>□ 독립</span><span>□ 언어힌트</span><span>□ 시각힌트</span><span>□ 시범</span><span>□ 신체지원</span></div><div class="stamp">참 잘했어요</div><div class="maker"><span><img src="../space/img/maker.webp" alt="">Made by</span></div></div></div></section>';
   }
   /* 한 장(A4)에 들어가도록: 넘치면 살짝 줄여요 */
   function fit() {
+    if (window.matchMedia && matchMedia('print').matches) return;   /* 인쇄 중에는 화면에서 맞춘 크기 그대로 */
     [].forEach.call(document.querySelectorAll('.page'), function (pg) {
       var inn = pg.querySelector('.inner'); inn.style.transform = ''; inn.style.width = ''; inn.style.minHeight = '';
-      var avail = 1040;   /* 277mm */
+      var avail = 1005;   /* 277mm(1047px)에서 인쇄 여유를 둠 */
       inn.classList.add('measure'); var need = inn.scrollHeight; inn.classList.remove('measure');
       if (need > avail) { var r = avail / need * .97; inn.style.transform = 'scale(' + r.toFixed(3) + ')'; inn.style.width = (100 / r).toFixed(2) + '%'; inn.style.minHeight = (avail / r) + 'px'; }
     });
   }
   addEventListener('beforeprint', fit);
+  addEventListener('load', function () { fit(); });
   function render() {
     var s0 = seed, qs = MAKE[id] ? MAKE[id]() : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
     var html = pageHtml(qs, false);
