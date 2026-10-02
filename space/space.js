@@ -367,6 +367,16 @@
     body.appendChild(d);
   }
 
+  /* 다른 게임(정글 점프 등)에 갔다가 '뒤로'로 돌아오면 브라우저가 떠날 때 모습(어둡게 사라지고 확대된 채)을 그대로 되살려요.
+     그래서 돌아왔을 때 화면을 처음 상태로 다시 맞춰요. */
+  addEventListener('pageshow', function (e) {
+    if (!e.persisted) return;
+    busy = false; flight.hidden = true;
+    if (stage.getAnimations) stage.getAnimations().forEach(function (an) { an.cancel(); });
+    if (cur.view === 'map') { if (window.OKS_ZOOM) OKS_ZOOM.enter({ noIntro: true }); if (view3d) view3d.start(); startTwinkle(); }
+    else if (land3d) land3d.start();
+  });
+
   /* ---------- 시작 ---------- */
   var wasP = portrait();
   addEventListener('resize', function () {

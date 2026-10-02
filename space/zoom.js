@@ -206,7 +206,8 @@ window.OKS_ZOOM = (function () {
       if (!scroller) build();
       on = true; document.body.classList.add('sp-zooming');
       scroller.scrollTop = 0; scroller.scrollLeft = 0; scroller.style.backgroundImage = 'none';
-      cos.hidden = false; over.hidden = false; ui.hidden = false; diving = false; stage.style.opacity = '';
+      if (stage.getAnimations) stage.getAnimations().forEach(function (an) { an.cancel(); });
+      cos.hidden = false; over.hidden = false; ui.hidden = false; diving = false; stage.style.transition = ''; stage.style.filter = ''; stage.style.opacity = '';
       stage.style.transformOrigin = '0 0';
       dims();
       if (!(opt && opt.keep)) { z = zT = 1; V = homeP(); V1 = homeP(); home = false; anchor = null; }
@@ -217,7 +218,7 @@ window.OKS_ZOOM = (function () {
       if (!scroller) return;
       if (stage.getAnimations) stage.getAnimations().forEach(function (an) { an.cancel(); });
       on = false; intro = null; diving = false; cancelAnimationFrame(raf); raf = 0; document.body.classList.remove('sp-zooming');
-      stage.style.transform = ''; stage.style.transformOrigin = ''; stage.style.maskImage = stage.style.webkitMaskImage = ''; stage.style.opacity = ''; stage.style.pointerEvents = '';
+      stage.style.transform = ''; stage.style.transformOrigin = ''; stage.style.maskImage = stage.style.webkitMaskImage = ''; stage.style.opacity = ''; stage.style.transition = ''; stage.style.filter = ''; stage.style.pointerEvents = '';
       cos.hidden = true; over.hidden = true; ui.hidden = true; hint.hidden = true;
     },
     /* 별로 쑥 들어가기 (별 위로 내리기 전) */
@@ -227,8 +228,9 @@ window.OKS_ZOOM = (function () {
         stopIntro();
         var r = el.getBoundingClientRect(); anchor = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
         diving = true; zT = Math.max(z, 1) * 2.6; home = false; kick();
-        if (stage.animate) stage.animate([{ opacity: 1, filter: 'brightness(1)' }, { opacity: 0, filter: 'brightness(1.6)' }], { duration: 560, easing: 'ease-in', fill: 'forwards' }).onfinish = function (a) { done(); };
-        else setTimeout(done, 560);
+        stage.style.transition = 'opacity .56s ease-in, filter .56s ease-in'; void stage.offsetWidth;
+        stage.style.opacity = '0'; stage.style.filter = 'brightness(1.6)';
+        setTimeout(done, 580);
       });
     },
     state: function () { return { z: z, zT: zT, ZG: ZG, ZD: ZD, V: V, intro: !!intro }; },
