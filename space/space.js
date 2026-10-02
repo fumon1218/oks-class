@@ -180,6 +180,7 @@
   }
   function zoomInto(el) {
     return new Promise(function (done) {
+      if (window.OKS_ZOOM && OKS_ZOOM.on) return OKS_ZOOM.dive(el).then(done);
       if (calm() || !el || !stage.animate) return done();
       var r = el.getBoundingClientRect(), sr = stage.getBoundingClientRect();
       var ox = (r.left + r.width / 2 - sr.left) / sr.width * 100, oy = (r.top + r.height / 2 - sr.top) / sr.height * 100;
@@ -188,7 +189,7 @@
       an.onfinish = done;
     });
   }
-  function fadeIn() { if (!calm() && stage.animate) stage.animate([{ opacity: 0, transform: 'scale(1.06)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 420, easing: 'ease-out' }); }
+  function fadeIn() { if (calm() || !stage.animate) return; if (window.OKS_ZOOM && OKS_ZOOM.on) { (document.querySelector('.sp-cosmos') || stage).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420 }); stage.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 420, easing: 'ease-out' }); return; } stage.animate([{ opacity: 0, transform: 'scale(1.06)' }, { opacity: 1, transform: 'scale(1)' }], { duration: 420, easing: 'ease-out' }); }
 
   /* ---------- 화면 바꾸기 ---------- */
   var busy = false, booting = true;
@@ -205,6 +206,7 @@
     renderMap(); startTwinkle(); closeSheet(true);
     var target = fromStar && mapEl.querySelector('.sp-star[data-id="' + fromStar + '"]');
     centerScroll(50, portrait() ? 0 : 50);
+    if (window.OKS_ZOOM) OKS_ZOOM.enter({ noIntro: !!fromStar });
     fadeIn();
     if (target) { busy = true; fly(target, mapEl.querySelector('.sp-star.main'), false).then(function () { busy = false; }); }
     talk('ok_wave', '어느 별로 가 볼까요? 별을 눌러요!', !fromStar);
@@ -212,6 +214,7 @@
   function showLand(s, withFlight) {
     var go2 = function () {
       cur = { view: 'land', star: s.id, b: null }; document.body.dataset.view = 'land'; document.body.style.setProperty('--star', s.color);
+      if (window.OKS_ZOOM) OKS_ZOOM.leave();
       mapEl.hidden = true; landEl.hidden = false; setBg(s.land); if (view3d) view3d.stop();
       document.getElementById('backBtn').hidden = false;
       document.getElementById('title').innerHTML = '<b>' + O.esc(s.name) + '</b><span>' + s.subjects.map(function (k) { return SUBJ[k]; }).join(' · ') + ' · 건물을 눌러요</span>';
@@ -368,7 +371,7 @@
   var wasP = portrait();
   addEventListener('resize', function () {
     sizeCanvas(); document.body.classList.toggle('portrait', portrait());
-    if (portrait() !== wasP) { wasP = portrait(); if (cur.view === 'map') renderMap(); else if (cur.star) renderLand(starById(cur.star)); }
+    if (portrait() !== wasP) { wasP = portrait(); if (cur.view === 'map') { renderMap(); if (window.OKS_ZOOM && OKS_ZOOM.on) OKS_ZOOM.enter({ keep: true, noIntro: true }); } else if (cur.star) renderLand(starById(cur.star)); }
     if (cur.view === 'map') startTwinkle();
   });
   document.body.classList.toggle('portrait', portrait());

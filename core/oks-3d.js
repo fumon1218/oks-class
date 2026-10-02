@@ -126,11 +126,12 @@
       var hr = host.getBoundingClientRect(), dt = Math.min(.1, (now - (last || now)) / 1000); last = now;
       items.forEach(function (it) {
         if (!it.g || !it.el.isConnected || it.el.offsetParent === null) return;
-        var r = (it.box || it.el).getBoundingClientRect();
+        var r0 = (it.box || it.el).getBoundingClientRect(), sc = hr.width / (host.clientWidth || hr.width || 1);   /* 무대가 줌으로 커지거나 작아져도 캔버스 칸과 맞게 */
+        var r = { left: hr.left + (r0.left - hr.left) / sc, width: r0.width / sc, height: r0.height / sc, bottom: hr.top + (r0.bottom - hr.top) / sc };
         /* 모델이 돌면서 자리 밖으로 조금 나가도 잘리지 않게 그리는 칸을 넓히고, 그만큼 멀리서 봄 */
         var K = it.o.pad || 1.5;
         var w = r.width * K * dpr, h = r.height * K * dpr;
-        var x = (r.left - hr.left - r.width * (K - 1) / 2) * dpr, y = (hr.bottom - r.bottom - r.height * (K - 1) / 2) * dpr;
+        var x = (r.left - hr.left - r.width * (K - 1) / 2) * dpr, y = (hr.top + host.clientHeight - r.bottom - r.height * (K - 1) / 2) * dpr;
         if (w < 2 || h < 2 || x > canvas.width || y > canvas.height || x + w < 0 || y + h < 0) return;
         gl.viewport(x, y, w, h); gl.scissor(Math.max(0, x), Math.max(0, y), w, h); gl.clear(gl.DEPTH_BUFFER_BIT);
         var o = it.o, c3 = it.cam;

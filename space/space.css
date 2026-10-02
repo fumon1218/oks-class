@@ -168,3 +168,32 @@ body.portrait .sp-guide img{width:84px;}
 /* 다른 게임 별 */
 .sp-star.link .sp-star-name{border-style:dashed;}
 .sp-star.link .sp-fallback{display:grid;place-items:center;aspect-ratio:1;font-size:clamp(40px,6vw,90px);background:radial-gradient(circle,var(--c) 0%,transparent 70%);border-radius:50%;}
+
+/* ---------- 우주 줌 (먼 우주 → 은하 → 별 무리 → 가까이) ---------- */
+body.sp-zooming .sp-scroll{overflow:hidden;touch-action:none;cursor:grab;}
+body.sp-zooming .sp-scroll:active{cursor:grabbing;}
+body.sp-zooming .sp-stage{transform-origin:0 0;}
+.sp-cosmos{position:fixed;inset:0;overflow:hidden;pointer-events:none;background:#0d0a26;}
+.sp-cosmos[hidden],.sp-zover[hidden],.sp-zui[hidden]{display:none;}
+.sp-deep{position:absolute;inset:-4%;background:url('img/deep.webp') center/cover no-repeat;opacity:0;will-change:transform,opacity;}
+.sp-galaxy{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform,opacity;user-select:none;}
+.sp-map{--nm:1;}
+.sp-map .sp-star-name,.sp-map .sp-zoom{opacity:var(--nm);}
+.sp-zover{position:fixed;inset:0;z-index:3;pointer-events:none;}
+.sp-zmark{position:absolute;transform:translate(-50%,-50%);border:0;background:none;padding:0;cursor:pointer;color:#fff;font:inherit;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.sp-zmark i{display:block;width:var(--s,40px);height:var(--s,40px);max-width:60vmin;max-height:60vmin;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,245,210,.9) 0%,rgba(255,200,240,.45) 30%,rgba(170,140,255,.18) 55%,transparent 72%);animation:sp-glow 3s ease-in-out infinite;}
+.sp-zmark span{margin-top:-14px;padding:5px 14px;border-radius:999px;background:rgba(20,14,55,.78);border:2px solid #ffd76a;box-shadow:0 0 18px rgba(255,215,106,.5);font-size:clamp(15px,1.6vw,20px);white-space:nowrap;}
+.sp-zgal{position:absolute;transform:translate(-50%,0);padding:6px 16px;border-radius:999px;background:rgba(20,14,55,.7);border:2px solid #b9a4ff;color:#fff;font-size:clamp(16px,1.8vw,24px);white-space:nowrap;box-shadow:0 0 20px rgba(185,164,255,.45);}
+.sp-zhint{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:8px 18px;border-radius:999px;background:rgba(255,253,246,.92);color:#2a2060;font-size:clamp(15px,1.5vw,19px);animation:sp-fade .6s;}
+.sp-zhint[hidden]{display:none;}
+.sp-zui{position:fixed;right:max(10px,env(safe-area-inset-right,0px));bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:16;display:flex;align-items:center;gap:6px;padding:6px;border-radius:999px;background:rgba(20,14,55,.62);border:1.5px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);}
+.sp-zui button{border:0;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font:inherit;font-size:22px;min-width:46px;height:46px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:4px;padding:0 10px;}
+.sp-zui button:hover{background:rgba(255,255,255,.26);}
+.sp-zui button:focus-visible{outline:3px solid #ffd54f;outline-offset:2px;}
+.sp-zlv{display:inline-flex;gap:2px;padding:0 4px;border-left:1px solid rgba(255,255,255,.25);border-right:1px solid rgba(255,255,255,.25);}
+.sp-zlv button{font-size:15px;background:none;opacity:.7;}
+.sp-zlv button b{font-weight:400;font-size:19px;}
+.sp-zlv button.on{background:#ffd76a;color:#2a2060;opacity:1;}
+@media (max-width:760px){ .sp-zlv span{display:none;} .sp-zui button{min-width:40px;height:40px;font-size:19px;padding:0 8px;} .sp-zui{gap:3px;padding:4px;} }
+@media (max-width:760px){ body.sp-zooming .sp-guide{bottom:calc(64px + env(safe-area-inset-bottom,0px));} }
