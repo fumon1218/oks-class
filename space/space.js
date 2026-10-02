@@ -202,7 +202,7 @@
     cur = { view: 'map', star: null, b: null }; document.body.dataset.view = 'map'; if (land3d) land3d.stop();
     landEl.hidden = true; mapEl.hidden = false; setBg('space_bg');
     document.getElementById('backBtn').hidden = true;
-    document.getElementById('title').innerHTML = '<b>옥쌤의 즐거운 교실</b><span>우주선을 타고 공부하러 떠나요</span>';
+    document.getElementById('title').innerHTML = '<b>옥쌤의 즐거운 교실</b><span>우주선을 타고 공부하러 떠나요</span><em class="sp-maker"><img src="space/img/maker.webp" alt="">Made by 박장학사</em>';
     renderMap(); startTwinkle(); closeSheet(true);
     var target = fromStar && mapEl.querySelector('.sp-star[data-id="' + fromStar + '"]');
     centerScroll(50, portrait() ? 0 : 50);

@@ -197,3 +197,9 @@ body.sp-zooming .sp-stage{transform-origin:0 0;}
 .sp-zlv button.on{background:#ffd76a;color:#2a2060;opacity:1;}
 @media (max-width:760px){ .sp-zlv span{display:none;} .sp-zui button{min-width:40px;height:40px;font-size:19px;padding:0 8px;} .sp-zui{gap:3px;padding:4px;} }
 @media (max-width:760px){ body.sp-zooming .sp-guide{bottom:calc(64px + env(safe-area-inset-bottom,0px));} }
+
+/* 만든 사람 표시 (메인 왼쪽 위) */
+.sp-title .sp-maker{align-self:flex-start;display:inline-flex;align-items:center;gap:7px;margin-top:7px;padding:3px 12px 3px 3px;border-radius:999px;
+  background:rgba(20,14,55,.55);border:1.5px solid rgba(240,195,90,.75);font-style:normal;font-size:clamp(12px,1.15vw,15px);letter-spacing:.02em;color:#fff3d6;opacity:.92;text-shadow:none;}
+.sp-title .sp-maker img{width:clamp(24px,2.3vw,30px);height:clamp(24px,2.3vw,30px);border-radius:50%;box-shadow:0 0 0 1.5px #f0c35a;}
+@media (max-width:640px){ .sp-title .sp-maker{font-size:11px;margin-top:4px;padding-right:9px;} .sp-title .sp-maker img{width:20px;height:20px;} }
