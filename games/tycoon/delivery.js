@@ -6,10 +6,16 @@ window.OKS_DELIVERY = (function () {
   function josa(w, a, b) { var c = String(w).charCodeAt(String(w).length - 1) - 0xAC00; return (c >= 0 && c % 28) ? a : b; }
   var css = document.createElement('style');
   css.textContent = [
-    '.dl{position:fixed;inset:0;z-index:95;background:#2f6b3a;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;}',
-    '.dl .map{position:relative;flex:none;box-shadow:0 0 0 6px rgba(255,255,255,.5),0 20px 50px rgba(0,0,0,.45);border-radius:14px;overflow:hidden;}',
-    '.dl .map > img.town{position:absolute;inset:0;width:100%;height:100%;}',
-    '.dl svg.ov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}',
+    '.dl{position:fixed;inset:0;z-index:95;background:#2f6b3a;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;}',
+    '.dl.town-mode{background:linear-gradient(180deg,#bfe9ff 0%,#e3f7cf 60%,#b9e48f 100%);}',
+    '.dl .top{flex:none;width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px 6px;flex-wrap:wrap;}',
+    '.dl .top .addr{position:relative;right:auto;top:auto;min-width:0;max-width:100%;border-radius:20px;padding:6px 14px;box-shadow:0 6px 16px rgba(60,90,40,.25);display:flex;align-items:center;gap:14px;flex-wrap:wrap;}',
+    '.dl .top .addr h4,.dl .top .addr .line{margin:0;}',
+    '.dl .top .addr .who img{height:52px;}',
+    '.dl .top .bar{position:relative;left:auto;top:auto;flex-wrap:wrap;}',
+    '.dl .map{position:relative;flex:none;box-shadow:0 0 0 6px #fff,0 14px 34px rgba(40,90,40,.3);border-radius:14px;overflow:hidden;}',
+    '.dl .map > img.town{position:absolute;inset:0;width:100%;height:100%;filter:saturate(1.12) brightness(1.04);}',
+    '.dl svg.dlov{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;}',
     '.dl .badge{position:absolute;transform:translate(-50%,-50%);background:#fffdf6;border:3px solid #6d4c41;border-radius:999px;min-width:38px;height:38px;padding:0 8px;display:flex;align-items:center;justify-content:center;gap:4px;font-size:20px;color:#3e2723;box-shadow:0 3px 8px rgba(0,0,0,.3);pointer-events:none;white-space:nowrap;}',
     '.dl .badge img{height:28px;}',
     '.dl .badge.goal{animation:dlgoal 1s ease-in-out infinite;border-color:#ff9800;box-shadow:0 0 0 6px rgba(255,193,7,.6),0 0 24px 8px rgba(255,193,7,.6);}',
@@ -37,7 +43,7 @@ window.OKS_DELIVERY = (function () {
     '.dl .hold{position:absolute;right:18px;bottom:18px;z-index:6;width:150px;height:110px;border-radius:24px;border:4px solid #fff;background:#4fc3f7;color:#fff;font:inherit;font-size:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 6px 0 #0288d1,0 10px 20px rgba(0,0,0,.3);cursor:pointer;}',
     '.dl .hold b{font-size:40px;font-weight:400;line-height:1;}',
     '.dl .hold.on{transform:translateY(4px);box-shadow:0 2px 0 #0288d1;}',
-    '@media (max-width:700px){.dl .addr{right:8px;top:62px;min-width:0;padding:6px 10px;} .dl .addr .who img{height:42px;} .dl .addr .who,.dl .addr .line{font-size:16px;} .dl .arw{width:46px;height:46px;font-size:24px;} .dl .badge{min-width:28px;height:28px;font-size:15px;}}'
+    '@media (max-width:700px){.dl .top .addr{padding:4px 10px;gap:8px;} .dl .top .bar button{font-size:15px;padding:6px 10px;} .dl .top .addr .who img{height:38px;} .dl .addr{right:8px;top:62px;min-width:0;padding:6px 10px;} .dl .addr .who img{height:42px;} .dl .addr .who,.dl .addr .line{font-size:16px;} .dl .arw{width:46px;height:46px;font-size:24px;} .dl .badge{min-width:28px;height:28px;font-size:15px;}}'
   ].join('\n');
   document.head.appendChild(css);
 
@@ -54,7 +60,7 @@ window.OKS_DELIVERY = (function () {
   function truck(o) {
     var lv = o.level, h = T.HOUSES[o.house], cur = T.START, mistakes = 0, moving = false, helpOn = lv <= 1;
     var root = E('div', 'dl'), map = E('div', 'map');
-    map.innerHTML = '<img class="town" src="' + IMG + T.img + '" alt="햇살 마을 지도"><svg class="ov" viewBox="0 0 ' + T.W + ' ' + T.H + '" preserveAspectRatio="none"><path class="hint" d="" fill="none" stroke="#ff9800" stroke-width="14" stroke-dasharray="4 26" stroke-linecap="round" opacity=".95"/></svg>';
+    map.innerHTML = '<img class="town" src="' + IMG + T.img + '" alt="햇살 마을 지도"><svg class="dlov" viewBox="0 0 ' + T.W + ' ' + T.H + '" preserveAspectRatio="none"><path class="hint" d="" fill="none" stroke="#ff9800" stroke-width="14" stroke-dasharray="4 26" stroke-linecap="round" opacity=".95"/></svg>';
     root.appendChild(map);
     var hint = map.querySelector('.hint');
     /* 집 번호표: 1·2수준은 번호, 3수준부터는 번호 + (4수준부터) 문패 없이 */
@@ -67,13 +73,12 @@ window.OKS_DELIVERY = (function () {
     var tr = E('div', 'truck', '<img src="' + IMG + 'truck.webp" alt="">'); map.appendChild(tr);
     var ad = addrLines(h, o.guest, lv);
     var card = E('div', 'addr', '<h4>📦 배달 주소</h4><div class="who"><img src="' + o.guest.img + '" alt="">' + o.guest.name + '네 집</div>' + ad.html.map(function (l) { return '<div class="line">' + l + '</div>'; }).join(''));
-    root.appendChild(card);
     var bar = E('div', 'bar', '<button type="button" class="hear">🔊 주소 듣기</button><button type="button" class="hlp">🙋 길 알려 줘</button><button type="button" class="x">✖ 그만</button>');
-    root.appendChild(bar);
+    root.className = 'dl town-mode'; var top = E('div', 'top'); top.appendChild(bar); top.appendChild(card); root.insertBefore(top, map);
     var msg = E('div', 'msg', '화살표를 눌러 길을 따라가요. 주소의 집 앞에 서면 배달돼요!'); root.appendChild(msg);
     document.body.appendChild(root);
     function fit() {
-      var w = innerWidth - 16, hgt = innerHeight - 16, k = Math.min(w / T.W, hgt / T.H);
+      var w = innerWidth - 24, hgt = innerHeight - top.offsetHeight - 20, k = Math.min(w / T.W, hgt / T.H);
       map.style.width = Math.round(T.W * k) + 'px'; map.style.height = Math.round(T.H * k) + 'px';
       tr.style.width = Math.max(64, T.W * k * .075) + 'px';
     }
