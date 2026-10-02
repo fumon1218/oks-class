@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v84';
+const CACHE_NAME = 'oks-class-v85';
 const ASSETS = [
   './',
   './index.html',
@@ -641,13 +641,13 @@ const ASSETS = [
   './art/jj/snack/soup.webp',
   './art/jj/snack/spinach.webp',
   './art/jj/snack/stove.webp',
-  './icons/apple-touch-icon.png',
   './icons/avatar-walk-a.png',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
   './icons/mascot-cheer.png',
   './icons/mascot-idle.png',
   './icons/mascot-soft.png',
+  './icons/ok-face-180.png',
+  './icons/ok-face-192.png',
+  './icons/ok-face-512.png',
   './icons/subj-colors.png',
   './icons/subj-draw.png',
   './icons/subj-explore.png',
