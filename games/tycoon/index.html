@@ -13,7 +13,7 @@
    기다리는 시간 없이, 물을 줄 때마다 한 단계씩 자라요. 진행은 기기에 저장돼요. */
 body.oks{background:#f3e6c8 url('../farm/assets/greenhouse.webp') center/cover no-repeat fixed;overflow:hidden;}
 body.oks::before{background:rgba(255,250,235,.15);}
-.app{position:fixed;inset:0;display:flex;flex-direction:column;padding:10px 12px;box-sizing:border-box;gap:8px;}
+.app{position:fixed;inset:0;overflow:hidden;display:flex;flex-direction:column;padding:10px 12px;box-sizing:border-box;gap:8px;}
 .top{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;}
 .sign{background:linear-gradient(#b9773d,#94582a);color:#fff8e6;border-radius:18px;padding:6px 18px;font-size:24px;box-shadow:0 4px 0 #6d3f1b,0 6px 14px rgba(0,0,0,.25);white-space:nowrap;text-shadow:0 2px 0 rgba(0,0,0,.3);}
 .lvbar{flex:1;min-width:120px;max-width:420px;display:flex;align-items:center;gap:8px;background:rgba(255,253,245,.95);border-radius:999px;padding:4px 12px 4px 4px;box-shadow:0 3px 10px rgba(0,0,0,.15);}
@@ -179,7 +179,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
 .tile{border:3px solid #e6d2ad;border-radius:20px;background:#fffaf0;font:inherit;font-size:14px;white-space:nowrap;color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:4px 12px;cursor:pointer;text-decoration:none;box-shadow:0 4px 0 #d2b98e;min-width:86px;}
 .tile img{height:32px;}
 @media (max-width:1200px){
-  .tools{gap:6px;} .tool{font-size:15px;min-height:50px;padding:3px 10px 3px 4px;} .tool img{height:32px;} .tool b{width:22px;height:22px;font-size:13px;}
+  .tools{gap:6px;flex-wrap:wrap;} .tool{font-size:15px;min-height:50px;padding:3px 10px 3px 4px;} .tool img{height:32px;} .tool b{width:22px;height:22px;font-size:13px;}
   .tile{min-width:0;padding:2px 8px;font-size:12px;} .tile img{height:26px;}
   .sign{font-size:22px;padding:4px 14px;} .goal{margin-right:24px!important;} .gtext{font-size:13px;} .pill{font-size:18px;} .pill img{width:32px;height:32px;}
   .tb.help span{display:none;} .tb.help{padding:4px;}
@@ -198,6 +198,8 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
 <body class="oks">
 <script src="../../core/oks-core.js"></script>
 <script src="../../core/oks-eco.js"></script>
+<script src="town.js"></script>
+<script src="delivery.js"></script>
 <script>
 (function () {
   'use strict';
@@ -255,7 +257,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
     '<button class="tool t4" data-t="pack" type="button"><img src="' + FA + 'parcel.webp" alt=""><b>4</b><span>포장하기</span></button>' +
     '<button class="tool t5" data-t="deliver" type="button"><img src="' + M + 'truck.webp" alt=""><b>5</b><span>배달하기</span></button>' +
     '<button class="tile deco-btn" type="button"><img src="' + FA + 'shop_home.webp" alt="">농장 꾸미기</button>' +
-    '<a class="tile" href="../../play/?id=02-01-01-01"><img src="' + FA + 'chalkboard.webp" alt="">농장 차시 연습</a></div>';
+    '<a class="tile" href="../../play/?id=02-01-01-01"><img src="' + FA + 'chalkboard.webp" alt="">농장 차시 연습</a><a class="tile" href="../../worksheet/?id=farm-delivery&level=2"><img src="' + M + 'truck.webp" alt="">배달 학습지</a></div>';
   var farm = app.querySelector('.farm'), custs = app.querySelector('.custs'), stock = app.querySelector('.stock');
   var sayEl = app.querySelector('.speech');
   var tool = null;
@@ -333,7 +335,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
     custs.innerHTML = '';
     S.orders.forEach(function (o, i) {
       var pay = orderPay(o), c = E('div', 'cust' + (o.packed ? ' ready' : ''));
-      c.innerHTML = '<div class="ord">' + o.items.map(function (it) { return '<img src="' + CROPS[it[0]].item + '" alt="">×' + it[1]; }).join(' ') + '<div class="pay">🪙 ' + pay + '코인</div></div>' +
+      c.innerHTML = '<div class="ord">' + o.items.map(function (it) { return '<img src="' + CROPS[it[0]].item + '" alt="">×' + it[1]; }).join(' ') + '<div class="pay">🪙 ' + pay + '코인' + (o.house != null ? ' · 🏠' + (o.house + 1) + '번지' : '') + '</div></div>' +
         '<img class="who" src="' + GUESTS[o.g % GUESTS.length] + '" alt="">' + (o.packed ? '<img class="boxok" src="' + FA + 'parcel.webp" alt="">' : '');
       c.onclick = function () { tapCust(i); };
       custs.appendChild(c);
@@ -347,7 +349,8 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
     O.shuffle(open).slice(0, kinds).forEach(function (k) { items.push([k, 1 + Math.floor(Math.random() * Math.min(3, 1 + S.lv))]); });
     var used = S.orders.map(function (o) { return o.g % GUESTS.length; }), g;   /* 같은 손님이 겹치지 않게 */
     do { g = Math.floor(Math.random() * GUESTS.length); } while (used.indexOf(g) >= 0);
-    return { items: items, g: g, packed: false };
+    var hs = S.orders.map(function (o) { return o.house; }), hz; do { hz = Math.floor(Math.random() * 9); } while (hs.indexOf(hz) >= 0);
+    return { items: items, g: g, packed: false, house: hz };
   }
   function orderPay(o) { var s = 0; o.items.forEach(function (it) { s += CROPS[it[0]].price * it[1]; }); return s; }
   function canPack(o) { return !o.packed && o.items.every(function (it) { return (S.barn[it[0]] || 0) >= it[1]; }); }
@@ -459,8 +462,37 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
   }
 
   /* ---------- 배달 ---------- */
+  /* 배달 방법 고르기: 🚚 트럭(지도 보고 찾아가기) · 🚁 드론(날아서) · ⚡ 바로 */
+  var GNAME = { cat: '고양이', panda: '판다', monkey: '원숭이', bear: '곰', dog: '강아지', fox: '여우', koala: '코알라', penguin: '펭귄', elephant: '코끼리', tiger: '호랑이' };
+  function guestOf(o) { var src = GUESTS[o.g % GUESTS.length], k = (src.match(/(\w+)\.webp$/) || [])[1]; return { img: src, name: GNAME[k] || '손님' }; }
   function deliver(i) {
-    var o = S.orders[i], pay = orderPay(o), cel = custs.children[i], r = cel.getBoundingClientRect();
+    var o = S.orders[i]; if (o.house == null) { o.house = Math.floor(Math.random() * 9); save(); }
+    if (!window.OKS_DELIVERY) return quickDeliver(i);
+    var dlv = S.dlv || (S.help ? 1 : 3), gst = guestOf(o);
+    var ov = E('div', 'ov'), card = E('div', 'card', '<h3>🚚 어떻게 배달할까요?</h3><p style="margin:0 0 10px;font-size:17px">' + gst.name + '네 집 · ' + (o.house + 1) + '번지</p><div class="row dl-modes"></div>' +
+      '<p style="margin:12px 0 4px;font-size:15px;color:#8a7a5e">배달 수준</p><div class="row dl-lv"></div>');
+    var modes = [['truck', M + 'truck.webp', '트럭', '지도 보고 집 찾기'], ['drone', M + 'drone/drone_box.webp', '드론', '날아서 고리 지나기'], ['quick', FA + 'parcel.webp', '바로 배달', '쉽고 빠르게']];
+    modes.forEach(function (m) {
+      var b = E('button', 'pick', '<img src="' + m[1] + '" alt="">' + m[2] + '<small style="font-size:13px;color:#8a7a5e">' + m[3] + '</small>'); b.type = 'button'; b.style.width = '150px';
+      if (S.help && m[0] === 'truck') b.classList.add('oks-glow');
+      b.onclick = function () {
+        O.unlock(); ov.remove(); O.clearPrompt();
+        if (m[0] === 'quick') return quickDeliver(i);
+        window.OKS_DELIVERY.start({ mode: m[0], level: dlv, guest: gst, house: o.house, onDone: function (r) { if (r.ok) quickDeliver(i, r); else { talk('배달을 멈췄어요. 다시 배달해요.'); guide(); } } });
+      };
+      card.querySelector('.dl-modes').appendChild(b);
+    });
+    [1, 2, 3, 4, 5].forEach(function (n) {
+      var b = E('button', 'tb' + (n === dlv ? ' on' : ''), String(n)); b.type = 'button'; b.style.minWidth = '46px'; b.style.justifyContent = 'center';
+      b.onclick = function () { dlv = S.dlv = n; save(); [].forEach.call(card.querySelectorAll('.dl-lv .tb'), function (x) { x.classList.toggle('on', x === b); }); };
+      card.querySelector('.dl-lv').appendChild(b);
+    });
+    ov.appendChild(card); document.body.appendChild(ov);
+    O.say('트럭으로 갈까요, 드론으로 갈까요?');
+  }
+  function quickDeliver(i, res) {
+    var o = S.orders[i], pay = orderPay(o) + (res ? (res.mode === 'drone' ? (res.rings || 0) : (res.mistakes ? 1 : 3)) : 0), cel = custs.children[i], r = cel.getBoundingClientRect();
+    if (res) S.stars += res.mistakes ? 0 : 1;   /* 실수 없이 길을 찾으면 별 하나 더 */
     var tr = E('img', 'truck'); tr.src = M + 'truck.webp'; tr.alt = ''; document.body.appendChild(tr);
     O.sfx('tick');
     tr.animate([{ transform: 'translate(-260px,' + (r.top + 30) + 'px)' }, { transform: 'translate(' + (r.left - 120) + 'px,' + (r.top + 30) + 'px)' }], { duration: 1100, easing: 'ease-out', fill: 'forwards' });
@@ -477,7 +509,7 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
       var up = false; if (S.xp >= need(S.lv)) { S.xp -= need(S.lv); S.lv++; up = true; }
       save();
       if (O.eco) try { O.eco.reward({ coins: 2, xp: 5, mission: { shop: 1 } }); } catch (e) {}
-      O.log({ at: new Date().toISOString(), lesson: 'farm-tycoon', subject: 'math', school: 'elem', topic: '쑥쑥 햇살 농장 배달', level: S.help ? 2 : 4, engine: 'farm-tycoon', stars: 3, mistakes: 0, glow: 0, hand: 0, asked: 0, sec: 0 });
+      O.log({ at: new Date().toISOString(), lesson: 'farm-tycoon', subject: res && res.mode === 'truck' ? 'social' : 'math', school: 'elem', topic: '쑥쑥 햇살 농장 ' + (res ? (res.mode === 'truck' ? '트럭 배달(지도 읽기)' : '드론 배달') : '배달'), level: res ? (S.dlv || 3) : (S.help ? 2 : 4), engine: 'farm-tycoon' + (res ? '-' + res.mode : ''), stars: res && res.mistakes ? 2 : 3, mistakes: res ? res.mistakes || 0 : 0, glow: 0, hand: 0, asked: 0, sec: 0 });
       card.querySelector('.btn').onclick = function () {
         ov.remove(); setTool(null); drawAll(); bump('.coins'); bump('.stars');
         if (goalNow) { O.praise('오늘의 목표 완료!'); talk('오늘의 목표 완료! 선물로 10코인을 더 받았어요!'); bump('.coins'); }

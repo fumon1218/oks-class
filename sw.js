@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v79';
+const CACHE_NAME = 'oks-class-v80';
 const ASSETS = [
   './',
   './index.html',
@@ -54,6 +54,8 @@ const ASSETS = [
   './games/fishing/index.html',
   './games/balloons/index.html',
   './games/tycoon/index.html',
+  './games/tycoon/town.js',
+  './games/tycoon/delivery.js',
   './worksheet/index.html',
   './worksheet/generic.js',
   './minigames/farm-v8/index.html',
@@ -500,7 +502,15 @@ const ASSETS = [
   './games/tycoon/img/seed_strawberry.webp',
   './games/tycoon/img/seed_tomato.webp',
   './games/tycoon/img/seed_watermelon.webp',
+  './games/tycoon/img/town.webp',
   './games/tycoon/img/truck.webp',
+  './games/tycoon/img/drone/bg.webp',
+  './games/tycoon/img/drone/drone.webp',
+  './games/tycoon/img/drone/drone_box.webp',
+  './games/tycoon/img/drone/house.webp',
+  './games/tycoon/img/drone/pad.webp',
+  './games/tycoon/img/drone/ring.webp',
+  './games/tycoon/img/drone/ring_ok.webp',
   './art/jj/animals/baby_monkey.webp',
   './art/jj/animals/bear.webp',
   './art/jj/animals/cat.webp',
