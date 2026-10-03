@@ -28,14 +28,15 @@
   function newStep(kind, lv) { return { kind: kind, level: lv, attempts: 0, errors: 0, firstCorrect: null, completed: false, glow: 0, hand: 0, asked: 0 }; }
   function recordAttempt(step, correct) { step.attempts++; if (step.firstCorrect === null) step.firstCorrect = correct; if (!correct) step.errors++; }
   function csv(rows) {
-    var head = ['날짜', '학교급', '차시', '수준', '조작', '과제', '첫반응정답', '시도', '오류', '반짝임', '시범', '도움요청', '완료', '신호반응ms', '도움정도', '실제활동관찰'];
+    var head = ['날짜', '학교급', '차시', '수준', '조작', '과제', '첫반응정답', '시도', '오류', '반짝임', '시범', '도움요청', '완료', '신호반응ms', '도움정도', '실제활동관찰', '경기방식', '화면경기초', '리듬성공', '최대연속', '부스트', '허들성공', '허들재도전', '바통전달'];
     function cell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
-    return '\uFEFF' + [head].concat(rows.flatMap(function (r) { return r.steps.map(function (s) { return [r.at, r.school, r.topic, r.level, r.input, TITLES[s.kind], s.firstCorrect, s.attempts, s.errors, s.glow, s.hand, s.asked, s.completed, s.reactionMs, r.independence, r.transferObservation || '미관찰']; }); })).map(function (r) { return r.map(cell).join(','); }).join('\n');
+    return '\uFEFF' + [head].concat(rows.flatMap(function (r) { return r.steps.map(function (s) { return [r.at, r.school, r.topic, r.level, r.input, TITLES[s.kind], s.firstCorrect, s.attempts, s.errors, s.glow, s.hand, s.asked, s.completed, s.reactionMs, r.independence, r.transferObservation || '미관찰', (s.race||{}).mode, (s.race||{}).seconds, (s.race||{}).rhythm, (s.race||{}).bestCombo, (s.race||{}).boosts, (s.race||{}).cleared, (s.race||{}).missed, (s.race||{}).baton]; }); })).map(function (r) { return r.map(cell).join(','); }).join('\n');
   }
   function mount(opt) {
     var sh = opt.sh, lv = opt.level, plan = course(opt.school, opt.lesson), board = sh.board;
     var prefs = O.jget('oks_athletics_input_v2', {}), single = !!O.settings().scan || prefs.single !== false || lv <= 2;
     var slow = O.settings().slow, calm = O.settings().calm || matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var raceController = null, racePrefs = O.jget('oks_athletics_race_preferences_v1', {}), assisted = lv <= 2 || O.settings().scan || racePrefs.assisted === true, rivals = racePrefs.rivals === true;
     var st, ctx, entry, current, stepNo = 0, generation = 0, handles = [], closed = false, paused = false, metrics = [], foot = 0;
     document.body.classList.add('athletics-lesson');
     if (calm) document.body.classList.add('calm');
@@ -47,7 +48,7 @@
       var close=button('닫기',function(){ov.remove();sh.levelBtn.focus();});box.appendChild(close);ov.appendChild(box);document.body.appendChild(ov);close.focus();
     };
     function later(fn, ms) { var gen = generation; var h = setTimeout(function () { if (gen === generation && !closed) fn(); }, ms); handles.push(h); return h; }
-    function cancel() { generation++; handles.forEach(clearTimeout); handles = []; O.clearPrompt(); }
+    function cancel() { if(raceController){raceController.stop();raceController=null;} generation++; handles.forEach(clearTimeout); handles = []; O.clearPrompt(); }
     function clear() { cancel(); board.innerHTML = ''; board.className = 'oks-board al-board'; }
     function focus(el) { later(function () { if (el && el.isConnected && !O.settings().scan) el.focus({ preventScroll: true }); }, 0); }
     function target(el) { ctx.target({ get: typeof el === 'function' ? el : function () { return el; } }); }
@@ -119,49 +120,9 @@
       later(function () { lights.querySelector('.amber').classList.remove('on'); lights.querySelector('.green').classList.add('on'); green = true; readyAt = performance.now(); s.message('출발!'); b.disabled = false; b.textContent = '출발!'; O.sfx('bell'); instruction('출발!'); target(b); focus(b); }, (slow ? 2500 : 1600) + Math.random() * 400);
     }
     function run(kind) {
-      var s = scene('runner_run_a'), count = 0, need = lv === 1 ? 3 : lv <= 3 ? 6 : 8, last = '', busy = false, phase = 0;
-      var isPace = kind === 'pace', isRelay = kind === 'relay', partner = null;
-      if (isRelay) { partner = E('div', 'al-partner'); partner.appendChild(img('runner_idle', '', '다음 차례 친구')); s.stage.appendChild(partner); s.stage.classList.add('relay'); }
-      var progress = E('progress', 'al-distance'); progress.max = need; progress.value = 0; progress.setAttribute('aria-label', '도착까지 이동'); s.controls.appendChild(progress);
-      instruction(isRelay ? '내 구간을 이동하고 친구에게 차례를 넘겨요.' : isPace ? '천천히 · 빠르게 · 멈춤 신호를 보고 움직여요. 시간 제한은 없어요.' : single ? '큰 버튼을 누를 때마다 앞으로 가요. 내 속도로 끝까지 가요.' : '왼발 · 오른발 버튼을 번갈아 눌러요.');
-      var buttons = [];
-      function message() { s.message((isPace ? ['천천히', '빠르게', '멈춤'][phase] + ' · ' : '') + count + ' / ' + need); }
-      function paceControls() {
-        buttons.forEach(function (b) { b.hidden = phase === 2; }); stop.hidden = phase !== 2;
-        target(phase === 2 ? stop : function () { return buttons.filter(function (b) { return single || b.dataset.side !== last; }); }); message();
-      }
-      function advance(side, b) {
-        if (current.completed || busy || paused) return;
-        if (!single && side === last) { attempt(false); s.message('다른 발 버튼을 눌러요'); return; }
-        attempt(true); last = side; foot++; count++; progress.value = count;
-        if (isPace && !calm) s.runner.style.transitionDuration = phase === 1 ? '.18s' : '.65s';
-        s.move(count / need * (isRelay ? .65 : 1)); s.pose(foot % 2 ? 'runner_run_a' : 'runner_run_b'); O.sfx('tick'); message();
-        if (count >= need) {
-          buttons.forEach(function (x) { x.disabled = true; });
-          if (isRelay) { s.message('친구에게 차례를 넘겨요'); var pass = button('친구에게 바통 전달', function () { if (current.completed || busy) return; busy = true; attempt(true); partner.classList.add('moving'); partner.firstChild.src = ASSET + 'runner_run_a.webp'; s.pose('runner_idle'); later(function () { done('함께 도착했어요!'); }, calm ? 100 : 650); }); s.controls.appendChild(pass); target(pass); focus(pass); }
-          else { s.pose('runner_celebrate'); done('결승선에 도착했어요!'); }
-          return;
-        }
-        if (isPace && count === 2) phase = 1;
-        if (isPace && count === Math.min(4, need - 1)) phase = 2;
-        if (isPace) paceControls(); else target(function () { return buttons.filter(function (x) { return single || x.dataset.side !== last; }); });
-      }
-      if (single) buttons.push(button('한 걸음 앞으로', function () { advance('one', buttons[0]); }));
-      else ['왼발', '오른발'].forEach(function (label, i) { var b = button(label, function () { advance(String(i), b); }, i ? 'orange' : 'blue'); b.dataset.side = String(i); buttons.push(b); });
-      var stop = button('멈춰요', function () { if (current.completed || busy || phase !== 2) return; attempt(true); busy = true; stop.disabled = true; s.pose('runner_idle'); s.message('잘 멈췄어요 · 준비되면 다시 가요');
-        var resume = button('다시 앞으로', function () { if (current.completed) return; busy = false; phase = 0; resume.remove(); stop.disabled = false; s.pose('runner_run_a'); paceControls(); }); s.controls.appendChild(resume); target(resume); focus(resume);
-      }, 'orange'); stop.hidden = true;
-      buttons.forEach(function (b) { s.controls.appendChild(b); }); if (isPace) s.controls.appendChild(stop);
-      message(); target(buttons[0]); focus(buttons[0]);
+      raceController = OKS_ATHLETICS_RACE.mount({board:board,kind:kind,level:lv,single:single,assisted:assisted,calm:calm,slow:slow,rivals:rivals,later:later,instruction:instruction,attempt:attempt,target:target,complete:function(result){current.race=result;done('멋지게 완주했어요!');}});
     }
-    function hurdle() {
-      var s = scene('runner_run_a'), n = 0, busy = false, need = lv <= 2 ? 1 : 3;
-      var obstacle = E('div', 'al-hurdle'); obstacle.innerHTML = '<span></span><i></i><i></i>'; s.stage.appendChild(obstacle);
-      instruction('장애물 앞에서 멈췄어요. 버튼을 눌러 화면 선수가 넘어가게 해요.'); s.move(.28); s.message('장애물 앞 · 준비됐나요?');
-      var b = button('장애물 넘기', function () { if (busy || current.completed) return; busy = true; attempt(true); b.disabled = true; obstacle.hidden=true;s.pose('runner_hurdle'); s.runner.classList.add('jumping'); s.move(.6);
-        later(function () { s.runner.classList.remove('jumping'); n++; current.obstacles = n; if (n === need) { s.pose('runner_celebrate'); s.move(1); done('장애물을 넘었어요!'); } else { obstacle.hidden=false;s.pose('runner_run_a'); s.move(.28); s.message(n + '개 성공 · 다음 장애물'); busy = false; b.disabled = false; target(b); } }, calm ? 200 : 700);
-      }); s.controls.appendChild(b); target(b); focus(b);
-    }
+    function hurdle() { run('hurdle'); }
     function order() {
       var seq = [{ img: ASSET + 'runner_ready.webp', label: '출발 준비' }, { img: ASSET + 'runner_run_a.webp', label: '달리기' }, { img: ASSET + 'runner_celebrate.webp', label: '도착' }], pos = 0;
       instruction('준비 → 달리기 → 도착 순서로 눌러요.'); var host = E('div', 'al-choice-area'), cards = seq.map(function (x) { return ctx.card(x); }); host.appendChild(ctx.grid(O.shuffle(cards), lv === 1 ? 1 : 3)); board.appendChild(host);
@@ -191,7 +152,7 @@
     }
     function finish() {
       cancel(); sh.setRounds(plan.steps.length, plan.steps.length);
-      entry = { at: new Date().toISOString(), lesson: 'sports-athletics-' + opt.school + '-' + opt.lesson, subject: 'physical', school: opt.school, topic: plan.title, level: lv, engine: 'athletics-adventure', rounds: metrics.length, mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: Math.round(metrics.reduce(function(n,m){return n+m.seconds;},0)), input: single ? 'one-button' : 'alternate', steps: metrics, transferObservation: '미관찰' };
+      entry = { at: new Date().toISOString(), lesson: 'sports-athletics-' + opt.school + '-' + opt.lesson, subject: 'physical', school: opt.school, topic: plan.title, level: lv, engine: 'athletics-stadium-v2', rounds: metrics.length, mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: Math.round(metrics.reduce(function(n,m){return n+m.seconds;},0)), input: single ? 'one-button' : 'alternate', steps: metrics, transferObservation: '미관찰' };
       opt.save(3, st.mistakes);
       O.finish({ stats: st, entry: entry, stars: 3, noReward: true, title: '끝까지 참여했어요!', text: plan.title + ' · 미션 ' + metrics.length + '개 완료', buttons: [{ label: '한 번 더', onClick: function () { location.reload(); } }, { label: '육상 목차', color: 'blue', href: '?festival=summer&sport=athletics&school=' + opt.school }] });
       var all = sessions(); all.push(entry); O.jset(SESSION_KEY, all.slice(-200));
@@ -212,6 +173,12 @@
       var one = button('큰 버튼 하나로', function () { single = true; storeInput(); }, 'blue'), two = button('왼발·오른발 번갈아', function () { single = false; storeInput(); }, 'blue'); two.disabled = lv <= 2 || O.settings().scan;
       function storeInput() { O.jset('oks_athletics_input_v2', { single: single }); one.setAttribute('aria-pressed', String(single)); two.setAttribute('aria-pressed', String(!single)); }
       storeInput(); settings.appendChild(one); settings.appendChild(two); board.appendChild(settings);
+      var raceOptions=E('div','ar-options');
+      var assist=button('기다려 주는 경기',function(){assisted=true;saveRacePrefs();},'blue'),timing=button('타이밍 도전',function(){assisted=false;saveRacePrefs();},'blue');
+      timing.disabled=lv<=2||O.settings().scan;
+      var together=button('친구와 함께 완주',function(){rivals=false;saveRacePrefs();},'blue'),compete=button('친구와 순위 도전',function(){rivals=true;saveRacePrefs();},'blue');
+      function saveRacePrefs(){O.jset('oks_athletics_race_preferences_v1',{assisted:assisted,rivals:rivals});assist.setAttribute('aria-pressed',String(assisted));timing.setAttribute('aria-pressed',String(!assisted));together.setAttribute('aria-pressed',String(!rivals));compete.setAttribute('aria-pressed',String(rivals));}
+      saveRacePrefs();raceOptions.appendChild(E('p','','경기 방식'));[assist,timing,together,compete].forEach(function(b){raceOptions.appendChild(b);});board.appendChild(raceOptions);
       var go = button('육상 모험 시작', function () { O.unlock(); clear(); st = O.newStats(); ctx = { sh: sh, board: board, level: lv, stats: st, cfg: {}, lesson: { topic: plan.title } }; O.kit(ctx); stepNo = 0; metrics = []; next(); }, 'orange'); var actions = E('div', 'al-intro-actions'); actions.appendChild(go);
       var ws = E('a', 'oks-btn blue', '학습지 인쇄'); ws.href = 'worksheet.html?sport=athletics&school=' + opt.school + '&lesson=' + opt.lesson + '&level=' + lv; actions.appendChild(ws); board.appendChild(actions);
       var info = E('details', 'al-teacher-guide', '<summary>선생님 · 활동 방법과 기록</summary><p>시간 제한과 탈락은 없습니다. 터치·마우스·키보드로 참여할 수 있어요. 스위치 모드는 공통 설정에서 켜세요.</p><p>출발 반응은 화면 버튼을 누른 시간입니다. 실제 달리기 속도나 운동 능력으로 해석하지 않아요. 기록은 이 기기의 참여가 함께 저장됩니다.</p>');

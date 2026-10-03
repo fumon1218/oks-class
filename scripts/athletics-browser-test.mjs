@@ -25,7 +25,7 @@ try {
   page.on('pageerror',e=>errors.push(e.message));
   await page.addInitScript(()=>{
     localStorage.setItem('oksaem-settings',JSON.stringify({voice:false,sound:false}));
-    localStorage.setItem('oks_core_v1',JSON.stringify({calm:true,scan:location.search.includes('scanTest=1')}));
+    localStorage.setItem('oks_core_v1',JSON.stringify({calm:!location.search.includes('motionTest=1'),scan:location.search.includes('scanTest=1')}));
   });
   await page.clock.install();
   let tested=0;
@@ -34,6 +34,7 @@ try {
   }
   async function play(school,lesson,level,alternate=false){
     await open(school,lesson,level);
+    if(level>=3)await page.getByRole('button',{name:'타이밍 도전',exact:true}).click({force:true});
     if(alternate)await page.getByRole('button',{name:'왼발·오른발 번갈아',exact:true}).click({force:true});
     await page.getByRole('button',{name:'육상 모험 시작',exact:true}).click({force:true});
     let nextFoot=0;
@@ -51,7 +52,7 @@ try {
         const cards=[...board.querySelectorAll('.oks-card')].filter(enabled);
         if(cards.length){(cards.find(c=>c._item?.correct)||cards[0]).click();return true;}
         const btns=[...board.querySelectorAll('.al-controls button')].filter(enabled);
-        const priority=['다시 앞으로','멈춰요','친구에게 바통 전달','해 봤어요 · 다음 동작','출발!','장애물 넘기','한 걸음 앞으로'];
+        const priority=['응원 부스트!','경기 출발','다음 미션','점프!','바통 전달','다시 앞으로','멈춰요','친구에게 바통 전달','해 봤어요 · 다음 동작','출발!','장애물 넘기','한 걸음 앞으로'];
         for(const t of priority){const b=btns.find(b=>b.textContent===t);if(b){b.click();return true;}}
         const side=btns.find(b=>b.textContent===(foot%2?'오른발':'왼발'));if(side){side.click();return true;}
         if(btns[0]&&btns[0].textContent!=='신호를 기다려요'){btns[0].click();return true;}return false;
@@ -63,11 +64,15 @@ try {
     assert.equal(r.steps.length,await page.evaluate(({school,lesson})=>OKS_ATHLETICS.course(school,lesson).steps.length,{school,lesson}));
     assert(r.steps.every(s=>s.completed&&Number.isFinite(s.attempts)&&Number.isFinite(s.seconds)));
     assert.equal(r.input,alternate?'alternate':'one-button');
+    const races=r.steps.filter(s=>s.race).map(s=>s.race);
+    assert(races.every(x=>x.distance===100&&x.taps>0),'실제 조작 후 경기 완주');
+    if(level<=2){assert(races.some(x=>x.boosts>0),'응원 부스트 실제 사용');assert(races.filter(x=>x.kind==='hurdle').every(x=>x.cleared===3));assert(races.filter(x=>x.kind==='relay').every(x=>x.baton));}
+    assert(races.every(x=>x.mode===(level<=2?'assist':'timing')),'지원과 타이밍 모드 적용');
     assert.equal(r.steps.filter(s=>s.kind==='signal').length,r.steps.filter(s=>Number.isFinite(s.reactionMs)).length);
     assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('oks_learning_log_v1')).at(-1).topic),r.topic);
     tested++;
   }
-  for(const school of ['elem','middle','high'])for(let lesson=1;lesson<=3;lesson++)for(let level=1;level<=5;level++)await play(school,lesson,level);
+  if(!process.env.ATHLETICS_CONTROLS_ONLY)for(const school of ['elem','middle','high'])for(let lesson=1;lesson<=3;lesson++)for(const level of (process.env.ATHLETICS_TEST_LEVELS||'1,2,3,4,5').split(',').map(Number))await play(school,lesson,level);
   await play('middle',2,4,true);
   await play('middle',3,4,true);
   // 쉬기 전의 신호 타이머가 다음 미션을 진행하지 않는지 확인합니다.
@@ -81,7 +86,9 @@ try {
   assert.equal(await page.locator('.al-mission>span').textContent(),'미션 2 / 3');
   // 반응이 빨라도 완료는 한 번만 기록합니다.
   await page.evaluate(()=>{const b=document.querySelector('.al-controls button');for(let i=0;i<30;i++)b.click();});await page.clock.runFor(1000);
-  assert.equal(await page.locator('.al-mission>b').textContent(),'순서 기억하기');
+  assert.equal(await page.locator('.al-mission>b').textContent(),'결승선까지');
+  assert.equal(await page.locator('.ar-game').count(),1);
+  assert((await page.locator('.ar-game').getAttribute('data-distance'))<20,'연타로 경기 건너뛰기 방지');
   // 태블릿과 좁은 화면의 수평 넘침·게임 이미지 로딩.
   for(const viewport of [{width:768,height:1024},{width:390,height:844}]){
     await page.setViewportSize(viewport);await open('middle',2,3);await page.getByRole('button',{name:'육상 모험 시작',exact:true}).click({force:true});
@@ -92,6 +99,23 @@ try {
     assert.equal(await page.locator('.al-lights .green.on').count(),1,'출발 신호등');
     await page.waitForFunction(()=>getComputedStyle(document.querySelector('.al-lights .green.on')).backgroundColor==='rgb(34, 189, 112)');
     if(process.env.ATHLETICS_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.ATHLETICS_SCREENSHOT_DIR,'athletics-track-'+viewport.width+'.png'),fullPage:true});
+  }
+  // 경기 화면도 태블릿과 휴대폰에서 잘리고 넘치지 않습니다.
+  for(const viewport of [{width:1024,height:768},{width:390,height:844}]){
+    await page.setViewportSize(viewport);await page.goto(base+'/sports/?festival=summer&sport=athletics&school=elem&lesson=1&level=3&play=1&motionTest=1');
+    await page.getByRole('button',{name:'타이밍 도전',exact:true}).click({force:true});
+    await page.getByRole('button',{name:'육상 모험 시작',exact:true}).click({force:true});await page.clock.runFor(3000);
+    await page.getByRole('button',{name:'출발!',exact:true}).click({force:true});await page.clock.runFor(1400);
+    await page.getByRole('button',{name:'경기 출발',exact:true}).click({force:true});await page.clock.runFor(2000);
+    await page.getByRole('button',{name:'리듬 맞춰 달리기',exact:true}).click({force:true});await page.clock.runFor(850);
+    await page.waitForFunction(()=>[...document.querySelectorAll('.ar-game img')].every(i=>i.complete&&i.naturalWidth));
+    assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+    if(process.env.ATHLETICS_SCREENSHOT_DIR)await page.screenshot({path:path.join(process.env.ATHLETICS_SCREENSHOT_DIR,'stadium-'+viewport.width+'.png'),fullPage:true});
+    await page.getByRole('button',{name:'쉬기',exact:true}).click({force:true});
+    const before=await page.locator('.ar-game').getAttribute('data-distance');await page.clock.runFor(5000);
+    assert.equal(await page.locator('.ar-game').getAttribute('data-distance'),before,'쉬는 동안 경기 정지');
+    await page.getByRole('button',{name:'이어서 하기',exact:true}).click({force:true});
+    assert.equal(await page.getByRole('button',{name:'경기 출발',exact:true}).count(),1,'동일 경기 재시작');
   }
   // 최초 온라인 설치 뒤 네트워크가 없어도 차시와 그림이 실행됩니다.
   await page.evaluate(()=>navigator.serviceWorker.ready);

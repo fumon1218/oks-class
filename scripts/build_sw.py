@@ -8,7 +8,7 @@ os.chdir(ROOT)
 PAGES = [
     './', './index.html', './classic.html', './manifest.json',
     './space/space.css', './core/oks-3d.js', './art/3d/models.js', './space/space.js', './space/zoom.js', './space/data.js', './art/art-ready.js',
-    './sports/', './sports/index.html', './sports/sports.css', './sports/sports.js', './sports/curriculum.js', './sports/worksheet.html', './sports/athletics.js', './sports/athletics.css',
+    './sports/', './sports/index.html', './sports/sports.css', './sports/sports.js', './sports/curriculum.js', './sports/worksheet.html', './sports/athletics.js', './sports/athletics-race.js', './sports/athletics.css',
     './learn/', './learn/index.html', './learn/learn.css', './learn/learn.js',
     './play/', './play/index.html', './play/play.css', './play/play.js', './play/content.js', './play/content2.js', './play/content-extra.js', './play/english-basic-content.js', './play/english-basic-engine.js', './play/custom.js', './play/scenes.js', './curriculum/editor.html', './play/describe.js', './curriculum/plan.html',
     './play/engines.js', './play/engines2.js', './play/farm.js',
