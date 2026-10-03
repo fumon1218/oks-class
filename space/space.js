@@ -88,6 +88,18 @@
           } });
       }
     });
+    /* 은하계 레벨의 독립 별 마을 — 우리 별 마을 내부 별들과 섞이지 않게 별도 렌더링 */
+    (SP.SYSTEMS || []).forEach(function (s, i) {
+      var m = P ? s.mapP : s.map;
+      var e = place(E('div', 'sp-star sp-system sp-system-' + s.id, ''), m.x, m.y, m.w);
+      e.dataset.system = s.id; e.dataset.depth = '0.72'; e.style.setProperty('--c', s.color);
+      e.setAttribute('aria-hidden', 'true');
+      e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, '🏟️', 'sp-star-img');
+      mapEl.appendChild(e);
+      if (view3d && model(s.model)) {
+        view3d.add(model(s.model), e, { box: e.querySelector('.sp-star-img'), spin: s.spin == null ? .18 : s.spin, yaw: .55 + i, tilt: .42, dist: 1.8, dy: -.04, glow: hex(s.color) });
+      }
+    });
     /* 다른 게임 별: 누르면 우주선 타고 날아가서 그 게임으로 */
     (SP.LINKS || []).forEach(function (s, i) {
       var m = P ? s.mapP : s.map;
