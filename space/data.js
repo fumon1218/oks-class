@@ -21,6 +21,13 @@
       subjects: ['math', 'science'], color: '#e8a24a', hello: '햇살 농장이에요! 씨앗을 심고, 세고, 키워 봐요.',
       map: { x: 20, y: 78, w: 13 }, mapP: { x: 24, y: 64.8, w: 28 } },
   ];
+  /* 은하계 레벨의 별 마을: 우리 별 마을과 같은 단계에서 선택하는 독립 행성계 */
+  var SYSTEMS = [
+    { id: 'ssing', model: 'star_ssing', name: '씽씽 별 마을', short: '씽씽 별 마을',
+      color: '#55cfff', chips: ['체육', '놀이'], soon: true, spin: .18,
+      map: { x: 22, y: 56, w: 18 }, mapP: { x: 22, y: 36, w: 34 },
+      say: '씽씽 별 마을은 체육과 놀이를 배우는 새로운 행성계예요. 곧 만나요!' }
+  ];
   /* 아직 태어나지 않은 별 (업데이트되면 새 교과·심화 단원으로) */
   /* 다른 게임으로 가는 별 (우주선 타고 날아가서 그 게임으로) */
   var LINKS = [
@@ -116,5 +123,5 @@
     });
     return out;
   }
-  window.OKS_SPACE = { STARS: STARS, LINKS: LINKS, EGGS: EGGS, DECO: DECO, B: B, assign: assign };
+  window.OKS_SPACE = { STARS: STARS, SYSTEMS: SYSTEMS, LINKS: LINKS, EGGS: EGGS, DECO: DECO, B: B, assign: assign };
 })();
