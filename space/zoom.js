@@ -30,7 +30,7 @@ window.OKS_ZOOM = (function () {
     markSsing = E('button', 'sp-zmark ssing', '<i></i><span>🏃 씽씽 별 마을<small>체육 · 놀이 · 하계 스포츠</small></span>'); markSsing.type = 'button'; markSsing.setAttribute('aria-label', '씽씽 별 마을로 가까이 가기');
     markSsing.onclick = function () {
       O.sfx('pop'); stopIntro();
-      if (focus === 'ssing' && z >= .82) { location.href = '../sports/'; return; }
+      if (focus === 'ssing' && z >= .82) { location.href = 'sports/'; return; }
       selectSystem('ssing', true);
     };
     galLab = E('div', 'sp-zgal', '🌌 옥쌤 은하');
