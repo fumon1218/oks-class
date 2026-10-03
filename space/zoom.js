@@ -7,8 +7,9 @@ window.OKS_ZOOM = (function () {
   var O = window.OKS, E = O.el;
   var IMGW = 1672, IMGH = 941, F = [0.69, 0.63];   /* 은하 그림에서 우리 별 무리가 있는 자리 */
   var ZMAX = 2.4, SNAP_IDLE = 520;
-  var scroller, stage, mapEl, cos, deep, gal, gal2, over, mark, galLab, hint, ui;
+  var scroller, stage, mapEl, cos, deep, gal, gal2, over, markOur, markSsing, galLab, hint, ui;
   var on = false, z = 1, zT = 1, V = { x: 0, y: 0 }, V1 = null, anchor = null, home = false, pinch = false, intro = null, diving = false;
+  var focus = 'our', autoFocus = false;
   var SW, SH, vw, vh, GW, GH, ZG, ZD, C, G0, raf = 0, last = 0, idleT = 0;
   function calm() { return !!O.settings().calm || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
   function cl(v, a, b) { return v < a ? a : v > b ? b : v; }
@@ -24,11 +25,13 @@ window.OKS_ZOOM = (function () {
     cos.appendChild(deep); cos.appendChild(gal2); cos.appendChild(gal);
     document.body.insertBefore(cos, scroller);
     over = E('div', 'sp-zover'); over.hidden = true;
-    mark = E('button', 'sp-zmark', '<i></i><span>✨ 우리 별 마을</span>'); mark.type = 'button'; mark.setAttribute('aria-label', '우리 별 마을로 가까이 가기');
-    mark.onclick = function () { O.sfx('pop'); stopIntro(); go(1, true); };
+    markOur = E('button', 'sp-zmark our', '<i></i><span>✨ 우리 별 마을</span>'); markOur.type = 'button'; markOur.setAttribute('aria-label', '우리 별 마을로 가까이 가기');
+    markOur.onclick = function () { O.sfx('pop'); stopIntro(); selectSystem('our', true); };
+    markSsing = E('button', 'sp-zmark ssing', '<i></i><span>🏃 씽씽 별 마을<small>체육 · 놀이 · 곧 만나요</small></span>'); markSsing.type = 'button'; markSsing.setAttribute('aria-label', '씽씽 별 마을 가까이 보기, 곧 만나요');
+    markSsing.onclick = function () { O.sfx('pop'); stopIntro(); selectSystem('ssing', true); };
     galLab = E('div', 'sp-zgal', '🌌 옥쌤 은하');
-    hint = E('div', 'sp-zhint', '화면을 누르면 바로 가요'); hint.hidden = true;
-    over.appendChild(mark); over.appendChild(galLab); over.appendChild(hint);
+    hint = E('div', 'sp-zhint', '마우스 휠이나 두 손가락으로 원하는 별 마을에 가까이 가요'); hint.hidden = true;
+    over.appendChild(markOur); over.appendChild(markSsing); over.appendChild(galLab); over.appendChild(hint);
     scroller.parentNode.insertBefore(over, scroller.nextSibling);
     ui = E('div', 'sp-zui', '<button type="button" data-z="in" aria-label="가까이">＋</button><button type="button" data-z="out" aria-label="멀리">－</button>' +
       '<span class="sp-zlv"><button type="button" data-l="gal"><b>🌌</b><span>은하</span></button><button type="button" data-l="map"><b>✨</b><span>별 무리</span></button><button type="button" data-l="near"><b>🔍</b><span>가까이</span></button></span>' +
@@ -73,6 +76,23 @@ window.OKS_ZOOM = (function () {
     V.y = SH * z <= vh ? C.y : cl(V.y, hy, SH - hy);
   }
   function scr(wx, wy) { return { x: vw / 2 + (wx - V.x) * z, y: vh / 2 + (wy - V.y) * z }; }
+  function ssingWorld() {
+    var e = mapEl && mapEl.querySelector('.system-ssing');
+    if (!e) return { x: SW * .22, y: SH * .56 };
+    return { x: parseFloat(e.style.left || '22') * SW / 100, y: parseFloat(e.style.top || '56') * SH / 100 };
+  }
+  function focusWorld() { return focus === 'ssing' ? ssingWorld() : C; }
+  function chooseFocusAt(x, y) {
+    var a = scr(C.x, C.y), s = scr(ssingWorld().x, ssingWorld().y);
+    var da = Math.hypot(x - a.x, y - a.y), ds = Math.hypot(x - s.x, y - s.y);
+    focus = ds < da ? 'ssing' : 'our'; V1 = focusWorld(); autoFocus = true;
+  }
+  function selectSystem(name, direct) {
+    focus = name === 'ssing' ? 'ssing' : 'our'; V1 = focusWorld(); autoFocus = true; anchor = null; home = false;
+    if (direct) zT = focus === 'ssing' ? 2.05 : 1;
+    else if (zT < 1) zT = 1;
+    kick();
+  }
 
   function apply() {
     if (z >= 1) { clampV(); V1 = { x: V.x, y: V.y }; } else { if (z < .65) V1 = { x: C.x, y: C.y }; var c = centerFor(z); V.x = c.x; V.y = c.y; }
@@ -92,10 +112,14 @@ window.OKS_ZOOM = (function () {
     /* 먼 우주 */
     var dO = cl(Math.log(.25 / z) / Math.log(.25 / ZG), 0, 1);
     deep.style.opacity = dO.toFixed(3); deep.style.transform = 'scale(' + (1.04 + Math.min(.3, z / ZG * .06)).toFixed(4) + ')';
-    /* 이름표 */
-    var mO = cl((.45 - z) / .25, 0, 1) * cl((z - ZD * 1.1) / (ZG * .8 - ZD * 1.1), 0, 1);
-    var cp = scr(C.x, C.y); mark.style.left = cp.x + 'px'; mark.style.top = cp.y + 'px'; mark.style.opacity = mO.toFixed(3); mark.style.pointerEvents = mO > .3 ? 'auto' : 'none';
-    mark.style.setProperty('--s', Math.max(18, SW * z * .55).toFixed(1) + 'px');
+    /* 행성계 이름표 — 먼 은하에서는 두 마을을 함께 보여 줍니다 */
+    var mO = cl((.56 - z) / .24, 0, 1) * cl((z - ZD * 1.1) / (ZG * .8 - ZD * 1.1), 0, 1);
+    var cp = scr(C.x, C.y), sw = ssingWorld(), sp = scr(sw.x, sw.y);
+    markOur.style.left = cp.x + 'px'; markOur.style.top = cp.y + 'px'; markOur.style.opacity = mO.toFixed(3); markOur.style.pointerEvents = mO > .3 ? 'auto' : 'none';
+    markSsing.style.left = sp.x + 'px'; markSsing.style.top = sp.y + 'px'; markSsing.style.opacity = mO.toFixed(3); markSsing.style.pointerEvents = mO > .3 ? 'auto' : 'none';
+    markOur.style.setProperty('--s', Math.max(18, SW * z * .55).toFixed(1) + 'px');
+    markSsing.style.setProperty('--s', Math.max(18, SW * z * .48).toFixed(1) + 'px');
+    mapEl.style.setProperty('--ssing-visible', (z < .72 || focus === 'ssing') ? '1' : '0');
     var gp = scr(G0.x + GW / 2, G0.y + GH * .9); galLab.style.left = gp.x + 'px'; galLab.style.top = Math.min(vh - 60, gp.y) + 'px';
     galLab.style.opacity = cl((ZG * 2.4 - z) / (ZG * 1.4), 0, 1).toFixed(3);
     /* 단계 표시 */
@@ -123,6 +147,10 @@ window.OKS_ZOOM = (function () {
         var kh = calm() ? 1 : 1 - Math.exp(-dt * 6);
         var H0 = homeP(); V.x = lerp(V.x, H0.x, kh); V.y = lerp(V.y, H0.y, kh);
         if (Math.abs(V.x - H0.x) + Math.abs(V.y - H0.y) < .5) { V.x = H0.x; V.y = H0.y; home = false; } else moving = true;
+      } else if (autoFocus && z >= .72) {
+        var FT = focusWorld(), kf = calm() ? 1 : 1 - Math.exp(-dt * 4.8);
+        V.x = lerp(V.x, FT.x, kf); V.y = lerp(V.y, FT.y, kf);
+        moving = true;
       }
     }
     apply();
@@ -150,6 +178,7 @@ window.OKS_ZOOM = (function () {
   function onWheel(e) {
     if (!on) return; e.preventDefault(); stopIntro();
     var dy = e.deltaMode === 1 ? e.deltaY * 30 : e.deltaY;
+    if (dy < 0 && zT < .8) chooseFocusAt(e.clientX, e.clientY);
     zT = cl(zT * Math.exp(-dy * (e.ctrlKey ? .01 : .0016)), ZD, ZMAX);
     anchor = { x: e.clientX, y: e.clientY }; home = false; kick(); snapLater();
   }
@@ -167,11 +196,13 @@ window.OKS_ZOOM = (function () {
     pr.x = e.clientX; pr.y = e.clientY;
     if (np >= 2) {
       var p = vals(), d = Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
-      anchor = { x: (p[0].x + p[1].x) / 2, y: (p[0].y + p[1].y) / 2 }; zT = cl(pz0 * d / d0, ZD, ZMAX); home = false; kick();
+      anchor = { x: (p[0].x + p[1].x) / 2, y: (p[0].y + p[1].y) / 2 };
+      if (d > d0 * 1.03 && zT < .8) chooseFocusAt(anchor.x, anchor.y);
+      zT = cl(pz0 * d / d0, ZD, ZMAX); home = false; kick();
       return;
     }
     if (downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) > 8) moved = true;
-    if (moved && z >= 1) { V.x -= dx / z; V.y -= dy / z; home = false; apply(); }
+    if (moved && z >= 1) { autoFocus = false; V.x -= dx / z; V.y -= dy / z; home = false; apply(); }
   }
   function onUp(e) {
     if (!pts[e.pointerId]) return;
@@ -210,7 +241,7 @@ window.OKS_ZOOM = (function () {
       cos.hidden = false; over.hidden = false; ui.hidden = false; diving = false; stage.style.transition = ''; stage.style.filter = ''; stage.style.opacity = '';
       stage.style.transformOrigin = '0 0';
       dims();
-      if (!(opt && opt.keep)) { z = zT = 1; V = homeP(); V1 = homeP(); home = false; anchor = null; }
+      if (!(opt && opt.keep)) { z = zT = 1; V = homeP(); V1 = homeP(); home = false; anchor = null; focus = 'our'; autoFocus = false; }
       if (!(opt && opt.noIntro)) startIntro();
       apply(); kick();
     },
