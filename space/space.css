@@ -179,6 +179,8 @@ body.portrait .sp-guide img{width:84px;}
 .sp-system-ssing{opacity:var(--ssing-visible,0);}
 .sp-map > .sp-star:not(.sp-system){opacity:var(--our-visible,1);transition:opacity .35s ease;}
 .sp-system .sp-star-img{filter:drop-shadow(0 18px 30px rgba(10,5,40,.58));}
+.sp-map.focus-ssing > .sp-star:not(.sp-system){display:none;}
+.sp-map.focus-our > .sp-system{display:none;}
 
 /* ---------- 우주 줌 (먼 우주 → 은하 → 별 무리 → 가까이) ---------- */
 body.sp-zooming .sp-scroll{overflow:hidden;touch-action:none;cursor:grab;}
