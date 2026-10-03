@@ -15,11 +15,11 @@ window.OKS_SPORTS_DATA = {
     {n:5,name:'스스로 즐기기',desc:'스스로 선택하고 기록하며 생활 속 활동으로 이어가요.'}
   ],
   sports: [
-    {id:'athletics',name:'육상',emo:'🏃',color:'#ff8b45',title:'달리고 뛰며 기록해요',goal:'출발·달리기·도착의 순서를 알고 안전하게 움직여요.',concepts:['출발','달리기','도착','기록','안전'],image:'assets/athletics.png'},
-    {id:'swimming',name:'수영',emo:'🏊',color:'#38bdf8',title:'물에서 안전하게 움직여요',goal:'수영장의 기본 시설과 안전 약속을 알고 기초 움직임을 경험해요.',concepts:['수영장','레인','고글','호흡','안전'],image:'assets/swimming.png'},
-    {id:'archery',name:'양궁',emo:'🏹',color:'#76c94f',title:'과녁의 중심을 향해요',goal:'과녁과 방향을 살피고 주의 집중하여 목표를 맞혀요.',concepts:['과녁','중심','방향','집중','안전'],image:'assets/archery.png'},
-    {id:'gymnastics',name:'체조',emo:'🤸',color:'#bf78ef',title:'몸의 균형을 느껴요',goal:'서기·팔 벌리기·한 발 균형 동작을 차례로 경험해요.',concepts:['자세','균형','순서','몸','안전'],image:'assets/gymnastics.png'},
-    {id:'taekwondo',name:'태권도',emo:'🥋',color:'#ef6c68',title:'기본 발차기를 익혀요',goal:'준비 자세와 발차기 방향을 알고 안전한 목표를 향해 움직여요.',concepts:['준비','발차기','방향','예절','안전'],image:'assets/taekwondo.png'},
-    {id:'soccer',name:'축구',emo:'⚽',color:'#f3c24b',title:'공을 목표로 보내요',goal:'공과 골대의 관계를 알고 발로 공을 보내는 기초 움직임을 경험해요.',concepts:['공','골대','차기','패스','협동'],image:'assets/soccer.png'}
+    {id:'athletics',name:'육상',emo:'🏃',color:'#ff8b45',title:'달리고 뛰며 기록해요',goal:'출발·달리기·도착의 순서를 알고 안전하게 움직여요.',concepts:['출발','달리기','도착','기록','안전'],image:'assets/athletics.webp'},
+    {id:'swimming',name:'수영',emo:'🏊',color:'#38bdf8',title:'물에서 안전하게 움직여요',goal:'수영장의 기본 시설과 안전 약속을 알고 기초 움직임을 경험해요.',concepts:['수영장','레인','고글','호흡','안전'],image:'assets/swimming.webp'},
+    {id:'archery',name:'양궁',emo:'🏹',color:'#76c94f',title:'과녁의 중심을 향해요',goal:'과녁과 방향을 살피고 주의 집중하여 목표를 맞혀요.',concepts:['과녁','중심','방향','집중','안전'],image:'assets/archery.webp'},
+    {id:'gymnastics',name:'체조',emo:'🤸',color:'#bf78ef',title:'몸의 균형을 느껴요',goal:'서기·팔 벌리기·한 발 균형 동작을 차례로 경험해요.',concepts:['자세','균형','순서','몸','안전'],image:'assets/gymnastics.webp'},
+    {id:'taekwondo',name:'태권도',emo:'🥋',color:'#ef6c68',title:'기본 발차기를 익혀요',goal:'준비 자세와 발차기 방향을 알고 안전한 목표를 향해 움직여요.',concepts:['준비','발차기','방향','예절','안전'],image:'assets/taekwondo.webp'},
+    {id:'soccer',name:'축구',emo:'⚽',color:'#f3c24b',title:'공을 목표로 보내요',goal:'공과 골대의 관계를 알고 발로 공을 보내는 기초 움직임을 경험해요.',concepts:['공','골대','차기','패스','협동'],image:'assets/soccer.webp'}
   ]
 };
