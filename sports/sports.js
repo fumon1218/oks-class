@@ -9,7 +9,7 @@ function top(title,sub,back){
 }
 function tryBg(el,s){var im=new Image();im.onload=function(){el.classList.add('has-bg');el.style.backgroundImage="url('"+s.image+"')"};im.src=s.image;}
 function hub(){
-  var sh=top('씽씽 별 마을','체육 · 놀이 · 하계 스포츠','../space/');
+  var sh=top('씽씽 별 마을','체육 · 놀이 · 하계 스포츠','../');
   sh.ask('하계 스포츠 마을에서 배우고 싶은 종목을 골라 보세요.',{silent:true});
   var b=document.createElement('div');b.className='sports-hub';
   b.innerHTML='<div class="sports-hero"><h1>☀️ 하계 스포츠 마을</h1><p>보고 · 따라 하고 · 직접 해 보며 스포츠를 배워요</p></div>'+
