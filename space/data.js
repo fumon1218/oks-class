@@ -19,7 +19,11 @@
       map: { x: 82, y: 76, w: 19 }, mapP: { x: 72, y: 65.6, w: 40 } },
     { id: 'farm', model: 'star_farm', name: '햇살 농장', short: '햇살 농장', img: 'star_farm', land: 'land_farm', guide: 'robot_wave', guideName: '별빛이',
       subjects: ['math', 'science'], color: '#e8a24a', hello: '햇살 농장이에요! 씨앗을 심고, 세고, 키워 봐요.',
-      map: { x: 20, y: 78, w: 13 }, mapP: { x: 24, y: 64.8, w: 28 } }
+      map: { x: 20, y: 78, w: 13 }, mapP: { x: 24, y: 64.8, w: 28 } },
+    { id: 'ssing', model: 'star_ssing', name: '씽씽별', short: '씽씽별', img: 'star_ssing', emo: '🏃',
+      subjects: [], chips: ['체육', '놀이'], color: '#55cfff', soon: true, spin: .18,
+      hello: '씽씽별은 체육과 놀이를 배우는 새로운 별이에요.',
+      map: { x: 8, y: 54, w: 16 }, mapP: { x: 50, y: 108, w: 30 } }
   ];
   /* 아직 태어나지 않은 별 (업데이트되면 새 교과·심화 단원으로) */
   /* 다른 게임으로 가는 별 (우주선 타고 날아가서 그 게임으로) */
@@ -36,7 +40,7 @@
     { img: 'egg_sleep', x: 56, y: 91, w: 4.5, p: [50, 79, 9], say: '아직 잠자는 별이에요. 새 공부가 생기면 깨어나요.' }
   ];
   var DECO = [
-    { img: 'ring_planet', x: 6, y: 52, w: 6, p: [10, 50, 13] }, { img: 'comet', x: 72, y: 13, w: 6, drift: 1, p: [8, 76, 12] }, { img: 'satellite', x: 93, y: 52, w: 5.5, p: [90, 50, 13] },
+    { img: 'ring_planet', x: 5, y: 14, w: 6, p: [10, 50, 13] }, { img: 'comet', x: 72, y: 13, w: 6, drift: 1, p: [8, 76, 12] }, { img: 'satellite', x: 93, y: 52, w: 5.5, p: [90, 50, 13] },
     { img: 'galaxy', x: 70, y: 48, w: 5, dim: 1 }, { img: 'moon', x: 94, y: 8, w: 4.5 }, { img: 'asteroid', x: 30, y: 92, w: 3.5 }
   ];
 
