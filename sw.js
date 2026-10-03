@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v95';
+const CACHE_NAME = 'oks-class-v96';
 const ASSETS = [
   './',
   './index.html',
@@ -26,6 +26,25 @@ const ASSETS = [
   './sports/assets/gymnastics.webp',
   './sports/assets/taekwondo.webp',
   './sports/assets/soccer.webp',
+  './sports/assets/athletics/athletics_bg_main.webp',
+  './sports/assets/athletics/runner_idle.webp',
+  './sports/assets/athletics/runner_ready.webp',
+  './sports/assets/athletics/runner_run_a.webp',
+  './sports/assets/athletics/runner_run_b.webp',
+  './sports/assets/athletics/runner_hurdle.webp',
+  './sports/assets/athletics/runner_celebrate.webp',
+  './sports/assets/athletics/start_block.webp',
+  './sports/assets/athletics/start_signal.webp',
+  './sports/assets/athletics/finish_ribbon.webp',
+  './sports/assets/athletics/outfit_tshirt.webp',
+  './sports/assets/athletics/outfit_shorts.webp',
+  './sports/assets/athletics/outfit_coat.webp',
+  './sports/assets/athletics/outfit_scarf.webp',
+  './sports/assets/athletics/outfit_gloves.webp',
+  './sports/assets/athletics/outfit_cap.webp',
+  './sports/assets/athletics/outfit_sneakers.webp',
+  './sports/assets/athletics/outfit_sandals.webp',
+  './sports/assets/athletics/outfit_swimsuit.webp',
   './learn/',
   './learn/index.html',
   './learn/learn.css',
