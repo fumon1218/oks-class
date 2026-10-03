@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v88';
+const CACHE_NAME = 'oks-class-v89';
 const ASSETS = [
   './',
   './index.html',
@@ -24,6 +24,8 @@ const ASSETS = [
   './play/content.js',
   './play/content2.js',
   './play/content-extra.js',
+  './play/english-basic-content.js',
+  './play/english-basic-engine.js',
   './play/custom.js',
   './play/scenes.js',
   './curriculum/editor.html',
@@ -37,6 +39,7 @@ const ASSETS = [
   './core/oks-kit.js',
   './core/oks-eco.js',
   './curriculum/lessons.js',
+  './curriculum/english-basic.js',
   './shop/',
   './shop/index.html',
   './shop/shop.css',
@@ -96,6 +99,21 @@ const ASSETS = [
   './core/ui/star.webp',
   './core/ui/star_gold.webp',
   './core/ui/title_wood.webp',
+  './core/ui/icon_back.png',
+  './core/ui/icon_complete.png',
+  './core/ui/icon_erase.png',
+  './core/ui/icon_help.png',
+  './core/ui/icon_hint.png',
+  './core/ui/icon_home.png',
+  './core/ui/icon_listen.png',
+  './core/ui/icon_map.png',
+  './core/ui/icon_pause.png',
+  './core/ui/icon_play.png',
+  './core/ui/icon_replay_audio.png',
+  './core/ui/icon_reward.png',
+  './core/ui/icon_settings.png',
+  './core/ui/icon_star.png',
+  './core/ui/icon_teacher.png',
   './art/space/asteroid.webp',
   './art/space/comet.webp',
   './art/space/egg_born.webp',
