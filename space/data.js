@@ -24,7 +24,7 @@
   /* 은하계 레벨의 별 마을: 우리 별 마을과 같은 단계에서 선택하는 독립 행성계 */
   var SYSTEMS = [
     { id: 'ssing', model: 'star_ssing_new', name: '씽씽 별 마을', short: '씽씽 별 마을',
-      color: '#55cfff', chips: ['체육', '놀이', '하계 스포츠'], soon: false, spin: .14, yaw: .25, tilt: .36, dist: 2.05,
+      color: '#55cfff', chips: ['체육', '놀이'], soon: false, spin: .14, yaw: .25, tilt: .36, dist: 2.05,
       map: { x: 13, y: 56, w: 16 }, mapP: { x: 15, y: 36, w: 29 },
       say: '씽씽 별 마을에 오신 것을 환영해요! 하계 스포츠 활동부터 시작해요.' }
   ];
