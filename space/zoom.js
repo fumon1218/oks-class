@@ -72,7 +72,7 @@ window.OKS_ZOOM = (function () {
   }
   function clampV() {
     var hx = vw / 2 / z, hy = vh / 2 / z;
-    if (focus === 'ssing' && autoFocus && z >= .72) {
+    if (focus === 'ssing' && autoFocus && z >= .56) {
       /* 씽씽 별 마을은 우리 별 마을 왼쪽의 독립 행성계라서, 줌인할 때 화면 중앙까지 충분히 이동할 수 있게 여백을 허용 */
       V.x = cl(V.x, SW * .06, SW - hx);
     } else {
@@ -128,10 +128,10 @@ window.OKS_ZOOM = (function () {
     markSsing.style.left = ssingX + 'px'; markSsing.style.top = sp.y + 'px'; markSsing.style.opacity = mO.toFixed(3); markSsing.style.pointerEvents = mO > .3 ? 'auto' : 'none';
     markOur.style.setProperty('--s', Math.max(18, SW * z * .55).toFixed(1) + 'px');
     markSsing.style.setProperty('--s', Math.max(18, SW * z * .48).toFixed(1) + 'px');
-    mapEl.style.setProperty('--ssing-visible', (z < .72 || focus === 'ssing') ? '1' : '0');
-    mapEl.style.setProperty('--our-visible', (z < .72 || focus === 'our') ? '1' : '0');
-    mapEl.classList.toggle('focus-ssing', z >= .72 && focus === 'ssing');
-    mapEl.classList.toggle('focus-our', z >= .72 && focus === 'our');
+    mapEl.style.setProperty('--ssing-visible', (z < .56 || focus === 'ssing') ? '1' : '0');
+    mapEl.style.setProperty('--our-visible', (z < .56 || focus === 'our') ? '1' : '0');
+    mapEl.classList.toggle('focus-ssing', z >= .56 && focus === 'ssing');
+    mapEl.classList.toggle('focus-our', z >= .56 && focus === 'our');
     var gp = scr(G0.x + GW / 2, G0.y + GH * .9); galLab.style.left = gp.x + 'px'; galLab.style.top = Math.min(vh - 60, gp.y) + 'px';
     galLab.style.opacity = cl((ZG * 2.4 - z) / (ZG * 1.4), 0, 1).toFixed(3);
     /* 단계 표시 */
@@ -159,7 +159,7 @@ window.OKS_ZOOM = (function () {
         var kh = calm() ? 1 : 1 - Math.exp(-dt * 6);
         var H0 = homeP(); V.x = lerp(V.x, H0.x, kh); V.y = lerp(V.y, H0.y, kh);
         if (Math.abs(V.x - H0.x) + Math.abs(V.y - H0.y) < .5) { V.x = H0.x; V.y = H0.y; home = false; } else moving = true;
-      } else if (autoFocus && z >= .72) {
+      } else if (autoFocus && z >= .56) {
         var FT = focusWorld(), kf = calm() ? 1 : 1 - Math.exp(-dt * 4.8);
         V.x = lerp(V.x, FT.x, kf); V.y = lerp(V.y, FT.y, kf);
         moving = true;
