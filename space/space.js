@@ -98,7 +98,7 @@
       if (s.soon) chips += '<i class="sp-soon-chip">곧 만나요</i>';
       e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, '🏟️', 'sp-star-img') +
         '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>' +
-        (s.id === 'ssing' && !s.soon ? '<a class="sp-system-enter" href="../sports/">☀️ 하계 스포츠 시작</a>' : '');
+        (s.id === 'ssing' && !s.soon ? '<a class="sp-system-enter" href="sports/">☀️ 하계 스포츠 시작</a>' : '');
       mapEl.appendChild(e);
       var enter = e.querySelector('.sp-system-enter');
       if (enter) {
