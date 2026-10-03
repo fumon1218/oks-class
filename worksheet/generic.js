@@ -31,6 +31,12 @@ window.OKS_WS_GENERIC = function (W) {
     }
     return c;
   }
+  var specialCfg = cfgOf(level);
+  if (window.OKS_ENGLISH_BASIC_WS && /^05-00-/.test(id)) {
+    var special = window.OKS_ENGLISH_BASIC_WS(W, specialCfg);
+    if (special && special.length) return special.slice(0, 4);
+  }
+
   var KO = '가나다라마';
   function optCard(o, ok, showLabel, sz) {
     sz = sz || 56;
