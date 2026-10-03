@@ -77,15 +77,16 @@ label.ck{display:inline-flex;align-items:center;gap:4px;font-size:14px}
   function chip(it, ok){ return '<span class="chip' + (ok ? ' ok' : '') + '">' + pic(it) + ' ' + esc(it.label || it.en || '') + (ok ? ' ✔' : '') + '</span>'; }
   function lesson(){ return D.lessons.filter(function(l){ return l.id === cur; })[0]; }
 
+  function schoolsFor(subject){ return D.schools.filter(function(s){ return D.lessons.some(function(x){ return x.subject === subject && x.school === s.key; }); }); }
   function fillSel(){
     var l = lesson();
     S.innerHTML = D.subjects.map(function(s){ return '<option value="' + s.key + '"' + (s.key === l.subject ? ' selected' : '') + '>' + s.name + '</option>'; }).join('');
-    H.innerHTML = D.schools.map(function(s){ return '<option value="' + s.key + '"' + (s.key === l.school ? ' selected' : '') + '>' + s.name + '</option>'; }).join('');
+    H.innerHTML = schoolsFor(l.subject).map(function(s){ return '<option value="' + s.key + '"' + (s.key === l.school ? ' selected' : '') + '>' + s.name + '</option>'; }).join('');
     var ls = D.lessons.filter(function(x){ return x.subject === l.subject && x.school === l.school; });
     L.innerHTML = ls.map(function(x){ var k = CU.kind(C[x.id]), n = CU.count(x.id); return '<option value="' + x.id + '"' + (x.id === cur ? ' selected' : '') + '>' + x.no + ' ' + esc(x.topic) + (k ? '' : ' (편집 없음)') + (n ? ' ✏️' + n : '') + '</option>'; }).join('');
   }
-  S.onchange = function(){ cur = D.lessons.filter(function(x){ return x.subject === S.value && x.school === H.value; })[0].id; go(); };
-  H.onchange = S.onchange;
+  S.onchange = function(){ var hs = schoolsFor(S.value), sk = hs.some(function(x){return x.key === H.value;}) ? H.value : hs[0].key; cur = D.lessons.filter(function(x){ return x.subject === S.value && x.school === sk; })[0].id; go(); };
+  H.onchange = function(){ cur = D.lessons.filter(function(x){ return x.subject === S.value && x.school === H.value; })[0].id; go(); };
   L.onchange = function(){ cur = L.value; go(); };
 
   function go(){
