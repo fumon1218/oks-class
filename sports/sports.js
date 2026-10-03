@@ -142,7 +142,7 @@ function activity(){
  sh.ask(li[0]+'! 시작해 볼까요?',{silent:true});
 
  var start=E('div','oks-start sports-start');
- start.innerHTML='<div class="oks-start-lv">'+LEVELS[level-1].name+'</div><p class="gdesc">'+levelDesc(s,li)+'</p><p>'+li[1]+'</p><div class="sports-start-preview"><img src="'+(s.id==='athletics'?'assets/athletics/athletics_bg_main.webp':s.image)+'" alt=""></div>';
+ start.innerHTML='<div class="oks-start-lv">'+LEVELS[level-1].name+'</div><p class="gdesc">'+levelDesc(s,li)+'</p><p>'+li[1]+'</p><div class="sports-start-preview'+(s.id==='athletics'?' athletics-preview':'')+'"><img class="preview-bg" src="'+(s.id==='athletics'?'assets/athletics/athletics_bg_main.webp':s.image)+'" alt="">'+(s.id==='athletics'?'<img class="preview-runner" src="assets/athletics/runner_idle.webp" alt="">':'')+'</div>';
  var go=E('button','oks-btn',O.iconHtml('icon_play.png','시작하기'));go.type='button';start.appendChild(go);
  var ws=E('a','oks-btn blue oks-extra','학습지 인쇄');ws.href='worksheet.html?sport='+s.id+'&school='+school+'&level='+level;start.appendChild(ws);
  sh.board.appendChild(start);
@@ -193,7 +193,11 @@ function roundFor(s,li,ctx,host,i){
  if(s.id==='athletics'){
    if(level===1)return athleticsExplore(ctx,host,i);
    if(level===2)return athleticsChoose(ctx,host,i);
-   if(level===3)return athleticsSequence(ctx,host,i);
+   if(level===3){
+     if(i===0||i===3)return athleticsGearDrag(ctx,host,i);
+     if(i===2)return athleticsStartTiming(ctx,host);
+     return athleticsSequence(ctx,host,i);
+   }
    if(level===4)return athleticsRace(ctx,host,i);
    return athleticsLife(ctx,host,i);
  }
@@ -233,6 +237,30 @@ function athleticsChoose(ctx,host,i){
  var ok=cards.filter(function(x){return x._item.label===S.ok[1]})[0];ctx.target({get:function(){return ok}});
  return ctx.tapWait(cards,function(x){return x===ok}).then(function(x){ctx.good(x);O.say(x._item.label,{noRepeat:true});return O.wait(800)})
 }
+function athleticsGearDrag(ctx,host,i){
+ var sets=[
+  {q:'달리기할 때 필요한 운동화를 준비 구역으로 옮겨요.',ok:['outfit_sneakers.webp','운동화'],no:['outfit_sandals.webp','샌들']},
+  {q:'출발할 때 사용하는 스타팅 블록을 옮겨요.',ok:['start_block.webp','스타팅 블록'],no:['outfit_coat.webp','겨울 외투']}
+ ],S=sets[(i===3?1:0)];
+ ctx.sh.ask(S.q);
+ var row=E('div','sports-drag-row'),zone=E('div','sports-dropzone athletics-zone','<img src="assets/athletics/runner_ready.webp" alt=""><span>준비 구역</span>');
+ var items=[ctx.card({img:'assets/athletics/'+S.ok[0],label:S.ok[1]},{big:true}),ctx.card({img:'assets/athletics/'+S.no[0],label:S.no[1]},{big:true})];
+ row.appendChild(ctx.grid(O.shuffle(items),2));row.appendChild(zone);host.appendChild(row);
+ ctx.target({get:function(){return items.filter(function(x){return x._item.label===S.ok[1]})[0]},to:function(){return zone}});
+ return ctx.dnd(items,[zone],function(it){return it._item.label===S.ok[1]},function(it){
+   ctx.good(it);zone.innerHTML='<div class="ath-zone-done">'+it.innerHTML+'<strong>준비 완료!</strong></div>';
+ },function(){return items.some(function(x){return x._done&&x._item.label===S.ok[1]})}).then(function(){return O.wait(850)});
+}
+function athleticsStartTiming(ctx,host){
+ ctx.sh.ask('초록 신호가 나오면 빠르게 출발 버튼을 눌러요.');
+ var wrap=E('div','ath-start-challenge');
+ wrap.innerHTML='<img class="ath-ready-runner" src="assets/athletics/runner_ready.webp" alt=""><img class="ath-signal big" src="assets/athletics/start_signal.webp" alt=""><div class="ath-start-msg">준비…</div>';
+ var b=E('button','oks-btn orange','기다려요');b.disabled=true;wrap.appendChild(b);host.appendChild(wrap);
+ return new Promise(function(res){setTimeout(function(){
+   var t=performance.now();wrap.querySelector('.ath-start-msg').textContent='출발!';b.disabled=false;b.textContent='달리기 시작';ctx.target({get:function(){return b}});
+   b.onclick=function(){var ms=Math.round(performance.now()-t);wrap.querySelector('.ath-ready-runner').src='assets/athletics/runner_run_a.webp';wrap.querySelector('.ath-start-msg').innerHTML='반응 시간 <b>'+ms+'ms</b>';ctx.good(b);setTimeout(res,900)}
+ },750+Math.random()*850)});
+}
 function athleticsSequence(ctx,host,i){
  ctx.sh.ask('출발부터 결승까지 순서대로 눌러 보세요.');
  var seq=[
@@ -259,7 +287,7 @@ function athleticsRace(ctx,host,i){
  }
  var l=E('button','ath-foot','왼발'),r=E('button','ath-foot','오른발');ctrl.appendChild(l);ctrl.appendChild(r);
  return new Promise(function(res){
-   function tap(side,b){if(side===last){ctx.bad(b);return}last=side;progress++;player.querySelector('img').src=progress%2?'assets/athletics/runner_run_a.webp':'assets/athletics/runner_run_b.webp';player.style.left=(8+progress*8)+'%';O.sfx('tick');if(progress>=10){ctx.good(b);player.querySelector('img').src='assets/athletics/runner_celebrate.webp';setTimeout(res,900)}}
+   function tap(side,b){if(side===last){ctx.bad(b);return}last=side;progress++;player.querySelector('img').src=progress%2?'assets/athletics/runner_run_a.webp':'assets/athletics/runner_run_b.webp';player.style.left=(8+progress*8)+'%';O.sfx('tick');if(progress>=10){ctx.good(b);player.style.left='78%';player.querySelector('img').src='assets/athletics/runner_celebrate.webp';if(i===4){var rec=athleticsRecord();var t=Date.now();rec.finishes=(rec.finishes||0)+1;rec.last=t;saveAthleticsRecord(rec);showAthleticsRecord(game,rec)}setTimeout(res,1000)}}
    l.onclick=function(){tap('L',l)};r.onclick=function(){tap('R',r)};ctx.target({get:function(){return [l,r]}})
  })
 }
@@ -271,6 +299,11 @@ function athleticsLife(ctx,host,i){
    return new Promise(function(res){cards.forEach(function(c){c.onclick=function(){if(c._ok&&!c._done){c._done=true;c.classList.add('good');got++;O.sfx('ok');if(got===3){O.praise();setTimeout(res,900)}}else ctx.bad(c)}})})
  }
  return athleticsRace(ctx,host,(i%4));
+}
+function athleticsRecord(){try{return JSON.parse(localStorage.getItem('oks_athletics_record_v1')||'{}')}catch(e){return{}}}
+function saveAthleticsRecord(r){try{localStorage.setItem('oks_athletics_record_v1',JSON.stringify(r))}catch(e){}}
+function showAthleticsRecord(game,r){
+ var p=E('div','ath-record-pop','<b>🏁 완주 '+r.finishes+'회</b><small>내 기록이 하나 더 쌓였어요!</small>');game.appendChild(p);setTimeout(function(){p.classList.add('show')},30);
 }
 function exploreRound(s,ctx,host,i){
  var set=sportSet(s),arr=set.tools.slice(i%2,i%2+3);if(arr.length<3)arr=set.tools.slice(0,3);
