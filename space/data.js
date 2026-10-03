@@ -24,8 +24,8 @@
   /* 은하계 레벨의 별 마을: 우리 별 마을과 같은 단계에서 선택하는 독립 행성계 */
   var SYSTEMS = [
     { id: 'ssing', model: 'star_ssing_new', name: '씽씽 별 마을', short: '씽씽 별 마을',
-      color: '#55cfff', chips: ['체육', '놀이'], soon: true, spin: .18,
-      map: { x: 8, y: 56, w: 18 }, mapP: { x: 12, y: 36, w: 34 },
+      color: '#55cfff', chips: ['체육', '놀이'], soon: true, spin: .14, yaw: .25, tilt: .36, dist: 2.05,
+      map: { x: 13, y: 56, w: 16 }, mapP: { x: 15, y: 36, w: 29 },
       say: '씽씽 별 마을은 체육과 놀이를 배우는 새로운 행성계예요. 곧 만나요!' }
   ];
   /* 아직 태어나지 않은 별 (업데이트되면 새 교과·심화 단원으로) */
