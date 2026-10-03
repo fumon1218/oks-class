@@ -339,9 +339,21 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   LESSONS.forEach(function (l) { var gk = l.subjectName + ' · ' + l.schoolName; if (!groups[gk]) { groups[gk] = document.createElement('optgroup'); groups[gk].label = gk; sel.appendChild(groups[gk]); }
     var o = document.createElement('option'); o.value = l.id; o.textContent = l.subjectName + ' ' + l.no + ' ' + l.topic; groups[gk].appendChild(o); });
   sel.value = id; document.getElementById('level').value = level;
-  function go(newSeed) { var u = '?id=' + sel.value + '&level=' + document.getElementById('level').value + '&seed=' + (newSeed ? Math.floor(Math.random() * 1e6) : seed); location.search = u; }
+  function go(newSeed) { var u = '?id=' + sel.value + '&level=' + document.getElementById('level').value + '&seed=' + (newSeed ? Math.floor(Math.random() * 1e9) : seed); location.search = u; }
+  function freshSeed() {
+    var next = 0;
+    try { var a = new Uint32Array(1); crypto.getRandomValues(a); next = a[0] % 1000000000; }
+    catch (e) { next = (Date.now() + Math.floor(Math.random() * 1000000)) % 1000000000; }
+    if (next === seed) next = (next + 104729) % 1000000000;
+    return next;
+  }
+  function randomizeSheet() {
+    seed = freshSeed();
+    history.replaceState(null, '', '?id=' + id + '&level=' + level + '&seed=' + seed);
+    render();
+  }
   sel.onchange = function () { go(false); }; document.getElementById('level').onchange = function () { go(false); };
-  document.getElementById('again').onclick = function () { go(true); };
+  document.getElementById('again').onclick = randomizeSheet;
   document.getElementById('withAns').onchange = render;
   document.getElementById('print').onclick = function () { var im = [].slice.call(document.images).filter(function (i) { return !i.complete; }); Promise.all(im.map(function (i) { return new Promise(function (r) { i.onload = i.onerror = r; }); })).then(function () { window.print(); }); };
   document.getElementById('back').href = '../play/?id=' + id + '&level=' + level;
