@@ -97,7 +97,7 @@
       e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, '🏟️', 'sp-star-img');
       mapEl.appendChild(e);
       if (view3d && model(s.model)) {
-        view3d.add(model(s.model), e, { box: e.querySelector('.sp-star-img'), spin: s.spin == null ? .18 : s.spin, yaw: .55 + i, tilt: .42, dist: 1.8, dy: -.04, glow: hex(s.color) });
+        view3d.add(model(s.model), e, { box: e.querySelector('.sp-star-img'), spin: s.spin == null ? .14 : s.spin, yaw: s.yaw == null ? .25 + i : s.yaw, tilt: s.tilt == null ? .36 : s.tilt, dist: s.dist || 2.05, dy: -.03, glow: hex(s.color) });
       }
     });
     /* 다른 게임 별: 누르면 우주선 타고 날아가서 그 게임으로 */
