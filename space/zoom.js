@@ -27,8 +27,12 @@ window.OKS_ZOOM = (function () {
     over = E('div', 'sp-zover'); over.hidden = true;
     markOur = E('button', 'sp-zmark our', '<i></i><span>✨ 우리 별 마을</span>'); markOur.type = 'button'; markOur.setAttribute('aria-label', '우리 별 마을로 가까이 가기');
     markOur.onclick = function () { O.sfx('pop'); stopIntro(); selectSystem('our', true); };
-    markSsing = E('button', 'sp-zmark ssing', '<i></i><span>🏃 씽씽 별 마을<small>체육 · 놀이 · 곧 만나요</small></span>'); markSsing.type = 'button'; markSsing.setAttribute('aria-label', '씽씽 별 마을 가까이 보기, 곧 만나요');
-    markSsing.onclick = function () { O.sfx('pop'); stopIntro(); selectSystem('ssing', true); };
+    markSsing = E('button', 'sp-zmark ssing', '<i></i><span>🏃 씽씽 별 마을<small>체육 · 놀이 · 하계 스포츠</small></span>'); markSsing.type = 'button'; markSsing.setAttribute('aria-label', '씽씽 별 마을로 가까이 가기');
+    markSsing.onclick = function () {
+      O.sfx('pop'); stopIntro();
+      if (focus === 'ssing' && z >= .82) { location.href = '../sports/'; return; }
+      selectSystem('ssing', true);
+    };
     galLab = E('div', 'sp-zgal', '🌌 옥쌤 은하');
     hint = E('div', 'sp-zhint', '마우스 휠이나 두 손가락으로 원하는 별 마을에 가까이 가요'); hint.hidden = true;
     over.appendChild(markOur); over.appendChild(markSsing); over.appendChild(galLab); over.appendChild(hint);
