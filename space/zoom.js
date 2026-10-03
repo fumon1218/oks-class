@@ -77,7 +77,7 @@ window.OKS_ZOOM = (function () {
   }
   function scr(wx, wy) { return { x: vw / 2 + (wx - V.x) * z, y: vh / 2 + (wy - V.y) * z }; }
   function ssingWorld() {
-    var e = mapEl && mapEl.querySelector('.system-ssing');
+    var e = mapEl && mapEl.querySelector('.sp-system-ssing');
     if (!e) return { x: SW * .22, y: SH * .56 };
     return { x: parseFloat(e.style.left || '22') * SW / 100, y: parseFloat(e.style.top || '56') * SH / 100 };
   }
@@ -120,6 +120,7 @@ window.OKS_ZOOM = (function () {
     markOur.style.setProperty('--s', Math.max(18, SW * z * .55).toFixed(1) + 'px');
     markSsing.style.setProperty('--s', Math.max(18, SW * z * .48).toFixed(1) + 'px');
     mapEl.style.setProperty('--ssing-visible', (z < .72 || focus === 'ssing') ? '1' : '0');
+    mapEl.style.setProperty('--our-visible', (z < .72 || focus === 'our') ? '1' : '0');
     var gp = scr(G0.x + GW / 2, G0.y + GH * .9); galLab.style.left = gp.x + 'px'; galLab.style.top = Math.min(vh - 60, gp.y) + 'px';
     galLab.style.opacity = cl((ZG * 2.4 - z) / (ZG * 1.4), 0, 1).toFixed(3);
     /* 단계 표시 */
