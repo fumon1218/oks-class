@@ -115,8 +115,12 @@ window.OKS_ZOOM = (function () {
     /* 행성계 이름표 — 먼 은하에서는 두 마을을 함께 보여 줍니다 */
     var mO = cl((.56 - z) / .24, 0, 1) * cl((z - ZD * 1.1) / (ZG * .8 - ZD * 1.1), 0, 1);
     var cp = scr(C.x, C.y), sw = ssingWorld(), sp = scr(sw.x, sw.y);
-    markOur.style.left = cp.x + 'px'; markOur.style.top = cp.y + 'px'; markOur.style.opacity = mO.toFixed(3); markOur.style.pointerEvents = mO > .3 ? 'auto' : 'none';
-    markSsing.style.left = sp.x + 'px'; markSsing.style.top = sp.y + 'px'; markSsing.style.opacity = mO.toFixed(3); markSsing.style.pointerEvents = mO > .3 ? 'auto' : 'none';
+    /* 은하계 단계에서는 두 행성계 라벨이 서로 겹치지 않도록 화면 좌우로 충분히 벌립니다.
+       가까이 갈수록 실제 3D 행성계 위치로 자연스럽게 되돌아갑니다. */
+    var sep = ease(cl((.62 - z) / .24, 0, 1));
+    var ourX = lerp(cp.x, vw * .78, sep), ssingX = lerp(sp.x, vw * .20, sep);
+    markOur.style.left = ourX + 'px'; markOur.style.top = cp.y + 'px'; markOur.style.opacity = mO.toFixed(3); markOur.style.pointerEvents = mO > .3 ? 'auto' : 'none';
+    markSsing.style.left = ssingX + 'px'; markSsing.style.top = sp.y + 'px'; markSsing.style.opacity = mO.toFixed(3); markSsing.style.pointerEvents = mO > .3 ? 'auto' : 'none';
     markOur.style.setProperty('--s', Math.max(18, SW * z * .55).toFixed(1) + 'px');
     markSsing.style.setProperty('--s', Math.max(18, SW * z * .48).toFixed(1) + 'px');
     mapEl.style.setProperty('--ssing-visible', (z < .72 || focus === 'ssing') ? '1' : '0');
