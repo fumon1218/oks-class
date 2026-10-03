@@ -181,8 +181,26 @@ body.portrait .sp-guide img{width:84px;}
 .sp-system .sp-star-img{filter:drop-shadow(0 18px 30px rgba(10,5,40,.58));}
 .sp-system .sp-star-name{margin-top:-3%;}
 .sp-map.focus-ssing > .sp-star:not(.sp-system){display:none;}
-.sp-map.focus-ssing > .sp-system{pointer-events:auto;cursor:grab;touch-action:none;}
+/* 씽씽 별 마을에 가까이 들어오면 행성을 화면/무대 정중앙에 놓습니다. */
+.sp-map.focus-ssing > .sp-system{
+  left:50%!important;top:50%!important;
+  pointer-events:auto;cursor:grab;touch-action:none;
+  transition:left .45s ease,top .45s ease,opacity .35s ease;
+}
 .sp-map.focus-ssing > .sp-system:active{cursor:grabbing;}
+/* 기존 별들과 동일한 이름+교과 캡슐 UI를 씽씽 별 마을에서도 항상 또렷하게 표시 */
+.sp-map.focus-ssing > .sp-system .sp-star-name{
+  opacity:1!important;
+  display:inline-flex!important;
+  margin-top:-3%;
+  padding:6px 14px;
+  border-radius:999px;
+  background:rgba(20,14,55,.72);
+  border:2px solid color-mix(in srgb,var(--c) 70%,#fff);
+  box-shadow:0 0 18px color-mix(in srgb,var(--c) 45%,transparent);
+}
+.sp-map.focus-ssing > .sp-system .sp-star-name b{font-weight:400;font-size:clamp(18px,2.3vw,32px);}
+.sp-map.focus-ssing > .sp-system .sp-star-name i{font-style:normal;font-size:clamp(12px,1.2vw,16px);padding:2px 9px;border-radius:999px;background:var(--c);color:#1c1440;}
 .sp-map.focus-our > .sp-system{display:none;}
 
 /* ---------- 우주 줌 (먼 우주 → 은하 → 별 무리 → 가까이) ---------- */
