@@ -187,6 +187,9 @@ body.portrait .sp-guide img{width:84px;}
   transition:opacity .35s ease;
 }
 .sp-map.focus-ssing > .sp-system:active{cursor:grabbing;}
+.sp-system-enter{display:none;position:relative;z-index:5;margin-top:8px;padding:8px 16px;border-radius:999px;background:#fff0b8;border:2px solid #ffd45d;color:#5c4200;text-decoration:none;font-size:clamp(14px,1.25vw,18px);box-shadow:0 5px 14px rgba(30,30,90,.25);white-space:nowrap}
+.sp-map.focus-ssing > .sp-system .sp-system-enter{display:inline-flex;align-items:center;justify-content:center}
+.sp-system-enter:active{transform:translateY(2px) scale(.98)}
 /* 기존 별들과 동일한 이름+교과 캡슐 UI를 씽씽 별 마을에서도 항상 또렷하게 표시 */
 .sp-map.focus-ssing > .sp-system .sp-star-name{
   opacity:1!important;
