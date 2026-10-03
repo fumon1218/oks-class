@@ -19,16 +19,20 @@
   try { sessionStorage.removeItem('oks_return'); } catch (e) {}
   var SHOPS_OF = window.OKS_SHOP_BY_LESSON || function () { return []; };
 
+  function validSchools() { return D.schools.filter(function (x) { return D.lessons.some(function (l) { return l.subject === subject && l.school === x.key; }); }); }
+  function ensureSchool() { var vs = validSchools(); if (vs.length && !vs.some(function (x) { return x.key === school; })) school = vs[0].key; }
+
   function renderTabs() {
+    ensureSchool();
     var s = document.getElementById('subjects'); s.innerHTML = '';
     D.subjects.forEach(function (x) {
       var b = E('button', 'subj' + (x.key === subject ? ' on' : ''), '<span class="ic">' + SUBJ[x.key].emo + '</span><b>' + x.name + '</b>');
       b.type = 'button'; b.style.setProperty('--c', SUBJ[x.key].color);
-      b.onclick = function () { subject = x.key; save(); render(); O.say(x.name, { noRepeat: true }); };
+      b.onclick = function () { subject = x.key; ensureSchool(); save(); render(); O.say(x.name, { noRepeat: true }); };
       s.appendChild(b);
     });
     var sc = document.getElementById('schools'); sc.innerHTML = '';
-    D.schools.forEach(function (x) {
+    validSchools().forEach(function (x) {
       var ready = D.lessons.filter(function (l) { return l.subject === subject && l.school === x.key && C[l.id]; }).length;
       var b = E('button', 'sch' + (x.key === school ? ' on' : ''), x.name + (ready ? ' <small>게임 ' + ready + '</small>' : ' <small>계획</small>'));
       b.type = 'button'; b.onclick = function () { school = x.key; save(); render(); };
@@ -41,6 +45,7 @@
     var s = ''; for (var i = 1; i <= 5; i++) { var v = best && best[i] || 0; s += v ? '★' : '·'; } return s;
   }
   function render() {
+    ensureSchool();
     renderTabs();
     var main = document.getElementById('main'); main.innerHTML = '';
     var list = D.lessons.filter(function (l) { return l.subject === subject && l.school === school; });
