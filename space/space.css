@@ -169,6 +169,13 @@ body.portrait .sp-guide img{width:84px;}
 .sp-star.link .sp-star-name{border-style:dashed;}
 .sp-star.link .sp-fallback{display:grid;place-items:center;aspect-ratio:1;font-size:clamp(40px,6vw,90px);background:radial-gradient(circle,var(--c) 0%,transparent 70%);border-radius:50%;}
 
+/* 곧 열릴 별: 기존 별 UI를 유지하되 접속은 잠가 둡니다 */
+.sp-star.soon:disabled{opacity:1;color:#fff;}
+.sp-star.soon,.sp-star.soon.is-3d{cursor:default;}
+.sp-star.soon .sp-star-name{border-style:dashed;background:rgba(20,14,55,.78);}
+.sp-star.soon .sp-soon-chip{background:#fff3c4;color:#5a4212;border:1px solid #ffd86a;box-shadow:0 0 12px rgba(255,216,106,.38);}
+.sp-star.soon:hover .sp-star-img,.sp-star.soon:focus-visible .sp-star-img{transform:none;}
+
 /* ---------- 우주 줌 (먼 우주 → 은하 → 별 무리 → 가까이) ---------- */
 body.sp-zooming .sp-scroll{overflow:hidden;touch-action:none;cursor:grab;}
 body.sp-zooming .sp-scroll:active{cursor:grabbing;}
