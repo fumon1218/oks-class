@@ -9,9 +9,9 @@ PAGES = [
     './', './index.html', './classic.html', './manifest.json',
     './space/space.css', './core/oks-3d.js', './art/3d/models.js', './space/space.js', './space/zoom.js', './space/data.js', './art/art-ready.js',
     './learn/', './learn/index.html', './learn/learn.css', './learn/learn.js',
-    './play/', './play/index.html', './play/play.css', './play/play.js', './play/content.js', './play/content2.js', './play/content-extra.js', './play/custom.js', './play/scenes.js', './curriculum/editor.html', './play/describe.js', './curriculum/plan.html',
+    './play/', './play/index.html', './play/play.css', './play/play.js', './play/content.js', './play/content2.js', './play/content-extra.js', './play/english-basic-content.js', './play/english-basic-engine.js', './play/custom.js', './play/scenes.js', './curriculum/editor.html', './play/describe.js', './curriculum/plan.html',
     './play/engines.js', './play/engines2.js', './play/farm.js',
-    './core/oks-core.css', './core/oks-core.js', './core/oks-kit.js', './core/oks-eco.js', './curriculum/lessons.js',
+    './core/oks-core.css', './core/oks-core.js', './core/oks-kit.js', './core/oks-eco.js', './curriculum/lessons.js', './curriculum/english-basic.js',
     './shop/', './shop/index.html', './shop/shop.css', './shop/shop.js', './shop/shops.js', './shop/stations.js',
     './town/', './town/index.html', './town/town.css', './town/town.js', './town/cc.webp', './town/wj.webp',
     './games/farm/index.html', './games/birds/index.html', './games/shapes/index.html', './games/fishing/index.html', './games/balloons/index.html', './games/tycoon/index.html', './games/tycoon/town.js', './games/tycoon/town2.js', './games/tycoon/delivery.js', './worksheet/index.html', './worksheet/generic.js', './minigames/farm-v8/index.html',
@@ -21,7 +21,7 @@ PAGES = [
     './quests/index.html', './curriculum/teacher-guide.html', './curriculum/reports.html',
 ]
 files = []
-for pat in ['core/ui/*.webp', 'art/scene/*.webp', 'art/space/*.webp', 'space/img/*.webp', 'art/3d/*.glb', 'art/build/*.webp', 'art/char/*.webp', 'art/obj/*.webp', 'art/act/*.webp', 'art/people/*.webp', 'art/avatar/*.webp', 'games/farm/assets/*.webp', 'games/birds/img/*.webp', 'games/shapes/img/*.webp', 'games/fishing/img/*.webp', 'games/balloons/img/*.webp', 'games/tycoon/img/*.webp', 'games/tycoon/img/drone/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
+for pat in ['core/ui/*.webp', 'core/ui/*.png', 'art/scene/*.webp', 'art/space/*.webp', 'space/img/*.webp', 'art/3d/*.glb', 'art/build/*.webp', 'art/char/*.webp', 'art/obj/*.webp', 'art/act/*.webp', 'art/people/*.webp', 'art/avatar/*.webp', 'games/farm/assets/*.webp', 'games/birds/img/*.webp', 'games/shapes/img/*.webp', 'games/fishing/img/*.webp', 'games/balloons/img/*.webp', 'games/tycoon/img/*.webp', 'games/tycoon/img/drone/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
     files += sorted(glob.glob(pat))
 assets = [p for p in PAGES if p.endswith('/') or os.path.exists(p)] + ['./' + f for f in files]
 src = open('sw.js', encoding='utf-8').read()
