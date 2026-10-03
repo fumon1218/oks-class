@@ -183,9 +183,8 @@ body.portrait .sp-guide img{width:84px;}
 .sp-map.focus-ssing > .sp-star:not(.sp-system){display:none;}
 /* 씽씽 별 마을에 가까이 들어오면 행성을 화면/무대 정중앙에 놓습니다. */
 .sp-map.focus-ssing > .sp-system{
-  left:50%!important;top:50%!important;
   pointer-events:auto;cursor:grab;touch-action:none;
-  transition:left .45s ease,top .45s ease,opacity .35s ease;
+  transition:opacity .35s ease;
 }
 .sp-map.focus-ssing > .sp-system:active{cursor:grabbing;}
 /* 기존 별들과 동일한 이름+교과 캡슐 UI를 씽씽 별 마을에서도 항상 또렷하게 표시 */
