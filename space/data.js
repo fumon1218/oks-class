@@ -20,10 +20,10 @@
     { id: 'farm', model: 'star_farm', name: '햇살 농장', short: '햇살 농장', img: 'star_farm', land: 'land_farm', guide: 'robot_wave', guideName: '별빛이',
       subjects: ['math', 'science'], color: '#e8a24a', hello: '햇살 농장이에요! 씨앗을 심고, 세고, 키워 봐요.',
       map: { x: 20, y: 78, w: 13 }, mapP: { x: 24, y: 64.8, w: 28 } },
-    { id: 'ssing', model: 'star_ssing', name: '씽씽별', short: '씽씽별', img: 'star_ssing', emo: '🏃',
+    { id: 'ssing', system: 'ssing', model: 'star_ssing', name: '씽씽 별 마을', short: '씽씽 별 마을', img: 'star_ssing', emo: '🏃',
       subjects: [], chips: ['체육', '놀이'], color: '#55cfff', soon: true, spin: .18,
-      hello: '씽씽별은 체육과 놀이를 배우는 새로운 별이에요.',
-      map: { x: 8, y: 54, w: 16 }, mapP: { x: 50, y: 108, w: 30 } }
+      hello: '씽씽 별 마을은 체육과 놀이를 배우는 새로운 행성계예요.',
+      map: { x: 16, y: 56, w: 18 }, mapP: { x: 22, y: 36, w: 34 } }
   ];
   /* 아직 태어나지 않은 별 (업데이트되면 새 교과·심화 단원으로) */
   /* 다른 게임으로 가는 별 (우주선 타고 날아가서 그 게임으로) */
