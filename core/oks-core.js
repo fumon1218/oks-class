@@ -25,6 +25,9 @@
   function pick(a, n) { return shuffle(a).slice(0, n == null ? 1 : n); }
   function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function iconHtml(file, label, cls) {
+    return '<span class="oks-icon-label' + (label ? '' : ' only') + (cls ? ' ' + cls : '') + '"><img class="oks-ico" src="' + UI + file + '" alt="">' + (label ? '<span class="txt">' + esc(label) + '</span>' : '') + '</span>';
+  }
 
   /* ---------- 설정 ---------- */
   function settings() {
@@ -190,7 +193,7 @@
       timers.push(setTimeout(doHand, p[1] * 1000 * (t.slow || 1)));
     }
   }
-  function help() { /* 🙋 도와줘: 반짝임 → 한 번 더 누르면 손가락 */
+  function help() { /* 도와줘: 반짝임 → 한 번 더 누르면 손가락 */
     if (!curTarget) { repeat(); return; }
     if (stats) stats.asked++;
     if (!glowEls.length) { doGlow(); repeat(); } else doHand();
@@ -205,15 +208,15 @@
     document.body.classList.add('oks');
     var app = el('div', 'oks-app');
     var top = el('div', 'oks-top');
-    var back = el('a', 'oks-pill', '⬅ <span>' + esc(o.backLabel || '배움 지도') + '</span>'); back.href = o.back || (ROOT + 'learn/');
+    var back = el('a', 'oks-pill', iconHtml('icon_back.png', o.backLabel || '배움 지도')); back.href = o.back || (ROOT + 'learn/');
     var title = el('div', 'oks-title', '<b>' + esc(o.title) + '</b>' + (o.subtitle ? '<span>' + esc(o.subtitle) + '</span>' : ''));
     var lvl = el('button', 'oks-pill oks-level', ''); lvl.type = 'button';
     var dots = el('div', 'oks-dots');
-    var speak = el('button', 'oks-round', '<img src="' + UI + 'speaker.webp" alt="다시 듣기">'); speak.type = 'button'; speak.title = '다시 듣기';
-    var helpBtn = el('button', 'oks-pill oks-help', '🙋 도와줘'); helpBtn.type = 'button';
+    var speak = el('button', 'oks-round', iconHtml('icon_replay_audio.png', '')); speak.type = 'button'; speak.title = '다시 듣기';
+    var helpBtn = el('button', 'oks-pill oks-help', iconHtml('icon_help.png', '도와줘')); helpBtn.type = 'button';
     /* 설명 읽어 주기 켜고 끄기 (선생님·학생이 고를 수 있게, 기기에 저장) */
     var exBtn = el('button', 'oks-pill oks-explain', ''); exBtn.type = 'button';
-    function exShow() { var on = settings().explain; exBtn.innerHTML = on ? '🗣️ <span>설명 켬</span>' : '🔇 <span>설명 끔</span>'; exBtn.setAttribute('aria-pressed', on); exBtn.title = on ? '문제 설명을 읽어 줘요 (누르면 꺼져요)' : '문제 설명을 읽지 않아요 (누르면 켜져요)'; exBtn.classList.toggle('off', !on); }
+    function exShow() { var on = settings().explain; exBtn.innerHTML = iconHtml('icon_listen.png', on ? '설명 켬' : '설명 끔'); exBtn.setAttribute('aria-pressed', on); exBtn.title = on ? '문제 설명을 읽어 줘요 (누르면 꺼져요)' : '문제 설명을 읽지 않아요 (누르면 켜져요)'; exBtn.classList.toggle('off', !on); }
     exShow();
     exBtn.onclick = function () { var on = !settings().explain; saveSetting('explain', on); if (!on) hush(); exShow(); toast(on ? '설명을 읽어 줄게요' : '설명을 읽지 않아요. 🔊를 누르면 들을 수 있어요', 1800); };
     var menu = null, moreBtn = null;
@@ -358,7 +361,7 @@
     if (global.OKS.eco && !o.noReward) { /* 코인·경험치 */
       var rc = (o.coins != null ? o.coins : 3 + stars * 3) + (o.extraCoins || 0), rx = o.xp != null ? o.xp : 10 + (entry.level || 1) * 4 + stars * 3;
       global.OKS.eco.reward({ coins: rc, xp: rx, mission: o.mission || { lesson: 1 }, badge: [o.badge || 'first_lesson'].concat(entry.level === 5 && stars === 3 ? ['star5'] : []), delay: 900 });
-      box.querySelector('.stars').insertAdjacentHTML('afterend', '<div class="eco-gain">🪙 +' + rc + ' · ⭐ 경험치 +' + rx + '</div>');
+      box.querySelector('.stars').insertAdjacentHTML('afterend', '<div class="eco-gain"><img class="oks-eco-icon" src="' + UI + 'icon_reward.png" alt=""> +' + rc + ' · <img class="oks-eco-icon" src="' + UI + 'icon_star.png" alt=""> 경험치 +' + rx + '</div>');
     }
     var btns = box.querySelector('.btns');
     (o.buttons || []).forEach(function (b) {
@@ -375,7 +378,7 @@
 
   global.OKS = {
     ROOT: ROOT, UI: UI, LEVELS: LEVELS, PROMPT: PROMPT, NOTE: NOTE,
-    jget: jget, jset: jset, qs: qs, el: el, esc: esc, shuffle: shuffle, pick: pick, wait: wait,
+    jget: jget, jset: jset, qs: qs, el: el, esc: esc, iconHtml: iconHtml, shuffle: shuffle, pick: pick, wait: wait,
     settings: settings, saveSetting: saveSetting, levelFor: levelFor, rememberLevel: rememberLevel, applyBody: applyBody, ret: ret, fromSpace: fromSpace,
     say: say, repeat: repeat, setReplay: setReplay, hush: hush, sfx: sfx, tone: tone, noise: noise, inst: inst, unlock: actx,
     target: target, clearPrompt: clearPrompt, help: help, showNow: showNow,
