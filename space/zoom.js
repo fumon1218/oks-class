@@ -86,7 +86,10 @@ window.OKS_ZOOM = (function () {
     if (!e) return { x: SW * .22, y: SH * .56 };
     return { x: parseFloat(e.style.left || '22') * SW / 100, y: parseFloat(e.style.top || '56') * SH / 100 };
   }
-  function focusWorld() { return focus === 'ssing' ? ssingWorld() : C; }
+  function focusWorld() {
+    /* 씽씽 별 마을에 들어오면 3D 객체 자체를 중앙으로 옮기므로 카메라도 무대 정중앙을 바라봅니다. */
+    return C;
+  }
   function chooseFocusAt(x, y) {
     var a = scr(C.x, C.y), s = scr(ssingWorld().x, ssingWorld().y);
     var da = Math.hypot(x - a.x, y - a.y), ds = Math.hypot(x - s.x, y - s.y);
