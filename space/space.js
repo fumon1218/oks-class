@@ -97,8 +97,14 @@
       var chips = (s.chips || []).map(function (k) { return '<i>' + O.esc(k) + '</i>'; }).join('');
       if (s.soon) chips += '<i class="sp-soon-chip">곧 만나요</i>';
       e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, '🏟️', 'sp-star-img') +
-        '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>';
+        '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>' +
+        (s.id === 'ssing' && !s.soon ? '<a class="sp-system-enter" href="../sports/">☀️ 하계 스포츠 시작</a>' : '');
       mapEl.appendChild(e);
+      var enter = e.querySelector('.sp-system-enter');
+      if (enter) {
+        enter.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); });
+        enter.addEventListener('click', function (ev) { ev.stopPropagation(); O.unlock && O.unlock(); O.sfx('pop'); });
+      }
       if (view3d && model(s.model)) {
         /* 우리 별 마을의 3D 별과 같은 map 모드: 마우스/한 손가락으로 직접 360° 회전 */
         view3d.add(model(s.model), e, { box: e.querySelector('.sp-star-img'), spin: s.spin == null ? .14 : s.spin, yaw: s.yaw == null ? .25 + i : s.yaw, tilt: s.tilt == null ? .36 : s.tilt, dist: s.dist || 2.05, dy: -.03, glow: hex(s.color), mode: 'map' });
