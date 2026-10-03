@@ -175,6 +175,7 @@ body.portrait .sp-guide img{width:84px;}
 .sp-star.soon .sp-star-name{border-style:dashed;background:rgba(20,14,55,.78);}
 .sp-star.soon .sp-soon-chip{background:#fff3c4;color:#5a4212;border:1px solid #ffd86a;box-shadow:0 0 12px rgba(255,216,106,.38);}
 .sp-star.soon:hover .sp-star-img,.sp-star.soon:focus-visible .sp-star-img{transform:none;}
+.sp-star.system-ssing{opacity:var(--ssing-visible,0);transition:opacity .35s ease;pointer-events:none;}
 
 /* ---------- 우주 줌 (먼 우주 → 은하 → 별 무리 → 가까이) ---------- */
 body.sp-zooming .sp-scroll{overflow:hidden;touch-action:none;cursor:grab;}
@@ -191,6 +192,9 @@ body.sp-zooming .sp-stage{transform-origin:0 0;}
 .sp-zmark i{display:block;width:var(--s,40px);height:var(--s,40px);max-width:60vmin;max-height:60vmin;border-radius:50%;
   background:radial-gradient(circle,rgba(255,245,210,.9) 0%,rgba(255,200,240,.45) 30%,rgba(170,140,255,.18) 55%,transparent 72%);animation:sp-glow 3s ease-in-out infinite;}
 .sp-zmark span{margin-top:-14px;padding:5px 14px;border-radius:999px;background:rgba(20,14,55,.78);border:2px solid #ffd76a;box-shadow:0 0 18px rgba(255,215,106,.5);font-size:clamp(15px,1.6vw,20px);white-space:nowrap;}
+.sp-zmark span small{display:block;margin-top:2px;font-size:.66em;line-height:1.1;opacity:.9;font-weight:400;}
+.sp-zmark.ssing span{border-color:#72dcff;box-shadow:0 0 18px rgba(114,220,255,.48);}
+.sp-zmark.ssing i{background:radial-gradient(circle,rgba(205,255,250,.95) 0%,rgba(85,207,255,.45) 30%,rgba(100,160,255,.18) 55%,transparent 72%);}
 .sp-zgal{position:absolute;transform:translate(-50%,0);padding:6px 16px;border-radius:999px;background:rgba(20,14,55,.7);border:2px solid #b9a4ff;color:#fff;font-size:clamp(16px,1.8vw,24px);white-space:nowrap;box-shadow:0 0 20px rgba(185,164,255,.45);}
 .sp-zhint{position:absolute;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:8px 18px;border-radius:999px;background:rgba(255,253,246,.92);color:#2a2060;font-size:clamp(15px,1.5vw,19px);animation:sp-fade .6s;}
 .sp-zhint[hidden]{display:none;}
