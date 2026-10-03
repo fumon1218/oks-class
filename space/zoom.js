@@ -72,7 +72,12 @@ window.OKS_ZOOM = (function () {
   }
   function clampV() {
     var hx = vw / 2 / z, hy = vh / 2 / z;
-    V.x = SW * z <= vw ? C.x : cl(V.x, hx, SW - hx);
+    if (focus === 'ssing' && autoFocus && z >= .72) {
+      /* 씽씽 별 마을은 우리 별 마을 왼쪽의 독립 행성계라서, 줌인할 때 화면 중앙까지 충분히 이동할 수 있게 여백을 허용 */
+      V.x = cl(V.x, SW * .06, SW - hx);
+    } else {
+      V.x = SW * z <= vw ? C.x : cl(V.x, hx, SW - hx);
+    }
     V.y = SH * z <= vh ? C.y : cl(V.y, hy, SH - hy);
   }
   function scr(wx, wy) { return { x: vw / 2 + (wx - V.x) * z, y: vh / 2 + (wy - V.y) * z }; }
@@ -89,7 +94,7 @@ window.OKS_ZOOM = (function () {
   }
   function selectSystem(name, direct) {
     focus = name === 'ssing' ? 'ssing' : 'our'; V1 = focusWorld(); autoFocus = true; anchor = null; home = false;
-    if (direct) zT = focus === 'ssing' ? 2.05 : 1;
+    if (direct) zT = focus === 'ssing' ? 1.85 : 1;
     else if (zT < 1) zT = 1;
     kick();
   }
