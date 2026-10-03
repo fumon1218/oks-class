@@ -16,3 +16,5 @@ jobs:
           node-version: '22'
       - name: Check HTML scripts, assets and curriculum links
         run: node scripts/smoke-test.mjs
+      - name: Check athletics lesson goals and records
+        run: node scripts/athletics-test.mjs

@@ -8,6 +8,7 @@ os.chdir(ROOT)
 PAGES = [
     './', './index.html', './classic.html', './manifest.json',
     './space/space.css', './core/oks-3d.js', './art/3d/models.js', './space/space.js', './space/zoom.js', './space/data.js', './art/art-ready.js',
+    './sports/', './sports/index.html', './sports/sports.css', './sports/sports.js', './sports/curriculum.js', './sports/worksheet.html', './sports/athletics.js', './sports/athletics.css',
     './learn/', './learn/index.html', './learn/learn.css', './learn/learn.js',
     './play/', './play/index.html', './play/play.css', './play/play.js', './play/content.js', './play/content2.js', './play/content-extra.js', './play/english-basic-content.js', './play/english-basic-engine.js', './play/custom.js', './play/scenes.js', './curriculum/editor.html', './play/describe.js', './curriculum/plan.html',
     './play/engines.js', './play/engines2.js', './play/farm.js',
@@ -20,7 +21,7 @@ PAGES = [
     './minigames/index.html', './minigames/art-tycoon.html', './minigames/packs.js',
     './quests/index.html', './curriculum/teacher-guide.html', './curriculum/reports.html',
 ]
-files = []
+files = sorted(glob.glob('sports/assets/**/*.webp', recursive=True))
 for pat in ['core/ui/*.webp', 'core/ui/*.png', 'art/scene/*.webp', 'art/space/*.webp', 'space/img/*.webp', 'art/3d/*.glb', 'art/build/*.webp', 'art/char/*.webp', 'art/obj/*.webp', 'art/act/*.webp', 'art/people/*.webp', 'art/avatar/*.webp', 'games/farm/assets/*.webp', 'games/birds/img/*.webp', 'games/shapes/img/*.webp', 'games/fishing/img/*.webp', 'games/balloons/img/*.webp', 'games/tycoon/img/*.webp', 'games/tycoon/img/drone/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
     files += sorted(glob.glob(pat))
 assets = [p for p in PAGES if p.endswith('/') or os.path.exists(p)] + ['./' + f for f in files]

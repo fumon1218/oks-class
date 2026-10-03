@@ -31,8 +31,8 @@ var SPORT_ITEMS={
 
 function byId(id){return D.sports.filter(function(s){return s.id===id})[0];}
 function schoolInfo(){return SCHOOLS.filter(function(x){return x.key===school})[0]||SCHOOLS[0];}
-function top(title,sub,back,label,compact){
- return O.shell({title:title,subtitle:sub,back:back||'../',backLabel:label||'뒤로',level:level,compact:compact!==false,fit:compact!==false});
+function top(title,sub,back,label,compact,fit){
+ return O.shell({title:title,subtitle:sub,back:back||'../',backLabel:label||'뒤로',level:level,compact:compact!==false,fit:fit==null?compact!==false:fit});
 }
 function tryBg(el,s){var im=new Image();im.onload=function(){el.classList.add('sports-bg');el.style.setProperty('--sport-bg',"url('"+s.image+"')")};im.src=s.image;}
 function progress(){try{return JSON.parse(localStorage.getItem('oks_sports_progress_v4')||'{}')}catch(e){return{}}}
@@ -41,6 +41,7 @@ function save(key,stars,mistakes){
  try{localStorage.setItem('oks_sports_progress_v4',JSON.stringify(p))}catch(e){}
 }
 function info(s,sk,no){
+ if(s.id==='athletics'&&window.OKS_ATHLETICS){var c=OKS_ATHLETICS.course(sk,no);return [c.title,c.goal]}
  var map={
  athletics:{
   elem:[['달리기 출발과 도착','출발선과 결승선을 알고 순서대로 움직여요.'],['달리기 준비와 안전','운동화와 준비운동 등 안전한 준비를 알아봐요.'],['나의 달리기 기록','출발 신호에 반응하고 기록을 살펴봐요.']],
@@ -135,9 +136,10 @@ function lessonRow(s,sk,no){
 function activity(){
  var s=byId(sid);if(!s){summerHub();return}
  var li=info(s,school,lessonNo),sc=schoolInfo();
- var sh=top(s.name+' '+lessonNo+'차시 · '+li[0],sc.name+' · 체육 · 놀이','?festival=summer&sport='+s.id+'&school='+school,s.name+' 목차',true);
+ var sh=top(s.name+' '+lessonNo+'차시 · '+li[0],sc.name+' · 체육 · 놀이','?festival=summer&sport='+s.id+'&school='+school,s.name+' 목차',true,s.id==='athletics'?false:undefined);
  if(s.id==='athletics') document.body.classList.add('athletics-game');
  document.body.classList.add('oks-play','sports-play');
+ if(s.id==='athletics'&&window.OKS_ATHLETICS){OKS_ATHLETICS.mount({sh:sh,school:school,lesson:lessonNo,level:level,save:function(stars,mistakes){save('athletics-'+school+'-'+lessonNo,stars,mistakes)}});return;}
  sh.setLevel(level);sh.setRounds(level===1?3:5,0);
  sh.ask(li[0]+'! 시작해 볼까요?',{silent:true});
 
@@ -190,17 +192,6 @@ function sceneStrip(s,i,n){
  return d;
 }
 function roundFor(s,li,ctx,host,i){
- if(s.id==='athletics'){
-   if(level===1)return athleticsExplore(ctx,host,i);
-   if(level===2)return athleticsChoose(ctx,host,i);
-   if(level===3){
-     if(i===0||i===3)return athleticsGearDrag(ctx,host,i);
-     if(i===2)return athleticsStartTiming(ctx,host);
-     return athleticsSequence(ctx,host,i);
-   }
-   if(level===4)return athleticsRace(ctx,host,i);
-   return athleticsLife(ctx,host,i);
- }
  if(level===1)return exploreRound(s,ctx,host,i);
  if(level===2)return chooseRound(s,ctx,host,i,2);
  if(level===3)return i%2===0?dragRound(s,ctx,host,i):sequenceRound(s,ctx,host,i);
@@ -213,98 +204,6 @@ function item(o){
   return {emo:v,label:o[1]};
 }
 function sportSet(s){return SPORT_ITEMS[s.id]||SPORT_ITEMS.athletics}
-function athleticsHero(path,label,cls){
- var w=E('div','ath-runner '+(cls||''));w.innerHTML='<img src="assets/athletics/'+path+'" alt="'+(label||'')+'">';return w;
-}
-function athleticsExplore(ctx,host,i){
- var stages=[
-  ['runner_idle.webp','달리기 선수를 만나 봐요.'],
-  ['runner_ready.webp','출발 준비 자세를 살펴봐요.'],
-  ['runner_run_a.webp','달리는 움직임을 살펴봐요.']
- ],x=stages[i%stages.length];
- ctx.sh.ask(x[1]);
- var hero=athleticsHero(x[0],x[1],'big');host.appendChild(hero);
- var b=E('button','oks-btn orange','눌러 보기');host.appendChild(b);ctx.target({get:function(){return b}});
- return new Promise(function(res){b.onclick=function(){hero.classList.add('bounce');O.sfx('pop');O.say(x[1],{noRepeat:true});ctx.good(b);setTimeout(res,900)}})
-}
-function athleticsChoose(ctx,host,i){
- var sets=[
-  {q:'달리기할 때 신기 좋은 것을 골라요.',ok:['outfit_sneakers.webp','운동화'],no:['outfit_sandals.webp','샌들']},
-  {q:'출발할 때 사용하는 것을 골라요.',ok:['start_block.webp','스타팅 블록'],no:['outfit_coat.webp','겨울 외투']},
-  {q:'출발 신호를 알려 주는 것을 골라요.',ok:['start_signal.webp','출발 신호'],no:['outfit_scarf.webp','목도리']}
- ],S=sets[i%sets.length];ctx.sh.ask(S.q);
- var arr=O.shuffle([S.ok,S.no]),cards=arr.map(function(x){return ctx.card({img:'assets/athletics/'+x[0],label:x[1]},{big:true})});host.appendChild(ctx.grid(cards,2));
- var ok=cards.filter(function(x){return x._item.label===S.ok[1]})[0];ctx.target({get:function(){return ok}});
- return ctx.tapWait(cards,function(x){return x===ok}).then(function(x){ctx.good(x);O.say(x._item.label,{noRepeat:true});return O.wait(800)})
-}
-function athleticsGearDrag(ctx,host,i){
- var sets=[
-  {q:'달리기할 때 필요한 운동화를 준비 구역으로 옮겨요.',ok:['outfit_sneakers.webp','운동화'],no:['outfit_sandals.webp','샌들']},
-  {q:'출발할 때 사용하는 스타팅 블록을 옮겨요.',ok:['start_block.webp','스타팅 블록'],no:['outfit_coat.webp','겨울 외투']}
- ],S=sets[(i===3?1:0)];
- ctx.sh.ask(S.q);
- var row=E('div','sports-drag-row'),zone=E('div','sports-dropzone athletics-zone','<img src="assets/athletics/runner_ready.webp" alt=""><span>준비 구역</span>');
- var items=[ctx.card({img:'assets/athletics/'+S.ok[0],label:S.ok[1]},{big:true}),ctx.card({img:'assets/athletics/'+S.no[0],label:S.no[1]},{big:true})];
- row.appendChild(ctx.grid(O.shuffle(items),2));row.appendChild(zone);host.appendChild(row);
- ctx.target({get:function(){return items.filter(function(x){return x._item.label===S.ok[1]})[0]},to:function(){return zone}});
- return ctx.dnd(items,[zone],function(it){return it._item.label===S.ok[1]},function(it){
-   ctx.good(it);zone.innerHTML='<div class="ath-zone-done">'+it.innerHTML+'<strong>준비 완료!</strong></div>';
- },function(){return items.some(function(x){return x._done&&x._item.label===S.ok[1]})}).then(function(){return O.wait(850)});
-}
-function athleticsStartTiming(ctx,host){
- ctx.sh.ask('초록 신호가 나오면 빠르게 출발 버튼을 눌러요.');
- var wrap=E('div','ath-start-challenge');
- wrap.innerHTML='<img class="ath-ready-runner" src="assets/athletics/runner_ready.webp" alt=""><img class="ath-signal big" src="assets/athletics/start_signal.webp" alt=""><div class="ath-start-msg">준비…</div>';
- var b=E('button','oks-btn orange','기다려요');b.disabled=true;wrap.appendChild(b);host.appendChild(wrap);
- return new Promise(function(res){setTimeout(function(){
-   var t=performance.now();wrap.querySelector('.ath-start-msg').textContent='출발!';b.disabled=false;b.textContent='달리기 시작';ctx.target({get:function(){return b}});
-   b.onclick=function(){var ms=Math.round(performance.now()-t);wrap.querySelector('.ath-ready-runner').src='assets/athletics/runner_run_a.webp';wrap.querySelector('.ath-start-msg').innerHTML='반응 시간 <b>'+ms+'ms</b>';ctx.good(b);setTimeout(res,900)}
- },750+Math.random()*850)});
-}
-function athleticsSequence(ctx,host,i){
- ctx.sh.ask('출발부터 결승까지 순서대로 눌러 보세요.');
- var seq=[
-  ['runner_ready.webp','출발 준비'],
-  ['runner_run_a.webp','달리기'],
-  ['runner_celebrate.webp','결승']
- ],order=O.shuffle(seq.slice()),cards=order.map(function(x){return ctx.card({img:'assets/athletics/'+x[0],label:x[1]})}),k=0;
- host.appendChild(ctx.grid(cards,3));ctx.target({get:function(){return cards.filter(function(c){return c._item.label===seq[k][1]})}});
- return new Promise(function(res){cards.forEach(function(c){c.onclick=function(){if(c._item.label===seq[k][1]){c.classList.add('good');c._done=true;O.sfx('tick');k++;if(k===seq.length){O.praise();setTimeout(res,900)}else ctx.target({get:function(){return cards.filter(function(x){return!x._done&&x._item.label===seq[k][1]})}})}else ctx.bad(c)}})})
-}
-function athleticsRace(ctx,host,i){
- ctx.sh.ask(i===0?'신호가 초록색이 되면 출발해요.':i===3?'허들이 나오면 점프해요.':'왼쪽과 오른쪽을 번갈아 눌러 달려요.');
- var game=E('div','ath-race');
- game.innerHTML='<div class="ath-track"><div class="ath-finish"><img src="assets/athletics/finish_ribbon.webp" alt=""></div><div class="ath-player"><img src="assets/athletics/runner_ready.webp" alt=""></div><div class="ath-hurdle '+(i===3?'show':'')+'"><img src="assets/athletics/runner_hurdle.webp" alt=""></div></div><div class="ath-controls"></div>';
- host.appendChild(game);var player=game.querySelector('.ath-player'),ctrl=game.querySelector('.ath-controls'),progress=0,last='';
- if(i===0){
-   var sig=E('img','ath-signal');sig.src='assets/athletics/start_signal.webp';ctrl.appendChild(sig);
-   var go=E('button','oks-btn orange','기다려요');go.disabled=true;ctrl.appendChild(go);
-   return new Promise(function(res){setTimeout(function(){go.disabled=false;go.textContent='출발!';player.querySelector('img').src='assets/athletics/runner_run_a.webp';ctx.target({get:function(){return go}});go.onclick=function(){ctx.good(go);player.style.left='75%';setTimeout(res,1000)}},700+Math.random()*900)})
- }
- if(i===3){
-   var jump=E('button','oks-btn orange','점프!');ctrl.appendChild(jump);ctx.target({get:function(){return jump}});
-   return new Promise(function(res){jump.onclick=function(){player.querySelector('img').src='assets/athletics/runner_hurdle.webp';player.classList.add('jump');ctx.good(jump);setTimeout(res,1000)}})
- }
- var l=E('button','ath-foot','왼발'),r=E('button','ath-foot','오른발');ctrl.appendChild(l);ctrl.appendChild(r);
- return new Promise(function(res){
-   function tap(side,b){if(side===last){ctx.bad(b);return}last=side;progress++;player.querySelector('img').src=progress%2?'assets/athletics/runner_run_a.webp':'assets/athletics/runner_run_b.webp';player.style.left=(8+progress*8)+'%';O.sfx('tick');if(progress>=10){ctx.good(b);player.style.left='78%';player.querySelector('img').src='assets/athletics/runner_celebrate.webp';if(i===4){var rec=athleticsRecord();var t=Date.now();rec.finishes=(rec.finishes||0)+1;rec.last=t;saveAthleticsRecord(rec);showAthleticsRecord(game,rec)}setTimeout(res,1000)}}
-   l.onclick=function(){tap('L',l)};r.onclick=function(){tap('R',r)};ctx.target({get:function(){return [l,r]}})
- })
-}
-function athleticsLife(ctx,host,i){
- if(i===0){
-   ctx.sh.ask('달리기에 알맞은 옷을 골라 보세요.');
-   var choices=[['outfit_tshirt.webp','티셔츠',1],['outfit_shorts.webp','반바지',1],['outfit_sneakers.webp','운동화',1],['outfit_coat.webp','두꺼운 외투',0],['outfit_scarf.webp','목도리',0],['outfit_sandals.webp','샌들',0]];
-   var cards=choices.map(function(x){var c=ctx.card({img:'assets/athletics/'+x[0],label:x[1]});c._ok=x[2];return c});host.appendChild(ctx.grid(cards,3));var got=0;ctx.target({get:function(){return cards.filter(function(x){return x._ok&&!x._done})}});
-   return new Promise(function(res){cards.forEach(function(c){c.onclick=function(){if(c._ok&&!c._done){c._done=true;c.classList.add('good');got++;O.sfx('ok');if(got===3){O.praise();setTimeout(res,900)}}else ctx.bad(c)}})})
- }
- return athleticsRace(ctx,host,(i%4));
-}
-function athleticsRecord(){try{return JSON.parse(localStorage.getItem('oks_athletics_record_v1')||'{}')}catch(e){return{}}}
-function saveAthleticsRecord(r){try{localStorage.setItem('oks_athletics_record_v1',JSON.stringify(r))}catch(e){}}
-function showAthleticsRecord(game,r){
- var p=E('div','ath-record-pop','<b>🏁 완주 '+r.finishes+'회</b><small>내 기록이 하나 더 쌓였어요!</small>');game.appendChild(p);setTimeout(function(){p.classList.add('show')},30);
-}
 function exploreRound(s,ctx,host,i){
  var set=sportSet(s),arr=set.tools.slice(i%2,i%2+3);if(arr.length<3)arr=set.tools.slice(0,3);
  ctx.sh.ask('그림을 하나씩 눌러 '+s.name+'에 쓰는 것을 살펴봐요.');
@@ -314,7 +213,7 @@ function exploreRound(s,ctx,host,i){
  });
 }
 function chooseRound(s,ctx,host,i,nopt){
- var set=sportSet(s),right=set.tools[i%set.tools.length],wrong=set.bad.concat(set.tools.filter(function(x){return x!==right})),opts=[right].concat(O.shuffle(wrong).slice(0,nopt-1));
+ var set=sportSet(s),right=set.tools[i%set.tools.length],wrong=set.bad,opts=[right].concat(O.shuffle(wrong).slice(0,nopt-1));
  ctx.sh.ask(s.name+' 활동에 알맞은 것을 골라 보세요.');
  var cards=O.shuffle(opts).map(function(x){return ctx.card(item(x),{big:nopt<=2})});host.appendChild(ctx.grid(cards));
  var ok=cards.filter(function(c){return c._item.label===right[1]})[0];ctx.target({get:function(){return ok}});
@@ -337,7 +236,7 @@ function sequenceRound(s,ctx,host,i){
  ctx.sh.ask('동작 순서를 차례대로 눌러 보세요.');
  var order=O.shuffle(seq.slice()),cards=order.map(function(x){return ctx.card(item(x))}),k=0;host.appendChild(ctx.grid(cards,3));
  ctx.target({get:function(){return cards.filter(function(c){return c._item.label===seq[k][1]})}});
- return new Promise(function(res){cards.forEach(function(c){c.onclick=function(){if(c._item.label===seq[k][1]){c._done=true;c.classList.add('good');O.sfx('tick');k++;if(k===seq.length){O.praise();setTimeout(res,800)}else ctx.target({get:function(){return cards.filter(function(x){return!x._done&&x._item.label===seq[k][1]})}})}else ctx.bad(c)}})});
+ return new Promise(function(res){cards.forEach(function(c){c.onclick=function(){if(c._done||k>=seq.length)return;if(c._item.label===seq[k][1]){c._done=true;c.classList.add('good');O.sfx('tick');k++;if(k===seq.length){O.praise();setTimeout(res,800)}else ctx.target({get:function(){return cards.filter(function(x){return!x._done&&x._item.label===seq[k][1]})}})}else ctx.bad(c)}})});
 }
 function timingRound(s,ctx,host){
  ctx.sh.ask('신호가 나오면 빠르게 눌러 보세요.');

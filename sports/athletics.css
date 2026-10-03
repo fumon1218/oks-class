@@ -1,0 +1,79 @@
+/* 육상 수업의 실제 게임판. 화면 크기가 달라도 선수의 발 기준선을 유지합니다. */
+body.athletics-lesson{background:#d5effb url('assets/athletics/athletics_bg_main.webp') center/cover fixed no-repeat}
+body.athletics-lesson::before{background:rgba(238,247,255,.75)}
+body.athletics-lesson .oks-app{max-width:1120px}
+.athletics-lesson .oks-board{padding:18px;background:#fffdf7}
+.athletics-lesson button:focus-visible,.athletics-lesson a:focus-visible,.athletics-lesson summary:focus-visible{outline:4px solid #174f9d;outline-offset:4px}
+.athletics-lesson button[disabled]{cursor:default;opacity:.55}
+.al-board .oks-btn{min-height:64px;min-width:160px;font-size:22px;margin:0}
+.al-board [hidden]{display:none!important}
+.al-intro-hero{display:flex;align-items:center;justify-content:center;gap:28px;padding:24px;background:linear-gradient(120deg,#e3f6ff,#fff2d7);border-radius:24px}
+.al-intro-runner{width:140px;height:215px;object-fit:contain;object-position:bottom}
+.al-intro-hero h1{font-size:clamp(24px,3.2vw,36px);margin:14px 0 10px;color:#164777}
+.al-intro-hero p{font-size:21px;max-width:620px;line-height:1.5;margin:0}
+.al-tag{padding:6px 12px;background:#fff;color:#175785;border-radius:20px;font-size:16px}
+.al-route{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;padding:20px 0}
+.al-route span{display:flex;gap:6px;align-items:center;background:#eef6fc;border-radius:16px;padding:8px 12px;font-size:17px}
+.al-route b{background:#fff;border-radius:50%;width:28px;height:28px;display:grid;place-items:center;color:#1d62a5}
+.al-input,.al-intro-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;padding:8px 0}
+.al-input .oks-btn{font-size:17px;min-height:52px;background:#e8eff7;color:#264967;box-shadow:none;border:3px solid transparent}
+.al-input .oks-btn[aria-pressed=true]{background:#dff8e8;border-color:#26834d;color:#164c2e}
+.al-intro-actions{padding:18px 0}
+.al-teacher-guide{border-top:1px solid #d5dfeb;padding:15px 6px;color:#4d6175;font-size:16px;line-height:1.6}
+.al-teacher-guide summary{cursor:pointer;min-height:44px;display:list-item}
+.al-teacher-guide .oks-btn{font-size:16px;min-height:46px}
+.al-mission{display:flex;gap:12px;align-items:center;margin-bottom:12px;color:#194c78}
+.al-mission>span{font-size:17px;background:#e9f3fc;border-radius:14px;padding:8px 12px}
+.al-mission>b{font-size:27px;flex:1}
+.al-mission .oks-btn{min-width:70px;min-height:48px;font-size:17px}
+.al-checkpoints{display:flex;gap:8px;margin-bottom:14px}
+.al-checkpoints>span{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:48px;background:#eff3f7;border-radius:14px;color:#617083;padding:6px}
+.al-checkpoints b{font-size:17px}.al-checkpoints small{font-size:14px}
+.al-checkpoints .now{background:#fff1bb;box-shadow:inset 0 0 0 2px #d89418;color:#77500c}
+.al-checkpoints .done{background:#e4f5ea;color:#277546}
+.al-track{position:relative;width:100%;height:310px;border-radius:24px;overflow:hidden;background:#c3efff url('assets/athletics/athletics_bg_main.webp') center/cover no-repeat;border:4px solid #d7edf5}
+.al-lane{position:absolute;bottom:0;height:40%;width:100%;background:linear-gradient(0deg,#bc5544ee,#e78861dd);border-top:3px solid #fff}
+.al-lane::before,.al-lane::after{content:'';position:absolute;width:100%;height:3px;background:#fff9;top:38%}
+.al-lane::after{top:76%}
+.al-runner{position:absolute;left:7%;bottom:10%;width:18%;height:62%;z-index:3;transition:left .35s ease;display:flex;align-items:flex-end;justify-content:center}
+.al-runner img{width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 5px 3px #3c34343a)}
+.al-runner.jumping{animation:al-jump .7s ease}
+@keyframes al-jump{50%{transform:translateY(-75px)}}
+.al-line{position:absolute;bottom:3%;font-size:15px;padding:4px 10px;background:#fffc;color:#83382b;border-radius:8px;z-index:4}
+.al-start{left:6%}.al-end{right:3%}
+.al-ribbon{position:absolute;width:19%;right:1%;bottom:11%;z-index:2}
+.al-status{position:absolute;top:12px;left:50%;transform:translateX(-50%);padding:10px 18px;background:#fffffff2;color:#17416e;border:2px solid #bbd8ed;box-shadow:0 4px 8px #2b558a17;border-radius:18px;font-size:23px;max-width:90%;width:max-content;text-align:center;z-index:5}
+.al-lights{position:absolute;right:6%;top:27%;padding:9px;background:#344354;border:3px solid #fff;border-radius:15px;display:flex;gap:8px;z-index:5}
+.al-lights i{width:30px;height:30px;border-radius:50%;background:#738092}
+.al-lights .red.on{background:#e74642;box-shadow:0 0 0 3px #f8b9b7}.al-lights .amber.on{background:#ffd04b;box-shadow:0 0 0 3px #ffe9a3}.al-lights .green.on{background:#22bd70;box-shadow:0 0 0 3px #b2f4cd}
+.al-controls{display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;padding:18px 8px 8px;min-height:90px}
+.al-controls .oks-btn{min-width:200px;min-height:72px;font-size:25px}
+.al-distance{width:100%;height:15px;accent-color:#2d9c65}
+.al-hurdle{position:absolute;left:48%;bottom:11%;height:70px;width:15%;z-index:2}
+.al-hurdle span{position:absolute;width:100%;height:18px;top:0;background:repeating-linear-gradient(90deg,#fff 0 25%,#f28261 25% 50%);border:2px solid #b86448;border-radius:4px}
+.al-hurdle i{position:absolute;left:8%;top:18px;height:52px;width:8px;background:#368ac5}
+.al-hurdle i:last-child{left:auto;right:8%}
+.al-partner{position:absolute;left:66%;bottom:10%;width:17%;height:60%;z-index:3;transition:left .7s ease}
+.al-partner img{width:100%;height:100%;object-fit:contain;object-position:bottom}.al-partner.moving{left:80%}
+.al-choice-area{min-height:310px;display:flex;align-items:center;justify-content:center;padding:20px 0}
+.al-choice-area .oks-grid{width:100%}.al-choice-area .oks-card{min-height:230px}
+.al-record-note{font-size:17px;color:#355b7b;text-align:center;margin:8px 0}
+.al-transfer{padding:14px;margin-top:14px;border-radius:18px;background:#edf6fc;text-align:left;font-size:16px;color:#284e6b}
+.al-transfer>b{font-size:19px}.al-transfer p{line-height:1.5;margin:8px 0}.al-transfer small{font-size:13px;line-height:1.5;display:block}
+.al-observation{margin-top:12px;border-top:1px solid #c6dce9;padding-top:10px}.al-observation summary{min-height:44px;cursor:pointer}
+.al-observation .oks-btn,.al-transfer>.oks-btn{min-width:0;min-height:44px;font-size:14px;padding:8px 10px;margin:4px}
+.al-observation button[aria-pressed=true]{outline:3px solid #287d4b;background:#d5f3e0}
+.athletics-lesson .oks-finish{max-width:570px;max-height:92dvh;overflow-y:auto}
+body.athletics-lesson.calm .al-runner,body.athletics-lesson.calm .al-partner{transition:none}
+@media(max-width:700px){
+ .athletics-lesson .oks-app{padding:10px 8px 22px}.athletics-lesson .oks-board{padding:12px}
+ .al-intro-hero{padding:18px 12px;gap:14px}.al-intro-runner{width:90px;height:160px}.al-intro-hero p{font-size:18px}
+ .al-mission{gap:7px}.al-mission>b{font-size:21px}.al-mission>span{font-size:13px;padding:7px}
+ .al-checkpoints{gap:4px}.al-checkpoints>span{flex-direction:column;gap:2px;padding:4px;min-height:48px}.al-checkpoints small{font-size:11px;text-align:center}
+ .al-track{height:265px}.al-status{font-size:19px}.al-controls .oks-btn{min-width:140px;font-size:22px;min-height:68px}
+ .al-lights{right:3%;top:28%;gap:5px}.al-lights i{width:22px;height:22px}
+ .al-choice-area{min-height:250px}.al-choice-area .oks-card{min-height:185px;padding:10px}
+ .al-choice-area .oks-card .pic{height:120px}.al-choice-area .oks-card .lab{font-size:18px}
+}
+@media(max-width:420px){.al-input .oks-btn{width:100%}.al-intro-hero h1{font-size:23px}.al-route{gap:6px}.al-route span{font-size:14px;padding:6px}.al-controls{gap:8px}.al-controls .oks-btn{min-width:120px}.al-track{height:230px}.al-status{font-size:17px}.al-intro-runner{width:70px}}
+@media(prefers-reduced-motion:reduce){.al-runner,.al-partner{transition:none}.al-runner.jumping{animation:none}}

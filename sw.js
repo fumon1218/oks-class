@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v96';
+const CACHE_NAME = 'oks-class-v97';
 const ASSETS = [
   './',
   './index.html',
@@ -19,32 +19,8 @@ const ASSETS = [
   './sports/sports.js',
   './sports/curriculum.js',
   './sports/worksheet.html',
-  './sports/assets/summer_hub.webp',
-  './sports/assets/athletics.webp',
-  './sports/assets/swimming.webp',
-  './sports/assets/archery.webp',
-  './sports/assets/gymnastics.webp',
-  './sports/assets/taekwondo.webp',
-  './sports/assets/soccer.webp',
-  './sports/assets/athletics/athletics_bg_main.webp',
-  './sports/assets/athletics/runner_idle.webp',
-  './sports/assets/athletics/runner_ready.webp',
-  './sports/assets/athletics/runner_run_a.webp',
-  './sports/assets/athletics/runner_run_b.webp',
-  './sports/assets/athletics/runner_hurdle.webp',
-  './sports/assets/athletics/runner_celebrate.webp',
-  './sports/assets/athletics/start_block.webp',
-  './sports/assets/athletics/start_signal.webp',
-  './sports/assets/athletics/finish_ribbon.webp',
-  './sports/assets/athletics/outfit_tshirt.webp',
-  './sports/assets/athletics/outfit_shorts.webp',
-  './sports/assets/athletics/outfit_coat.webp',
-  './sports/assets/athletics/outfit_scarf.webp',
-  './sports/assets/athletics/outfit_gloves.webp',
-  './sports/assets/athletics/outfit_cap.webp',
-  './sports/assets/athletics/outfit_sneakers.webp',
-  './sports/assets/athletics/outfit_sandals.webp',
-  './sports/assets/athletics/outfit_swimsuit.webp',
+  './sports/athletics.js',
+  './sports/athletics.css',
   './learn/',
   './learn/index.html',
   './learn/learn.css',
@@ -110,6 +86,32 @@ const ASSETS = [
   './quests/index.html',
   './curriculum/teacher-guide.html',
   './curriculum/reports.html',
+  './sports/assets/archery.webp',
+  './sports/assets/athletics.webp',
+  './sports/assets/athletics/athletics_bg_main.webp',
+  './sports/assets/athletics/finish_ribbon.webp',
+  './sports/assets/athletics/outfit_cap.webp',
+  './sports/assets/athletics/outfit_coat.webp',
+  './sports/assets/athletics/outfit_gloves.webp',
+  './sports/assets/athletics/outfit_sandals.webp',
+  './sports/assets/athletics/outfit_scarf.webp',
+  './sports/assets/athletics/outfit_shorts.webp',
+  './sports/assets/athletics/outfit_sneakers.webp',
+  './sports/assets/athletics/outfit_swimsuit.webp',
+  './sports/assets/athletics/outfit_tshirt.webp',
+  './sports/assets/athletics/runner_celebrate.webp',
+  './sports/assets/athletics/runner_hurdle.webp',
+  './sports/assets/athletics/runner_idle.webp',
+  './sports/assets/athletics/runner_ready.webp',
+  './sports/assets/athletics/runner_run_a.webp',
+  './sports/assets/athletics/runner_run_b.webp',
+  './sports/assets/athletics/start_block.webp',
+  './sports/assets/athletics/start_signal.webp',
+  './sports/assets/gymnastics.webp',
+  './sports/assets/soccer.webp',
+  './sports/assets/summer_hub.webp',
+  './sports/assets/swimming.webp',
+  './sports/assets/taekwondo.webp',
   './core/ui/arrow_down.webp',
   './core/ui/btn_blue.webp',
   './core/ui/btn_green.webp',
@@ -202,6 +204,8 @@ const ASSETS = [
   './art/3d/star_jungle.glb',
   './art/3d/star_love.glb',
   './art/3d/star_sea.glb',
+  './art/3d/star_ssing.glb',
+  './art/3d/star_ssing_new.glb',
   './art/3d/star_word.glb',
   './art/3d/tree.glb',
   './art/3d/wave.glb',
@@ -748,7 +752,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
         })
-        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
+        .catch(() => caches.match(event.request, { ignoreSearch: isPage }).then((cached) => cached || caches.match('./index.html')))
     );
     return;
   }

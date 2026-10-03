@@ -1,7 +1,18 @@
 <!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>씽씽 별 마을 활동지</title>
 <style>@import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');*{box-sizing:border-box}body{margin:0;background:#eef4ff;font-family:Jua,'Malgun Gothic',sans-serif;color:#24345d}.bar{max-width:900px;margin:16px auto;display:flex;gap:8px}.bar a,.bar button{border:0;border-radius:14px;padding:10px 16px;background:#245fc2;color:#fff;font:inherit;text-decoration:none}.sheet{width:210mm;min-height:297mm;margin:12px auto;background:#fff;padding:13mm 14mm;box-shadow:0 8px 25px #7893b855}.head{border:4px solid #5dc9e9;border-radius:24px;padding:10px 16px;display:flex;align-items:center;gap:12px}.head .planet{font-size:45px}.head h1{font-size:28px;margin:0}.head p{margin:2px 0;color:#587099}.info{margin-left:auto;font-size:15px}.q{margin:18px 0;padding:14px;border-radius:18px;border:2px solid #d9e4f6}.q h2{font-size:20px;margin:0 0 10px}.choices{display:flex;gap:12px;flex-wrap:wrap}.c{min-width:120px;border:2px solid #cfd9e8;border-radius:14px;padding:10px;text-align:center;font-size:18px}.draw{height:130px;border:2px dashed #b7c6dd;border-radius:14px}.reflect{display:flex;justify-content:space-around;font-size:24px}.foot{text-align:center;color:#8290a9;font-size:13px;margin-top:16px}@media print{body{background:#fff}.bar{display:none}.sheet{margin:0;box-shadow:none}}@media(max-width:850px){.sheet{width:96%;min-height:0;padding:20px}}</style></head><body>
-<div class="bar"><a href="./">← 하계 스포츠</a><button onclick="print()">인쇄하기</button></div><main class="sheet" id="sheet"></main><script src="curriculum.js"></script><script>
+<div class="bar"><a href="./">← 하계 스포츠</a><button onclick="print()">인쇄하기</button></div><main class="sheet" id="sheet"></main><script src="curriculum.js"></script><script src="../core/oks-core.js"></script><script src="athletics.js"></script><script>
+(function(){
 var q=new URLSearchParams(location.search),id=q.get('sport')||'athletics',lv=+(q.get('level')||2),D=OKS_SPORTS_DATA,s=D.sports.find(function(x){return x.id===id})||D.sports[0];
+if(s.id==='athletics'){
+ var school=q.get('school')||'elem',no=Math.max(1,Math.min(3,+(q.get('lesson')||1))),plan=OKS_ATHLETICS.course(school,no);
+ var labels={signal:'출발 신호 기다리기',run:'도착 지점까지 이동',order:'준비 → 이동 → 도착',gear:'상황에 맞는 준비물 선택',warmup:'나에게 맞는 몸 풀기',safety:'몸과 주변 공간 확인',reflect:'내 참여 돌아보기',goal:'내 목표 선택',pace:'천천히 · 빠르게 · 멈춤',hurdle:'내 방법으로 장애물 넘기',relay:'친구에게 차례 전달',cooldown:'숨 고르며 마무리'};
+ document.getElementById('sheet').innerHTML='<div class="head"><div class="planet">🏃</div><div><h1>'+OKS.esc(plan.title)+'</h1><p>'+OKS.esc(plan.goal)+'</p></div><div class="info">수준 '+lv+'<br>이름 __________</div></div>'+
+ '<section class="q"><h2>1. 오늘의 활동 순서를 살펴봐요.</h2><div class="choices">'+plan.steps.map(function(k,i){return '<div class="c">'+(i+1)+'. '+labels[k]+'</div>'}).join('')+'</div></section>'+
+ '<section class="q"><h2>2. 화면에서 배운 것을 교실에서 해 봐요.</h2><p>'+OKS.esc(plan.transfer)+'</p><div class="draw">나의 참여 방법을 그림·글·말·AAC로 표현해요.</div></section>'+
+ '<section class="q"><h2>3. 선생님이 실제 참여를 관찰해요.</h2><p>□ 미관찰　□ 지원받아 참여　□ 독립 참여</p><p>도움: □ 언어　□ 시각　□ 시범　□ 신체지원</p><p>학생이 한 행동과 필요한 도움: ______________________</p><p>________________________________________________</p></section>'+
+ '<section class="q"><h2>4. 활동을 마친 내 마음에 ○ 해요.</h2><div class="reflect"><span>😀 재미있어요</span><span>🙋 도움이 필요해요</span><span>🙂 다시 해 볼래요</span></div></section><div class="foot">옥쌤의 즐거운 교실 · 화면 버튼 반응과 실제 신체활동 수행을 구분해 기록합니다.</div>';
+ return;
+}
 var tasks={athletics:['출발과 도착 중 출발에 ○ 해 보세요.','1-2-3-4 순서로 숫자를 써 보세요.','달리기 전에 필요한 준비를 그림으로 그려 보세요.'],swimming:['수영장에서 사용하는 도구를 골라 보세요.','물에 들어가기 전 안전 약속을 말해 보세요.','내가 해 보고 싶은 물놀이를 그려 보세요.'],archery:['과녁의 가운데에 점을 찍어 보세요.','집중할 때 필요한 태도에 ○ 해 보세요.','나만의 과녁을 꾸며 보세요.'],gymnastics:['서기-팔 벌리기-한 발 균형 순서를 써 보세요.','균형을 잡을 때 몸의 어느 부분을 쓰는지 말해 보세요.','내가 할 수 있는 균형 자세를 그려 보세요.'],taekwondo:['준비 자세 다음에 할 동작을 골라 보세요.','왼쪽·오른쪽 방향을 구별해 보세요.','안전하게 연습하기 위한 약속을 써 보세요.'],soccer:['공을 보내야 할 빈 공간을 찾아 ○ 해 보세요.','골대와 공을 선으로 이어 보세요.','친구와 함께할 때 필요한 말을 써 보세요.']}[s.id];
 document.getElementById('sheet').innerHTML='<div class="head"><div class="planet">'+s.emo+'</div><div><h1>씽씽 별 마을 · '+s.name+' 활동지</h1><p>'+s.goal+'</p></div><div class="info">수준 '+lv+'<br>이름 __________</div></div>'+
 '<section class="q"><h2>1. '+tasks[0]+'</h2><div class="choices"><div class="c">① '+s.concepts[0]+'</div><div class="c">② '+s.concepts[1]+'</div><div class="c">③ '+s.concepts[2]+'</div></div></section>'+
@@ -9,4 +20,6 @@ document.getElementById('sheet').innerHTML='<div class="head"><div class="planet
 '<section class="q"><h2>3. '+tasks[2]+'</h2><div class="draw"></div></section>'+
 '<section class="q"><h2>4. 활동을 마친 내 마음에 ○ 해 보세요.</h2><div class="reflect"><span>😀 재미있어요</span><span>🙂 할 수 있어요</span><span>😌 다시 해 볼래요</span></div></section>'+
 '<div class="foot">옥쌤의 즐거운 교실 · 씽씽 별 마을 · 과정과 참여를 함께 살펴보는 활동지</div>';
+
+})();
 </script></body></html>
