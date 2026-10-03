@@ -63,17 +63,23 @@
     if (use3d) { var cv3 = E('canvas', 'sp-3d'); cv3.setAttribute('aria-hidden', 'true'); mapEl.appendChild(cv3); view3d = OKS3D.view(cv3, mapEl); }
     SP.STARS.forEach(function (s, i) {
       var m = P ? s.mapP : s.map;
-      var e = place(E('button', 'sp-star' + (s.id === 'center' ? ' main' : ''), ''), m.x, m.y, m.w);
+      var e = place(E('button', 'sp-star' + (s.id === 'center' ? ' main' : '') + (s.soon ? ' soon' : ''), ''), m.x, m.y, m.w);
       e.type = 'button'; e.dataset.id = s.id; e.dataset.depth = s.id === 'center' ? '1' : '0.8'; e.style.setProperty('--c', s.color);
       e.style.animationDelay = (-i * 1.7) + 's';
-      var chips = s.subjects.map(function (k) { return '<i>' + SUBJ[k] + '</i>'; }).join('');
-      e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, '🪐', 'sp-star-img') + '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>';
-      e.onclick = function () { O.unlock && O.unlock(); O.sfx('pop'); go(s.id); };
+      var labels = s.chips || s.subjects.map(function (k) { return SUBJ[k]; });
+      var chips = labels.map(function (k) { return '<i>' + O.esc(k) + '</i>'; }).join('');
+      if (s.soon) chips += '<i class="sp-soon-chip">곧 만나요</i>';
+      e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, s.emo || '🪐', 'sp-star-img') + '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>';
+      if (s.soon) {
+        e.disabled = true; e.setAttribute('aria-disabled', 'true'); e.setAttribute('aria-label', s.name + ' · 곧 만나요');
+      } else {
+        e.onclick = function () { O.unlock && O.unlock(); O.sfx('pop'); go(s.id); };
+      }
       mapEl.appendChild(e);
       if (view3d && model(s.model)) {
-        view3d.add(model(s.model), e, { box: e.querySelector('.sp-star-img'), spin: s.id === 'center' ? .18 : .26, yaw: i * 1.3, tilt: .42, dist: 1.8, dy: -.04, glow: hex(s.color),
+        view3d.add(model(s.model), e, { box: e.querySelector('.sp-star-img'), spin: s.spin == null ? (s.id === 'center' ? .18 : .26) : s.spin, yaw: s.yaw == null ? i * 1.3 : s.yaw, tilt: s.tilt == null ? .42 : s.tilt, dist: s.dist || 1.8, dy: -.04, glow: hex(s.color),
           onload: function (ok3) {
-            if (!ok3) return;
+            if (!ok3 || s.soon) return;
             var z = E('span', 'sp-zoom', '🔍'); z.setAttribute('role', 'button'); z.tabIndex = 0; z.setAttribute('aria-label', s.name + ' 크게 보기'); z.title = '크게 보기 (돌리고 확대해 봐요)';
             z.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); });
             z.onclick = function (ev) { ev.stopPropagation(); ev.preventDefault(); open3d(s.model, s.name, s.color); };
