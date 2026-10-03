@@ -121,6 +121,8 @@ window.OKS_ZOOM = (function () {
     markSsing.style.setProperty('--s', Math.max(18, SW * z * .48).toFixed(1) + 'px');
     mapEl.style.setProperty('--ssing-visible', (z < .72 || focus === 'ssing') ? '1' : '0');
     mapEl.style.setProperty('--our-visible', (z < .72 || focus === 'our') ? '1' : '0');
+    mapEl.classList.toggle('focus-ssing', z >= .72 && focus === 'ssing');
+    mapEl.classList.toggle('focus-our', z >= .72 && focus === 'our');
     var gp = scr(G0.x + GW / 2, G0.y + GH * .9); galLab.style.left = gp.x + 'px'; galLab.style.top = Math.min(vh - 60, gp.y) + 'px';
     galLab.style.opacity = cl((ZG * 2.4 - z) / (ZG * 1.4), 0, 1).toFixed(3);
     /* 단계 표시 */
