@@ -29,6 +29,9 @@ img{-webkit-user-drag:none;}
   background:var(--glass);box-shadow:0 4px 12px rgba(80,55,30,.18);font-size:17px;text-decoration:none;color:var(--ink);
 }
 .oks-pill img{width:26px;height:26px;object-fit:contain;}
+.oks-icon-label{display:inline-flex;align-items:center;justify-content:center;gap:7px;line-height:1}
+.oks-icon-label.only{gap:0}.oks-ico{width:26px;height:26px;object-fit:contain;display:block;flex:none}
+.oks-round .oks-ico{width:34px;height:34px}.oks-eco-icon{width:24px;height:24px;object-fit:contain;vertical-align:middle}
 .oks-title{flex:1;min-width:150px;display:flex;flex-direction:column;align-items:center;line-height:1.15;
   background:url('ui/title_wood.webp') center/100% 100% no-repeat;padding:8px 26px 10px;color:#fff8e6;
   text-shadow:0 2px 0 rgba(90,50,20,.55);}
