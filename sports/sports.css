@@ -134,3 +134,24 @@ body.athletics-game{background-image:url('assets/athletics/athletics_bg_main.web
 .ath-foot{min-width:170px;min-height:84px;border-radius:28px;border:4px solid #fff;background:linear-gradient(#5ebdff,#258bd9);color:#fff;font-size:27px;box-shadow:0 8px 0 #1666aa,0 12px 22px rgba(20,55,100,.2)}
 .ath-foot:active{transform:translateY(6px);box-shadow:0 2px 0 #1666aa}
 @media(max-width:700px){.ath-track{height:240px}.ath-player{width:120px;height:155px}.ath-finish{width:130px}.ath-hurdle{width:150px}.ath-foot{min-width:120px;min-height:70px;font-size:21px}}
+
+
+/* 육상 업로드 자산 적용 보강 */
+.athletics-preview{position:relative}
+.athletics-preview .preview-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.athletics-preview .preview-runner{position:absolute;z-index:2;left:8%;bottom:0;height:92%;width:auto;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(20,40,70,.28))}
+.athletics-zone{position:relative;overflow:hidden}
+.athletics-zone>img{height:130px;max-width:150px;object-fit:contain;filter:drop-shadow(0 6px 8px rgba(30,50,70,.2))}
+.ath-zone-done{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.ath-zone-done .oks-card{min-height:120px}.ath-zone-done strong{font-size:20px;color:#26845a}
+.ath-start-challenge{display:grid;grid-template-columns:220px 120px;grid-template-rows:auto auto;align-items:end;justify-content:center;gap:10px 24px;width:min(700px,94%);padding:20px 24px;border-radius:28px;background:rgba(255,255,255,.9);box-shadow:0 10px 26px rgba(35,55,90,.18)}
+.ath-ready-runner{grid-row:1/3;max-height:260px;max-width:220px;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(30,50,70,.22))}
+.ath-signal.big{height:120px;justify-self:center}
+.ath-start-msg{font-size:34px;color:#d85e37;text-align:center}.ath-start-msg b{color:#235db5;font-weight:400}
+.ath-start-challenge .oks-btn{grid-column:2;min-width:150px}
+.ath-record-pop{position:absolute;z-index:8;right:18px;top:18px;display:flex;flex-direction:column;gap:3px;padding:12px 18px;border-radius:20px;background:rgba(255,250,225,.97);border:4px solid #ffd45a;box-shadow:0 8px 24px rgba(40,50,80,.22);opacity:0;transform:translateY(-12px) scale(.92);transition:.3s}
+.ath-record-pop.show{opacity:1;transform:none}.ath-record-pop b{font-size:22px;color:#805600}.ath-record-pop small{font-size:14px;color:#6d6258}
+@media(max-width:700px){
+ .athletics-preview .preview-runner{height:82%}
+ .ath-start-challenge{grid-template-columns:150px 100px;padding:12px;gap:8px}.ath-ready-runner{max-height:190px;max-width:150px}.ath-signal.big{height:90px}.ath-start-msg{font-size:24px}
+}
