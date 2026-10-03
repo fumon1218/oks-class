@@ -76,3 +76,39 @@ body.sports::before{background:linear-gradient(180deg,rgba(14,39,103,.16),rgba(2
 .sports-level-row{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-top:13px}.sports-level-btn{text-decoration:none;color:#3b2f2a;background:#f4ecdf;border:4px solid transparent;border-radius:18px;min-height:88px;display:flex;flex-direction:column;align-items:center;justify-content:center}.sports-level-btn b{font-size:31px;line-height:1}.sports-level-btn small{font-size:16px}.sports-level-btn.cur{border-color:#f1ba36;background:#fff7d9}.sports-level-btn i{color:#f0a000;font-style:normal;font-size:13px;letter-spacing:1px;margin-top:2px}
 @media(max-width:800px){.festival-grid{grid-template-columns:repeat(2,1fr)}.sport-toc-head{align-items:flex-start}.sport-toc-head img{width:130px;height:100px}.sports-level-row{grid-template-columns:repeat(5,minmax(90px,1fr));overflow-x:auto}.sports-floor{min-width:130px;font-size:19px}}
 @media(max-width:520px){.festival-grid{grid-template-columns:1fr}.festival-card{min-height:210px}.festival-card img,.festival-emo{height:135px}.sport-toc-head{flex-direction:column}.sport-toc-head img{width:100%;height:150px}.sports-floor-tabs{display:grid;grid-template-columns:1fr 1fr 1fr}.sports-floor{min-width:0;padding:9px 5px;font-size:16px}.sports-level-row{grid-template-columns:1fr}.sports-level-btn{min-height:64px;flex-direction:row;gap:10px}}
+
+
+/* ===== 실제 활동: 우리 별 마을 차시 UI와 동일한 상호작용 밀도 ===== */
+body.sports-play{background-image:url('../core/ui/greenhouse_soft.webp')}
+body.sports-play::before{background:rgba(246,250,255,.62)}
+.sports-play .oks-app{max-width:min(1560px,100%)}
+.sports-start{max-width:none}
+.sports-start-preview{width:min(760px,86%);height:190px;margin:10px auto 4px;border-radius:26px;overflow:hidden;box-shadow:0 8px 22px rgba(30,45,80,.18)}
+.sports-start-preview img{width:100%;height:100%;object-fit:cover}
+.oks-board.sports-game-board{position:relative;overflow:hidden;background:rgba(255,253,248,.94)}
+.oks-board.sports-game-board.sports-bg::before{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.82),rgba(255,255,255,.88)),var(--sport-bg) center/cover no-repeat;pointer-events:none}
+.sports-scene-strip{position:relative;height:148px;border-radius:24px;overflow:hidden;margin:0 0 12px;box-shadow:0 8px 22px rgba(35,50,85,.18)}
+.sports-scene-strip>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sports-scene-strip::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(18,38,90,.68),rgba(18,38,90,.08) 58%,rgba(255,255,255,.16));pointer-events:none}
+.sports-scene-title{position:absolute;z-index:2;left:20px;top:18px;padding:6px 16px;border-radius:999px;background:rgba(255,255,255,.94);font-size:22px;color:#25447f;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.sports-scene-dots{position:absolute;z-index:2;left:20px;bottom:16px;display:flex;gap:8px}
+.sports-scene-dots i{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.72);border:3px dashed rgba(255,255,255,.95);font-style:normal;color:#5b6785}
+.sports-scene-dots i.now{background:#fff4bd;border-style:solid;border-color:#ffbe35;transform:scale(1.12);color:#8b6200}
+.sports-scene-dots i.done{background:#fff;border-style:solid;border-color:#55bf78;color:#f0a000}
+.sports-play-area{position:relative;z-index:2;min-height:390px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:18px 10px}
+.sports-play-area .oks-grid{width:100%}
+.sports-play-area .oks-card{background:rgba(255,255,255,.97);border-color:#f5cf6b}
+.sports-drag-row{width:100%;display:flex;align-items:center;justify-content:center;gap:30px;flex-wrap:wrap}
+.sports-drag-row>.oks-grid{width:auto}
+.sports-dropzone{width:260px;min-height:220px;border-radius:30px;border:5px dashed #5abddf;background:rgba(235,250,255,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#275e82;box-shadow:inset 0 0 0 5px rgba(255,255,255,.75)}
+.sports-dropzone.hover{background:#e5fff0;border-color:#43b66c;box-shadow:0 0 28px rgba(67,182,108,.38)}
+.sports-dropzone>b{font-size:72px;font-weight:400}.sports-dropzone>span{font-size:21px}
+.sports-dropzone .oks-card{border:0;box-shadow:none;background:transparent}
+.sports-timing{display:flex;flex-direction:column;align-items:center;gap:22px}
+.sports-ready{font-size:clamp(42px,6vw,78px);color:#e3673e;text-shadow:0 3px #fff}.sports-ready b{color:#245aaa;font-weight:400}
+.sports-play-area .oks-card.good{box-shadow:0 0 0 6px rgba(47,177,106,.22),0 8px 18px rgba(50,70,90,.18)}
+@media(max-width:700px){
+ .sports-scene-strip{height:112px}.sports-scene-title{font-size:17px;left:10px;top:10px}.sports-scene-dots{left:10px;bottom:10px;gap:5px}.sports-scene-dots i{width:32px;height:32px;font-size:13px}
+ .sports-play-area{min-height:330px;padding:10px 4px}.sports-drag-row{gap:12px}.sports-dropzone{width:190px;min-height:150px}
+ .sports-start-preview{height:135px}
+}
