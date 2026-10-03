@@ -14,6 +14,13 @@ window.OKS_SPORTS_DATA = {
     {n:4,name:'게임에 써 보기',desc:'간단한 규칙이 있는 미니게임에 적용해요.'},
     {n:5,name:'스스로 즐기기',desc:'스스로 선택하고 기록하며 생활 속 활동으로 이어가요.'}
   ],
+  festivals: [
+    {id:'summer',name:'하계 올림픽',sub:'달리고 · 뛰고 · 헤엄치고 · 겨뤄요',image:'assets/summer_hub.webp',active:true},
+    {id:'winter',name:'동계 올림픽',sub:'눈과 얼음 위 스포츠',emo:'❄️',active:false},
+    {id:'summer_para',name:'하계 패럴림픽',sub:'함께 즐기는 여름 스포츠',emo:'♿',active:false},
+    {id:'winter_para',name:'동계 패럴림픽',sub:'함께 즐기는 겨울 스포츠',emo:'🏂',active:false},
+    {id:'asian',name:'아시안게임',sub:'아시아의 다양한 스포츠',emo:'🏅',active:false}
+  ],
   sports: [
     {id:'athletics',name:'육상',emo:'🏃',color:'#ff8b45',title:'달리고 뛰며 기록해요',goal:'출발·달리기·도착의 순서를 알고 안전하게 움직여요.',concepts:['출발','달리기','도착','기록','안전'],image:'assets/athletics.webp'},
     {id:'swimming',name:'수영',emo:'🏊',color:'#38bdf8',title:'물에서 안전하게 움직여요',goal:'수영장의 기본 시설과 안전 약속을 알고 기초 움직임을 경험해요.',concepts:['수영장','레인','고글','호흡','안전'],image:'assets/swimming.webp'},
@@ -21,5 +28,37 @@ window.OKS_SPORTS_DATA = {
     {id:'gymnastics',name:'체조',emo:'🤸',color:'#bf78ef',title:'몸의 균형을 느껴요',goal:'서기·팔 벌리기·한 발 균형 동작을 차례로 경험해요.',concepts:['자세','균형','순서','몸','안전'],image:'assets/gymnastics.webp'},
     {id:'taekwondo',name:'태권도',emo:'🥋',color:'#ef6c68',title:'기본 발차기를 익혀요',goal:'준비 자세와 발차기 방향을 알고 안전한 목표를 향해 움직여요.',concepts:['준비','발차기','방향','예절','안전'],image:'assets/taekwondo.webp'},
     {id:'soccer',name:'축구',emo:'⚽',color:'#f3c24b',title:'공을 목표로 보내요',goal:'공과 골대의 관계를 알고 발로 공을 보내는 기초 움직임을 경험해요.',concepts:['공','골대','차기','패스','협동'],image:'assets/soccer.webp'}
-  ]
+  ],
+  lessons: {
+    athletics:[
+      {id:'know',no:'1',name:'육상과 친해져요',goal:'출발선, 트랙, 결승선을 알아봐요.'},
+      {id:'move',no:'2',name:'달리기 움직임',goal:'출발하고 달려서 도착하는 순서를 익혀요.'},
+      {id:'safe',no:'3',name:'기록과 안전',goal:'나의 기록을 살펴보고 안전한 달리기 약속을 익혀요.'}
+    ],
+    swimming:[
+      {id:'know',no:'1',name:'수영장과 도구',goal:'수영장, 레인, 물안경을 알아봐요.'},
+      {id:'move',no:'2',name:'물에서 움직여요',goal:'호흡과 기초 움직임을 차례로 경험해요.'},
+      {id:'safe',no:'3',name:'물놀이 안전',goal:'준비운동과 안전 약속을 익혀요.'}
+    ],
+    archery:[
+      {id:'know',no:'1',name:'양궁과 과녁',goal:'활과 과녁의 생김새와 중심을 알아봐요.'},
+      {id:'move',no:'2',name:'중심을 향해요',goal:'방향을 살피고 목표 가까이에 맞혀요.'},
+      {id:'safe',no:'3',name:'집중과 안전',goal:'차례와 안전 약속을 지키며 집중해요.'}
+    ],
+    gymnastics:[
+      {id:'know',no:'1',name:'체조 동작 알아보기',goal:'서기와 팔 벌리기 동작을 알아봐요.'},
+      {id:'move',no:'2',name:'균형 잡기',goal:'몸의 균형을 잡는 기초 동작을 해 봐요.'},
+      {id:'safe',no:'3',name:'순서와 안전',goal:'동작 순서를 지키고 안전하게 움직여요.'}
+    ],
+    taekwondo:[
+      {id:'know',no:'1',name:'태권도와 예절',goal:'준비 자세와 기본 예절을 알아봐요.'},
+      {id:'move',no:'2',name:'발차기 방향',goal:'왼쪽과 오른쪽 목표를 향해 움직여요.'},
+      {id:'safe',no:'3',name:'안전하게 겨뤄요',goal:'거리와 차례를 지키며 안전하게 연습해요.'}
+    ],
+    soccer:[
+      {id:'know',no:'1',name:'축구와 공',goal:'공, 골대, 경기장을 알아봐요.'},
+      {id:'move',no:'2',name:'차고 패스해요',goal:'발로 공을 보내는 기초 움직임을 경험해요.'},
+      {id:'safe',no:'3',name:'함께하는 축구',goal:'빈 공간을 찾고 친구와 협동해요.'}
+    ]
+  }
 };
