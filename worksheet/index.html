@@ -139,6 +139,32 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   .qh{background:#fff!important;}
   .anslabel{top:-4mm;right:0;}
 }
+
+/* ===== 공통 학습지 레이아웃 v2: 내용 유지, 인쇄 공간 확대 ===== */
+.page{padding:9mm 10mm 8mm;border-radius:10px;overflow:hidden}
+.head{gap:7px;padding-bottom:5px;margin-bottom:4px;border-bottom:2.5px solid var(--line)}
+.head .tt{background:linear-gradient(180deg,#fffdfa 0%,#fff8ef 100%);border:1.5px solid #d8cbb6;border-radius:18px;padding:10px 14px 8px}
+.head .sub{font-size:12px;line-height:1.2}
+.head h1{font-size:22px;line-height:1.1;margin:4px 0 0}
+.head .goal{font-size:14px;line-height:1.25;margin-top:4px}
+.head .lv{font-size:12px;line-height:1.1;margin-top:3px}
+.score{width:30mm;border-radius:16px;border-width:2px;background:#fff;box-shadow:inset 0 0 0 2px #fff7ea}
+.score b{font-size:13px}.score span{font-size:18px;margin-top:4px}
+.info{margin:7px 0 4px;border-width:1.8px;border-radius:14px;background:#fff}
+.info div{padding:5px 8px;font-size:14px;min-height:34px}
+.q{margin-top:12px;background:#fff;border:1.4px solid #ebe1d1;border-radius:18px;padding:10px 12px 12px}
+.qh{align-items:center;font-size:20px;line-height:1.25}
+.qh .no{width:30px;height:30px;font-size:15px}
+.qh .pt{font-size:12px}
+.qb{margin:10px 0 0 38px}
+.card{border-radius:12px;background:#fffdf8}
+.maker span{background:#fffdf7}
+.maker img{width:7mm;height:7mm;border-radius:50%;object-fit:cover;display:block}
+@media print{
+  body,.page,.head .tt,.score,.info,.q,.card,.box,.choices span,.tbl,.foot .chk span,.maker span,.foot .stamp{background:#fff!important;box-shadow:none!important}
+  .page{border-radius:0!important}
+}
+
 </style>
 </head>
 <body>
