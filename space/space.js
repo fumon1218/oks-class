@@ -63,7 +63,7 @@
     if (use3d) { var cv3 = E('canvas', 'sp-3d'); cv3.setAttribute('aria-hidden', 'true'); mapEl.appendChild(cv3); view3d = OKS3D.view(cv3, mapEl); }
     SP.STARS.forEach(function (s, i) {
       var m = P ? s.mapP : s.map;
-      var e = place(E('button', 'sp-star' + (s.id === 'center' ? ' main' : '') + (s.soon ? ' soon' : ''), ''), m.x, m.y, m.w);
+      var e = place(E('button', 'sp-star' + (s.id === 'center' ? ' main' : '') + (s.soon ? ' soon' : '') + (s.system ? ' system-' + s.system : ''), ''), m.x, m.y, m.w);
       e.type = 'button'; e.dataset.id = s.id; e.dataset.depth = s.id === 'center' ? '1' : '0.8'; e.style.setProperty('--c', s.color);
       e.style.animationDelay = (-i * 1.7) + 's';
       var labels = s.chips || s.subjects.map(function (k) { return SUBJ[k]; });
