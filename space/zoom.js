@@ -87,8 +87,8 @@ window.OKS_ZOOM = (function () {
     return { x: parseFloat(e.style.left || '22') * SW / 100, y: parseFloat(e.style.top || '56') * SH / 100 };
   }
   function focusWorld() {
-    /* 씽씽 별 마을에 들어오면 3D 객체 자체를 중앙으로 옮기므로 카메라도 무대 정중앙을 바라봅니다. */
-    return C;
+    /* 행성 자체의 월드 좌표는 유지하고, 선택한 행성계 쪽으로 카메라를 이동시켜 화면 정중앙에 보이게 합니다. */
+    return focus === 'ssing' ? ssingWorld() : C;
   }
   function chooseFocusAt(x, y) {
     var a = scr(C.x, C.y), s = scr(ssingWorld().x, ssingWorld().y);
