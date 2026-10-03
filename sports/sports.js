@@ -1,55 +1,116 @@
 (function(){
 'use strict';
 var O=window.OKS,D=window.OKS_SPORTS_DATA;
-var q=new URLSearchParams(location.search), sid=q.get('sport'), level=Math.max(1,Math.min(5,parseInt(q.get('level')||'2',10)));
-function icon(file,label){return O.iconHtml(file,label||'');}
+var q=new URLSearchParams(location.search), sid=q.get('sport'), school=q.get('school')||'elem',
+    level=Math.max(1,Math.min(5,parseInt(q.get('level')||'2',10)));
+var SCHOOLS=[
+  {key:'elem',floor:'1층',name:'초등',desc:'기초 움직임과 안전하게 즐기기'},
+  {key:'middle',floor:'2층',name:'중등',desc:'기초 기능을 익혀 간이 게임에 적용하기'},
+  {key:'high',floor:'3층',name:'고등',desc:'스스로 선택하고 생활 속 스포츠로 이어가기'}
+];
+var LEVELS=[
+  {n:1,name:'감각 탐색'},{n:2,name:'골라 보기'},{n:3,name:'직접 해 보기'},{n:4,name:'혼자 해 보기'},{n:5,name:'생활에 써 보기'}
+];
 function byId(id){return D.sports.filter(function(s){return s.id===id})[0];}
-function top(title,sub,back){
-  return O.shell({title:title,subtitle:sub,back:back||'../space/',backLabel:back?'하계 스포츠':'우주마을로',level:level,compact:false});
+function top(title,sub,back,label){
+  return O.shell({title:title,subtitle:sub,back:back||'../',backLabel:label||'씽씽별로',level:level,compact:false});
 }
 function tryBg(el,s){var im=new Image();im.onload=function(){el.classList.add('has-bg');el.style.backgroundImage="url('"+s.image+"')"};im.src=s.image;}
+function store(){try{return JSON.parse(localStorage.getItem('oks_sports_progress_v2')||'{}')}catch(e){return{}}}
+function save(k,lv,stars){
+  var p=store();p[k]=p[k]||{plays:0,best:{}};p[k].plays++;p[k].last=lv;p[k].best[lv]=Math.max(p[k].best[lv]||0,stars||0);
+  try{localStorage.setItem('oks_sports_progress_v2',JSON.stringify(p))}catch(e){}
+}
+function lessonInfo(s,sk){
+  var m={
+    athletics:{elem:['달리기 출발과 도착','출발·달리기·도착의 순서를 알고 안전하게 움직여요.'],middle:['달리기와 기록','신호에 맞춰 출발하고 자신의 기록을 확인해요.'],high:['나의 육상 활동 계획','상황에 맞는 달리기 목표를 정하고 스스로 실천해요.']},
+    swimming:{elem:['수영장과 안전 약속','수영장 도구와 안전 약속을 알고 물놀이에 참여해요.'],middle:['호흡과 레인 이용','레인을 지키고 기초 호흡 순서를 익혀요.'],high:['안전한 수영 계획','준비부터 마무리까지 안전한 수영 활동을 계획해요.']},
+    archery:{elem:['과녁의 중심 찾기','과녁의 중심과 방향을 살펴 목표를 맞혀요.'],middle:['집중해서 과녁 맞히기','주의를 집중하고 목표 지점을 조절해요.'],high:['나의 목표 정하기','목표 난이도를 정하고 결과를 기록하며 도전해요.']},
+    gymnastics:{elem:['몸의 균형 느끼기','기본 자세와 균형 동작을 차례로 경험해요.'],middle:['균형 동작 이어 하기','여러 균형 동작을 순서대로 연결해요.'],high:['나만의 체조 구성','할 수 있는 동작을 선택해 짧은 순서를 만들어요.']},
+    taekwondo:{elem:['준비 자세와 방향','준비 자세와 왼쪽·오른쪽 방향을 알아봐요.'],middle:['기본 발차기 익히기','목표 방향에 맞춰 안전하게 발차기를 연습해요.'],high:['안전한 태권도 활동','예절과 안전 약속을 지키며 동작을 선택해요.']},
+    soccer:{elem:['공과 골대 알아보기','공과 골대를 구별하고 빈 공간을 찾아봐요.'],middle:['패스와 공간 찾기','친구와 함께 빈 공간으로 패스하는 방법을 익혀요.'],high:['협동하는 축구 활동','상황을 보고 패스할 곳을 스스로 선택해요.']}
+  };
+  return m[s.id][sk];
+}
 function hub(){
-  var sh=top('씽씽 별 마을','체육 · 놀이 · 하계 스포츠','../');
-  sh.ask('하계 스포츠 마을에서 배우고 싶은 종목을 골라 보세요.',{silent:true});
-  var b=document.createElement('div');b.className='sports-hub';
-  b.innerHTML='<div class="sports-hero"><h1>☀️ 하계 스포츠 마을</h1><p>보고 · 따라 하고 · 직접 해 보며 스포츠를 배워요</p></div>'+
-   '<div class="sports-tabs"><button class="sports-tab on">하계 스포츠</button><button class="sports-tab lock">동계 · 준비 중</button><button class="sports-tab lock">패럴림픽 · 다음 단계</button><button class="sports-tab lock">아시안게임 · 다음 단계</button></div>'+
-   '<div class="sports-grid"></div>';
-  var g=b.querySelector('.sports-grid');
+  var sh=top('씽씽 별 마을','체육 · 놀이','../','우주로');
+  sh.ask('배우고 싶은 스포츠 경기장을 골라 보세요.',{silent:true});
+  var b=document.createElement('div');b.className='sports-town';
+  b.innerHTML='<div class="sports-town-head"><h1>씽씽 별 마을</h1><p>움직이고 · 배우고 · 함께 즐겨요</p></div><div class="sports-buildings"></div>';
+  var g=b.querySelector('.sports-buildings');
   D.sports.forEach(function(s){
-    var a=document.createElement('button');a.className='sport-card';a.style.setProperty('--sport',s.color);
-    a.innerHTML='<span class="emo">'+s.emo+'</span><b>'+s.name+'</b><small>'+s.goal+'</small><span class="go">활동 시작</span>';
-    a.onclick=function(){O.sfx('pop');location.href='?sport='+s.id+'&level='+level};g.appendChild(a);
+    var a=document.createElement('button');a.className='sports-building';a.style.setProperty('--sport',s.color);
+    a.innerHTML='<span class="sports-building-pic" style="background-image:url('+s.image+')"></span><span class="sports-building-sign"><b>'+s.name+' 경기장</b><small>체육 · 놀이</small></span>';
+    a.onclick=function(){O.sfx('pop');openSport(s)};g.appendChild(a);
   });
   sh.board.innerHTML='';sh.board.appendChild(b);
+  makeModal(sh);
 }
-function levelBar(s,host){
- var x=document.createElement('div');x.className='sport-levels';
- D.levels.forEach(function(L){var b=document.createElement('button');b.className='sport-level'+(L.n===level?' on':'');b.textContent=L.n+' '+L.name;b.title=L.desc;b.onclick=function(){location.href='?sport='+s.id+'&level='+L.n};x.appendChild(b)});
- host.appendChild(x);
+var modal=null,modalBody=null,modalPic=null,modalName=null,modalSub=null;
+function makeModal(sh){
+  modal=document.createElement('div');modal.className='sports-modal';modal.hidden=true;
+  modal.innerHTML='<div class="sports-modal-box"><button class="sports-modal-close" type="button">×</button><div class="sports-modal-head"><div class="sports-modal-pic"></div><div><h2></h2><p></p></div></div><div class="sports-floor-tabs"></div><div class="sports-lesson-list"></div></div>';
+  document.body.appendChild(modal);
+  modalBody=modal.querySelector('.sports-lesson-list');modalPic=modal.querySelector('.sports-modal-pic');modalName=modal.querySelector('h2');modalSub=modal.querySelector('.sports-modal-head p');
+  modal.querySelector('.sports-modal-close').onclick=function(){modal.hidden=true};
+  modal.onclick=function(e){if(e.target===modal)modal.hidden=true};
+}
+function openSport(s){
+  var sel=school, tabs=modal.querySelector('.sports-floor-tabs');
+  modalPic.style.backgroundImage='url('+s.image+')';modalName.textContent=s.name+' 경기장';modalSub.textContent='씽씽 별 마을 · 체육 · 놀이';
+  tabs.innerHTML='';
+  SCHOOLS.slice().reverse().forEach(function(sc){
+    var t=document.createElement('button');t.className='sports-floor';t.dataset.k=sc.key;
+    t.innerHTML='<b>'+sc.floor+'</b> '+sc.name+' <small>1</small>';
+    t.onclick=function(){sel=sc.key;school=sel;draw();O.sfx('tick');O.say(sc.name,{noRepeat:true})};tabs.appendChild(t);
+  });
+  function draw(){
+    Array.from(tabs.children).forEach(function(t){t.classList.toggle('on',t.dataset.k===sel)});
+    modalBody.innerHTML='';modalBody.appendChild(lessonRow(s,sel));
+  }
+  draw();modal.hidden=false;
+}
+function lessonRow(s,sk){
+  var info=lessonInfo(s,sk), key=s.id+'-'+sk, pr=store()[key]||{}, row=document.createElement('article');row.className='sports-lesson';
+  row.innerHTML='<div class="sports-lesson-head"><span class="sports-no">체육 1-1</span><div><b>'+info[0]+'</b><small>〈'+s.name+'〉 '+info[1]+'</small></div><em>'+(pr.plays||0)+'번</em></div><div class="sports-level-row"></div>';
+  var lv=row.querySelector('.sports-level-row'), cur=pr.last||level;
+  LEVELS.forEach(function(L){
+    var a=document.createElement('a');a.className='sports-level-btn'+(L.n===cur?' cur':'')+(pr.best&&pr.best[L.n]?' got':'');
+    var stars=pr.best&&pr.best[L.n]?'<i>'+'★'.repeat(pr.best[L.n])+'</i>':'';
+    a.innerHTML='<b>'+L.n+'</b><small>'+L.name+'</small>'+stars;
+    a.href='?sport='+s.id+'&school='+sk+'&level='+L.n;lv.appendChild(a);
+  });
+  return row;
 }
 function activity(){
  var s=byId(sid);if(!s){hub();return}
- var sh=top(s.name+' '+level+'단계',s.title,'./');
- sh.setLevel(level);sh.setRounds(5,0);
- sh.ask(s.goal,{silent:true});
- var wrap=document.createElement('div');levelBar(s,wrap);
- var st=document.createElement('div');st.className='activity-stage';wrap.appendChild(st);tryBg(st,s);
- var act=document.createElement('div');act.className='activity-in';st.appendChild(act);
- var score=0,round=0,mist=0;
- function scoreEl(){return '<div class="scorebar">'+[0,1,2,3,4].map(function(i){return '<img src="../core/ui/'+(i<score?'star_gold.webp':'star.webp')+'" alt="">'}).join('')+' <b>'+score+'/5</b></div>'}
- function ask(t){sh.ask(t,{silent:true});}
- function correct(next){score++;O.sfx('ok');O.praise();round++;sh.setRounds(5,round);setTimeout(next,550)}
- function wrong(btn,msg){mist++;O.sfx('no');btn&&btn.classList.add('bad');O.toast(msg||'다시 한 번 살펴봐요');setTimeout(function(){btn&&btn.classList.remove('bad')},450)}
- function finish(){
-   act.innerHTML='<div class="sport-prompt">⭐ '+s.name+' 활동을 마쳤어요!<br><small>'+D.levels[level-1].desc+'</small></div>'+scoreEl()+
-   '<div class="activity-actions"><a class="oks-btn blue" href="worksheet.html?sport='+s.id+'&level='+level+'">📄 활동지</a><a class="oks-btn orange" href="?sport='+s.id+'&level='+Math.min(5,level+1)+'">다음 수준</a><a class="oks-btn" href="./">다른 종목</a></div>';
-   try{var log=JSON.parse(localStorage.getItem('oks_sports_log_v1')||'[]');log.push({at:new Date().toISOString(),sport:s.id,level:level,score:score,mistakes:mist});localStorage.setItem('oks_sports_log_v1',JSON.stringify(log.slice(-300)))}catch(e){}
- }
- var rounds=makers[s.id](s,act,{level:level,good:correct,bad:wrong,ask:ask,score:function(){return scoreEl()}});
- function next(){if(round>=5)return finish();act.innerHTML='';var f=rounds[round%rounds.length];f(next)}
- next();
- sh.board.innerHTML='';sh.board.appendChild(wrap);
+ var info=lessonInfo(s,school), sh=top(s.name+' · '+info[0],SCHOOLS.filter(function(x){return x.key===school})[0].name+' · 체육 · 놀이','./','건물로');
+ sh.setLevel(level);sh.setRounds(5,0);sh.ask(info[0]+'! 시작해 볼까요?',{silent:true});
+ var wrap=document.createElement('div');wrap.className='sports-activity-wrap';
+ var start=document.createElement('div');start.className='sports-start';
+ start.innerHTML='<div class="sports-start-level">'+LEVELS[level-1].name+'</div><h2>'+info[0]+'</h2><p>'+info[1]+'</p><p class="sports-space">〈'+s.name+'〉 '+s.goal+'</p>';
+ var go=document.createElement('button');go.className='oks-btn';go.innerHTML=O.iconHtml('icon_play.png','시작하기');start.appendChild(go);
+ var ws=document.createElement('a');ws.className='oks-btn blue';ws.href='worksheet.html?sport='+s.id+'&school='+school+'&level='+level;ws.textContent='학습지 인쇄';start.appendChild(ws);
+ wrap.appendChild(start);sh.board.innerHTML='';sh.board.appendChild(wrap);
+ go.onclick=function(){O.unlock();O.sfx('pop');runActivity(sh,s,info,wrap)};
+}
+function runActivity(sh,s,info,wrap){
+  sh.ask(info[1],{silent:true});sh.setRounds(5,0);
+  wrap.innerHTML='';var st=document.createElement('div');st.className='activity-stage';wrap.appendChild(st);tryBg(st,s);
+  var act=document.createElement('div');act.className='activity-in';st.appendChild(act);
+  var score=0,round=0,mist=0;
+  function scoreEl(){return '<div class="scorebar">'+[0,1,2,3,4].map(function(i){return '<img src="../core/ui/'+(i<score?'star_gold.webp':'star.webp')+'" alt="">'}).join('')+' <b>'+score+'/5</b></div>'}
+  function ask(t){sh.ask(t,{silent:true});}
+  function correct(next){score++;O.sfx('ok');O.praise();round++;sh.setRounds(5,round);setTimeout(next,550)}
+  function wrong(btn,msg){mist++;O.sfx('no');btn&&btn.classList.add('bad');O.toast(msg||'다시 한 번 살펴봐요');setTimeout(function(){btn&&btn.classList.remove('bad')},450)}
+  function finish(){
+    var stars=mist<=1?3:mist<=3?2:1;save(s.id+'-'+school,level,stars);
+    act.innerHTML='<div class="sport-prompt">⭐ '+info[0]+' 활동을 마쳤어요!</div>'+scoreEl()+
+      '<div class="activity-actions"><a class="oks-btn blue" href="worksheet.html?sport='+s.id+'&school='+school+'&level='+level+'">학습지 인쇄</a>'+
+      '<a class="oks-btn orange" href="?sport='+s.id+'&school='+school+'&level='+Math.min(5,level+1)+'">다음 수준</a><a class="oks-btn" href="./">씽씽별로</a></div>';
+  }
+  var rounds=makers[s.id](s,act,{level:level,good:correct,bad:wrong,ask:ask});
+  function next(){if(round>=5)return finish();act.innerHTML='';rounds[round%rounds.length](next)} next();
 }
 function choices(host,items,ok,next,bad){
  var r=document.createElement('div');r.className='choice-row';host.appendChild(r);
@@ -58,9 +119,9 @@ function choices(host,items,ok,next,bad){
 var makers={
  athletics:function(s,h,c){return[
   function(n){c.ask('달리기는 어디에서 시작할까요?');h.innerHTML='<div class="sport-prompt">출발 지점을 찾아보세요.</div>';choices(h,[['🚩','출발',1],['🏁','도착',0]],1,function(){c.good(n)},c.bad)},
-  function(n){c.ask('출발부터 도착까지 차례대로 눌러 보세요.');h.innerHTML='<div class="sport-prompt">1 → 2 → 3 → 4</div><div class="trackline"></div>';var k=1;var tr=h.querySelector('.trackline');[1,2,3,4].forEach(function(i){var b=document.createElement('button');b.className='trackstep';b.textContent=i;b.onclick=function(){if(i===k){b.classList.add('done');k++;O.sfx('tick');if(k===5)c.good(n)}else c.bad(b,'차례를 다시 확인해요')};tr.appendChild(b)})},
+  function(n){c.ask('출발부터 도착까지 차례대로 눌러 보세요.');h.innerHTML='<div class="sport-prompt">1 → 2 → 3 → 4</div><div class="trackline"></div>';var k=1,tr=h.querySelector('.trackline');[1,2,3,4].forEach(function(i){var b=document.createElement('button');b.className='trackstep';b.textContent=i;b.onclick=function(){if(i===k){b.classList.add('done');k++;O.sfx('tick');if(k===5)c.good(n)}else c.bad(b,'차례를 다시 확인해요')};tr.appendChild(b)})},
   function(n){c.ask('달리기 전에 준비해야 할 것을 골라 보세요.');h.innerHTML='<div class="sport-prompt">안전하게 준비해요.</div>';choices(h,[['👟','운동화',1],['🧸','인형',0],['💧','물',1]],1,function(){c.good(n)},c.bad)},
-  function(n){c.ask('신호가 나오면 빠르게 눌러 보세요.');h.innerHTML='<div class="sport-prompt">준비…</div><button class="oks-btn orange" disabled>기다려요</button>';var b=h.querySelector('button'),p=h.querySelector('.sport-prompt');setTimeout(function(){p.textContent='출발!';b.disabled=false;b.textContent='🏃 달리기';var t=performance.now();b.onclick=function(){var ms=Math.round(performance.now()-t);p.textContent='반응 시간 '+ms+'ms';c.good(n)}},700+Math.random()*900)},
+  function(n){c.ask('신호가 나오면 빠르게 눌러 보세요.');h.innerHTML='<div class="sport-prompt">준비…</div><button class="oks-btn orange" disabled>기다려요</button>';var b=h.querySelector('button'),p=h.querySelector('.sport-prompt');setTimeout(function(){p.textContent='출발!';b.disabled=false;b.textContent='🏃 달리기';var t=performance.now();b.onclick=function(){p.textContent='반응 시간 '+Math.round(performance.now()-t)+'ms';c.good(n)}},700+Math.random()*900)},
   function(n){c.ask('나에게 맞는 달리기 목표를 골라 보세요.');h.innerHTML='<div class="sport-prompt">내 목표 정하기</div>';choices(h,[['🙂','천천히 끝까지',1],['⚡','빠르게 달리기',1],['🤝','친구와 함께',1]],1,function(){c.good(n)},c.bad)}
  ]},
  swimming:function(s,h,c){return[
