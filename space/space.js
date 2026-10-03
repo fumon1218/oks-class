@@ -323,8 +323,12 @@
       (i ? '<div><b>Lv.' + i.lv + '</b><small>' + O.esc(i.title) + '</small></div><div><b>🪙 ' + i.coins + '</b><small>코인</small></div>' : '') + '</div>');
     var btns = E('div', 'sp-links');
     if (O.eco) { var m = E('button', 'sp-link', '🎯 오늘의 미션'); m.type = 'button'; m.onclick = function () { O.eco.missionsView(); }; btns.appendChild(m); }
-    [['🌱 배움 지도 (7교과 126차시 한눈에)', 'learn/'], ['📘 선생님 지도 계획서', 'curriculum/plan.html'], ['✏️ 선생님 문항 편집', 'curriculum/editor.html'], ['⚙️ 설정 (목소리·움직임·큰 버튼)', 'learn/?set=1']]
-      .forEach(function (l) { var a = E('a', 'sp-link', l[0]); a.href = l[1]; btns.appendChild(a); });
+    [
+      [O.iconHtml('icon_map.png', '배움 지도 (7교과 144차시 한눈에)'), 'learn/'],
+      [O.iconHtml('icon_teacher.png', '선생님 지도 계획서'), 'curriculum/plan.html'],
+      ['✏️ 선생님 문항 편집', 'curriculum/editor.html'],
+      [O.iconHtml('icon_settings.png', '설정 (목소리·움직임·큰 버튼)'), 'learn/?set=1']
+    ].forEach(function (l) { var a = E('a', 'sp-link', l[0]); a.href = l[1]; btns.appendChild(a); });
     body.appendChild(btns);
   }
   function reviewView(body) {
