@@ -175,11 +175,14 @@ body.portrait .sp-guide img{width:84px;}
 .sp-star.soon .sp-star-name{border-style:dashed;background:rgba(20,14,55,.78);}
 .sp-star.soon .sp-soon-chip{background:#fff3c4;color:#5a4212;border:1px solid #ffd86a;box-shadow:0 0 12px rgba(255,216,106,.38);}
 .sp-star.soon:hover .sp-star-img,.sp-star.soon:focus-visible .sp-star-img{transform:none;}
-.sp-system{pointer-events:none!important;transition:opacity .35s ease;}
+.sp-system{pointer-events:none;transition:opacity .35s ease;}
 .sp-system-ssing{opacity:var(--ssing-visible,0);}
 .sp-map > .sp-star:not(.sp-system){opacity:var(--our-visible,1);transition:opacity .35s ease;}
 .sp-system .sp-star-img{filter:drop-shadow(0 18px 30px rgba(10,5,40,.58));}
+.sp-system .sp-star-name{margin-top:-3%;}
 .sp-map.focus-ssing > .sp-star:not(.sp-system){display:none;}
+.sp-map.focus-ssing > .sp-system{pointer-events:auto;cursor:grab;touch-action:none;}
+.sp-map.focus-ssing > .sp-system:active{cursor:grabbing;}
 .sp-map.focus-our > .sp-system{display:none;}
 
 /* ---------- 우주 줌 (먼 우주 → 은하 → 별 무리 → 가까이) ---------- */
