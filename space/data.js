@@ -23,7 +23,7 @@
     { id: 'ssing', system: 'ssing', model: 'star_ssing', name: '씽씽 별 마을', short: '씽씽 별 마을', img: 'star_ssing', emo: '🏃',
       subjects: [], chips: ['체육', '놀이'], color: '#55cfff', soon: true, spin: .18,
       hello: '씽씽 별 마을은 체육과 놀이를 배우는 새로운 행성계예요.',
-      map: { x: 16, y: 56, w: 18 }, mapP: { x: 22, y: 36, w: 34 } }
+      map: { x: 22, y: 56, w: 18 }, mapP: { x: 22, y: 36, w: 34 } }
   ];
   /* 아직 태어나지 않은 별 (업데이트되면 새 교과·심화 단원으로) */
   /* 다른 게임으로 가는 별 (우주선 타고 날아가서 그 게임으로) */
