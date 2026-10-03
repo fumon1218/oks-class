@@ -104,8 +104,8 @@
   sh.ask(lesson.topic + '! 시작해 볼까요?', { silent: true });
   var start = E('div', 'oks-start');
   var gdesc = window.OKS_DESCRIBE && base ? window.OKS_DESCRIBE(base, level) : '';
-  start.innerHTML = '<div class="oks-start-lv">' + O.LEVELS[level - 1].name + '</div>' + (gdesc ? '<p class="gdesc">🎮 ' + O.esc(gdesc) + '</p>' : '') + '<p>🎯 ' + O.esc(lesson.goal) + '</p>';
-  var go = E('button', 'oks-btn', '▶ 시작하기'); go.type = 'button';
+  start.innerHTML = '<div class="oks-start-lv">' + O.LEVELS[level - 1].name + '</div>' + (gdesc ? '<p class="gdesc">' + O.esc(gdesc) + '</p>' : '') + '<p>' + O.esc(lesson.goal) + '</p>';
+  var go = E('button', 'oks-btn', O.iconHtml('icon_play.png', '시작하기')); go.type = 'button';
   start.appendChild(go);
   /* 같은 목표를 다른 놀이로: 수 세기 차시 → 새 잡기 */
   var BIRDS = ['🐦 새 잡기로 세기', 'games/birds/?mode=count&'], SHAPEG = ['🎪 모양 뽑기', 'games/shapes/?'],
@@ -121,7 +121,7 @@
   extras.forEach(function (x) { var ex = E('a', 'oks-btn orange oks-extra', x.label); ex.href = x.href; start.appendChild(ex); });
   /* 종이 학습지 (지금은 수학 1단원) */
   var wsHref = base ? O.ROOT + 'worksheet/?id=' + id + '&level=' + level : null;
-  if (wsHref) { var wb = E('a', 'oks-btn blue oks-extra', '📄 학습지 인쇄'); wb.href = wsHref; start.appendChild(wb); }
+  if (wsHref) { var wb = E('a', 'oks-btn blue oks-extra', '학습지 인쇄'); wb.href = wsHref; start.appendChild(wb); }
   sh.board.appendChild(start);
   O.target({ get: function () { return go; } }, Math.min(level, 2));
   go.onclick = function () { O.unlock(); O.clearPrompt(); st.t0 = Date.now(); st.glow = 0; st.hand = 0; ctx.clear(); run(); };
