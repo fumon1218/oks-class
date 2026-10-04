@@ -98,6 +98,7 @@ function summerHub(){
    var btn=E('button','summer-building '+(b.type==='utility'?'utility':'sport')+' pos-'+(i+1));
    btn.style.setProperty('--bcolor',b.color||'#55cfff');
    btn.innerHTML='<span class="summer-building-art"><img src="'+b.image+'" alt=""></span><span class="summer-building-label"><b>'+b.name+'</b><small>'+b.sub+'</small></span>';
+   var bi=btn.querySelector('img');bi.onerror=function(){var s=b.type==='sport'&&byId(b.id);if(s&&s.scene&&this.src.indexOf(s.scene)<0)this.src=s.scene;else this.style.visibility='hidden'};
    btn.onclick=function(){
      O.sfx('pop');
      if(b.type==='sport'){location.href='?festival=summer&sport='+b.id;return;}
@@ -129,7 +130,7 @@ function utilityBuilding(id){
  }else{
    body.innerHTML='<p class="summer-note">배웠던 종목을 골라 다시 연습해 보세요. 각 경기장에서 학년과 수준을 다시 선택할 수 있어요.</p><div class="summer-training-links"></div>';
    var links=body.querySelector('.summer-training-links');
-   D.sports.forEach(function(s){var a=E('a','summer-training-link','<img src="'+s.image+'" alt=""><span><b>'+s.name+'</b><small>'+s.title+'</small></span>');a.href='?festival=summer&sport='+s.id;links.appendChild(a)});
+   D.sports.forEach(function(s){var a=E('a','summer-training-link','<img src="'+s.image+'" alt=""><span><b>'+s.name+'</b><small>'+s.title+'</small></span>');a.href='?festival=summer&sport='+s.id;var im=a.querySelector('img');im.onerror=function(){if(s.scene&&this.src.indexOf(s.scene)<0)this.src=s.scene};links.appendChild(a)});
  }
  modal.onclick=function(e){if(e.target===modal)modal.remove()};modal.appendChild(box);document.body.appendChild(modal);
 }
@@ -139,7 +140,8 @@ function sportToc(){
  var sh=top(s.name+' 경기장','하계 올림픽 · 체육 · 놀이','?festival=summer','하계 올림픽',false);
  sh.ask(s.name+' 경기장이에요. 층을 고르고 차시와 수준을 눌러요.',{silent:true});
  var host=E('div','sport-toc');
- host.innerHTML='<div class="sport-toc-head"><img src="'+s.image+'" alt=""><div><small>하계 올림픽</small><h1>'+s.name+' 경기장</h1><p>'+s.goal+'</p></div></div><div class="sports-floor-tabs"></div><div class="sports-lesson-list"></div>';
+ host.innerHTML='<div class="sport-toc-head"><img src="'+s.image+'" alt=""><div><small>하계 스포츠</small><h1>'+s.name+' 경기장</h1><p>'+s.goal+'</p></div></div><div class="sports-floor-tabs"></div><div class="sports-lesson-list"></div>';
+ var heroImg=host.querySelector('.sport-toc-head img');heroImg.onerror=function(){if(s.scene&&this.src.indexOf(s.scene)<0)this.src=s.scene};
  var tabs=host.querySelector('.sports-floor-tabs'),list=host.querySelector('.sports-lesson-list'),sel=school;
  SCHOOLS.slice().reverse().forEach(function(sc){
   var t=E('button','sports-floor');t.dataset.k=sc.key;t.innerHTML='<b>'+sc.floor+'</b> '+sc.name+' <small>3</small>';
