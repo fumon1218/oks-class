@@ -155,3 +155,40 @@ body.athletics-game{background-image:url('assets/athletics/athletics_bg_main.web
  .athletics-preview .preview-runner{height:82%}
  .ath-start-challenge{grid-template-columns:150px 100px;padding:12px;gap:8px}.ath-ready-runner{max-height:190px;max-width:150px}.ath-signal.big{height:90px}.ath-start-msg{font-size:24px}
 }
+
+
+/* ===== 씽씽별 하계 스포츠 마을 · 건물 지도 UI ===== */
+.summer-village{position:relative;min-height:760px;border-radius:36px;overflow:hidden;background:linear-gradient(180deg,#dff7ff 0 26%,#e9f8d9 26% 100%);box-shadow:0 16px 44px rgba(7,30,84,.28);border:4px solid rgba(255,255,255,.78)}
+.summer-village-sky{position:relative;z-index:4;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 26px 12px;background:linear-gradient(180deg,rgba(255,255,255,.9),rgba(255,255,255,.48))}
+.summer-village-sky small{display:block;color:#3a79aa;font-size:15px}.summer-village-sky h1{margin:0;color:#173d7d;font-size:clamp(32px,4.4vw,54px);font-weight:500;text-shadow:0 3px #fff}.summer-village-sky p{margin:3px 0 0;color:#52708a;font-size:19px}
+.summer-village-badge{flex:0 0 auto;padding:9px 16px;border-radius:999px;background:#fff7c9;border:3px solid #f6c857;color:#815b00;font-size:18px;box-shadow:0 5px 12px rgba(80,65,20,.12)}
+.summer-village-map{position:relative;min-height:650px;padding:24px 30px 34px;background:
+ radial-gradient(circle at 50% 56%,rgba(255,255,255,.85) 0 8%,transparent 8.5%),
+ radial-gradient(circle at 50% 56%,#b9e98b 0 43%,#9fd875 43.5% 53%,#83c865 53.5% 100%)}
+.summer-village-map::before{content:'';position:absolute;left:5%;right:5%;bottom:4%;height:20%;border-radius:50%;background:rgba(81,164,213,.18);filter:blur(1px)}
+.summer-road{position:absolute;z-index:0;left:50%;top:52%;background:#f4e3bd;border:5px solid rgba(255,255,255,.65);box-shadow:0 3px 0 rgba(126,100,64,.11);transform-origin:center}
+.summer-road.road-a{width:82%;height:56px;transform:translate(-50%,-50%) rotate(0deg);border-radius:999px}
+.summer-road.road-b{width:62%;height:52px;transform:translate(-50%,-50%) rotate(90deg);border-radius:999px}
+.summer-plaza{position:absolute;z-index:2;left:50%;top:53%;transform:translate(-50%,-50%);width:126px;height:126px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#fff4cf;border:7px solid #fff;box-shadow:0 10px 22px rgba(67,91,70,.18);color:#4c6a42;pointer-events:none}
+.summer-plaza span{font-size:40px;line-height:1}.summer-plaza b{font-size:15px;font-weight:500}
+.summer-building-grid{position:relative;z-index:3;display:grid;grid-template-columns:repeat(5,minmax(145px,1fr));grid-auto-rows:minmax(235px,auto);gap:16px 14px;align-items:end}
+.summer-building{position:relative;min-width:0;border:0;background:transparent;padding:2px 4px 8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:0;transition:transform .16s ease,filter .16s ease;filter:drop-shadow(0 10px 12px rgba(34,75,74,.18))}
+.summer-building:hover,.summer-building:focus-visible{transform:translateY(-6px) scale(1.025);filter:drop-shadow(0 15px 16px rgba(34,75,74,.24));outline:none}
+.summer-building:active{transform:translateY(-1px) scale(.98)}
+.summer-building-art{position:relative;width:100%;height:176px;display:flex;align-items:flex-end;justify-content:center}
+.summer-building-art::after{content:'';position:absolute;left:18%;right:18%;bottom:4px;height:18px;border-radius:50%;background:rgba(45,93,62,.18);filter:blur(7px);z-index:-1}
+.summer-building-art img{display:block;width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.summer-building.utility .summer-building-art{height:154px}.summer-building.utility{transform:scale(.95)}.summer-building.utility:hover,.summer-building.utility:focus-visible{transform:translateY(-6px) scale(.98)}
+.summer-building-label{min-width:86%;max-width:100%;margin-top:-2px;padding:8px 10px 9px;border-radius:18px;background:rgba(255,255,255,.95);border:3px solid color-mix(in srgb,var(--bcolor) 72%,#fff);box-shadow:0 6px 14px rgba(35,65,80,.14);display:flex;flex-direction:column;align-items:center}
+.summer-building-label b{font-size:19px;font-weight:500;color:#263c5d;white-space:nowrap}.summer-building-label small{font-size:12px;color:#68778b;margin-top:2px;white-space:nowrap}
+.summer-building.pos-1,.summer-building.pos-5{margin-top:30px}.summer-building.pos-6,.summer-building.pos-10{margin-bottom:10px}
+.summer-utility-modal{position:fixed;inset:0;z-index:220;background:rgba(10,25,67,.58);display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(5px)}
+.summer-utility-box{position:relative;width:min(980px,95vw);max-height:92vh;overflow:auto;border-radius:34px;background:#fffaf0;border:5px solid #fff;box-shadow:0 22px 70px rgba(7,20,70,.38);padding:22px 26px 28px}
+.summer-utility-close{position:absolute;z-index:3;right:16px;top:14px;width:54px;height:54px;border-radius:50%;background:#f1eadf;color:#665b53;font-size:38px;line-height:1;box-shadow:0 4px 10px rgba(50,35,20,.12)}
+.summer-utility-head{display:flex;align-items:center;gap:20px;padding-right:58px}.summer-utility-head>img{width:170px;height:145px;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(30,60,80,.16))}.summer-utility-head small{color:#4e9ac3}.summer-utility-head h2{margin:2px 0;font-size:35px;color:#2d4264;font-weight:500}.summer-utility-head p{margin:0;color:#748095;font-size:17px}
+.summer-utility-body{margin-top:14px;padding:18px;border-radius:24px;background:#fff;box-shadow:inset 0 0 0 2px #f1e7d8}.summer-tip b{font-size:24px;color:#245889}.summer-tip p,.summer-note{font-size:18px;line-height:1.55;color:#5f6878}
+.summer-medal-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.summer-medal-stats>div{padding:18px;border-radius:22px;background:linear-gradient(180deg,#fff7ce,#fff);border:3px solid #f4d46a;text-align:center}.summer-medal-stats b{display:block;font-size:36px;color:#9b6a00}.summer-medal-stats small{color:#74664b}
+.summer-training-links{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.summer-training-link{display:flex;align-items:center;gap:10px;padding:9px;border-radius:18px;background:#f5f9ff;border:2px solid #dfeaf7;text-decoration:none;color:#334866}.summer-training-link img{width:80px;height:70px;object-fit:contain}.summer-training-link b{display:block;font-size:18px}.summer-training-link small{display:block;color:#718096;font-size:12px}
+@media(max-width:1050px){.summer-building-grid{grid-template-columns:repeat(4,minmax(140px,1fr));grid-auto-rows:220px}.summer-building-art{height:158px}.summer-building.utility .summer-building-art{height:145px}.summer-building.pos-1,.summer-building.pos-5{margin-top:0}}
+@media(max-width:760px){.summer-village{min-height:0}.summer-village-sky{padding:14px 14px 10px}.summer-village-badge{display:none}.summer-village-sky p{font-size:15px}.summer-village-map{min-height:0;padding:18px 10px 24px}.summer-road,.summer-plaza{display:none}.summer-building-grid{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:auto;gap:10px 6px}.summer-building{min-height:205px}.summer-building-art{height:150px}.summer-building.utility{transform:none}.summer-building.utility:hover,.summer-building.utility:focus-visible{transform:translateY(-4px)}.summer-building.utility .summer-building-art{height:140px}.summer-building-label{min-width:94%;padding:7px 6px}.summer-building-label b{font-size:17px}.summer-building-label small{font-size:11px;white-space:normal;text-align:center}.summer-utility-head>img{width:120px;height:105px}.summer-utility-head h2{font-size:27px}.summer-training-links{grid-template-columns:1fr 1fr}}
+@media(max-width:430px){.summer-building{min-height:180px}.summer-building-art{height:128px}.summer-building.utility .summer-building-art{height:120px}.summer-building-label b{font-size:15px}.summer-building-label small{display:none}.summer-utility-box{padding:18px 12px 22px}.summer-utility-head{gap:8px}.summer-utility-head>img{width:92px;height:82px}.summer-medal-stats{grid-template-columns:1fr}.summer-training-links{grid-template-columns:1fr}}
