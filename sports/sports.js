@@ -34,7 +34,7 @@ function schoolInfo(){return SCHOOLS.filter(function(x){return x.key===school})[
 function top(title,sub,back,label,compact,fit){
  return O.shell({title:title,subtitle:sub,back:back||'../',backLabel:label||'뒤로',level:level,compact:compact!==false,fit:fit==null?compact!==false:fit});
 }
-function tryBg(el,s){var im=new Image();im.onload=function(){el.classList.add('sports-bg');el.style.setProperty('--sport-bg',"url('"+s.image+"')")};im.src=s.image;}
+function tryBg(el,s){var src=s.scene||s.image,im=new Image();im.onload=function(){el.classList.add('sports-bg');el.style.setProperty('--sport-bg',"url('"+src+"')")};im.src=src;}
 function progress(){try{return JSON.parse(localStorage.getItem('oks_sports_progress_v4')||'{}')}catch(e){return{}}}
 function save(key,stars,mistakes){
  var p=progress();p[key]=p[key]||{plays:0,best:{}};p[key].plays++;p[key].last=level;p[key].best[level]=Math.max(p[key].best[level]||0,stars||0);p[key].mistakes=mistakes;
@@ -89,17 +89,49 @@ function villageHub(){
 }
 /* ---------- 하계 올림픽 종목 ---------- */
 function summerHub(){
- var sh=top('하계 올림픽','종목 목차','./','씽씽별로',false);
- sh.ask('배우고 싶은 하계 올림픽 종목을 골라 보세요.',{silent:true});
- var b=E('div','summer-toc');
- b.innerHTML='<div class="sports-hero small"><h1>하계 올림픽</h1><p>종목을 고르면 학습 목차로 들어가요</p></div><div class="sports-grid"></div>';
- var g=b.querySelector('.sports-grid');
- D.sports.forEach(function(s){
-  var a=E('button','sport-card image-card');a.style.setProperty('--sport',s.color);
-  a.innerHTML='<img src="'+s.image+'" alt=""><span class="sport-card-label"><b>'+s.name+'</b><small>'+s.title+'</small><em>목차 보기</em></span>';
-  a.onclick=function(){O.sfx('pop');location.href='?festival=summer&sport='+s.id};g.appendChild(a);
+ var sh=top('하계 스포츠 마을','씽씽 별 마을 · 하계 스포츠','./','씽씽별로',false);
+ sh.ask('가 보고 싶은 건물을 골라 보세요. 경기장에서는 종목별 차시를, 보조 건물에서는 안내와 복습을 할 수 있어요.',{silent:true});
+ var host=E('div','summer-village');
+ host.innerHTML='<div class="summer-village-sky"><div><small>씽씽 별 마을</small><h1>하계 스포츠 마을</h1><p>건물을 눌러 운동과 놀이를 시작해요</p></div><span class="summer-village-badge">☀️ 하계 스포츠</span></div><div class="summer-village-map"><div class="summer-road road-a"></div><div class="summer-road road-b"></div><div class="summer-plaza"><span>⭐</span><b>씽씽 광장</b></div><div class="summer-building-grid"></div></div>';
+ var grid=host.querySelector('.summer-building-grid');
+ (D.summerBuildings||[]).forEach(function(b,i){
+   var btn=E('button','summer-building '+(b.type==='utility'?'utility':'sport')+' pos-'+(i+1));
+   btn.style.setProperty('--bcolor',b.color||'#55cfff');
+   btn.innerHTML='<span class="summer-building-art"><img src="'+b.image+'" alt=""></span><span class="summer-building-label"><b>'+b.name+'</b><small>'+b.sub+'</small></span>';
+   btn.onclick=function(){
+     O.sfx('pop');
+     if(b.type==='sport'){location.href='?festival=summer&sport='+b.id;return;}
+     utilityBuilding(b.id);
+   };
+   grid.appendChild(btn);
  });
- sh.board.innerHTML='';sh.board.appendChild(b);
+ sh.board.innerHTML='';sh.board.appendChild(host);
+}
+function utilityBuilding(id){
+ var old=document.querySelector('.summer-utility-modal');if(old)old.remove();
+ var modal=E('div','summer-utility-modal'),box=E('section','summer-utility-box'),close=E('button','summer-utility-close','×');
+ close.type='button';close.setAttribute('aria-label','닫기');close.onclick=function(){modal.remove();O.sfx('pop')};
+ box.appendChild(close);
+ var data=(D.summerBuildings||[]).filter(function(x){return x.id===id})[0]||{};
+ var head=E('div','summer-utility-head','<img src="'+(data.image||'')+'" alt=""><div><small>하계 스포츠 마을</small><h2>'+(data.name||'스포츠 안내')+'</h2><p>'+(data.sub||'')+'</p></div>');
+ box.appendChild(head);
+ var body=E('div','summer-utility-body');box.appendChild(body);
+ if(id==='info'){
+   body.innerHTML='<div class="summer-tip"><b>오늘은 이렇게 시작해요</b><p>처음이라면 육상 경기장에서 1수준 ‘느껴 보기’부터 시작해 보세요. 학생의 움직임과 반응 속도에 따라 수준을 자유롭게 바꿀 수 있어요.</p></div>';
+   var a=E('a','oks-btn','🏃 육상 경기장 가기');a.href='?festival=summer&sport=athletics';body.appendChild(a);
+ }else if(id==='medal'){
+   var p=progress(),keys=Object.keys(p),plays=0,stars=0;
+   keys.forEach(function(k){if(k.indexOf('-')<0)return;var x=p[k]||{};plays+=x.plays||0;Object.keys(x.best||{}).forEach(function(lv){stars+=x.best[lv]||0})});
+   body.innerHTML='<div class="summer-medal-stats"><div><b>'+plays+'</b><small>참여한 활동</small></div><div><b>'+stars+'</b><small>모은 별</small></div><div><b>'+keys.length+'</b><small>기록된 차시</small></div></div><p class="summer-note">순위보다 참여와 나의 변화가 더 중요해요. 같은 종목도 다른 수준으로 다시 도전할 수 있어요.</p>';
+ }else if(id==='play'){
+   body.innerHTML='<p class="summer-note">수업 사이에 짧고 즐겁게 몸을 움직이는 놀이 공간이에요.</p>';
+   var l=E('a','oks-btn blue','🎮 미니게임 놀이터 가기');l.href='../minigames/';body.appendChild(l);
+ }else{
+   body.innerHTML='<p class="summer-note">배웠던 종목을 골라 다시 연습해 보세요. 각 경기장에서 학년과 수준을 다시 선택할 수 있어요.</p><div class="summer-training-links"></div>';
+   var links=body.querySelector('.summer-training-links');
+   D.sports.forEach(function(s){var a=E('a','summer-training-link','<img src="'+s.image+'" alt=""><span><b>'+s.name+'</b><small>'+s.title+'</small></span>');a.href='?festival=summer&sport='+s.id;links.appendChild(a)});
+ }
+ modal.onclick=function(e){if(e.target===modal)modal.remove()};modal.appendChild(box);document.body.appendChild(modal);
 }
 /* ---------- 종목 차시 + 수준 ---------- */
 function sportToc(){
@@ -144,7 +176,8 @@ function activity(){
  sh.ask(li[0]+'! 시작해 볼까요?',{silent:true});
 
  var start=E('div','oks-start sports-start');
- start.innerHTML='<div class="oks-start-lv">'+LEVELS[level-1].name+'</div><p class="gdesc">'+levelDesc(s,li)+'</p><p>'+li[1]+'</p><div class="sports-start-preview'+(s.id==='athletics'?' athletics-preview':'')+'"><img class="preview-bg" src="'+(s.id==='athletics'?'assets/athletics/athletics_bg_main.webp':s.image)+'" alt="">'+(s.id==='athletics'?'<img class="preview-runner" src="assets/athletics/runner_idle.webp" alt="">':'')+'</div>';
+ var preview=s.id==='athletics'?'assets/athletics/athletics_bg_main.webp':(s.scene||s.image);
+ start.innerHTML='<div class="oks-start-lv">'+LEVELS[level-1].name+'</div><p class="gdesc">'+levelDesc(s,li)+'</p><p>'+li[1]+'</p><div class="sports-start-preview'+(s.id==='athletics'?' athletics-preview':'')+'"><img class="preview-bg" src="'+preview+'" alt="">'+(s.id==='athletics'?'<img class="preview-runner" src="assets/athletics/runner_idle.webp" alt="">':'')+'</div>';
  var go=E('button','oks-btn',O.iconHtml('icon_play.png','시작하기'));go.type='button';start.appendChild(go);
  var ws=E('a','oks-btn blue oks-extra','학습지 인쇄');ws.href='worksheet.html?sport='+s.id+'&school='+school+'&level='+level;start.appendChild(ws);
  sh.board.appendChild(start);
@@ -187,7 +220,7 @@ function runGame(sh,s,li){
 }
 function sceneStrip(s,i,n){
  var d=E('div','sports-scene-strip');
- var bg=s.id==='athletics'?'assets/athletics/athletics_bg_main.webp':s.image;
+ var bg=s.id==='athletics'?'assets/athletics/athletics_bg_main.webp':(s.scene||s.image);
  d.innerHTML='<img src="'+bg+'" alt=""><div class="sports-scene-title">'+s.emo+' '+s.name+' 탐험</div><div class="sports-scene-dots">'+Array.from({length:n},function(_,k){return '<i class="'+(k<i?'done':k===i?'now':'')+'">'+(k<i?'★':k+1)+'</i>'}).join('')+'</div>';
  return d;
 }
