@@ -100,7 +100,7 @@
       return result; // 인식되지 않은 프레임으로는 점수를 주지 않습니다.
     }
     if (!this.baseline) return result;
-    var candidates = [], accepted = 0, sensitivity = this.options.sensitivity;
+    var candidates = [], accepted = 0, sensitivity = this.options.sensitivity * (this.options.seated ? 1 : .7);
     Object.keys(this.tracking).forEach(function (s) { if (!f[s] && (!this.tracking[s].previous || now - this.tracking[s].previous.time > 250)) this.tracking[s] = { armed: false, low: null, high: null, smooth: null, previous: null }; }, this);
     Object.keys(f).forEach(function (s) {
       if (!this.baseline[s]) {
@@ -108,6 +108,15 @@
         return;
       }
       var b = this.baseline[s], t = this.tracking[s], current = f[s], previous = t.previous;
+      // 서서 시작할 때 발이 올라간 상태로 잡혔다면 실제 내려 둔 자세로 기준을 고칩니다.
+      var resting = !this.options.seated && visible(points[SIDES[s][0]]) && visible(points[SIDES[s][1]]) && current.ankle > b.ankle + .025 && current.ankle - current.knee > .06 && Math.abs(current.kneeX - b.kneeX) < Math.max(.08, b.leg * .25) && Math.abs(current.x - b.x) < Math.max(.12, b.leg * .75);
+      if (resting) {
+        if (!t.rest || Math.hypot(current.x - t.rest.x, current.ankle - t.rest.ankle) > .025 || Math.hypot(current.kneeX - t.rest.kneeX, current.knee - t.rest.knee) > .025) t.rest = { x: current.x, ankle: current.ankle, kneeX: current.kneeX, knee: current.knee, time: now };
+        t.armed = false; t.low = t.high = t.smooth = null;
+        if (now - t.rest.time < 200) { accepted++; result.sides.push(s); t.previous = { x: current.x, ankle: current.ankle, kneeX: current.kneeX, knee: current.knee, time: now }; return; }
+        this.baseline[s] = b = { ankle: current.ankle, knee: current.knee, leg: Math.max(.09, current.leg), x: current.x, kneeX: current.kneeX };
+      }
+      t.rest = null;
       // 다른 위치의 사람/사물로 좌표가 튄 프레임은 점수에서 제외합니다.
       var jump = previous && Math.max(Math.hypot(current.x - previous.x, current.ankle - previous.ankle), Math.hypot(current.kneeX - previous.kneeX, current.knee - previous.knee)) > b.leg * .75 * Math.max(1, Math.min(2.5, (now - previous.time) / 100));
       var shifted = Math.abs(current.x - b.x) > b.leg * .75 || Math.abs(current.kneeX - b.kneeX) > b.leg * .75;
@@ -117,8 +126,12 @@
         result.reason = 'tracking'; return;
       }
       accepted++; result.sides.push(s); t.previous = { x: current.x, ankle: current.ankle, kneeX: current.kneeX, knee: current.knee, time: now };
-      var ankle = (b.ankle - f[s].ankle) / b.leg, knee = (b.knee - f[s].knee) / b.leg;
-      var value = this.options.seated ? Math.max(ankle, knee) : Math.max(ankle, knee * .85);
+      var drift = 0, other = s === 'left' ? 'right' : 'left', otherBase = this.baseline[other], otherPose = f[other];
+      if (!this.options.seated && otherBase && otherPose && Math.abs((otherPose.ankle - otherBase.ankle) - (otherPose.knee - otherBase.knee)) < otherBase.leg * .03) drift = otherPose.knee - otherBase.knee;
+      var ankle = (b.ankle - current.ankle + drift) / b.leg, knee = (b.knee - current.knee + drift) / b.leg;
+      var sweep = Math.abs((current.x - current.kneeX) - (b.x - b.kneeX)) / b.leg;
+      // 서서 차는 안쪽/옆쪽 발목 움직임은 발 들기와 함께 나타날 때만 인정합니다.
+      var value = this.options.seated ? Math.max(ankle, knee) : Math.max(ankle, knee * .85, Math.max(ankle, knee) > .025 ? sweep : 0);
       t.smooth = t.smooth == null ? value : t.smooth * .25 + value * .75;
       result.lift = Math.max(result.lift, t.smooth);
       if (t.smooth < sensitivity * .42) {

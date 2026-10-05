@@ -59,3 +59,10 @@ const stableFront=pose(), largeBack=pose();[25,26,27,28].forEach(i=>largeBack[i]
 console.log('PASS 신뢰도 흔들림·짧은 누락·추적 없는 약한 좌표 차단·참여자 유지');
 
 const sensitiveSpike=new Motion({sensitivity:.08});sensitiveSpike.start(pose());frames(sensitiveSpike,pose(),5);assert.equal(frames(sensitiveSpike,up,1).length,0);assert.equal(frames(sensitiveSpike,pose(),8).length,0,'작은 움직임 설정에서도 한 프레임 튐에 점수 없음');
+
+const sweep=pose();sweep[27].x=.465;sweep[27].y=.83;const standingSweep=new Motion();standingSweep.start(pose());frames(standingSweep,pose(),5);assert.deepEqual(frames(standingSweep,sweep,12),['left'],'서서 작게 들며 안쪽으로 차는 동작');frames(standingSweep,pose(),8);assert.deepEqual(frames(standingSweep,sweep,12),['left']);
+const sidewaysOnly=pose();sidewaysOnly[27].x=.465;const shuffle=new Motion();shuffle.start(pose());frames(shuffle,pose(),5);assert.equal(frames(shuffle,sidewaysOnly,12).length,0,'발을 들지 않고 옆으로만 끄는 동작은 제외');
+const raisedStart=pose();raisedStart[27].y=.7;const ground=new Motion();ground.start(raisedStart);frames(ground,pose(),8);assert.equal(ground.baseline.left.ankle,.85,'처음 들린 발 대신 내려 둔 자세로 기준 복구');assert.deepEqual(frames(ground,up,12),['left'],'짧게 잡힌 시작 다리 길이를 복구해 정상 동작 판정');
+const sway=pose();[25,26,27,28].forEach(i=>sway[i].y-=.06);const balance=new Motion();balance.start(pose());frames(balance,pose(),5);assert.equal(frames(balance,sway,12).length,0,'양쪽 다리가 같이 올라가는 몸통 흔들림을 발차기로 세지 않음');
+const seatedSweep=new Motion({seated:true});seatedSweep.start(pose());frames(seatedSweep,pose(),5);assert.equal(frames(seatedSweep,sweep,12).length,0,'앉은 모드에 서서 차기 수평 판정을 추가하지 않음');
+console.log('PASS 서서 차기: 안쪽 발차기·바닥 끌기 제외·들린 초기 기준 복구·균형 흔들림 보정·앉은 모드 유지');
