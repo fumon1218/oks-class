@@ -3,7 +3,7 @@
   var $ = function (id) { return document.getElementById(id); }, O = window.OKS;
   var video = $('video'), overlay = $('skeleton'), ctx = overlay.getContext('2d');
   var stream = null, worker = null, cancelModel = null, detector = null;
-  var epoch = 0, starting = false, ready = false, valid = false, calibrating = false, playing = false, paused = false, busy = false;
+  var epoch = 0, starting = false, ready = false, valid = false, playing = false, paused = false, busy = false;
   var countMode = 'button';
   var count = 0, raf = 0, lastFrame = 0, lastVideoTime = -1, poseTimer = 0, flight = null, shine = null, poseTimeout = 0;
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches || !!(O && O.settings().calm);
@@ -13,13 +13,12 @@
     $('camera').disabled = starting || !!stream;
     $('camera').textContent = starting ? '카메라 준비 중…' : stream ? '카메라 켜짐' : '카메라 켜기';
     $('stop').disabled = !starting && !stream;
-    $('calibrate').disabled = !ready || !valid || calibrating || paused;
+    $('calibrate').disabled = !ready || !valid || paused;
     $('pause').disabled = !playing;
     $('pause').textContent = paused ? '다시 놀기' : '잠깐 쉬기';
     $('tryKick').disabled = starting;
     $('tryKick').textContent = stream ? '버튼 연습으로 전환' : '버튼으로 차 보기';
     $('framing').hidden = !ready;
-    ['posture', 'foot', 'sensitivity'].forEach(function (id) { $(id).disabled = calibrating; });
     $('cameraBadge').textContent = starting ? '준비 중' : stream ? (valid ? '다리 인식됨' : '다리를 보여 주세요') : '카메라 꺼짐';
     $('inputLabel').textContent = stream ? '카메라 동작 모드' : '버튼 연습 모드';
   }
@@ -76,24 +75,28 @@
     clearTimeout(poseTimer); busy = false;
     valid = !!detector.read(points); var instruction = framing(points); draw(points);
     if (paused || $('helpDialog').open) { updateControls(); return; }
-    if (calibrating) {
-      var c = detector.calibrate(points); $('calibration').value = c.progress;
-      status(!c.valid ? instruction : c.moving ? '발을 내리고 잠깐 편하게 멈춰 주세요.' : '편한 준비 자세를 유지해 주세요…');
-      if (c.done) { calibrating = false; playing = true; $('calibration').hidden = true; cue('발을 내린 뒤, 살짝 들어 보세요!'); status('준비됐어요! 발 들기 → 내리기를 반복해요.'); $('caption').textContent = '발을 내린 뒤 다시 들어야 다음 동작으로 인정해요.'; }
-    } else if (playing) {
+    if (!playing && valid && detector.start(points)) {
+      playing = true;
+      cue('놀이 시작! 발을 내린 뒤 살짝 들어요.');
+      status('인식됐어요! 자동으로 놀이를 시작했어요.');
+      $('caption').textContent = '발을 내린 뒤 다시 들어야 다음 동작으로 인정해요.';
+      updateControls();
+      return;
+    }
+    if (playing) {
       var r = detector.update(points, performance.now());
       if (!r.valid) { cue('다리가 보이면 이어서 놀아요.'); status(instruction); }
       else { status('발을 내린 뒤 다시 들면 제기를 차요.'); if (r.kick) kick(r.kick); else if ($('cue').textContent === '다리가 보이면 이어서 놀아요.') cue('발을 내리고 다시 준비해요.'); }
-    } else { status(valid ? '전신이 잘 보여요! ‘자세 맞추고 시작’을 누르면 놀이를 시작해요.' : instruction); cue(valid ? '자세 맞추고 시작을 눌러요!' : '발까지 보여야 놀이를 시작할 수 있어요.'); }
+    } else { status(instruction); cue('다리가 인식되면 자동으로 시작해요.'); }
     updateControls();
   }
   function stopCamera(message) {
-    epoch++; starting = ready = valid = calibrating = playing = paused = busy = false;
+    epoch++; starting = ready = valid = playing = paused = busy = false;
     cancelAnimationFrame(raf); raf = 0; clearTimeout(poseTimer);
     if (cancelModel) { cancelModel(); cancelModel = null; }
     if (worker) worker.terminate(); worker = null;
     if (stream) stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; video.srcObject = null;
-    ctx.clearRect(0, 0, overlay.width, overlay.height); $('cameraEmpty').hidden = false; $('calibration').hidden = true; $('calibration').value = 0;
+    ctx.clearRect(0, 0, overlay.width, overlay.height); $('cameraEmpty').hidden = false;
     resetVisuals(); updateControls(); status(message || '카메라를 껐어요. 버튼으로 연습하거나 다시 켤 수 있어요.'); cue('발을 들면 제기가 통통!');
   }
   function frame(now) {
@@ -139,7 +142,7 @@
       });
       await Promise.all([cameraPromise, initModel(token)]);
       if (token !== epoch) return;
-      starting = false; ready = true; lastFrame = 0; lastVideoTime = -1; resetScore(); countMode = 'camera'; status('어깨부터 발까지 화면에 들어오도록 위치를 맞춰 주세요.'); updateControls(); raf = requestAnimationFrame(frame);
+      starting = false; ready = true; lastFrame = 0; lastVideoTime = -1; resetScore(); countMode = 'camera'; status('다리가 한 번 인식되면 자동으로 시작해요. 어깨부터 발까지 보여 주세요.'); updateControls(); raf = requestAnimationFrame(frame);
     } catch (e) {
       if (token !== epoch) return;
       var message = e.name === 'NotAllowedError' ? '카메라 권한이 허용되지 않았어요. 주소창의 사이트 설정에서 카메라를 허용하고 다시 켜 주세요.' : e.name === 'NotFoundError' ? '사용할 카메라를 찾지 못했어요. 맥북 카메라 연결을 확인해 주세요.' : e.name === 'NotReadableError' ? '카메라를 사용하지 못했어요. 다른 앱의 카메라 사용을 끝내고 다시 켜 주세요.' : '카메라 또는 동작 인식 준비에 실패했어요. 인터넷 연결을 확인하고 다시 켜 주세요. 버튼 연습도 가능합니다.';
@@ -148,7 +151,7 @@
   }
   $('camera').onclick = startCamera;
   $('stop').onclick = function () { stopCamera(); };
-  $('calibrate').onclick = function () { detector = newDetector(); calibrating = true; playing = false; resetScore(); $('calibration').hidden = false; $('calibration').value = 0; cue('편한 준비 자세로 잠깐 멈춰요.'); updateControls(); };
+  $('calibrate').onclick = function () { detector = newDetector(); playing = false; resetScore(); cue('다시 인식되면 바로 시작해요.'); status('편한 자세에서 발을 내려 주세요. 인식되면 자동으로 시작해요.'); updateControls(); };
   $('pause').onclick = function () {
     paused = !paused; detector.resetTracking(); updateControls();
     if (flight) paused ? flight.pause() : flight.play(); if (shine) paused ? shine.pause() : shine.play();
@@ -156,7 +159,7 @@
   };
   $('reset').onclick = function () { resetScore(); paused = false; if (detector) detector.resetTracking(); cue('새로운 별을 모아 볼까요?'); updateControls(); };
   $('tryKick').onclick = function () { if (starting) return; if (stream) stopCamera('카메라를 끄고 버튼 연습으로 전환했어요. 카메라를 다시 켜면 동작 놀이로 돌아갈 수 있어요.'); kick('button'); };
-  ['posture', 'foot', 'sensitivity'].forEach(function (id) { $(id).onchange = function () { detector = newDetector(); playing = paused = calibrating = false; $('calibration').hidden = true; resetVisuals(); status(stream ? '설정을 바꿨어요. 준비 자세를 다시 맞춰 주세요.' : '카메라를 켜거나 버튼으로 연습해 주세요.'); cue('내 움직임에 맞춰 준비해요.'); updateControls(); }; });
+  ['posture', 'foot', 'sensitivity'].forEach(function (id) { $(id).onchange = function () { detector = newDetector(); playing = paused = false; resetVisuals(); status(stream ? '설정을 바꿨어요. 다리가 인식되면 자동으로 다시 시작해요.' : '카메라를 켜거나 버튼으로 연습해 주세요.'); cue('내 움직임에 맞춰 준비해요.'); updateControls(); }; });
   $('help').onclick = function () { if (playing && !paused) $('pause').click(); $('helpDialog').showModal(); };
   $('helpDialog').addEventListener('close', function () { if (detector) detector.resetTracking(); });
   var lastButton = 0;

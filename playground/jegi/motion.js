@@ -49,6 +49,16 @@
   Motion.selectPose = selectPose;
   Motion.prototype.inspect = function (points) { return inspect(points, this.options.foot); };
   Motion.prototype.read = function (points) { return features(points, this.options.foot); };
+  // 첫 유효 자세를 즉시 기준으로 사용합니다. 멈춰 있는 준비 단계는 없습니다.
+  Motion.prototype.start = function (points) {
+    var f = this.read(points);
+    if (!f) return false;
+    var sides = this.options.foot === 'both' ? ['left', 'right'] : [this.options.foot];
+    this.baseline = {};
+    sides.forEach(function (s) { this.baseline[s] = { ankle: f[s].ankle, knee: f[s].knee, leg: Math.max(.5, f[s].leg) }; }, this);
+    this.resetTracking();
+    return true;
+  };
   Motion.prototype.calibrate = function (points) {
     var f = this.read(points), sides = this.options.foot === 'both' ? ['left', 'right'] : [this.options.foot];
     if (!f) { this.samples = []; return { valid: false, progress: 0 }; }

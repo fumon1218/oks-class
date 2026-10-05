@@ -16,3 +16,6 @@ console.log('PASS 제기 동작: 보정·노이즈·중복·재인식·발 선�
 const cropped=pose();cropped[27].y=cropped[28].y=1.1;const diagnosis=new Motion().inspect(cropped);assert.equal(diagnosis.valid,false);assert.equal(diagnosis.seen.feet,false);assert.equal(diagnosis.seen.shoulders,true);
 const back=pose();back[11].x=.46;back[12].x=.54;const front=cropped;front[11].x=.25;front[12].x=.75;assert.equal(Motion.selectPose([back,front]),front,'뒷사람이 전신이어도 앞쪽 참여자 우선');assert.equal(Motion.selectPose([]),null);
 console.log('PASS 전신 준비 진단·두 사람 중 앞쪽 참여자 선택');
+
+const instant=new Motion();assert.equal(instant.start(missing),false);assert.equal(instant.start(pose()),true,'첫 유효 프레임으로 즉시 시작');assert.equal(instant.samples.length,0,'24프레임 자세 유지 불필요');assert.equal(frames(instant,pose(),4).length,0);assert.equal(frames(instant,up,10).length,1,'자동 시작 뒤 발 들기 점수');assert.equal(frames(instant,up,10).length,0,'같은 발 유지 중 중복 없음');
+console.log('PASS 첫 인식 즉시 시작·동작 점수 분리');
