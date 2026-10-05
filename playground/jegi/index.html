@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#ecf8ee"><title>제기차기 · 놀이별</title><link rel="icon" href="../../icons/ok-face-192.png"><link rel="stylesheet" href="../../core/oks-core.css"><link rel="stylesheet" href="jegi.css"></head>
+<body class="oks jegi-page">
+<header class="jegi-header"><a class="back-link" href="../">← 놀이별</a><div><span>전통놀이 · 몸으로 놀아요</span><h1>토끼와 제기차기</h1></div><button id="help" class="soft-button">놀이 방법</button></header>
+<main class="jegi-layout">
+<section class="play-court" aria-label="제기 놀이 화면">
+ <div class="score-row"><div class="score-pill">성공한 동작 <strong id="score">0</strong>번</div><div class="goal-pill" id="goal">별 모으기 0 / 5</div></div>
+ <div id="cue" class="play-cue">발을 들면 제기가 통통!</div>
+ <div class="rabbit-shadow"></div><img id="rabbit" class="rabbit" src="assets/rabbit-ready.webp" alt="제기차기를 준비하는 토끼" draggable="false">
+ <img id="jegi" class="jegi" src="assets/jegi.webp" alt="알록달록 제기" draggable="false"><div id="spark" class="spark" aria-hidden="true">✦</div>
+ <div class="court-caption" id="caption">카메라로 함께 놀거나, 버튼으로 먼저 해 보세요.</div>
+</section>
+<aside class="control-panel" aria-label="동작 인식과 놀이 설정">
+ <div class="panel-heading"><h2>내 움직임으로 놀기</h2><span class="camera-badge" id="cameraBadge">카메라 꺼짐</span></div>
+ <div class="camera-preview"><video id="video" muted autoplay playsinline></video><canvas id="skeleton" aria-hidden="true"></canvas><div id="cameraEmpty">📷<br><span>어깨부터 발까지 보이게<br>맥북을 고정해 주세요.</span></div></div>
+ <p id="status" class="status" role="status" aria-live="polite">카메라 켜기 → 준비 자세 맞추기 → 놀이 시작</p>
+ <div class="settings"><label>놀이 자세<select id="posture"><option value="standing">서서 발 들기</option><option value="seated">앉아서 다리 들기</option></select></label><label>사용할 발<select id="foot"><option value="both">어느 발이든</option><option value="left">내 왼발</option><option value="right">내 오른발</option></select></label><label class="wide">인식할 움직임<select id="sensitivity"><option value="0.08">작은 움직임</option><option value="0.13" selected>보통 움직임</option><option value="0.20">큰 움직임</option></select></label></div>
+ <div class="camera-actions"><button id="camera" class="primary-button">카메라 켜기</button><button id="calibrate" class="soft-button" disabled>준비 자세 맞추기</button></div>
+ <progress id="calibration" max="1" value="0" aria-label="준비 자세 설정 진행" hidden></progress>
+ <div class="session-actions"><button id="pause" class="soft-button" disabled>잠깐 쉬기</button><button id="reset" class="soft-button">새로 시작</button><button id="stop" class="soft-button" disabled>카메라 끄기</button></div>
+ <div class="practice"><button id="tryKick" class="try-button">버튼으로 차 보기</button><p>카메라 없이도 가능 · 스페이스 키로도 차요</p><span id="inputLabel">버튼 연습 모드</span></div>
+ <p class="privacy">카메라 영상은 저장하거나 서버로 보내지 않습니다. 동작 인식 준비에는 인터넷 연결이 필요합니다.</p>
+</aside>
+</main>
+<dialog id="helpDialog"><h2>이렇게 놀아요</h2><ol><li>어깨부터 발까지 화면에 보이도록 맥북을 고정해요.</li><li>카메라를 켜고, 편한 준비 자세에서 ‘준비 자세 맞추기’를 눌러요.</li><li>발을 살짝 들면 토끼가 제기를 차요. 발을 내린 뒤 다시 들어요.</li></ol><p>앉아서 참여할 수도 있어요. 공간을 비우고, 편안한 범위에서 움직여요. 화면 속 제기를 차는 놀이이며 실제 제기의 접촉을 판정하지 않습니다.</p><form method="dialog"><button class="primary-button">알겠어요</button></form></dialog>
+<script src="../../core/oks-core.js"></script><script src="motion.js"></script><script src="jegi.js"></script>
+</body></html>
