@@ -271,7 +271,6 @@ window.OKS_ZOOM = (function () {
     enter: function (opt) {
       if (!scroller) build();
       on = true; document.body.classList.add('sp-zooming');
-      stage.style.setProperty('--map-background', stage.style.backgroundImage || 'none');
       scroller.scrollTop = 0; scroller.scrollLeft = 0; scroller.style.backgroundImage = 'none';
       if (stage.getAnimations) stage.getAnimations().forEach(function (an) { an.cancel(); });
       cos.hidden = false; over.hidden = false; ui.hidden = false; diving = false; stage.style.transition = ''; stage.style.filter = ''; stage.style.opacity = '';

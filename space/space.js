@@ -229,7 +229,7 @@
 
   /* ---------- 화면 바꾸기 ---------- */
   var busy = false, booting = true;
-  function setBg(name) { var p = art(name); stage.style.backgroundImage = scroller.style.backgroundImage = p ? 'url(' + p + ')' : ''; }
+  function setBg(name) { var p = art(name); stage.style.backgroundImage = scroller.style.backgroundImage = p ? 'url(' + p + ')' : ''; stage.style.setProperty('--map-background', p ? 'url("' + new URL(p, document.baseURI).href + '")' : 'none'); }
   function centerScroll(xPct, yPct) {
     var max = scroller.scrollWidth - scroller.clientWidth; if (max > 0) scroller.scrollLeft = max * (xPct == null ? .5 : xPct / 100);
     var maxY = scroller.scrollHeight - scroller.clientHeight; if (maxY > 0) scroller.scrollTop = maxY * (yPct == null ? .5 : yPct / 100);
