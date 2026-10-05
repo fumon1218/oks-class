@@ -4,7 +4,7 @@
   var video = $('video'), overlay = $('skeleton'), ctx = overlay.getContext('2d');
   var stream = null, worker = null, cancelModel = null, detector = null;
   var epoch = 0, starting = false, ready = false, valid = false, playing = false, paused = false, busy = false;
-  var countMode = 'button';
+  var countMode = 'button', trackingValid = true;
   var count = 0, raf = 0, lastFrame = 0, lastVideoTime = -1, poseTimer = 0, flight = null, shine = null, poseTimeout = 0;
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches || !!(O && O.settings().calm);
   function status(text) { if ($('status').textContent !== text) $('status').textContent = text; }
@@ -19,7 +19,7 @@
     $('tryKick').disabled = starting;
     $('tryKick').textContent = stream ? '버튼 연습으로 전환' : '버튼으로 차 보기';
     $('framing').hidden = !ready;
-    $('cameraBadge').textContent = starting ? '준비 중' : stream ? (valid ? '다리 인식됨' : '다리를 보여 주세요') : '카메라 꺼짐';
+    $('cameraBadge').textContent = starting ? '준비 중' : stream ? (valid ? (trackingValid ? '다리 인식됨' : '위치 확인 중') : '다리를 보여 주세요') : '카메라 꺼짐';
     $('inputLabel').textContent = stream ? '카메라 동작 모드' : '버튼 연습 모드';
   }
   function newDetector() { return new window.JegiMotion({ foot: $('foot').value, seated: $('posture').value === 'seated', sensitivity: Number($('sensitivity').value) }); }
@@ -50,31 +50,33 @@
   }
   function draw(points) {
     overlay.width = video.videoWidth || 640; overlay.height = video.videoHeight || 480; ctx.clearRect(0, 0, overlay.width, overlay.height);
-    if (!points) return;
+    if (!points || !valid) return;
     var links = [[25, 27], [26, 28], [27, 31], [28, 32], [25, 31], [26, 32]];
     ctx.strokeStyle = valid ? '#7af2b6' : '#ffd365'; ctx.lineWidth = Math.max(3, overlay.width / 150);
-    links.forEach(function (ids) { var a = points[ids[0]], b = points[ids[1]]; if (!a || !b || a.visibility < .55 || b.visibility < .55) return; ctx.beginPath(); ctx.moveTo(a.x * overlay.width, a.y * overlay.height); ctx.lineTo(b.x * overlay.width, b.y * overlay.height); ctx.stroke(); });
-    [25, 26, 27, 28, 31, 32].forEach(function (i) { var p = points[i]; if (p && p.visibility >= .55) { ctx.beginPath(); ctx.arc(p.x * overlay.width, p.y * overlay.height, 6, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); } });
+    links.forEach(function (ids) { var a = points[ids[0]], b = points[ids[1]]; if (!a || !b || a.visibility < .75 || b.visibility < .75) return; ctx.beginPath(); ctx.moveTo(a.x * overlay.width, a.y * overlay.height); ctx.lineTo(b.x * overlay.width, b.y * overlay.height); ctx.stroke(); });
+    [25, 26, 27, 28, 31, 32].forEach(function (i) { var p = points[i]; if (p && p.visibility >= .75) { ctx.beginPath(); ctx.arc(p.x * overlay.width, p.y * overlay.height, 6, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); } });
   }
   function framing(points) {
     var check = detector.inspect(points);
     document.querySelectorAll('[data-body]').forEach(function (e) {
       var labels = { knees: '무릎', feet: '발끝' };
-      e.classList.toggle('seen', check.seen[e.dataset.body]);
-      e.textContent = (check.seen[e.dataset.body] ? '✓ ' : '! ') + labels[e.dataset.body];
+      var accepted = check.valid && check.seen[e.dataset.body];
+      e.classList.toggle('seen', accepted);
+      e.textContent = (accepted ? '✓ ' : '! ') + labels[e.dataset.body];
     });
     if (check.valid) return '';
     if (!check.detected) return '무릎과 발끝이 화면에 보이도록 맥북 각도를 낮춰 주세요. 얼굴과 몸통은 보이지 않아도 돼요.';
     if (!check.seen.feet) return '발이 안 보여요. 무릎부터 발끝까지 들어오도록 맥북 화면 각도를 낮춰 주세요.';
     if (!check.seen.knees) return '무릎이 안 보여요. 무릎부터 발끝까지만 화면에 들어오면 돼요.';
-    return '화면에서 너무 작게 보여요. 조금 가까이 이동해 주세요.';
+    if (check.small) return '다리가 작게 보여요. 무릎과 발이 더 크게 보이도록 맞춰 주세요.';
+    return '다리 모양을 확실하게 확인하지 못했어요. 주변 물건과 겹치지 않도록 무릎과 발을 보여 주세요.';
   }
   function receivePose(points) {
     clearTimeout(poseTimer); busy = false;
     valid = !!detector.read(points); var instruction = framing(points); draw(points);
     if (paused || $('helpDialog').open) { updateControls(); return; }
     if (!playing && valid && detector.start(points)) {
-      playing = true;
+      playing = true; trackingValid = true;
       cue('놀이 시작! 발을 내린 뒤 살짝 들어요.');
       status('인식됐어요! 자동으로 놀이를 시작했어요.');
       $('caption').textContent = '발을 내린 뒤 다시 들어야 다음 동작으로 인정해요.';
@@ -83,13 +85,15 @@
     }
     if (playing) {
       var r = detector.update(points, performance.now());
-      if (!r.valid) { cue('다리가 보이면 이어서 놀아요.'); status(instruction); }
+      trackingValid = r.valid; draw(r.valid ? points : null);
+      if (!r.valid) document.querySelectorAll('[data-body]').forEach(function (e) { e.classList.remove('seen'); e.textContent = e.dataset.body === 'knees' ? '! 무릎' : '! 발끝'; });
+      if (!r.valid) { cue('다리가 보이면 이어서 놀아요.'); status(instruction || '다리 위치가 갑자기 바뀌었어요. 발을 내리고 같은 위치에서 다시 보여 주세요.'); }
       else { status('발을 내린 뒤 다시 들면 제기를 차요.'); if (r.kick) kick(r.kick); else if ($('cue').textContent === '다리가 보이면 이어서 놀아요.') cue('발을 내리고 다시 준비해요.'); }
     } else { status(instruction); cue('다리가 인식되면 자동으로 시작해요.'); }
     updateControls();
   }
   function stopCamera(message) {
-    epoch++; starting = ready = valid = playing = paused = busy = false;
+    trackingValid = true; epoch++; starting = ready = valid = playing = paused = busy = false;
     cancelAnimationFrame(raf); raf = 0; clearTimeout(poseTimer);
     if (cancelModel) { cancelModel(); cancelModel = null; }
     if (worker) worker.terminate(); worker = null;
