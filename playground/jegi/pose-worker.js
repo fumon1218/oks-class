@@ -13,7 +13,9 @@ self.onmessage = async function (event) {
   } else if (data.type === 'frame') {
     try {
       var result = model.detectForVideo(data.bitmap, data.time);
-      self.postMessage({ type: 'pose', points: self.JegiMotion.selectPose(result.landmarks) });
+      var selected = self.JegiMotion.selectPose(result.landmarks);
+      // 앱에는 무릎(25,26)과 발목(27,28) 네 좌표만 전달합니다.
+      self.postMessage({ type: 'pose', points: selected ? selected.map(function (p, i) { return i >= 25 && i <= 28 ? p : null; }) : null });
     } catch (e) { self.postMessage({ type: 'error', message: String(e.message || e) }); }
     finally { data.bitmap.close(); }
   }
