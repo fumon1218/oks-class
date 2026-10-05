@@ -13,3 +13,6 @@ const c=new Motion();for(let i=0;i<20;i++)c.calibrate(pose());c.calibrate(missin
 const s=calibrated({seated:true,sensitivity:.08});const knee=pose();knee[25].y=.59;frames(s,pose(),4);assert.equal(frames(s,knee,8).length,1,'작은 무릎 들기');
 const invalid=pose();delete invalid[11].visibility;assert.equal(new Motion().read(invalid),null);
 console.log('PASS 제기 동작: 보정·노이즈·중복·재인식·발 선택·앉은 자세');
+const cropped=pose();cropped[27].y=cropped[28].y=1.1;const diagnosis=new Motion().inspect(cropped);assert.equal(diagnosis.valid,false);assert.equal(diagnosis.seen.feet,false);assert.equal(diagnosis.seen.shoulders,true);
+const back=pose();back[11].x=.46;back[12].x=.54;const front=cropped;front[11].x=.25;front[12].x=.75;assert.equal(Motion.selectPose([back,front]),front,'뒷사람이 전신이어도 앞쪽 참여자 우선');assert.equal(Motion.selectPose([]),null);
+console.log('PASS 전신 준비 진단·두 사람 중 앞쪽 참여자 선택');

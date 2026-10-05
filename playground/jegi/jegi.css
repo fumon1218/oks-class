@@ -4,3 +4,10 @@
 @media(prefers-reduced-motion:reduce){.spark{display:none}}
 
 body.jegi-page::before{display:none;}
+
+/* 작성자 display 규칙이 hidden 속성을 덮어 영상 위 안내가 남지 않게 합니다. */
+#cameraEmpty[hidden],#framing[hidden]{display:none!important;}
+.framing{display:flex;gap:5px;justify-content:space-between;margin-top:9px;font-size:12px;}
+.framing span{flex:1;text-align:center;padding:5px;border-radius:8px;background:#fff0d9;color:#986326;}
+.framing span.seen{background:#e2f6e9;color:#24704a;}
+.status{min-height:54px;}

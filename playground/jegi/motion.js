@@ -3,12 +3,34 @@
   'use strict';
   var SIDES = { left: [23, 25, 27], right: [24, 26, 28] };
   function mean(a) { return a.reduce(function (s, v) { return s + v; }, 0) / a.length; }
+  function visible(p) {
+    return !!p && Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.visibility) && p.visibility >= .55 && p.x >= .01 && p.x <= .99 && p.y >= .01 && p.y <= .99;
+  }
+  function torsoSize(points) {
+    return Math.hypot((points[23].x + points[24].x - points[11].x - points[12].x) / 2, (points[23].y + points[24].y - points[11].y - points[12].y) / 2);
+  }
+  function inspect(points, foot) {
+    var sides = foot === 'both' ? ['left', 'right'] : [foot];
+    var groups = { shoulders: [11, 12], hips: [23, 24], knees: sides.map(function (s) { return SIDES[s][1]; }), feet: sides.map(function (s) { return SIDES[s][2]; }) };
+    var seen = {}, missing = [];
+    Object.keys(groups).forEach(function (g) { seen[g] = !!points && groups[g].every(function (i) { return visible(points[i]); }); if (!seen[g]) missing.push(g); });
+    var small = missing.length === 0 && torsoSize(points) < .07;
+    return { valid: missing.length === 0 && !small, seen: seen, missing: missing, small: small, detected: !!points };
+  }
+  function selectPose(poses) {
+    if (!poses || !poses.length) return null;
+    // 큰 상체와 중앙 위치를 우선합니다. 뒷사람의 다리가 잘 보여도 그 이유로 선택하지 않습니다.
+    function rank(p) {
+      if (!p || !p[11] || !p[12]) return -1;
+      var width = Math.hypot(p[11].x - p[12].x, p[11].y - p[12].y);
+      var center = (p[11].x + p[12].x) / 2;
+      return width * (1 - Math.min(.6, Math.abs(center - .5)));
+    }
+    return poses.reduce(function (best, p) { return rank(p) > rank(best) ? p : best; }, poses[0]);
+  }
   function features(points, foot) {
-    var ids = [11, 12, 23, 24];
-    (foot === 'both' ? ['left', 'right'] : [foot]).forEach(function (s) { ids = ids.concat(SIDES[s]); });
-    if (!points || ids.some(function (i) { var p = points[i]; return !p || !Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.visibility) || p.visibility < .55 || p.x < .01 || p.x > .99 || p.y < .01 || p.y > .99; })) return null;
-    var torso = Math.hypot((points[23].x + points[24].x - points[11].x - points[12].x) / 2, (points[23].y + points[24].y - points[11].y - points[12].y) / 2);
-    if (torso < .07) return null;
+    if (!inspect(points, foot).valid) return null;
+    var torso = torsoSize(points);
     var out = {};
     Object.keys(SIDES).forEach(function (s) {
       var ids = SIDES[s], hip = points[ids[0]], knee = points[ids[1]], ankle = points[ids[2]];
@@ -24,6 +46,8 @@
     this.lastKick = -Infinity;
     this.tracking = { left: { armed: false, low: null, high: null, smooth: null }, right: { armed: false, low: null, high: null, smooth: null } };
   };
+  Motion.selectPose = selectPose;
+  Motion.prototype.inspect = function (points) { return inspect(points, this.options.foot); };
   Motion.prototype.read = function (points) { return features(points, this.options.foot); };
   Motion.prototype.calibrate = function (points) {
     var f = this.read(points), sides = this.options.foot === 'both' ? ['left', 'right'] : [this.options.foot];

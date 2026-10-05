@@ -16,7 +16,9 @@
     $('calibrate').disabled = !ready || !valid || calibrating || paused;
     $('pause').disabled = !playing;
     $('pause').textContent = paused ? '다시 놀기' : '잠깐 쉬기';
-    $('tryKick').disabled = starting || !!stream;
+    $('tryKick').disabled = starting;
+    $('tryKick').textContent = stream ? '버튼 연습으로 전환' : '버튼으로 차 보기';
+    $('framing').hidden = !ready;
     ['posture', 'foot', 'sensitivity'].forEach(function (id) { $(id).disabled = calibrating; });
     $('cameraBadge').textContent = starting ? '준비 중' : stream ? (valid ? '다리 인식됨' : '다리를 보여 주세요') : '카메라 꺼짐';
     $('inputLabel').textContent = stream ? '카메라 동작 모드' : '버튼 연습 모드';
@@ -55,19 +57,34 @@
     links.forEach(function (ids) { var a = points[ids[0]], b = points[ids[1]]; if (!a || !b || a.visibility < .55 || b.visibility < .55) return; ctx.beginPath(); ctx.moveTo(a.x * overlay.width, a.y * overlay.height); ctx.lineTo(b.x * overlay.width, b.y * overlay.height); ctx.stroke(); });
     [23, 24, 25, 26, 27, 28].forEach(function (i) { var p = points[i]; if (p && p.visibility >= .55) { ctx.beginPath(); ctx.arc(p.x * overlay.width, p.y * overlay.height, 6, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); } });
   }
+  function framing(points) {
+    var check = detector.inspect(points);
+    document.querySelectorAll('[data-body]').forEach(function (e) {
+      var labels = { shoulders: '어깨', hips: '몸통', knees: '무릎', feet: '발' };
+      e.classList.toggle('seen', check.seen[e.dataset.body]);
+      e.textContent = (check.seen[e.dataset.body] ? '✓ ' : '! ') + labels[e.dataset.body];
+    });
+    if (check.valid) return '';
+    if (!check.detected) return '화면 중앙에 한 명만 서 주세요. 어깨부터 발까지 보여야 시작할 수 있어요.';
+    if (!check.seen.feet) return '발이 안 보여요. 맥북에서 조금 더 뒤로 이동하거나 화면 각도를 낮춰 발까지 보여 주세요.';
+    if (!check.seen.knees) return '무릎이 안 보여요. 다리 전체가 화면에 들어오도록 위치를 맞춰 주세요.';
+    if (!check.seen.hips) return '몸통이 가려졌어요. 화면 중앙에서 몸통과 다리를 함께 보여 주세요.';
+    if (!check.seen.shoulders) return '어깨가 안 보여요. 어깨부터 발까지 화면에 들어오도록 맞춰 주세요.';
+    return '화면에서 너무 작게 보여요. 조금 가까이 이동해 주세요.';
+  }
   function receivePose(points) {
     clearTimeout(poseTimer); busy = false;
-    valid = !!detector.read(points); draw(points);
+    valid = !!detector.read(points); var instruction = framing(points); draw(points);
     if (paused || $('helpDialog').open) { updateControls(); return; }
     if (calibrating) {
       var c = detector.calibrate(points); $('calibration').value = c.progress;
-      status(!c.valid ? '무릎과 발이 보이게 위치를 맞춰 주세요.' : c.moving ? '발을 내리고 잠깐 편하게 멈춰 주세요.' : '편한 준비 자세를 유지해 주세요…');
+      status(!c.valid ? instruction : c.moving ? '발을 내리고 잠깐 편하게 멈춰 주세요.' : '편한 준비 자세를 유지해 주세요…');
       if (c.done) { calibrating = false; playing = true; $('calibration').hidden = true; cue('발을 내린 뒤, 살짝 들어 보세요!'); status('준비됐어요! 발 들기 → 내리기를 반복해요.'); $('caption').textContent = '발을 내린 뒤 다시 들어야 다음 동작으로 인정해요.'; }
     } else if (playing) {
       var r = detector.update(points, performance.now());
-      if (!r.valid) { cue('다리가 보이면 이어서 놀아요.'); status('인식이 잠시 끊겼어요. 발을 내리고 화면 안으로 돌아와 주세요.'); }
+      if (!r.valid) { cue('다리가 보이면 이어서 놀아요.'); status(instruction); }
       else { status('발을 내린 뒤 다시 들면 제기를 차요.'); if (r.kick) kick(r.kick); else if ($('cue').textContent === '다리가 보이면 이어서 놀아요.') cue('발을 내리고 다시 준비해요.'); }
-    } else status(valid ? '다리가 잘 보여요. 편한 자세에서 ‘준비 자세 맞추기’를 눌러 주세요.' : '어깨부터 무릎과 발까지 카메라 화면에 보이게 해 주세요.');
+    } else { status(valid ? '전신이 잘 보여요! ‘자세 맞추고 시작’을 누르면 놀이를 시작해요.' : instruction); cue(valid ? '자세 맞추고 시작을 눌러요!' : '발까지 보여야 놀이를 시작할 수 있어요.'); }
     updateControls();
   }
   function stopCamera(message) {
@@ -138,7 +155,7 @@
     status(paused ? '잠깐 쉬어요. 다시 놀기를 누르면 이어서 참여해요.' : '발을 내리고 다시 준비해 주세요.'); cue(paused ? '잠깐 쉬어요.' : '발을 내린 뒤 다시 들어요.');
   };
   $('reset').onclick = function () { resetScore(); paused = false; if (detector) detector.resetTracking(); cue('새로운 별을 모아 볼까요?'); updateControls(); };
-  $('tryKick').onclick = function () { if (!stream && !starting) kick('button'); };
+  $('tryKick').onclick = function () { if (starting) return; if (stream) stopCamera('카메라를 끄고 버튼 연습으로 전환했어요. 카메라를 다시 켜면 동작 놀이로 돌아갈 수 있어요.'); kick('button'); };
   ['posture', 'foot', 'sensitivity'].forEach(function (id) { $(id).onchange = function () { detector = newDetector(); playing = paused = calibrating = false; $('calibration').hidden = true; resetVisuals(); status(stream ? '설정을 바꿨어요. 준비 자세를 다시 맞춰 주세요.' : '카메라를 켜거나 버튼으로 연습해 주세요.'); cue('내 움직임에 맞춰 준비해요.'); updateControls(); }; });
   $('help').onclick = function () { if (playing && !paused) $('pause').click(); $('helpDialog').showModal(); };
   $('helpDialog').addEventListener('close', function () { if (detector) detector.resetTracking(); });
