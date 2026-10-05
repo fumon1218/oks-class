@@ -29,7 +29,7 @@ console.log('PASS 무릎·발목만 시작/점수/재준비·한쪽 다리·하�
 const weak=pose();[25,26,27,28].forEach(i=>weak[i].visibility=.65);assert.equal(new Motion().start(weak),false,'낮은 신뢰도의 사물 추정 좌표 제외');
 const absent=pose();absent[25].presence=absent[26].presence=.2;assert.equal(new Motion().start(absent),false,'신체 존재 신뢰도 낮으면 제외');
 const tiny=pose();tiny[27].y=tiny[28].y=.67;assert.equal(new Motion().start(tiny),false,'사물의 작은 모서리 간격 제외');
-const overlap=pose();overlap[26]=structuredClone(overlap[25]);overlap[28]=structuredClone(overlap[27]);assert.equal(new Motion().start(overlap),false,'같은 물건을 양쪽 다리로 추정한 좌표 제외');
+const overlap=pose();overlap[26]=structuredClone(overlap[25]);overlap[28]=structuredClone(overlap[27]);const overlapped=new Motion();assert(overlapped.start(overlap),'겹쳐 보이는 다리는 한 쌍만 사용');assert.equal(Object.keys(overlapped.baseline).length,1,'같은 좌표를 두 다리로 중복 사용하지 않음');
 const disconnected=pose();disconnected[31]={x:.9,y:.2,visibility:.99};assert.equal(new Motion().start(disconnected),true,'발끝 오인식 좌표는 시작 판정에 영향 없음');
 const reversed=pose();reversed[27].y=.4;assert.equal(new Motion({foot:'left'}).start(reversed),false,'무릎 위의 사물을 발로 잡은 추정 제외');
 const swapped=pose();swapped[27].visibility=.1;swapped[31]={x:.4,y:.72,visibility:.99};const swapMotion=new Motion();swapMotion.start(pose());frames(swapMotion,pose(),5);assert.equal(frames(swapMotion,swapped,12).length,0,'발목이 안 보이면 발끝으로 대체하지 않음');
@@ -45,3 +45,9 @@ const anyLeg=new Motion();assert(anyLeg.start(oneSide),'어느 발이든 모드�
 const oppositeLost=new Motion();oppositeLost.start(pose());frames(oppositeLost,oneSide,5);assert.equal(frames(oppositeLost,oneLift,10).length,1,'다른 다리 인식이 끊겨도 보이는 다리로 점수');
 const mismatch=pose();mismatch[25].visibility=mismatch[28].visibility=0;assert.equal(new Motion().start(mismatch),false,'왼쪽 발목과 오른쪽 무릎을 섞어서 시작하지 않음');
 console.log('PASS 한쪽 다리 자동 시작·반대쪽 가림에도 점수·같은 다리 쌍 검사');
+
+const ankleOnly=pose();ankleOnly[27].y=.66;const stationaryOther=new Motion();stationaryOther.start(pose());frames(stationaryOther,pose(),5);assert.deepEqual(frames(stationaryOther,ankleOnly,12),['left'],'반대쪽과 무릎이 고정돼 있어도 왼발목만 올리면 점수');frames(stationaryOther,pose(),7);assert.deepEqual(frames(stationaryOther,ankleOnly,12),['left'],'같은 발만 내렸다 다시 차기');
+const rightAnkle=pose();rightAnkle[28].y=.66;const onlyRight=new Motion();onlyRight.start(pose());frames(onlyRight,pose(),5);assert.deepEqual(frames(onlyRight,rightAnkle,12),['right'],'왼발 고정하고 오른발목만 움직여 점수');
+const brokenOpposite=structuredClone(ankleOnly);brokenOpposite[26].y=.1;brokenOpposite[28].y=.98;const independent=new Motion();independent.start(pose());frames(independent,pose(),5);assert.deepEqual(frames(independent,brokenOpposite,12),['left'],'반대 다리가 비정상이어도 왼발 동작 인정');
+const crossed=pose();crossed[27].y=.6;const bend=new Motion();bend.start(pose());frames(bend,pose(),5);assert.deepEqual(frames(bend,crossed,12),['left'],'무릎보다 살짝 위로 발목을 들어도 시작 후 추적');
+console.log('PASS 왼발/오른발 단독 동작·무릎 굽힘·반대 다리 오류 독립·같은 발 반복');

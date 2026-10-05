@@ -13,7 +13,7 @@
     var knee = points[SIDES[side][0]], foot = anklePoint(points, side);
     return knee && foot ? Math.hypot(knee.x - foot.x, knee.y - foot.y) : 0;
   }
-  function inspect(points, foot) {
+  function inspect(points, foot, baseline) {
     var sides = foot === 'both' ? ['left', 'right'] : [foot];
     var seen = {
       knees: !!points && sides.some(function (s) { return visible(points[SIDES[s][0]]); }),
@@ -24,11 +24,13 @@
       var k = points[SIDES[s][0]], a = anklePoint(points, s);
       if (!visible(k) || !a) return false;
       var length = legSize(points, s);
+      // 놀이 중인 다리는 무릎을 굽혀 발목이 가까워져도 계속 추적합니다.
+      if (baseline && baseline[s]) return length <= .85;
       if (length < .045) { small = true; return false; }
       return length <= .85 && a.y >= k.y - .08;
     }) : [];
-    // 같은 좌표를 양쪽 다리로 중복 추정한 경우에는 제외합니다.
-    if (validSides.length === 2 && Math.hypot(points[25].x - points[26].x, points[25].y - points[26].y) < .025 && Math.hypot(points[27].x - points[28].x, points[27].y - points[28].y) < .025) validSides = [];
+    // 두 다리의 좌표가 겹치면 신뢰도가 높은 한 쌍만 사용합니다.
+    if (validSides.length === 2 && Math.hypot(points[25].x - points[26].x, points[25].y - points[26].y) < .025 && Math.hypot(points[27].x - points[28].x, points[27].y - points[28].y) < .025) validSides = [points[25].visibility + points[27].visibility >= points[26].visibility + points[28].visibility ? 'left' : 'right'];
     return { valid: validSides.length > 0, validSides: validSides, seen: seen, missing: Object.keys(seen).filter(function (g) { return !seen[g]; }), small: small, detected: !!points };
   }
   function selectPose(poses) {
@@ -46,8 +48,8 @@
     }
     return poses.reduce(function (best, p) { return rank(p) > rank(best) ? p : best; }, poses[0]);
   }
-  function features(points, foot) {
-    var check = inspect(points, foot);
+  function features(points, foot, baseline) {
+    var check = inspect(points, foot, baseline);
     if (!check.valid) return null;
     var out = {}, sides = check.validSides;
     sides.forEach(function (s) {
@@ -59,18 +61,17 @@
   }
   function Motion(options) {
     this.options = Object.assign({ foot: 'both', sensitivity: .13, seated: false }, options);
-    this.baseline = null; this.resetTracking();
+    this.baseline = null; this.lastKick = -Infinity; this.resetTracking();
   }
   Motion.prototype.resetTracking = function () {
-    this.lastKick = -Infinity;
     this.tracking = { left: { armed: false, low: null, high: null, smooth: null, previous: null }, right: { armed: false, low: null, high: null, smooth: null, previous: null } };
   };
   Motion.selectPose = selectPose;
-  Motion.prototype.inspect = function (points) { return inspect(points, this.options.foot); };
-  Motion.prototype.read = function (points) { return features(points, this.options.foot); };
+  Motion.prototype.inspect = function (points) { return inspect(points, this.options.foot, this.baseline); };
+  Motion.prototype.read = function (points) { return features(points, this.options.foot, this.baseline); };
   // 첫 유효 자세를 즉시 기준으로 사용합니다. 멈춰 있는 준비 단계는 없습니다.
   Motion.prototype.start = function (points) {
-    var f = this.read(points);
+    var f = features(points, this.options.foot);
     if (!f) return false;
     var sides = Object.keys(f);
     this.baseline = {};
@@ -93,7 +94,7 @@
       // 다른 위치의 사람/사물로 좌표가 튄 프레임은 점수에서 제외합니다.
       var jump = previous && Math.hypot(current.x - previous.x, current.ankle - previous.ankle) > b.leg * .75 * Math.max(1, Math.min(2.5, (now - previous.time) / 100));
       var shifted = Math.abs(current.x - b.x) > b.leg * .75 || Math.abs(current.kneeX - b.kneeX) > b.leg * .75;
-      var distorted = current.leg / b.leg < .25 || current.leg / b.leg > 2.2;
+      var distorted = current.leg / b.leg > 2.2;
       if (jump || shifted || distorted) {
         t.armed = false; t.low = t.high = t.smooth = null; t.previous = null;
         result.reason = 'tracking'; return;
@@ -117,7 +118,11 @@
     if (!accepted) { result.valid = false; return result; }
     if (candidates.length) {
       candidates.sort(function (a, b) { return b.lift - a.lift; }); result.kick = candidates[0].side; this.lastKick = now;
-      Object.keys(this.tracking).forEach(function (s) { this.tracking[s].armed = false; this.tracking[s].low = this.tracking[s].high = null; }, this);
+      Object.keys(this.tracking).forEach(function (s) {
+        var t = this.tracking[s];
+        // 찬 발과 동시에 들어 올린 발만 재준비합니다. 반대쪽의 내려 둔 발은 그대로 쓸 수 있습니다.
+        if (s === result.kick || t.smooth >= sensitivity) { t.armed = false; t.low = t.high = null; }
+      }, this);
     }
     return result;
   };
