@@ -91,15 +91,21 @@
     /* 은하계 레벨의 독립 별 마을 — 우리 별 마을 내부 별들과 섞이지 않게 별도 렌더링 */
     (SP.SYSTEMS || []).forEach(function (s, i) {
       var m = P ? s.mapP : s.map;
-      var e = place(E('div', 'sp-star sp-system sp-system-' + s.id, ''), m.x, m.y, m.w);
+      var directEntry = s.id === 'ssing' && !s.soon;
+      var e = place(E(directEntry ? 'button' : 'div', 'sp-star sp-system sp-system-' + s.id, ''), m.x, m.y, m.w);
       e.dataset.worldX = m.x; e.dataset.worldY = m.y; e.dataset.worldW = m.w;
       e.dataset.system = s.id; e.dataset.depth = '0'; e.style.setProperty('--c', s.color);
-      e.setAttribute('role', 'group'); e.setAttribute('aria-label', s.name + ' · ' + (s.chips || []).join(' · '));
+      if (directEntry) {
+        e.type = 'button'; e.setAttribute('aria-label', s.name + ' 들어가기');
+        e.onclick = function () { O.unlock && O.unlock(); O.sfx('pop'); location.href = 'sports/'; };
+      } else {
+        e.setAttribute('role', 'group'); e.setAttribute('aria-label', s.name + ' · ' + (s.chips || []).join(' · '));
+      }
       var chips = (s.chips || []).map(function (k) { return '<i>' + O.esc(k) + '</i>'; }).join('');
       if (s.soon) chips += '<i class="sp-soon-chip">곧 만나요</i>';
       e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, '🏟️', 'sp-star-img') +
-        '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>' +
-        (!s.soon && (s.id === 'ssing' || s.id === 'play') ? '<a class="sp-system-enter" href="' + (s.id === 'play' ? 'playground/' : 'sports/') + '">' + (s.id === 'play' ? '🪁 놀이별 들어가기' : '🏃 씽씽 별 마을 들어가기') + '</a>' : '');
+        (directEntry ? '' : '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>' +
+        (!s.soon && s.id === 'play' ? '<a class="sp-system-enter" href="playground/">🪁 놀이별 들어가기</a>' : ''));
       mapEl.appendChild(e);
       var enter = e.querySelector('.sp-system-enter');
       if (enter) {
