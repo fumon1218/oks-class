@@ -6,7 +6,7 @@ function calibrated(options){const d=new Motion(options);d.start(pose());assert(
 const up=pose();up[27].y=.65;up[25].y=.54;
 const d=calibrated();assert.equal(frames(d,pose(),4).length,0);assert.deepEqual(frames(d,up,15),['left'],'발을 계속 들고 있어도 1번만');assert.equal(frames(d,up,10).length,0);frames(d,pose(),6);assert.deepEqual(frames(d,up,8),['left'],'내렸다 다시 들면 1번');
 const noise=pose();for(let i=0;i<30;i++){noise[27].y=.85+Math.sin(i)*.015;assert.equal(frames(d,noise,1).length,0,'작은 흔들림 무시');}
-const missing=pose();missing[27].visibility=missing[28].visibility=.1;assert.equal(d.update(missing,now+=100).valid,false);assert.equal(frames(d,up,8).length,0,'다리를 든 상태로 재등장해도 점수 없음');frames(d,pose(),7);assert.equal(frames(d,up,8).length,1);
+const missing=pose();missing[27].visibility=missing[28].visibility=.1;assert.equal(d.update(missing,now+=100).valid,false);frames(d,missing,5);assert.equal(frames(d,up,8).length,0,'다리를 든 상태로 재등장해도 점수 없음');frames(d,pose(),7);assert.equal(frames(d,up,8).length,1);
 const l=calibrated({foot:'left'}),right=pose();right[28].y=.62;frames(l,pose(),4);assert.equal(frames(l,right,8).length,0,'선택하지 않은 발 무시');assert.equal(frames(l,up,8).length,1);
 const both=pose();both[27].y=both[28].y=.62;both[25].y=both[26].y=.54;const b=calibrated();frames(b,pose(),4);assert.equal(frames(b,both,20).length,1,'양발 동시 상승 중복 방지');
 
@@ -51,3 +51,11 @@ const rightAnkle=pose();rightAnkle[28].y=.66;const onlyRight=new Motion();onlyRi
 const brokenOpposite=structuredClone(ankleOnly);brokenOpposite[26].y=.1;brokenOpposite[28].y=.98;const independent=new Motion();independent.start(pose());frames(independent,pose(),5);assert.deepEqual(frames(independent,brokenOpposite,12),['left'],'반대 다리가 비정상이어도 왼발 동작 인정');
 const crossed=pose();crossed[27].y=.6;const bend=new Motion();bend.start(pose());frames(bend,pose(),5);assert.deepEqual(frames(bend,crossed,12),['left'],'무릎보다 살짝 위로 발목을 들어도 시작 후 추적');
 console.log('PASS 왼발/오른발 단독 동작·무릎 굽힘·반대 다리 오류 독립·같은 발 반복');
+
+const flicker=new Motion();flicker.start(pose());frames(flicker,pose(),5);const medium=pose();medium[27].y=.75;medium[25].y=.60;[25,27].forEach(i=>medium[i].visibility=.6);assert.equal(flicker.update(medium,now+=100).valid,true,'추적 중 0.6 신뢰도도 가까운 실제 좌표면 유지');const mediumLift=structuredClone(medium);mediumLift[27].y=.66;mediumLift[25].y=.54;assert.equal(frames(flicker,mediumLift,8).length,1,'짧은 신뢰도 하락 중에도 발 동작 판정');
+const gap=new Motion();gap.start(pose());frames(gap,pose(),5);assert.equal(gap.update(missing,now+=100).kick,null);assert.equal(frames(gap,up,8).length,1,'한 프레임 누락은 발 준비를 지우지 않음');
+const untrusted=new Motion();assert.equal(untrusted.start(medium),true,'강한 반대 다리가 있으면 시작 가능');assert.equal(new Motion({foot:'left'}).start(medium),false,'추적 이력 없는 낮은 신뢰도 다리는 시작 불가');
+const stableFront=pose(), largeBack=pose();[25,26,27,28].forEach(i=>largeBack[i].x+=.3);largeBack[25].y=largeBack[26].y=.3;assert.equal(Motion.selectPose([largeBack,up],stableFront),up,'발을 들어도 앞 참여자 유지');assert.equal(Motion.selectPose([largeBack],stableFront),null,'동떨어진 뒷사람으로 바로 전환하지 않음');
+console.log('PASS 신뢰도 흔들림·짧은 누락·추적 없는 약한 좌표 차단·참여자 유지');
+
+const sensitiveSpike=new Motion({sensitivity:.08});sensitiveSpike.start(pose());frames(sensitiveSpike,pose(),5);assert.equal(frames(sensitiveSpike,up,1).length,0);assert.equal(frames(sensitiveSpike,pose(),8).length,0,'작은 움직임 설정에서도 한 프레임 튐에 점수 없음');

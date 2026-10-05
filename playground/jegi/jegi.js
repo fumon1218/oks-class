@@ -55,11 +55,11 @@
     ctx.strokeStyle = valid ? '#7af2b6' : '#ffd365'; ctx.lineWidth = Math.max(3, overlay.width / 150);
     sides = sides || detector.inspect(points).validSides;
     links = links.filter(function (ids) { return sides.indexOf(ids[0] === 25 ? 'left' : 'right') >= 0; });
-    links.forEach(function (ids) { var a = points[ids[0]], b = points[ids[1]]; if (!a || !b || a.visibility < .75 || b.visibility < .75) return; ctx.beginPath(); ctx.moveTo(a.x * overlay.width, a.y * overlay.height); ctx.lineTo(b.x * overlay.width, b.y * overlay.height); ctx.stroke(); });
-    links.flat().forEach(function (i) { var p = points[i]; if (p && p.visibility >= .75) { ctx.beginPath(); ctx.arc(p.x * overlay.width, p.y * overlay.height, 6, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); } });
+    links.forEach(function (ids) { var a = points[ids[0]], b = points[ids[1]]; if (!a || !b || a.visibility < .5 || b.visibility < .5) return; ctx.beginPath(); ctx.moveTo(a.x * overlay.width, a.y * overlay.height); ctx.lineTo(b.x * overlay.width, b.y * overlay.height); ctx.stroke(); });
+    links.flat().forEach(function (i) { var p = points[i]; if (p && p.visibility >= .5) { ctx.beginPath(); ctx.arc(p.x * overlay.width, p.y * overlay.height, 6, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); } });
   }
   function framing(points) {
-    var check = detector.inspect(points);
+    var check = detector.inspect(points, performance.now());
     document.querySelectorAll('[data-body]').forEach(function (e) {
       var labels = { knees: '무릎', feet: '발목' };
       var accepted = check.valid && check.seen[e.dataset.body];
@@ -75,7 +75,7 @@
   }
   function receivePose(points) {
     clearTimeout(poseTimer); busy = false;
-    valid = !!detector.read(points); var instruction = framing(points); draw(points);
+    valid = !!detector.read(points, performance.now()); var instruction = framing(points); draw(points);
     if (paused || $('helpDialog').open) { updateControls(); return; }
     if (!playing && valid && detector.start(points)) {
       playing = true; trackingValid = true;
@@ -106,7 +106,7 @@
   function frame(now) {
     if (!ready || !stream) return;
     raf = requestAnimationFrame(frame);
-    if (paused || document.hidden || busy || now - lastFrame < 90 || video.readyState < 2 || video.currentTime === lastVideoTime) return;
+    if (paused || document.hidden || busy || now - lastFrame < 45 || video.readyState < 2 || video.currentTime === lastVideoTime) return;
     lastFrame = now; lastVideoTime = video.currentTime; busy = true;
     var token = epoch, activeWorker = worker;
     createImageBitmap(video).then(function (bitmap) {
