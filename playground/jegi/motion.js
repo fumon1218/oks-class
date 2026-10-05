@@ -2,7 +2,6 @@
 (function (root) {
   'use strict';
   var SIDES = { left: [25, 27], right: [26, 28] };
-  function mean(a) { return a.reduce(function (s, v) { return s + v; }, 0) / a.length; }
   function visible(p) {
     return !!p && Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.visibility) && p.visibility >= .75 && (p.presence == null || (Number.isFinite(p.presence) && p.presence >= .7)) && p.x >= .01 && p.x <= .99 && p.y >= .01 && p.y <= .99;
   }
@@ -17,23 +16,20 @@
   function inspect(points, foot) {
     var sides = foot === 'both' ? ['left', 'right'] : [foot];
     var seen = {
-      knees: !!points && sides.every(function (s) { return visible(points[SIDES[s][0]]); }),
-      feet: !!points && sides.every(function (s) { return !!anklePoint(points, s); })
+      knees: !!points && sides.some(function (s) { return visible(points[SIDES[s][0]]); }),
+      feet: !!points && sides.some(function (s) { return !!anklePoint(points, s); })
     };
-    var missing = Object.keys(seen).filter(function (g) { return !seen[g]; });
-    var small = missing.length === 0 && sides.some(function (s) { return legSize(points, s) < .045; });
-    var shape = missing.length === 0 && sides.every(function (s) {
-      var ids = SIDES[s], k = points[ids[0]], f = anklePoint(points, s), length = legSize(points, s);
-      if (length > .85 || f.y < k.y - .08) return false;
-      return true;
-    });
-    if (shape && sides.length === 2) {
-      var a = points[25], b = points[26], af = anklePoint(points, 'left'), bf = anklePoint(points, 'right');
-      var ratio = legSize(points, 'left') / legSize(points, 'right');
-      shape = Math.hypot(a.x - b.x, a.y - b.y) >= .025 && Math.hypot(af.x - bf.x, af.y - bf.y) >= .025 && ratio >= .25 && ratio <= 4;
-    }
-    return { valid: missing.length === 0 && !small && shape, seen: seen, missing: missing, small: small, shape: shape, detected: !!points };
-
+    var small = false;
+    var validSides = points ? sides.filter(function (s) {
+      var k = points[SIDES[s][0]], a = anklePoint(points, s);
+      if (!visible(k) || !a) return false;
+      var length = legSize(points, s);
+      if (length < .045) { small = true; return false; }
+      return length <= .85 && a.y >= k.y - .08;
+    }) : [];
+    // 같은 좌표를 양쪽 다리로 중복 추정한 경우에는 제외합니다.
+    if (validSides.length === 2 && Math.hypot(points[25].x - points[26].x, points[25].y - points[26].y) < .025 && Math.hypot(points[27].x - points[28].x, points[27].y - points[28].y) < .025) validSides = [];
+    return { valid: validSides.length > 0, validSides: validSides, seen: seen, missing: Object.keys(seen).filter(function (g) { return !seen[g]; }), small: small, detected: !!points };
   }
   function selectPose(poses) {
     if (!poses || !poses.length) return null;
@@ -51,8 +47,9 @@
     return poses.reduce(function (best, p) { return rank(p) > rank(best) ? p : best; }, poses[0]);
   }
   function features(points, foot) {
-    if (!inspect(points, foot).valid) return null;
-    var out = {}, sides = foot === 'both' ? ['left', 'right'] : [foot];
+    var check = inspect(points, foot);
+    if (!check.valid) return null;
+    var out = {}, sides = check.validSides;
     sides.forEach(function (s) {
       var knee = points[SIDES[s][0]], f = anklePoint(points, s);
       // 카메라를 고정한 상태에서 화면 좌표의 상승을 측정합니다. 몸통 좌표는 사용하지 않습니다.
@@ -62,7 +59,7 @@
   }
   function Motion(options) {
     this.options = Object.assign({ foot: 'both', sensitivity: .13, seated: false }, options);
-    this.baseline = null; this.samples = []; this.resetTracking();
+    this.baseline = null; this.resetTracking();
   }
   Motion.prototype.resetTracking = function () {
     this.lastKick = -Infinity;
@@ -75,34 +72,23 @@
   Motion.prototype.start = function (points) {
     var f = this.read(points);
     if (!f) return false;
-    var sides = this.options.foot === 'both' ? ['left', 'right'] : [this.options.foot];
+    var sides = Object.keys(f);
     this.baseline = {};
     sides.forEach(function (s) { this.baseline[s] = { ankle: f[s].ankle, knee: f[s].knee, leg: Math.max(.09, f[s].leg), x: f[s].x, kneeX: f[s].kneeX }; }, this);
     this.resetTracking();
     return true;
   };
-  Motion.prototype.calibrate = function (points) {
-    var f = this.read(points), sides = this.options.foot === 'both' ? ['left', 'right'] : [this.options.foot];
-    if (!f) { this.samples = []; return { valid: false, progress: 0 }; }
-    this.samples.push(f);
-    if (this.samples.length > 24) this.samples.shift();
-    var stable = sides.every(function (s) {
-      var a = this.samples.map(function (v) { return v[s].ankle; });
-      return Math.max.apply(null, a) - Math.min.apply(null, a) < .12;
-    }, this);
-    if (!stable) { this.samples = [f]; return { valid: true, progress: 1 / 24, moving: true }; }
-    if (this.samples.length < 24) return { valid: true, progress: this.samples.length / 24 };
-    this.baseline = {};
-    sides.forEach(function (s) { this.baseline[s] = { ankle: mean(this.samples.map(function (v) { return v[s].ankle; })), knee: mean(this.samples.map(function (v) { return v[s].knee; })), leg: Math.max(.09, mean(this.samples.map(function (v) { return v[s].leg; }))), x: f[s].x, kneeX: f[s].kneeX }; }, this);
-    this.resetTracking();
-    return { valid: true, progress: 1, done: true };
-  };
   Motion.prototype.update = function (points, now) {
-    var f = this.read(points), result = { valid: !!f, kick: null, lift: 0 };
+    var f = this.read(points), result = { valid: !!f, kick: null, lift: 0, sides: [] };
     if (!f) { this.resetTracking(); return result; }
     if (!this.baseline) return result;
-    var candidates = [], sensitivity = this.options.sensitivity;
-    Object.keys(this.baseline).forEach(function (s) {
+    var candidates = [], accepted = 0, sensitivity = this.options.sensitivity;
+    Object.keys(this.tracking).forEach(function (s) { if (!f[s]) this.tracking[s] = { armed: false, low: null, high: null, smooth: null, previous: null }; }, this);
+    Object.keys(f).forEach(function (s) {
+      if (!this.baseline[s]) {
+        this.baseline[s] = { ankle: f[s].ankle, knee: f[s].knee, leg: Math.max(.09, f[s].leg), x: f[s].x, kneeX: f[s].kneeX };
+        return;
+      }
       var b = this.baseline[s], t = this.tracking[s], current = f[s], previous = t.previous;
       // 다른 위치의 사람/사물로 좌표가 튄 프레임은 점수에서 제외합니다.
       var jump = previous && Math.hypot(current.x - previous.x, current.ankle - previous.ankle) > b.leg * .75 * Math.max(1, Math.min(2.5, (now - previous.time) / 100));
@@ -110,9 +96,9 @@
       var distorted = current.leg / b.leg < .25 || current.leg / b.leg > 2.2;
       if (jump || shifted || distorted) {
         t.armed = false; t.low = t.high = t.smooth = null; t.previous = null;
-        result.valid = false; result.reason = 'tracking'; return;
+        result.reason = 'tracking'; return;
       }
-      t.previous = { x: current.x, ankle: current.ankle, time: now };
+      accepted++; result.sides.push(s); t.previous = { x: current.x, ankle: current.ankle, time: now };
       var ankle = (b.ankle - f[s].ankle) / b.leg, knee = (b.knee - f[s].knee) / b.leg;
       var value = this.options.seated ? Math.max(ankle, knee) : Math.max(ankle, knee * .85);
       t.smooth = t.smooth == null ? value : t.smooth * .5 + value * .5;
@@ -128,7 +114,7 @@
         } else t.high = null;
       }
     }, this);
-    if (!result.valid) { this.resetTracking(); return result; }
+    if (!accepted) { result.valid = false; return result; }
     if (candidates.length) {
       candidates.sort(function (a, b) { return b.lift - a.lift; }); result.kick = candidates[0].side; this.lastKick = now;
       Object.keys(this.tracking).forEach(function (s) { this.tracking[s].armed = false; this.tracking[s].low = this.tracking[s].high = null; }, this);

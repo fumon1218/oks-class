@@ -48,11 +48,13 @@
       shine = $('spark').animate([{ opacity: 0, transform: 'scale(.4)' }, { opacity: 1, transform: 'scale(1)', offset: .35 }, { opacity: 0, transform: 'scale(1.3)' }], { duration: 700 });
     }
   }
-  function draw(points) {
+  function draw(points, sides) {
     overlay.width = video.videoWidth || 640; overlay.height = video.videoHeight || 480; ctx.clearRect(0, 0, overlay.width, overlay.height);
     if (!points || !valid) return;
     var links = $('foot').value === 'left' ? [[25, 27]] : $('foot').value === 'right' ? [[26, 28]] : [[25, 27], [26, 28]];
     ctx.strokeStyle = valid ? '#7af2b6' : '#ffd365'; ctx.lineWidth = Math.max(3, overlay.width / 150);
+    sides = sides || detector.inspect(points).validSides;
+    links = links.filter(function (ids) { return sides.indexOf(ids[0] === 25 ? 'left' : 'right') >= 0; });
     links.forEach(function (ids) { var a = points[ids[0]], b = points[ids[1]]; if (!a || !b || a.visibility < .75 || b.visibility < .75) return; ctx.beginPath(); ctx.moveTo(a.x * overlay.width, a.y * overlay.height); ctx.lineTo(b.x * overlay.width, b.y * overlay.height); ctx.stroke(); });
     links.flat().forEach(function (i) { var p = points[i]; if (p && p.visibility >= .75) { ctx.beginPath(); ctx.arc(p.x * overlay.width, p.y * overlay.height, 6, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); } });
   }
@@ -78,14 +80,14 @@
     if (!playing && valid && detector.start(points)) {
       playing = true; trackingValid = true;
       cue('놀이 시작! 발을 내린 뒤 살짝 들어요.');
-      status('인식됐어요! 자동으로 놀이를 시작했어요.');
+      status('한쪽 다리가 인식돼도 바로 시작해요! 발을 내린 뒤 살짝 들어요.');
       $('caption').textContent = '발을 내린 뒤 다시 들어야 다음 동작으로 인정해요.';
       updateControls();
       return;
     }
     if (playing) {
       var r = detector.update(points, performance.now());
-      trackingValid = r.valid; draw(r.valid ? points : null);
+      trackingValid = r.valid; draw(r.valid ? points : null, r.sides);
       if (!r.valid) document.querySelectorAll('[data-body]').forEach(function (e) { e.classList.remove('seen'); e.textContent = e.dataset.body === 'knees' ? '! 무릎' : '! 발목'; });
       if (!r.valid) { cue('다리가 보이면 이어서 놀아요.'); status(instruction || '다리 위치가 갑자기 바뀌었어요. 발을 내리고 같은 위치에서 다시 보여 주세요.'); }
       else { status('발을 내린 뒤 다시 들면 제기를 차요.'); if (r.kick) kick(r.kick); else if ($('cue').textContent === '다리가 보이면 이어서 놀아요.') cue('발을 내리고 다시 준비해요.'); }
@@ -144,7 +146,7 @@
       });
       await Promise.all([cameraPromise, initModel(token)]);
       if (token !== epoch) return;
-      starting = false; ready = true; lastFrame = 0; lastVideoTime = -1; resetScore(); countMode = 'camera'; status('다리가 한 번 인식되면 자동으로 시작해요. 무릎과 발목만 보여 주세요.'); updateControls(); raf = requestAnimationFrame(frame);
+      starting = false; ready = true; lastFrame = 0; lastVideoTime = -1; resetScore(); countMode = 'camera'; status('한쪽 다리의 무릎과 발목이 인식되면 자동으로 시작해요.'); updateControls(); raf = requestAnimationFrame(frame);
     } catch (e) {
       if (token !== epoch) return;
       var message = e.name === 'NotAllowedError' ? '카메라 권한이 허용되지 않았어요. 주소창의 사이트 설정에서 카메라를 허용하고 다시 켜 주세요.' : e.name === 'NotFoundError' ? '사용할 카메라를 찾지 못했어요. 맥북 카메라 연결을 확인해 주세요.' : e.name === 'NotReadableError' ? '카메라를 사용하지 못했어요. 다른 앱의 카메라 사용을 끝내고 다시 켜 주세요.' : '카메라 또는 동작 인식 준비에 실패했어요. 인터넷 연결을 확인하고 다시 켜 주세요. 버튼 연습도 가능합니다.';
