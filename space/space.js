@@ -92,8 +92,9 @@
     (SP.SYSTEMS || []).forEach(function (s, i) {
       var m = P ? s.mapP : s.map;
       var e = place(E('div', 'sp-star sp-system sp-system-' + s.id, ''), m.x, m.y, m.w);
-      e.dataset.system = s.id; e.dataset.depth = '0.72'; e.style.setProperty('--c', s.color);
-      e.setAttribute('role', 'group'); e.setAttribute('aria-label', s.name + ' · 체육 · 놀이 · 곧 만나요');
+      e.dataset.worldX = m.x; e.dataset.worldY = m.y; e.dataset.worldW = m.w;
+      e.dataset.system = s.id; e.dataset.depth = '0'; e.style.setProperty('--c', s.color);
+      e.setAttribute('role', 'group'); e.setAttribute('aria-label', s.name + ' · ' + (s.chips || []).join(' · '));
       var chips = (s.chips || []).map(function (k) { return '<i>' + O.esc(k) + '</i>'; }).join('');
       if (s.soon) chips += '<i class="sp-soon-chip">곧 만나요</i>';
       e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, '🏟️', 'sp-star-img') +

@@ -88,11 +88,11 @@ window.OKS_ZOOM = (function () {
   function ssingWorld() {
     var e = mapEl && mapEl.querySelector('.sp-system-ssing');
     if (!e) return { x: SW * .22, y: SH * .56 };
-    return { x: parseFloat(e.style.left || '22') * SW / 100, y: parseFloat(e.style.top || '56') * SH / 100 };
+    return { x: parseFloat(e.dataset.worldX || '13') * SW / 100, y: parseFloat(e.dataset.worldY || '56') * SH / 100 };
   }
   function focusWorld() {
-    /* 행성 자체의 월드 좌표는 유지하고, 선택한 행성계 쪽으로 카메라를 이동시켜 화면 정중앙에 보이게 합니다. */
-    return focus === 'ssing' ? ssingWorld() : C;
+    /* 배경은 무대 중앙을 유지합니다. 씽씽 행성계의 두 모델은 apply에서 화면 좌표에 맞춥니다. */
+    return C;
   }
   function chooseFocusAt(x, y) {
     var a = scr(C.x, C.y), s = scr(ssingWorld().x, ssingWorld().y);
@@ -139,6 +139,21 @@ window.OKS_ZOOM = (function () {
     mapEl.style.setProperty('--our-visible', (z < .56 || focus === 'our') ? '1' : '0');
     mapEl.classList.toggle('focus-ssing', z >= .56 && focus === 'ssing');
     mapEl.classList.toggle('focus-our', z >= .56 && focus === 'our');
+    mapEl.style.setProperty('--system-zoom', z);
+    /* 선택된 씽씽 행성계는 지도 카메라와 무관하게 화면 중앙/오른쪽에 배치합니다. */
+    [].forEach.call(mapEl.querySelectorAll('.sp-system'), function (e) {
+      if (z >= .56 && focus === 'ssing') {
+        var size = Math.min(vw * (e.dataset.system === 'ssing' ? .23 : .21), vh * .38);
+        var sx = vw * (e.dataset.system === 'ssing' ? .50 : .81);
+        e.style.width = (size / z) + 'px';
+        var image = e.querySelector('.sp-star-img');
+        var labelHeight = e.offsetHeight - (image ? image.offsetHeight : e.offsetHeight);
+        e.style.left = (V.x + (sx - vw / 2) / z) + 'px';
+        e.style.top = (V.y + (vh * .50 - vh / 2) / z + labelHeight / 2) + 'px';
+      } else {
+        e.style.left = e.dataset.worldX + '%'; e.style.top = e.dataset.worldY + '%'; e.style.width = e.dataset.worldW + '%';
+      }
+    });
     var gp = scr(G0.x + GW / 2, G0.y + GH * .9); galLab.style.left = gp.x + 'px'; galLab.style.top = Math.min(vh - 60, gp.y) + 'px';
     galLab.style.opacity = cl((ZG * 2.4 - z) / (ZG * 1.4), 0, 1).toFixed(3);
     /* 단계 표시 */

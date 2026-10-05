@@ -176,7 +176,7 @@ body.portrait .sp-guide img{width:84px;}
 .sp-star.soon .sp-soon-chip{background:#fff3c4;color:#5a4212;border:1px solid #ffd86a;box-shadow:0 0 12px rgba(255,216,106,.38);}
 .sp-star.soon:hover .sp-star-img,.sp-star.soon:focus-visible .sp-star-img{transform:none;}
 .sp-system{pointer-events:none;transition:opacity .35s ease;}
-.sp-system-ssing{opacity:var(--ssing-visible,0);}
+.sp-system-ssing,.sp-system-play{opacity:var(--ssing-visible,0);}
 .sp-map > .sp-star:not(.sp-system){opacity:var(--our-visible,1);transition:opacity .35s ease;}
 .sp-system .sp-star-img{filter:drop-shadow(0 18px 30px rgba(10,5,40,.58));}
 .sp-system .sp-star-name{margin-top:-3%;}
@@ -249,3 +249,12 @@ body.sp-zooming .sp-stage{transform-origin:0 0;}
 .sp-maker.back .mk-f{display:none;} .sp-maker.back .mk-b{display:block;}
 .sp-title .sp-maker img{width:clamp(24px,2.3vw,30px);height:clamp(24px,2.3vw,30px);border-radius:50%;box-shadow:0 0 0 1.5px #f0c35a;}
 @media (max-width:640px){ .sp-title .sp-maker{font-size:11px;margin-top:4px;padding-right:9px;} .sp-title .sp-maker img{width:20px;height:20px;} }
+
+/* 두 행성의 배치 기준점은 흔들림 없이 유지합니다. */
+.sp-system{animation:none;text-align:center;}
+
+/* 지도 확대와 별개로 이름표와 진입 버튼은 읽기 좋은 화면 크기를 유지합니다. */
+.sp-map.focus-ssing > .sp-system .sp-star-name{max-width:none;white-space:nowrap;padding:calc(6px / var(--system-zoom,1)) calc(14px / var(--system-zoom,1));gap:calc(6px / var(--system-zoom,1));}
+.sp-map.focus-ssing > .sp-system .sp-star-name b{font-size:calc(clamp(16px,2.3vw,32px) / var(--system-zoom,1));}
+.sp-map.focus-ssing > .sp-system .sp-star-name i{font-size:calc(clamp(11px,1.2vw,16px) / var(--system-zoom,1));padding:calc(2px / var(--system-zoom,1)) calc(9px / var(--system-zoom,1));}
+.sp-map.focus-ssing .sp-system-enter{font-size:calc(clamp(12px,1.25vw,18px) / var(--system-zoom,1));padding:calc(8px / var(--system-zoom,1)) calc(16px / var(--system-zoom,1));}

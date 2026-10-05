@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v99';
+const CACHE_NAME = 'oks-class-v100';
 const ASSETS = [
   './',
   './index.html',
@@ -110,6 +110,16 @@ const ASSETS = [
   './sports/assets/athletics/start_signal.webp',
   './sports/assets/gymnastics.webp',
   './sports/assets/soccer.webp',
+  './sports/assets/sports_building_archery.webp',
+  './sports/assets/sports_building_athletics.webp',
+  './sports/assets/sports_building_gymnastics.webp',
+  './sports/assets/sports_building_info_center.webp',
+  './sports/assets/sports_building_medal_house.webp',
+  './sports/assets/sports_building_play_zone.webp',
+  './sports/assets/sports_building_soccer.webp',
+  './sports/assets/sports_building_swimming.webp',
+  './sports/assets/sports_building_taekwondo.webp',
+  './sports/assets/sports_building_training_zone.webp',
   './sports/assets/summer_hub.webp',
   './sports/assets/swimming.webp',
   './sports/assets/taekwondo.webp',
@@ -204,6 +214,7 @@ const ASSETS = [
   './art/3d/star_farm.glb',
   './art/3d/star_jungle.glb',
   './art/3d/star_love.glb',
+  './art/3d/star_play.glb',
   './art/3d/star_sea.glb',
   './art/3d/star_ssing.glb',
   './art/3d/star_ssing_new.glb',
@@ -715,17 +726,6 @@ const ASSETS = [
   './icons/world-spring.jpg',
   './icons/world-summer.jpg',
   './icons/world-winter.jpg'
-,
-  './sports/assets/sports_building_athletics.webp',
-  './sports/assets/sports_building_swimming.webp',
-  './sports/assets/sports_building_archery.webp',
-  './sports/assets/sports_building_gymnastics.webp',
-  './sports/assets/sports_building_taekwondo.webp',
-  './sports/assets/sports_building_soccer.webp',
-  './sports/assets/sports_building_info_center.webp',
-  './sports/assets/sports_building_medal_house.webp',
-  './sports/assets/sports_building_play_zone.webp',
-  './sports/assets/sports_building_training_zone.webp'
 ];
 
 const OPTIONAL_ASSETS = ['./art/scenes/town_spring_hd.webp'];
