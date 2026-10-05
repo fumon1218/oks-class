@@ -51,24 +51,22 @@
   function draw(points) {
     overlay.width = video.videoWidth || 640; overlay.height = video.videoHeight || 480; ctx.clearRect(0, 0, overlay.width, overlay.height);
     if (!points) return;
-    var links = [[11, 12], [11, 23], [12, 24], [23, 24], [23, 25], [25, 27], [24, 26], [26, 28]];
+    var links = [[25, 27], [26, 28], [27, 31], [28, 32], [25, 31], [26, 32]];
     ctx.strokeStyle = valid ? '#7af2b6' : '#ffd365'; ctx.lineWidth = Math.max(3, overlay.width / 150);
     links.forEach(function (ids) { var a = points[ids[0]], b = points[ids[1]]; if (!a || !b || a.visibility < .55 || b.visibility < .55) return; ctx.beginPath(); ctx.moveTo(a.x * overlay.width, a.y * overlay.height); ctx.lineTo(b.x * overlay.width, b.y * overlay.height); ctx.stroke(); });
-    [23, 24, 25, 26, 27, 28].forEach(function (i) { var p = points[i]; if (p && p.visibility >= .55) { ctx.beginPath(); ctx.arc(p.x * overlay.width, p.y * overlay.height, 6, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); } });
+    [25, 26, 27, 28, 31, 32].forEach(function (i) { var p = points[i]; if (p && p.visibility >= .55) { ctx.beginPath(); ctx.arc(p.x * overlay.width, p.y * overlay.height, 6, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill(); } });
   }
   function framing(points) {
     var check = detector.inspect(points);
     document.querySelectorAll('[data-body]').forEach(function (e) {
-      var labels = { shoulders: '어깨', hips: '몸통', knees: '무릎', feet: '발' };
+      var labels = { knees: '무릎', feet: '발끝' };
       e.classList.toggle('seen', check.seen[e.dataset.body]);
       e.textContent = (check.seen[e.dataset.body] ? '✓ ' : '! ') + labels[e.dataset.body];
     });
     if (check.valid) return '';
-    if (!check.detected) return '화면 중앙에 한 명만 서 주세요. 어깨부터 발까지 보여야 시작할 수 있어요.';
-    if (!check.seen.feet) return '발이 안 보여요. 맥북에서 조금 더 뒤로 이동하거나 화면 각도를 낮춰 발까지 보여 주세요.';
-    if (!check.seen.knees) return '무릎이 안 보여요. 다리 전체가 화면에 들어오도록 위치를 맞춰 주세요.';
-    if (!check.seen.hips) return '몸통이 가려졌어요. 화면 중앙에서 몸통과 다리를 함께 보여 주세요.';
-    if (!check.seen.shoulders) return '어깨가 안 보여요. 어깨부터 발까지 화면에 들어오도록 맞춰 주세요.';
+    if (!check.detected) return '무릎과 발끝이 화면에 보이도록 맥북 각도를 낮춰 주세요. 얼굴과 몸통은 보이지 않아도 돼요.';
+    if (!check.seen.feet) return '발이 안 보여요. 무릎부터 발끝까지 들어오도록 맥북 화면 각도를 낮춰 주세요.';
+    if (!check.seen.knees) return '무릎이 안 보여요. 무릎부터 발끝까지만 화면에 들어오면 돼요.';
     return '화면에서 너무 작게 보여요. 조금 가까이 이동해 주세요.';
   }
   function receivePose(points) {
@@ -142,7 +140,7 @@
       });
       await Promise.all([cameraPromise, initModel(token)]);
       if (token !== epoch) return;
-      starting = false; ready = true; lastFrame = 0; lastVideoTime = -1; resetScore(); countMode = 'camera'; status('다리가 한 번 인식되면 자동으로 시작해요. 어깨부터 발까지 보여 주세요.'); updateControls(); raf = requestAnimationFrame(frame);
+      starting = false; ready = true; lastFrame = 0; lastVideoTime = -1; resetScore(); countMode = 'camera'; status('다리가 한 번 인식되면 자동으로 시작해요. 무릎과 발끝만 보여 주세요.'); updateControls(); raf = requestAnimationFrame(frame);
     } catch (e) {
       if (token !== epoch) return;
       var message = e.name === 'NotAllowedError' ? '카메라 권한이 허용되지 않았어요. 주소창의 사이트 설정에서 카메라를 허용하고 다시 켜 주세요.' : e.name === 'NotFoundError' ? '사용할 카메라를 찾지 못했어요. 맥북 카메라 연결을 확인해 주세요.' : e.name === 'NotReadableError' ? '카메라를 사용하지 못했어요. 다른 앱의 카메라 사용을 끝내고 다시 켜 주세요.' : '카메라 또는 동작 인식 준비에 실패했어요. 인터넷 연결을 확인하고 다시 켜 주세요. 버튼 연습도 가능합니다.';
