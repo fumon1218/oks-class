@@ -101,7 +101,7 @@ window.OKS_ZOOM = (function () {
   }
   function selectSystem(name, direct) {
     focus = name === 'ssing' ? 'ssing' : 'our'; V1 = focusWorld(); autoFocus = true; anchor = null; home = false;
-    if (direct) zT = focus === 'ssing' ? 1.85 : 1;
+    if (direct) zT = 1;
     else if (zT < 1) zT = 1;
     kick();
   }
@@ -143,13 +143,14 @@ window.OKS_ZOOM = (function () {
     /* 선택된 씽씽 행성계는 지도 카메라와 무관하게 화면 중앙/오른쪽에 배치합니다. */
     [].forEach.call(mapEl.querySelectorAll('.sp-system'), function (e) {
       if (z >= .56 && focus === 'ssing') {
-        var size = Math.min(vw * (e.dataset.system === 'ssing' ? .23 : .21), vh * .38);
-        var sx = vw * (e.dataset.system === 'ssing' ? .50 : .81);
+        var main = e.dataset.system === 'ssing', compact = vw < 640;
+        var size = Math.min(vw * (main ? (compact ? .58 : .30) : (compact ? .36 : .19)), vh * (main ? .48 : .34));
+        var sx = vw * (main ? .50 : (compact ? .74 : .81)), sy = vh * (main ? .50 : (compact ? .74 : .50));
         e.style.width = (size / z) + 'px';
         var image = e.querySelector('.sp-star-img');
         var labelHeight = e.offsetHeight - (image ? image.offsetHeight : e.offsetHeight);
         e.style.left = (V.x + (sx - vw / 2) / z) + 'px';
-        e.style.top = (V.y + (vh * .50 - vh / 2) / z + labelHeight / 2) + 'px';
+        e.style.top = (V.y + (sy - vh / 2) / z + labelHeight / 2) + 'px';
       } else {
         e.style.left = e.dataset.worldX + '%'; e.style.top = e.dataset.worldY + '%'; e.style.width = e.dataset.worldW + '%';
       }
@@ -270,6 +271,7 @@ window.OKS_ZOOM = (function () {
     enter: function (opt) {
       if (!scroller) build();
       on = true; document.body.classList.add('sp-zooming');
+      stage.style.setProperty('--map-background', stage.style.backgroundImage || 'none');
       scroller.scrollTop = 0; scroller.scrollLeft = 0; scroller.style.backgroundImage = 'none';
       if (stage.getAnimations) stage.getAnimations().forEach(function (an) { an.cancel(); });
       cos.hidden = false; over.hidden = false; ui.hidden = false; diving = false; stage.style.transition = ''; stage.style.filter = ''; stage.style.opacity = '';

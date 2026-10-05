@@ -91,30 +91,31 @@
     /* 은하계 레벨의 독립 별 마을 — 우리 별 마을 내부 별들과 섞이지 않게 별도 렌더링 */
     (SP.SYSTEMS || []).forEach(function (s, i) {
       var m = P ? s.mapP : s.map;
-      var directEntry = s.id === 'ssing' && !s.soon;
+      var directEntry = (s.id === 'ssing' || s.id === 'play') && !s.soon;
       var e = place(E(directEntry ? 'button' : 'div', 'sp-star sp-system sp-system-' + s.id, ''), m.x, m.y, m.w);
       e.dataset.worldX = m.x; e.dataset.worldY = m.y; e.dataset.worldW = m.w;
       e.dataset.system = s.id; e.dataset.depth = '0'; e.style.setProperty('--c', s.color);
       if (directEntry) {
         e.type = 'button'; e.setAttribute('aria-label', s.name + ' 들어가기');
-        e.onclick = function () { O.unlock && O.unlock(); O.sfx('pop'); location.href = 'sports/'; };
+        e.onclick = function () { O.unlock && O.unlock(); O.sfx('pop'); location.href = s.id === 'play' ? 'playground/' : 'sports/'; };
       } else {
         e.setAttribute('role', 'group'); e.setAttribute('aria-label', s.name + ' · ' + (s.chips || []).join(' · '));
       }
       var chips = (s.chips || []).map(function (k) { return '<i>' + O.esc(k) + '</i>'; }).join('');
       if (s.soon) chips += '<i class="sp-soon-chip">곧 만나요</i>';
       e.innerHTML = '<span class="sp-star-glow"></span>' + pic(s.img, '🏟️', 'sp-star-img') +
-        (directEntry ? '' : '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>' +
-        (!s.soon && s.id === 'play' ? '<a class="sp-system-enter" href="playground/">🪁 놀이별 들어가기</a>' : ''));
+        '<span class="sp-star-name"><b>' + O.esc(s.name) + '</b>' + chips + '</span>';
       mapEl.appendChild(e);
-      var enter = e.querySelector('.sp-system-enter');
-      if (enter) {
-        enter.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); });
-        enter.addEventListener('click', function (ev) { ev.stopPropagation(); O.unlock && O.unlock(); O.sfx('pop'); });
-      }
       if (view3d && model(s.model)) {
         /* 우리 별 마을의 3D 별과 같은 map 모드: 마우스/한 손가락으로 직접 360° 회전 */
-        view3d.add(model(s.model), e, { box: e.querySelector('.sp-star-img'), spin: s.spin == null ? .14 : s.spin, yaw: s.yaw == null ? .25 + i : s.yaw, tilt: s.tilt == null ? .36 : s.tilt, dist: s.dist || 2.05, dy: -.03, glow: hex(s.color), mode: 'map' });
+        view3d.add(model(s.model), e, { box: e.querySelector('.sp-star-img'), spin: s.spin == null ? .14 : s.spin, yaw: s.yaw == null ? .25 + i : s.yaw, tilt: s.tilt == null ? .36 : s.tilt, dist: s.dist || 2.05, dy: -.03, glow: hex(s.color), mode: 'map', onload: function (ok3) {
+          if (!ok3 || s.soon) return;
+          var z = E('span', 'sp-zoom', '🔍'); z.setAttribute('role', 'button'); z.tabIndex = 0; z.setAttribute('aria-label', s.name + ' 크게 보기'); z.title = '크게 보기 (돌리고 확대해 봐요)';
+          z.addEventListener('pointerdown', function (ev) { ev.stopPropagation(); });
+          z.onclick = function (ev) { ev.stopPropagation(); ev.preventDefault(); open3d(s.model, s.name, s.color); };
+          z.onkeydown = function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); ev.stopPropagation(); open3d(s.model, s.name, s.color); } };
+          e.appendChild(z);
+        } });
       }
     });
     /* 다른 게임 별: 누르면 우주선 타고 날아가서 그 게임으로 */

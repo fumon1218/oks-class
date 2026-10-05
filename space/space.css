@@ -187,9 +187,6 @@ body.portrait .sp-guide img{width:84px;}
   transition:opacity .35s ease;
 }
 .sp-map.focus-ssing > .sp-system:active{cursor:grabbing;}
-.sp-system-enter{display:none;position:relative;z-index:5;margin-top:8px;padding:8px 16px;border-radius:999px;background:#fff0b8;border:2px solid #ffd45d;color:#5c4200;text-decoration:none;font-size:clamp(14px,1.25vw,18px);box-shadow:0 5px 14px rgba(30,30,90,.25);white-space:nowrap}
-.sp-map.focus-ssing > .sp-system .sp-system-enter{display:inline-flex;align-items:center;justify-content:center}
-.sp-system-enter:active{transform:translateY(2px) scale(.98)}
 /* 기존 별들과 동일한 이름+교과 캡슐 UI를 씽씽 별 마을에서도 항상 또렷하게 표시 */
 .sp-map.focus-ssing > .sp-system .sp-star-name{
   opacity:1!important;
@@ -253,8 +250,12 @@ body.sp-zooming .sp-stage{transform-origin:0 0;}
 /* 두 행성의 배치 기준점은 흔들림 없이 유지합니다. */
 .sp-system{animation:none;text-align:center;}
 
-/* 지도 확대와 별개로 이름표와 진입 버튼은 읽기 좋은 화면 크기를 유지합니다. */
+/* 우리별과 같은 이름·교과 표시와 확대 버튼을 화면 크기에 맞춰 유지합니다. */
 .sp-map.focus-ssing > .sp-system .sp-star-name{max-width:none;white-space:nowrap;padding:calc(6px / var(--system-zoom,1)) calc(14px / var(--system-zoom,1));gap:calc(6px / var(--system-zoom,1));}
-.sp-map.focus-ssing > .sp-system .sp-star-name b{font-size:calc(clamp(16px,2.3vw,32px) / var(--system-zoom,1));}
+.sp-map.focus-ssing > .sp-system .sp-star-name b{font-size:calc(clamp(16px,1.9vw,26px) / var(--system-zoom,1));}
+.sp-map.focus-ssing > .sp-system-ssing .sp-star-name b{font-size:calc(clamp(18px,2.3vw,32px) / var(--system-zoom,1));}
+.sp-map.focus-ssing > .sp-system .sp-zoom{width:calc(40px / var(--system-zoom,1));height:calc(40px / var(--system-zoom,1));font-size:calc(21px / var(--system-zoom,1));}
 .sp-map.focus-ssing > .sp-system .sp-star-name i{font-size:calc(clamp(11px,1.2vw,16px) / var(--system-zoom,1));padding:calc(2px / var(--system-zoom,1)) calc(9px / var(--system-zoom,1));}
-.sp-map.focus-ssing .sp-system-enter{font-size:calc(clamp(12px,1.25vw,18px) / var(--system-zoom,1));padding:calc(8px / var(--system-zoom,1)) calc(16px / var(--system-zoom,1));}
+
+/* 세로 우주 지도도 가로 지도처럼 무대에 같은 우주 배경을 표시합니다. */
+body.portrait.sp-zooming[data-view="map"] .sp-stage{background:#140f33 var(--map-background,none) center/cover no-repeat!important;}
