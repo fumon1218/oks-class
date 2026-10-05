@@ -10,9 +10,56 @@
     return visible(points[ids[1]]) ? points[ids[1]] : null;
   }
   function legSize(points, side) {
-    var knee = points[SIDES[side][0]], foot = anklePoint(points, side);
+    var knee = points[SIDES[side][0]], foot = points[SIDES[side][1]];
     return knee && foot ? Math.hypot(knee.x - foot.x, knee.y - foot.y) : 0;
   }
+  // 좌표를 잃으면 예전 좌표를 그리지 않습니다. 실제로 관측한 네 관절만 정리합니다.
+  function PoseTracker() { this.previous = null; this.time = -Infinity; this.pending = {}; }
+  PoseTracker.prototype.update = function (points, now) {
+    if (!points) { if (now - this.time > 250) this.previous = null; return null; }
+    var out = points.map(function (p, i) { return i >= 25 && i <= 28 && p ? Object.assign({}, p) : null; });
+    var previous = now - this.time <= 250 ? this.previous : null;
+    function distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+    if (previous && [25, 26, 27, 28].every(function (i) { return visible(out[i]) && visible(previous[i], .5); })) {
+      var direct = distance(out[25], previous[25]) + distance(out[26], previous[26]);
+      var reverse = distance(out[25], previous[26]) + distance(out[26], previous[25]);
+      // 양 무릎이 서로의 직전 위치로 옮겨간 명확한 라벨 전환만 교정합니다.
+      if (direct > .08 && reverse < .04 && reverse < direct * .35) {
+        var knee = out[25], ankle = out[27]; out[25] = out[26]; out[27] = out[28]; out[26] = knee; out[28] = ankle;
+      }
+      var ankleDirect = distance(out[27], previous[27]) + distance(out[28], previous[28]);
+      var ankleReverse = distance(out[27], previous[28]) + distance(out[28], previous[27]);
+      // 무릎은 그대로인데 두 발목만 순간 뒤바뀌면 연결을 추측해서 만들지 않습니다.
+      if (distance(out[25], previous[25]) < .025 && distance(out[26], previous[26]) < .025 && ankleDirect > .12 && ankleReverse < .025 && ankleReverse < ankleDirect * .25) {
+        out[27] = out[28] = null;
+      }
+    }
+    Object.keys(SIDES).forEach(function (s) {
+      var ids = SIDES[s], k = out[ids[0]], a = out[ids[1]], oldK = previous && previous[ids[0]], oldA = previous && previous[ids[1]];
+      if (!visible(k, .5) || !visible(a, .5) || distance(k, a) < .025 || a.y < k.y - .08) { out[ids[0]] = out[ids[1]] = null; this.pending[s] = null; return; }
+      if (oldK && oldA) {
+        var oldLength = distance(oldK, oldA), limit = Math.max(.08, oldLength * .65);
+        var kneeJump = distance(k, oldK), ankleJump = distance(a, oldA);
+        // 무릎과 발목의 역전/순간 이동은 안정된 실측이 이어진 뒤에만 다시 받습니다.
+        var bad = (kneeJump > limit && ankleJump > limit) || distance(k, a) > Math.max(.15, oldLength * 2.5);
+        if (bad) {
+          var pending = this.pending[s];
+          if (!pending || distance(k, pending.knee) > .025 || distance(a, pending.ankle) > .025) pending = this.pending[s] = { knee: k, ankle: a, time: now, count: 0 };
+          pending.count++;
+          if (!visible(k) || !visible(a) || pending.count < 3 || now - pending.time < 150) { out[ids[0]] = out[ids[1]] = null; return; }
+        } else {
+          // 작은 떨림은 낮은 가중치, 실제 발차기는 높은 가중치로 처리합니다.
+          ids.forEach(function (i) { var p = out[i], old = previous[i], delta = distance(p, old), alpha = delta < .015 ? .3 : .8; p.x = delta < .003 ? old.x : old.x + (p.x - old.x) * alpha; p.y = delta < .003 ? old.y : old.y + (p.y - old.y) * alpha; });
+        }
+      }
+      this.pending[s] = null;
+    }, this);
+    // 버린 관절은 추적 기준을 갱신하지 않습니다. 신뢰도는 원본 값을 유지합니다.
+    if (out.slice(25, 29).some(Boolean)) {
+      this.previous = out.map(function (p, i) { return p || (previous && previous[i]) || null; }); this.time = now;
+    }
+    return out.slice(25, 29).some(Boolean) ? out : null;
+  };
   function inspect(points, foot, baseline, tracking, now) {
     var sides = foot === 'both' ? ['left', 'right'] : [foot];
     var seen = {
@@ -43,6 +90,10 @@
       poses.forEach(function (p) {
         var distances = [25, 26].filter(function (i) { return visible(previous[i], .5) && visible(p[i], .5); }).map(function (i) { return Math.hypot(p[i].x - previous[i].x, p[i].y - previous[i].y); });
         var d = distances.length ? Math.min.apply(null, distances) : Infinity;
+        if ([25, 26].every(function (i) { return visible(previous[i], .5) && visible(p[i], .5); })) {
+          var reversed = (Math.hypot(p[25].x - previous[26].x, p[25].y - previous[26].y) + Math.hypot(p[26].x - previous[25].x, p[26].y - previous[25].y)) / 2;
+          d = Math.min((distances[0] + distances[1]) / 2, reversed);
+        }
         if (d < distance) { distance = d; nearest = p; }
       });
       // 발을 들어 다리가 짧게 보여도 뒤쪽 사람으로 선택을 바꾸지 않습니다.
@@ -80,6 +131,7 @@
     this.tracking = { left: { armed: false, low: null, high: null, smooth: null, previous: null }, right: { armed: false, low: null, high: null, smooth: null, previous: null } };
   };
   Motion.selectPose = selectPose;
+  Motion.PoseTracker = PoseTracker;
   Motion.prototype.inspect = function (points, now) { return inspect(points, this.options.foot, this.baseline, this.tracking, now == null ? this.now : now); };
   Motion.prototype.read = function (points, now) { return features(points, this.options.foot, this.baseline, this.tracking, now == null ? this.now : now); };
   // 첫 유효 자세를 즉시 기준으로 사용합니다. 멈춰 있는 준비 단계는 없습니다.
@@ -100,6 +152,19 @@
       return result; // 인식되지 않은 프레임으로는 점수를 주지 않습니다.
     }
     if (!this.baseline) return result;
+    // 앉았다 일어나는 큰 자세 변화: 두 다리가 새 내려 둔 위치에서 안정되면 재기준화합니다.
+    var moved = f.left && f.right && this.baseline.left && this.baseline.right && ['left', 'right'].every(function (s) {
+      var p = f[s], b = this.baseline[s];
+      return visible(points[SIDES[s][0]]) && visible(points[SIDES[s][1]]) && p.ankle - p.knee > .06 && Math.abs(p.x - p.kneeX) < .12 && Math.abs(p.knee - b.knee) > .08 && Math.abs(p.kneeX - b.kneeX) < .08 && (p.ankle - b.ankle) - (p.knee - b.knee) > -.04;
+    }, this);
+    if (moved) {
+      var change = this.postureChange;
+      if (!change || ['left', 'right'].some(function (s) { return Math.hypot(f[s].x - change.pose[s].x, f[s].ankle - change.pose[s].ankle) > .02 || Math.hypot(f[s].kneeX - change.pose[s].kneeX, f[s].knee - change.pose[s].knee) > .02; })) change = this.postureChange = { pose: f, time: now };
+      this.resetTracking(); result.valid = false; result.reason = 'posture';
+      if (now - change.time >= 600) { this.start(points); this.postureChange = null; result.valid = true; result.sides = Object.keys(f); }
+      return result;
+    }
+    this.postureChange = null;
     var candidates = [], accepted = 0, sensitivity = this.options.sensitivity * (this.options.seated ? 1 : .7);
     Object.keys(this.tracking).forEach(function (s) { if (!f[s] && (!this.tracking[s].previous || now - this.tracking[s].previous.time > 250)) this.tracking[s] = { armed: false, low: null, high: null, smooth: null, previous: null }; }, this);
     Object.keys(f).forEach(function (s) {

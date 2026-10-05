@@ -67,9 +67,9 @@
       e.textContent = (accepted ? '✓ ' : '! ') + labels[e.dataset.body];
     });
     if (check.valid) return '';
-    if (!check.detected) return '무릎과 발목이 화면에 보이도록 맥북 각도를 낮춰 주세요. 얼굴과 몸통은 보이지 않아도 돼요.';
+    if (!check.detected) return '서서 인식이 끊기면 조금 뒤로 물러나 상체도 함께 보여 주세요. 발목이 화면 아래에서 잘리지 않게 맞춰요.';
     if (!check.seen.feet) return '발목이 안 보여요. 무릎부터 발목까지 들어오도록 맥북 화면 각도를 낮춰 주세요.';
-    if (!check.seen.knees) return '무릎이 안 보여요. 무릎부터 발목까지만 화면에 들어오면 돼요.';
+    if (!check.seen.knees) return '무릎이 안 보여요. 무릎과 발목을 함께 보여 주세요. 서서 끊기면 상체도 함께 보이게 맞춰요.';
     if (check.small) return '다리가 작게 보여요. 무릎과 발이 더 크게 보이도록 맞춰 주세요.';
     return '다리 모양을 확실하게 확인하지 못했어요. 주변 물건과 겹치지 않도록 무릎과 발을 보여 주세요.';
   }
@@ -89,7 +89,7 @@
       var r = detector.update(points, performance.now());
       trackingValid = r.valid; draw(r.valid ? points : null, r.sides);
       if (!r.valid) document.querySelectorAll('[data-body]').forEach(function (e) { e.classList.remove('seen'); e.textContent = e.dataset.body === 'knees' ? '! 무릎' : '! 발목'; });
-      if (!r.valid) { cue('다리가 보이면 이어서 놀아요.'); status(instruction || '다리 위치가 갑자기 바뀌었어요. 발을 내리고 같은 위치에서 다시 보여 주세요.'); }
+      if (!r.valid) { cue('다리가 보이면 이어서 놀아요.'); status(r.reason === 'posture' ? '자세가 바뀌었어요. 잠깐 발을 내려 두면 새 자세에 맞춰 이어서 놀아요.' : instruction || '좌표를 안정시키는 중이에요. 발을 내려 주세요. 서서 끊기면 상체도 함께 보이게 맞춰요.'); }
       else { status('발을 내린 뒤 다시 들면 제기를 차요.'); if (r.kick) kick(r.kick); else if ($('cue').textContent === '다리가 보이면 이어서 놀아요.') cue('발을 내리고 다시 준비해요.'); }
     } else { status(instruction); cue('다리가 인식되면 자동으로 시작해요.'); }
     updateControls();
