@@ -92,25 +92,41 @@ function villageHub(){
  talk(hello);
 }
 /* ---------- 하계 올림픽 종목 ---------- */
+var SUMMER_PADS={athletics:[302,262],swimming:[553,262],archery:[829,262],gymnastics:[1105,262],taekwondo:[1368,262],
+ soccer:[277,728],info:[541,728],medal:[829,728],play:[1118,728],training:[1393,728]};
 function summerHub(){
- var sh=top('하계 스포츠 마을','씽씽 별 마을 · 하계 스포츠','./','씽씽별로',false);
- sh.ask('가 보고 싶은 건물을 골라 보세요. 경기장에서는 종목별 차시를, 보조 건물에서는 안내와 복습을 할 수 있어요.',{silent:true});
- var host=E('div','summer-village');
- host.innerHTML='<div class="summer-village-sky"><div><small>씽씽 별 마을</small><h1>하계 스포츠 마을</h1><p>건물을 눌러 운동과 놀이를 시작해요</p></div><span class="summer-village-badge">☀️ 하계 스포츠</span></div><div class="summer-village-map"><div class="summer-road road-a"></div><div class="summer-road road-b"></div><div class="summer-plaza"><span>⭐</span><b>씽씽 광장</b></div><div class="summer-building-grid"></div></div>';
- var grid=host.querySelector('.summer-building-grid');
+ document.body.classList.add('sports-hubmap');
+ var root=E('div','sh-root sh-summer'),
+ hello='가 보고 싶은 건물을 눌러 보세요.';
+ root.innerHTML='<div class="sh-back" style="background-image:url(assets/summer_map.webp)"></div><div class="sh-scroll"><div class="sh-map"><img class="sh-bg" src="assets/summer_map.webp" alt="하계 스포츠 마을 지도"></div></div>'+
+  '<div class="sh-top"><a class="oks-pill sh-exit" href="./">🌌 <span>씽씽 별 마을</span></a><div class="sh-title"><b>하계 스포츠 마을</b><span>건물을 눌러 운동과 놀이를 시작해요</span></div><div class="sh-hud"></div></div>'+
+  '<div class="sh-guide"><img src="../art/char/ok_wave.webp" alt=""><div class="sh-bubble"></div></div>';
+ var map=root.querySelector('.sh-map'),bub=root.querySelector('.sh-bubble'),guide=root.querySelector('.sh-guide');
+ function talk(t){bub.textContent=t;guide.dataset.say=t;guide.classList.remove('pop');void guide.offsetWidth;guide.classList.add('pop');guide.classList.remove('quiet');clearTimeout(talk.t);talk.t=setTimeout(function(){guide.classList.add('quiet')},7000);}
+ guide.onclick=function(){guide.classList.remove('quiet');clearTimeout(talk.t);talk.t=setTimeout(function(){guide.classList.add('quiet')},7000);if(guide.dataset.say)O.say(guide.dataset.say)};
+ var prog=progress(),today=null;
+ function starsOf(id){var tot=0,plays=0;Object.keys(prog).forEach(function(k){if(k===id||k.indexOf(id+'-')===0){var x=prog[k]||{};plays+=x.plays||0;Object.keys(x.best||{}).forEach(function(lv){tot+=x.best[lv]||0})}});return {tot:tot,plays:plays}}
+ var sportsB=(D.summerBuildings||[]).filter(function(b){return b.type==='sport'});
+ for(var q=0;q<sportsB.length;q++){if(!starsOf(sportsB[q].id).plays){today=sportsB[q].id;break}}
  (D.summerBuildings||[]).forEach(function(b,i){
-   var btn=E('button','summer-building '+(b.type==='utility'?'utility':'sport')+' pos-'+(i+1));
-   btn.style.setProperty('--bcolor',b.color||'#55cfff');
-   btn.innerHTML='<span class="summer-building-art"><img src="'+b.image+'" alt=""></span><span class="summer-building-label"><b>'+b.name+'</b><small>'+b.sub+'</small></span>';
-   var bi=btn.querySelector('img');bi.onerror=function(){var s=b.type==='sport'&&byId(b.id);if(s&&s.scene&&this.src.indexOf(s.scene)<0)this.src=s.scene;else this.style.visibility='hidden'};
-   btn.onclick=function(){
-     O.sfx('pop');
-     if(b.type==='sport'){location.href='?festival=summer&sport='+b.id;return;}
-     utilityBuilding(b.id);
-   };
-   grid.appendChild(btn);
+  var pad=SUMMER_PADS[b.id]||[836,470],e=E('button','sh-bld'+(b.id===today?' today':''));e.type='button';e.dataset.id=b.id;
+  var w=b.id==='training'?236:250;
+  e.style.left=pad[0]/HUB_W*100+'%';e.style.top=pad[1]/HUB_H*100+'%';e.style.width=w/HUB_W*100+'%';e.style.zIndex=pad[1]+i;e.style.animationDelay=(i*60)+'ms';e.style.setProperty('--bcolor',b.color||'#55cfff');
+  var st=b.type==='sport'?starsOf(b.id):null;
+  e.innerHTML='<img class="sh-img" src="assets/sb_'+b.id+'.webp" alt="">'+
+   (b.id===today?'<span class="sh-today">오늘!</span>':'')+(st&&st.tot?'<span class="sh-stars">★ '+st.tot+'</span>':'')+
+   '<span class="sh-name"><b>'+O.esc(b.name)+'</b><small>'+O.esc(b.sub)+'</small></span>';
+  e.onclick=function(){
+   O.sfx('pop');
+   if(b.type==='sport'){talk(b.name+'으로 가요!');setTimeout(function(){location.href='?festival=summer&sport='+b.id},500);return}
+   utilityBuilding(b.id);
+  };
+  map.appendChild(e);
  });
- sh.board.innerHTML='';sh.board.appendChild(host);
+ document.body.innerHTML='';document.body.appendChild(root);
+ var sc=root.querySelector('.sh-scroll');sc.scrollLeft=(sc.scrollWidth-sc.clientWidth)/2;
+ if(O.eco&&O.eco.hud){try{O.eco.hud(root.querySelector('.sh-hud'))}catch(x){}}
+ var t=today&&byId(today);talk(t?hello+' 오늘은 '+t.name+'부터!':hello);
 }
 function utilityBuilding(id){
  var old=document.querySelector('.summer-utility-modal');if(old)old.remove();

@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v103';
+const CACHE_NAME = 'oks-class-v104';
 const ASSETS = [
   './',
   './index.html',
@@ -125,6 +125,16 @@ const ASSETS = [
   './sports/assets/hub_bld_winter.webp',
   './sports/assets/hub_bld_winter_para.webp',
   './sports/assets/hub_map.webp',
+  './sports/assets/sb_archery.webp',
+  './sports/assets/sb_athletics.webp',
+  './sports/assets/sb_gymnastics.webp',
+  './sports/assets/sb_info.webp',
+  './sports/assets/sb_medal.webp',
+  './sports/assets/sb_play.webp',
+  './sports/assets/sb_soccer.webp',
+  './sports/assets/sb_swimming.webp',
+  './sports/assets/sb_taekwondo.webp',
+  './sports/assets/sb_training.webp',
   './sports/assets/soccer.webp',
   './sports/assets/sports_building_archery.webp',
   './sports/assets/sports_building_athletics.webp',
@@ -137,6 +147,7 @@ const ASSETS = [
   './sports/assets/sports_building_taekwondo.webp',
   './sports/assets/sports_building_training_zone.webp',
   './sports/assets/summer_hub.webp',
+  './sports/assets/summer_map.webp',
   './sports/assets/swimming.webp',
   './sports/assets/taekwondo.webp',
   './playground/jegi/assets/court.webp',
