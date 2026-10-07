@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>종이 퍼즐 학습지 · 옥쌤의 즐거운 교실</title>
+<style>
+:root{--ink:#3b2f2f}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans KR','Apple SD Gothic Neo',sans-serif;background:#f3ead8;color:var(--ink)}
+.bar{position:sticky;top:0;z-index:5;background:#fffdf8;padding:10px 14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.bar label{font-size:15px;display:flex;gap:6px;align-items:center}
+.bar select,.bar button,.bar a{font:inherit;font-size:15px;padding:6px 12px;border-radius:12px;border:2px solid #e6d7bb;background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
+.bar .go{background:#ff6fa6;border-color:#ff6fa6;color:#fff}
+.sheet{width:190mm;min-height:270mm;margin:16px auto;padding:10mm;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.2);page-break-after:always;break-after:page}
+.sheet h2{margin:0 0 4mm;font-size:22px;display:flex;justify-content:space-between;align-items:baseline}
+.sheet h2 small{font-size:14px;font-weight:400}
+.nm{font-size:15px;margin-bottom:4mm}
+.pic,.slots{position:relative;width:100%;aspect-ratio:16/9;margin:0 auto}
+.pic canvas{width:100%;height:100%;display:block}
+.cut{position:absolute;inset:0;border:2px solid #333}
+.cut i,.cut b{position:absolute;display:block}
+.cut i{border:0;border-left:2.5px dashed #333;top:0;bottom:0}
+.cut b{border:0;border-top:2.5px dashed #333;left:0;right:0}
+.num{position:absolute;display:flex;align-items:flex-start;justify-content:flex-start;font-weight:700;font-size:15px;color:#c2185b}
+.num span{background:rgba(255,255,255,.9);border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;margin:3px}
+.slots{border:3px solid #6b4a1f;background:#fffdf4}
+.slots .cell{position:absolute;border:2px dashed #999;display:flex;align-items:center;justify-content:center;font-size:30px;color:#cfc3a9;font-weight:700}
+.tip{margin-top:6mm;font-size:15px;line-height:1.7;border:2px dashed #e6d7bb;border-radius:12px;padding:3mm 4mm}
+.tip.hide{display:none}
+@media print{body{background:#fff}.bar{display:none}.sheet{margin:0;box-shadow:none;width:auto;min-height:0;padding:8mm}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <label>그림 <select id="selImg"></select></label>
+  <label>조각 <select id="selN"><option value="4">4조각 (2×2)</option><option value="6" selected>6조각 (3×2)</option><option value="9">9조각 (3×3)</option><option value="12">12조각 (4×3)</option></select></label>
+  <label><input type="checkbox" id="chkNum" checked> 번호 쓰기</label>
+  <button class="go" onclick="window.print()">🖨️ 인쇄</button>
+  <a href="../games/puzzle/">🧩 퍼즐 게임으로</a>
+</div>
+<div id="out"></div>
+<script src="../art/masters/masters.js"></script>
+<script src="../games/puzzle/images.js"></script>
+<script>
+(function () {
+  'use strict';
+  var IMGS = window.OKS_ART.all(), G = { 4: [2, 2], 6: [3, 2], 9: [3, 3], 12: [4, 3] }, out = document.getElementById('out');
+  var sel = document.getElementById('selImg'), selN = document.getElementById('selN'), chk = document.getElementById('chkNum');
+  IMGS.forEach(function (x, i) { var o = document.createElement('option'); o.value = i; o.textContent = (x[3] ? '★ ' : '') + x[0]; sel.appendChild(o); });
+  var q = new URLSearchParams(location.search); if (q.get('img')) sel.value = q.get('img'); if (q.get('n') && G[q.get('n')]) selN.value = q.get('n');
+  function lines(c, r) { var s = ''; for (var i = 1; i < c; i++) s += '<i style="left:' + (i * 100 / c) + '%"></i>'; for (var j = 1; j < r; j++) s += '<b style="top:' + (j * 100 / r) + '%"></b>'; return s; }
+  function nums(c, r, on) { if (!on) return ''; var s = ''; for (var j = 0; j < r; j++) for (var i = 0; i < c; i++) s += '<div class="num" style="left:' + (i * 100 / c) + '%;top:' + (j * 100 / r) + '%"><span>' + (j * c + i + 1) + '</span></div>'; return s; }
+  function slots(c, r, on) { var s = ''; for (var j = 0; j < r; j++) for (var i = 0; i < c; i++) s += '<div class="cell" style="left:' + (i * 100 / c) + '%;top:' + (j * 100 / r) + '%;width:' + (100 / c) + '%;height:' + (100 / r) + '%">' + (on ? (j * c + i + 1) : '') + '</div>'; return s; }
+  function render() {
+    var it = IMGS[+sel.value], n = +selN.value, c = G[n][0], r = G[n][1], on = chk.checked;
+    out.innerHTML = '<section class="sheet"><h2>✂️ 퍼즐 조각 만들기 <small>이름 ____________</small></h2><div class="nm">그림: <b>' + it[0] + '</b>' + (it[2] ? ' · ' + it[2] : '') + '</div>' +
+      '<div class="pic"><canvas></canvas><div class="cut">' + lines(c, r) + '</div>' + nums(c, r, on) + '</div>' +
+      '<div class="tip">① 점선을 따라 가위로 오려요. ✂️<br>② ' + (on ? '조각 번호를 보고' : '그림을 잘 보고') + ' 다음 장 퍼즐판에 놓아 보아요.<br>③ 다 맞췄으면 풀로 붙여요.</div></section>' +
+      '<section class="sheet"><h2>🧩 퍼즐판 <small>이름 ____________</small></h2><div class="nm">조각을 알맞은 칸에 붙여요. (' + n + '조각)</div><div class="slots">' + slots(c, r, on) + '</div>' +
+      '<div class="tip">힌트: 하늘은 위쪽, 땅은 아래쪽에 있어요. 모서리 조각부터 찾아 보아요.</div></section>';
+    var im = new Image(); im.onload = function () {
+      var cv = out.querySelector('canvas'), W = 1400, H = Math.round(W * 9 / 16); cv.width = W; cv.height = H;
+      var iw = im.naturalWidth, ih = im.naturalHeight, sw = iw, sh = iw * 9 / 16; if (sh > ih) { sh = ih; sw = ih * 16 / 9; }
+      cv.getContext('2d').drawImage(im, (iw - sw) / 2, (ih - sh) / 2, sw, sh, 0, 0, W, H);
+    }; im.src = '../' + it[1];
+  }
+  sel.onchange = selN.onchange = chk.onchange = render; render();
+})();
+</script>
+</body>
+</html>

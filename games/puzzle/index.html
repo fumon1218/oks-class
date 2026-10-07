@@ -80,20 +80,14 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
 <body class="oks">
 <script src="../../core/oks-core.js"></script>
 <script src="../../core/oks-eco.js"></script>
+<script src="../../art/masters/masters.js"></script>
+<script src="images.js"></script>
 <script>
 (function () {
   'use strict';
   var O = window.OKS, E = O.el, R = '../../';
-  /* 우리 교실의 큰 그림 중 퍼즐로 예쁜 것을 골랐어요 */
-  var IMGS = [
-    ['폭포 정글', 'art/scenes/jungle.jpg'], ['한옥 정자 공원', 'art/scenes/park.jpg'], ['연못', 'art/scenes/pond.jpg'], ['눈 나라', 'art/scenes/snow.jpg'],
-    ['가을 마을', 'art/scenes/town_autumn.jpg'], ['봄 마을', 'art/scenes/town_spring.jpg'], ['여름 마을', 'art/scenes/town_summer.jpg'], ['겨울 마을', 'art/scenes/town_winter.jpg'],
-    ['나무 위 집', 'art/scenes/treehouse.jpg'], ['꽃 섬 마을', 'art/scenes/town_spring_hd.webp'], ['반짝 사원', 'art/jj/scenes/temple.webp'], ['옛 숲 유적', 'art/jj/scenes/ruins.webp'],
-    ['보석 동굴', 'art/jj/scenes/crystal.webp'], ['화산 섬', 'art/jj/scenes/volcano.webp'], ['초록별', 'art/space/land_center.webp'], ['보라별', 'art/space/land_dream.webp'],
-    ['농장별', 'art/space/land_farm.webp'], ['분홍별', 'art/space/land_love.webp'], ['바다별 해변', 'art/space/land_sea.webp'], ['맑은 하늘', 'games/birds/img/sky.webp'],
-    ['바닷속', 'games/fishing/img/sea.webp'], ['동물 마을 지도', 'games/tycoon/img/town.webp'], ['스포츠 센터', 'sports/assets/ballcenter/center_outside.webp'], ['은하수', 'space/img/galaxy.webp'],
-    ['호수 섬 마을', 'town/wj.webp'], ['꽃 온실', 'core/ui/greenhouse.webp']
-  ];
+  /* 우리 교실의 큰 그림 + 넣어 둔 명화(art/masters) — 목록은 images.js */
+  var IMGS = window.OKS_ART.all();
   var GRID = { 10: [5, 2], 20: [5, 4], 50: [10, 5], 100: [10, 10] };
   var DEF_BY_LEVEL = [10, 10, 20, 50, 100];
   var AS = 16 / 9;
@@ -102,6 +96,10 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
   var level = O.levelFor(LESSON);
   var BACK = O.qs('lesson') ? O.ret(O.ROOT + 'play/?id=' + LESSON) : O.ret(O.ROOT + 'index.html');
   var KEY = 'oks_puzzle_pieces_v1';
+  function hkey() { var a = O.profile && O.profile.active ? O.profile.active() : ''; return 'oks_puzzle_hist_v1' + (a ? '__' + a : ''); }
+  var ORDER = [10, 20, 50, 100];
+  /* 최근 결과로 다음 조각 수를 추천: 도움 없이 잘 끝냈으면 한 단계 위, 아니면 같은 조각 수 */
+  function recommend() { var h = O.jget(hkey(), null); if (!h || !h.n) return 0; var i = ORDER.indexOf(h.n); if (i < 0) return 0; return h.ok && i < ORDER.length - 1 ? ORDER[i + 1] : h.n; }
   function josa(w, a, b) { var c = w.charCodeAt(w.length - 1) - 0xAC00; return (c >= 0 && c % 28) ? a : b; }
 
   var sh = O.shell({ compact: true, title: '그림 퍼즐', back: BACK, backLabel: '돌아가기', level: level });
@@ -110,7 +108,7 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
   var stage = E('div', 'pz-stage'), dock = E('div', 'pz-dock');
   board.appendChild(stage); board.appendChild(dock);
   var btnPeek = E('button', 'oks-btn blue', '🖼️ 그림 보기'), btnHelp = E('button', 'oks-btn orange', '🖐️ 도와줘');
-  btnPeek.type = btnHelp.type = 'button'; dock.appendChild(btnPeek); dock.appendChild(btnHelp);
+  var btnAuto = E('button', 'oks-btn green', '🪄 대신 놓아 주기'); btnPeek.type = btnHelp.type = btnAuto.type = 'button'; dock.appendChild(btnPeek); dock.appendChild(btnHelp); dock.appendChild(btnAuto);
 
   /* ---------- 상태 ---------- */
   var N = 0, cols = 0, rows = 0, pick = null, img = null, stats = null, playing = false, finished = false;
@@ -297,10 +295,11 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
     var d = E('div', 'pz-done'); d.style.cssText = 'left:' + geo.bx + 'px;top:' + geo.by + 'px;width:' + geo.bw + 'px;height:' + geo.bh + 'px';
     var c = E('canvas'); c.width = stage._src.width; c.height = stage._src.height; c.getContext('2d').drawImage(stage._src, 0, 0); d.appendChild(c); stage.appendChild(d);
     O.sfx('ok'); await O.wait(250); d.classList.add('on');
-    O.say('완성! ' + pick[0] + josa(pick[0], '이에요', '예요') + '!'); await O.wait(2200);
+    O.say('완성! ' + pick[0] + josa(pick[0], '이에요', '예요') + '!' + (pick[2] ? ' ' + pick[2] + ' 작품이에요.' : '')); await O.wait(2200);
     finished = true;
+    O.jset(hkey(), { n: N, ok: stats.mistakes <= 2 && (helpUsed || 0) <= 1 && autoN === 0, at: Date.now() });
     var entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'art', school: 'elem', topic: '그림 퍼즐 ' + N + '조각', level: level, engine: 'puzzle', pieces: N, image: pick[1],
-      mistakes: stats.mistakes, glow: stats.glow, hand: stats.hand, asked: stats.asked + (helpUsed || 0), sec: Math.round((Date.now() - stats.t0) / 1000) };
+      mistakes: stats.mistakes, glow: stats.glow, hand: stats.hand, asked: stats.asked + (helpUsed || 0), auto: autoN, sec: Math.round((Date.now() - stats.t0) / 1000) };
     var btns = [{ label: '🔁 다른 그림으로 (' + N + '조각)', color: 'green', onClick: function () { go(N); } }];
     var nxt = { 10: 20, 20: 50, 50: 100 }[N];
     if (nxt) btns.push({ label: '🧩 ' + nxt + '조각 도전', color: 'orange', onClick: function () { go(nxt); } });
@@ -313,6 +312,12 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
   var peekT = 0, helpUsed = 0;
   btnPeek.onclick = function () { if (!peek) return; O.unlock(); peek.hidden = false; clearTimeout(peekT); peekT = setTimeout(function () { peek.hidden = true; }, 3200); };
   btnHelp.onclick = function () { if (!playing) return; O.unlock(); helpUsed++; helpOn = true; var pc = hint(); if (!pc) return; showSlot(true); pc.el.style.zIndex = ++zTop; pc.z = zTop; pc.el.classList.add('oks-glow'); O.say('반짝이는 조각을 빛나는 자리에 놓아요'); };
+  var autoN = 0;                                           /* 어려울 땐 한 조각씩 대신 놓아 줘요(선생님·도우미 지원 기록) */
+  btnAuto.onclick = function () {
+    if (!playing || drag) return; var pc = hint(); if (!pc) return; O.unlock(); autoN++; stats.hand++; O.clearPrompt();
+    pc.z = ++zTop; pc.el.style.zIndex = pc.z; pc.el.style.transition = 'left .55s ease, top .55s ease'; pc.x = pc.hx; pc.y = pc.hy; place(pc); O.sfx('tick');
+    setTimeout(function () { if (!pc.el) return; pc.el.style.transition = ''; snap(pc); }, 600);
+  };
   sh.levelBtn.onclick = function () { location.reload(); };
   var rz = 0; addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { if (!pieces.length || drag || !img) return; pieces.forEach(function (pc) { if (!pc.placed) { pc.fx = pc.x / geo.W; pc.fy = pc.y / geo.H; } }); build(); if (playing) setTarget(); }, 250); });
 
@@ -327,13 +332,13 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
   function startScreen() {
     sh.askEl.style.visibility = 'hidden';
     var saved = 0; try { saved = +localStorage.getItem(KEY) || 0; } catch (e) {}
-    N = +O.qs('pieces') || saved || DEF_BY_LEVEL[level - 1]; if (!GRID[N]) N = 20;
+    var rec = recommend(); N = +O.qs('pieces') || rec || saved || DEF_BY_LEVEL[level - 1]; if (!GRID[N]) N = 20;
     var ov = E('div', 'oks-start'), choices = [], pickIdx = 0;
-    function roll() { var idx = O.shuffle(IMGS.map(function (x, i) { return i; })); choices = idx.slice(0, 3); pickIdx = choices[0]; }
+    function roll() { var idx = O.shuffle(IMGS.map(function (x, i) { return i; })), m = idx.filter(function (i) { return IMGS[i][3]; }); if (m.length) { idx = [m[0]].concat(idx.filter(function (i) { return i !== m[0]; })); } choices = idx.slice(0, 3); pickIdx = choices[0]; }
     roll();
     ov.innerHTML = '<div class="st-card"><h1>🧩 그림 퍼즐</h1><p>조각을 끌어서 알맞은 자리에 놓아 그림을 완성해요.</p>' +
-      '<h3>몇 조각으로 할까요?</h3><div class="pz-cnt">' + [10, 20, 50, 100].map(function (n) { return '<button type="button" data-n="' + n + '">' + miniGrid(n) + '<b>' + n + '</b><span>' + HINT_TXT[n] + '</span></button>'; }).join('') + '</div>' +
-      '<h3>어떤 그림으로 할까요?</h3><div class="pz-imgs"></div><button type="button" class="oks-btn green st-go">시작! ▶</button></div>';
+      '<h3>몇 조각으로 할까요?</h3><div class="pz-cnt">' + [10, 20, 50, 100].map(function (n) { return '<button type="button" data-n="' + n + '">' + miniGrid(n) + '<b>' + n + '</b><span>' + (n === rec ? '👍 추천' : HINT_TXT[n]) + '</span></button>'; }).join('') + '</div>' +
+      '<h3>어떤 그림으로 할까요?</h3><div class="pz-imgs"></div><button type="button" class="oks-btn green st-go">시작! ▶</button><p style="margin:12px 0 0;font-size:15px"><a href="../../worksheet/puzzle.html">🖨️ 종이 퍼즐 학습지</a></p></div>';
     document.body.appendChild(ov);
     var imgsEl = ov.querySelector('.pz-imgs');
     function drawChoices() {

@@ -76,12 +76,12 @@
       { id: 'b_gugak', name: '국악 정자', sub: '음악 · 세계와 우리 음악', kind: 'lessons', subject: 'music', x: 78, y: 52, s: 1, emo: '🪘',
         keys: ['세계 음악', '음악 박물관'] },
       { id: 'b_color_studio', name: '색깔 공방', sub: '미술 · 색·그리기', kind: 'lessons', subject: 'art', x: 18, y: 90, s: 1, emo: '🎨', rest: true,
-        links: [['🎈 색깔 풍선', 'games/balloons/?mode=color'], ['🎈 색 섞기 풍선', 'games/balloons/?mode=mix']] },
+        links: [['🎈 색깔 풍선', 'games/balloons/?mode=color'], ['🎈 색 섞기 풍선', 'games/balloons/?mode=mix'], ['🎨 그림 속 색 찾기', 'games/look/']] },
       { id: 'b_sculpt', name: '조형 스튜디오', sub: '미술 · 만들기', kind: 'lessons', subject: 'art', x: 50, y: 90, s: 1, emo: '🏺',
         keys: ['공방', '캐릭터 스튜디오', '디자인'] },
       { id: 'b_gallery', name: '바다 미술관', sub: '미술 · 감상', kind: 'lessons', subject: 'art', x: 82, y: 90, s: 1, emo: '🖼️',
         keys: ['미술관', '감상'],
-        links: [['🧩 그림 퍼즐 (10 · 20 · 50 · 100조각)', 'games/puzzle/']] }
+        links: [['🧩 그림 퍼즐 (10 · 20 · 50 · 100조각)', 'games/puzzle/'], ['🎴 그림 짝 찾기', 'games/match/'], ['🎨 그림 속 색 찾기', 'games/look/'], ['🖨️ 종이 퍼즐 학습지', 'worksheet/puzzle.html']] }
     ],
     love: [
       { id: 'b_bakery', name: '동물 베이커리', sub: '수학 · 수·나누기', kind: 'lessons', subject: 'math', x: 20, y: 52, s: 1, emo: '🎂', keys: ['베이커리'] },
