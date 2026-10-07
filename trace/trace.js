@@ -213,7 +213,7 @@
     function showWord(reveal) {
       var w = S.g.word;
       big.textContent = S.g.label;
-      pic.innerHTML = w ? (w.img ? '<img src="' + O.ROOT + 'art/' + w.img + '" alt="' + O.esc(w.text) + '">' : '<span class="tr-emoji">' + (w.emoji || '') + '</span>') : '';
+      pic.innerHTML = w ? (w.img ? '<img src="' + O.ROOT + (/^(art|games)\//.test(w.img) ? '' : 'art/') + w.img + '" alt="' + O.esc(w.text) + '">' : '<span class="tr-emoji">' + (w.emoji || '') + '</span>') : '';
       wordEl.innerHTML = w ? '<b>' + O.esc(w.text) + '</b>' + (w.ko ? '<small>' + O.esc(w.ko) + '</small>' : '') : '';
       pic.classList.toggle('hide', !(reveal || S.g.picAlways)); wordEl.classList.toggle('hide', !reveal);
     }

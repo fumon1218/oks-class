@@ -37,14 +37,30 @@
     'ㅡ': [[[10, 50], [90, 50]]],
     'ㅣ': [[[50, 8], [50, 92]]]
   };
+  /* 쌍자음: 같은 자음을 왼쪽·오른쪽 반 칸에 두 번 / 복모음: 두 모음을 이어서 */
+  var DBL = {};
+  ['ㄱ', 'ㄷ', 'ㅂ', 'ㅅ', 'ㅈ'].forEach(function (c) { DBL[{ 'ㄱ': 'ㄲ', 'ㄷ': 'ㄸ', 'ㅂ': 'ㅃ', 'ㅅ': 'ㅆ', 'ㅈ': 'ㅉ' }[c]] = tf(CON[c], [0, 0, 50, 100]).concat(tf(CON[c], [50, 0, 50, 100])); });
+  var COMP = {
+    'ㅐ': tf(VOW['ㅏ'], [0, 0, 62, 100]).concat(tf(VOW['ㅣ'], [62, 0, 38, 100])), 'ㅒ': tf(VOW['ㅑ'], [0, 0, 62, 100]).concat(tf(VOW['ㅣ'], [62, 0, 38, 100])),
+    'ㅔ': tf(VOW['ㅓ'], [0, 0, 62, 100]).concat(tf(VOW['ㅣ'], [62, 0, 38, 100])), 'ㅖ': tf(VOW['ㅕ'], [0, 0, 62, 100]).concat(tf(VOW['ㅣ'], [62, 0, 38, 100])),
+    'ㅘ': tf(VOW['ㅗ'], [0, 30, 58, 70]).concat(tf(VOW['ㅏ'], [56, 0, 44, 100])), 'ㅙ': tf(VOW['ㅗ'], [0, 30, 45, 70]).concat(tf(VOW['ㅏ'], [44, 0, 32, 100]), tf(VOW['ㅣ'], [76, 0, 24, 100])),
+    'ㅚ': tf(VOW['ㅗ'], [0, 30, 58, 70]).concat(tf(VOW['ㅣ'], [62, 0, 38, 100])),
+    'ㅝ': tf(VOW['ㅜ'], [0, 0, 58, 70]).concat(tf(VOW['ㅓ'], [56, 0, 44, 100])), 'ㅞ': tf(VOW['ㅜ'], [0, 0, 45, 70]).concat(tf(VOW['ㅓ'], [44, 0, 32, 100]), tf(VOW['ㅣ'], [76, 0, 24, 100])),
+    'ㅟ': tf(VOW['ㅜ'], [0, 0, 58, 70]).concat(tf(VOW['ㅣ'], [62, 0, 38, 100])),
+    'ㅢ': tf(VOW['ㅡ'], [0, 40, 62, 40]).concat(tf(VOW['ㅣ'], [62, 0, 38, 100]))
+  };
+  var DBL_ORDER = 'ㄲㄸㅃㅆㅉ'.split(''), COMP_ORDER = 'ㅐㅒㅔㅖㅘㅙㅚㅝㅞㅟㅢ'.split('');
+  var DBL_NAME = { 'ㄲ': '쌍기역', 'ㄸ': '쌍디귿', 'ㅃ': '쌍비읍', 'ㅆ': '쌍시옷', 'ㅉ': '쌍지읒' };
+  var COMP_SOUND = { 'ㅐ': '애', 'ㅒ': '얘', 'ㅔ': '에', 'ㅖ': '예', 'ㅘ': '와', 'ㅙ': '왜', 'ㅚ': '외', 'ㅝ': '워', 'ㅞ': '웨', 'ㅟ': '위', 'ㅢ': '의' };
   var CON_ORDER = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ'.split(''), VOW_ORDER = 'ㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ'.split('');
   var CON_NAME = { 'ㄱ': '기역', 'ㄴ': '니은', 'ㄷ': '디귿', 'ㄹ': '리을', 'ㅁ': '미음', 'ㅂ': '비읍', 'ㅅ': '시옷', 'ㅇ': '이응', 'ㅈ': '지읒', 'ㅊ': '치읓', 'ㅋ': '키읔', 'ㅌ': '티읕', 'ㅍ': '피읖', 'ㅎ': '히읗' };
   var VOW_SOUND = { 'ㅏ': '아', 'ㅑ': '야', 'ㅓ': '어', 'ㅕ': '여', 'ㅗ': '오', 'ㅛ': '요', 'ㅜ': '우', 'ㅠ': '유', 'ㅡ': '으', 'ㅣ': '이' };
   /* 초성·중성·종성 번호 → 자모 (이 앱에서 쓰는 기본 자모만) */
-  var CHO = { 0: 'ㄱ', 2: 'ㄴ', 3: 'ㄷ', 5: 'ㄹ', 6: 'ㅁ', 7: 'ㅂ', 9: 'ㅅ', 11: 'ㅇ', 12: 'ㅈ', 14: 'ㅊ', 15: 'ㅋ', 16: 'ㅌ', 17: 'ㅍ', 18: 'ㅎ' };
-  var JUNG = { 0: 'ㅏ', 2: 'ㅑ', 4: 'ㅓ', 6: 'ㅕ', 8: 'ㅗ', 12: 'ㅛ', 13: 'ㅜ', 17: 'ㅠ', 18: 'ㅡ', 20: 'ㅣ' };
-  var JONG = { 0: '', 1: 'ㄱ', 4: 'ㄴ', 8: 'ㄹ', 16: 'ㅁ', 17: 'ㅂ', 21: 'ㅇ' };
-  var HORIZ = 'ㅗㅛㅜㅠㅡ';
+  var CHO = { 1: 'ㄲ', 4: 'ㄸ', 8: 'ㅃ', 10: 'ㅆ', 13: 'ㅉ', 0: 'ㄱ', 2: 'ㄴ', 3: 'ㄷ', 5: 'ㄹ', 6: 'ㅁ', 7: 'ㅂ', 9: 'ㅅ', 11: 'ㅇ', 12: 'ㅈ', 14: 'ㅊ', 15: 'ㅋ', 16: 'ㅌ', 17: 'ㅍ', 18: 'ㅎ' };
+  var JUNG = { 1: 'ㅐ', 3: 'ㅒ', 5: 'ㅔ', 7: 'ㅖ', 9: 'ㅘ', 10: 'ㅙ', 11: 'ㅚ', 14: 'ㅝ', 15: 'ㅞ', 16: 'ㅟ', 19: 'ㅢ', 0: 'ㅏ', 2: 'ㅑ', 4: 'ㅓ', 6: 'ㅕ', 8: 'ㅗ', 12: 'ㅛ', 13: 'ㅜ', 17: 'ㅠ', 18: 'ㅡ', 20: 'ㅣ' };
+  var JONG = { 0: '', 20: 'ㅆ', 1: 'ㄱ', 4: 'ㄴ', 8: 'ㄹ', 16: 'ㅁ', 17: 'ㅂ', 21: 'ㅇ' };
+  var HORIZ = 'ㅗㅛㅜㅠㅡ', MIXED = 'ㅘㅙㅚㅝㅞㅟㅢ';
+  function jam(j) { return CON[j] || DBL[j] || VOW[j] || COMP[j]; }
 
   function tf(strokes, b) { return strokes.map(function (s) { return s.map(function (p) { return [+(b[0] + p[0] / 100 * b[2]).toFixed(1), +(b[1] + p[1] / 100 * b[3]).toFixed(1)]; }); }); }
   /* 글자 하나 → {strokes, 구성} , 지원하지 않는 자모가 있으면 null */
@@ -52,11 +68,12 @@
     var c = ch.charCodeAt(0) - 0xAC00; if (c < 0 || c > 11171) return null;
     var cho = CHO[Math.floor(c / 588)], jung = JUNG[Math.floor((c % 588) / 28)], jong = JONG[c % 28];
     if (!cho || !jung || jong == null) return null;
-    var h = HORIZ.indexOf(jung) >= 0, f = !!jong, B;
-    if (!h) B = f ? { c: [4, 6, 44, 50], v: [52, 4, 38, 56], f: [22, 62, 56, 32] } : { c: [4, 14, 52, 72], v: [58, 6, 34, 88] };
+    var h = HORIZ.indexOf(jung) >= 0, m = MIXED.indexOf(jung) >= 0, f = !!jong, B;
+    if (m) B = f ? { c: [8, 2, 52, 32], v: [4, 36, 92, 30], f: [22, 68, 56, 30] } : { c: [8, 4, 52, 44], v: [4, 50, 92, 44] };
+    else if (!h) B = f ? { c: [4, 6, 44, 50], v: [52, 4, 38, 56], f: [22, 62, 56, 32] } : { c: [4, 14, 52, 72], v: [58, 6, 34, 88] };
     else B = f ? { c: [22, 2, 56, 30], v: [8, 34, 84, 28], f: [22, 64, 56, 32] } : { c: [20, 4, 60, 46], v: [6, 52, 88, 40] };
-    var st = tf(CON[cho], B.c).concat(tf(VOW[jung], B.v));
-    if (f) st = st.concat(tf(CON[jong], B.f));
+    var st = tf(jam(cho), B.c).concat(tf(jam(jung), B.v));
+    if (f) st = st.concat(tf(jam(jong), B.f));
     return { strokes: st, parts: [cho, jung, jong].filter(Boolean) };
   }
   /* 그림이 있는 낱말 (art 폴더 그림) */
@@ -64,8 +81,11 @@
     ['소', 'obj/cow.webp'], ['코', 'en/nose.webp'], ['눈', 'en/eye.webp'], ['공', 'en/ball.webp'], ['비', 'obj/rain.webp'], ['자', 'en/ruler.webp'],
     ['나무', 'obj/tree.webp'], ['우산', 'obj/umbrella.webp'], ['고래', 'obj/whale.webp'], ['모자', 'en/hat.webp'], ['오리', 'obj/duck.webp'],
     ['나비', 'obj/butterfly.webp'], ['구름', 'obj/cloud.webp'], ['가방', 'en/backpack.webp'], ['감자', 'obj/potato.webp'], ['호박', 'obj/pumpkin.webp'],
-    ['양파', 'obj/onion.webp'], ['연필', 'en/pencil.webp'], ['문어', 'obj/octopus.webp']
+    ['양파', 'obj/onion.webp'], ['연필', 'en/pencil.webp'], ['문어', 'obj/octopus.webp'],
+    ['달', 'obj/moon_night.webp'], ['별', 'obj/star.webp'], ['새', 'obj/bird.webp'], ['배', 'obj/boat.webp'], ['개', 'art/jj/animals/dog.webp'], ['고양이', 'art/jj/animals/cat.webp'],
+    ['토끼', 'art/jj/animals/rabbit.webp'], ['코끼리', 'art/jj/animals/elephant.webp'], ['쌀', 'en/food_rice.webp'], ['아빠', 'en/fam_dad.webp'], ['케이크', 'en/cake.webp'],
+    ['지우개', 'en/eraser.webp'], ['가위', 'en/scissors.webp'], ['의자', 'obj/chair.webp'], ['사과', 'games/balloons/img/f_apple.webp']
   ];
-  window.OKS_TRACE_HANGUL = { CON: CON, VOW: VOW, CON_ORDER: CON_ORDER, VOW_ORDER: VOW_ORDER, CON_NAME: CON_NAME, VOW_SOUND: VOW_SOUND, syllable: syllable, WORDS: WORDS,
+  window.OKS_TRACE_HANGUL = { DBL: DBL, COMP: COMP, DBL_ORDER: DBL_ORDER, COMP_ORDER: COMP_ORDER, DBL_NAME: DBL_NAME, COMP_SOUND: COMP_SOUND, CON: CON, VOW: VOW, CON_ORDER: CON_ORDER, VOW_ORDER: VOW_ORDER, CON_NAME: CON_NAME, VOW_SOUND: VOW_SOUND, syllable: syllable, WORDS: WORDS,
     SYL: '가나다라마바사아자차카타파하'.split('') };
 })();
