@@ -25,32 +25,8 @@ function save(key,stars,mistakes){
 }
 function info(s,sk,no){
  if(s.id==='athletics'&&window.OKS_ATHLETICS){var c=OKS_ATHLETICS.course(sk,no);return [c.title,c.goal]}
- var map={
- athletics:{
-  elem:[['달리기 출발과 도착','출발선과 결승선을 알고 순서대로 움직여요.'],['달리기 준비와 안전','운동화와 준비운동 등 안전한 준비를 알아봐요.'],['나의 달리기 기록','출발 신호에 반응하고 기록을 살펴봐요.']],
-  middle:[['달리기와 기록','신호에 맞춰 출발하고 자신의 기록을 확인해요.'],['속도와 거리 조절','거리와 속도를 조절하며 달려요.'],['간이 이어달리기','차례와 구역을 지키며 이어달리기를 경험해요.']],
-  high:[['나의 육상 활동 계획','상황에 맞는 달리기 목표를 정하고 실천해요.'],['기록 비교하기','이전 기록과 현재 기록을 비교해요.'],['안전한 운동 계획','준비·운동·정리운동을 스스로 계획해요.']]},
- swimming:{
-  elem:[['수영장과 안전 약속','수영장 도구와 안전 약속을 알고 참여해요.'],['물에서 움직여요','물속에서 몸을 편안하게 움직이는 방법을 알아봐요.'],['호흡과 마무리','기초 호흡과 활동 후 정리 방법을 알아봐요.']],
-  middle:[['호흡과 레인 이용','레인을 지키고 기초 호흡 순서를 익혀요.'],['기초 영법 경험','팔과 다리 움직임을 순서대로 경험해요.'],['수영장 안전 판단','상황을 보고 안전한 행동을 선택해요.']],
-  high:[['안전한 수영 계획','준비부터 마무리까지 안전한 활동을 계획해요.'],['나의 수영 목표','나에게 맞는 거리와 목표를 정해요.'],['생활 속 수영','건강과 여가를 위한 활동을 선택해요.']]},
- archery:{
-  elem:[['과녁의 중심 찾기','과녁의 중심과 방향을 살펴 목표를 맞혀요.'],['활과 화살 알아보기','양궁 도구의 이름과 역할을 알아봐요.'],['안전한 차례 지키기','기다리기와 안전선 지키기를 연습해요.']],
-  middle:[['집중해서 과녁 맞히기','주의를 집중하고 목표 지점을 조절해요.'],['거리와 방향','거리와 방향에 따라 목표를 조절해요.'],['점수 알아보기','과녁 위치에 따른 점수를 알아봐요.']],
-  high:[['나의 목표 정하기','목표 난이도를 정하고 결과를 기록하며 도전해요.'],['집중 전략 찾기','나에게 맞는 집중 방법을 찾아요.'],['안전한 경기 참여','규칙과 차례를 지키며 참여해요.']]},
- gymnastics:{
-  elem:[['몸의 균형 느끼기','기본 자세와 균형 동작을 차례로 경험해요.'],['팔과 다리 움직이기','팔과 다리를 여러 방향으로 움직여요.'],['동작 순서 기억하기','간단한 동작 순서를 보고 따라 해요.']],
-  middle:[['균형 동작 이어 하기','여러 균형 동작을 순서대로 연결해요.'],['높이와 방향 바꾸기','몸의 높이와 방향을 바꾸어 움직여요.'],['짧은 동작 구성','배운 동작을 연결해 짧은 순서를 만들어요.']],
-  high:[['나만의 체조 구성','할 수 있는 동작을 선택해 짧은 순서를 만들어요.'],['동작 표현하기','음악이나 신호에 맞춰 동작을 표현해요.'],['안전한 연습 계획','공간과 몸 상태를 살피며 연습 계획을 세워요.']]},
- taekwondo:{
-  elem:[['준비 자세와 방향','준비 자세와 왼쪽·오른쪽 방향을 알아봐요.'],['기본 발차기','목표를 향해 기초 발차기를 경험해요.'],['예절과 안전','인사와 차례, 안전 약속을 알아봐요.']],
-  middle:[['기본 발차기 익히기','목표 방향에 맞춰 안전하게 발차기를 연습해요.'],['거리 조절하기','목표와의 거리를 살펴 움직여요.'],['동작 이어 하기','준비 자세와 발차기를 연결해요.']],
-  high:[['안전한 태권도 활동','예절과 안전 약속을 지키며 동작을 선택해요.'],['나의 동작 구성','할 수 있는 동작을 골라 순서를 만들어요.'],['생활 속 태권도','건강과 자기관리를 위한 활동을 계획해요.']]},
- soccer:{
-  elem:[['공과 골대 알아보기','공과 골대를 구별하고 빈 공간을 찾아봐요.'],['공 차고 멈추기','발로 공을 보내고 멈추는 기초 움직임을 경험해요.'],['친구와 함께하기','친구와 차례를 지키며 공을 주고받아요.']],
-  middle:[['패스와 공간 찾기','친구와 함께 빈 공간으로 패스하는 방법을 익혀요.'],['드리블과 방향','공을 가까이 두고 방향을 바꾸어 움직여요.'],['간이 경기 규칙','간단한 규칙을 지키며 게임에 참여해요.']],
-  high:[['협동하는 축구 활동','상황을 보고 패스할 곳을 스스로 선택해요.'],['공격과 수비 판단','공과 사람의 위치를 보고 움직임을 선택해요.'],['나의 축구 계획','역할과 목표를 정해 활동에 참여해요.']]}
- };
+ var map=window.OKS_SPORT_TITLES;
+
  return (map[s.id]&&map[s.id][sk]&&map[s.id][sk][Math.max(0,Math.min(2,no-1))])||[s.title,s.goal];
 }
 
@@ -201,7 +177,7 @@ function activity(){
  var preview=s.id==='athletics'?'assets/athletics/athletics_bg_main.webp':(s.scene||s.image);
  start.innerHTML='<div class="oks-start-lv">'+LEVELS[level-1].name+'</div><p class="gdesc">'+levelDesc(s,li)+'</p><p>'+li[1]+'</p><div class="sports-start-preview'+(s.id==='athletics'?' athletics-preview':'')+'"><img class="preview-bg" src="'+preview+'" alt="">'+(s.id==='athletics'?'<img class="preview-runner" src="assets/athletics/runner_idle.webp" alt="">':'')+'</div>';
  var go=E('button','oks-btn',O.iconHtml('icon_play.png','시작하기'));go.type='button';start.appendChild(go);
- var ws=E('a','oks-btn blue oks-extra','학습지 인쇄');ws.href='worksheet.html?sport='+s.id+'&school='+school+'&level='+level;start.appendChild(ws);
+ var ws=E('a','oks-btn blue oks-extra','학습지 인쇄');ws.href='../worksheet/?id=sp-'+s.id+'-'+school+'-'+lessonNo+'&level='+level;start.appendChild(ws);
  sh.board.appendChild(start);
  O.target({get:function(){return go}},Math.min(level,2));
  go.onclick=function(){O.unlock();O.clearPrompt();runGame(sh,s,li)};
@@ -234,7 +210,7 @@ function runGame(sh,s,li){
    buttons:[
     {label:'한 번 더',onClick:function(){location.reload()}},
     level<5?{label:'다음 수준 ('+(level+1)+')',color:'orange',href:'?festival=summer&sport='+s.id+'&school='+school+'&lesson='+lessonNo+'&level='+(level+1)+'&play=1'}:null,
-    {label:'학습지 인쇄',color:'blue',href:'worksheet.html?sport='+s.id+'&school='+school+'&level='+level},
+    {label:'학습지 인쇄',color:'blue',href:'../worksheet/?id=sp-'+s.id+'-'+school+'-'+lessonNo+'&level='+level},
     {label:s.name+' 목차',color:'blue',href:'?festival=summer&sport='+s.id+'&school='+school}
    ].filter(Boolean)});
  }

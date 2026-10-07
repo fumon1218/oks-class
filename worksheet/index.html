@@ -248,6 +248,7 @@ body.th-bw .d-spk{display:none!important}
 <script src="../play/custom.js"></script>
 <script src="generic.js"></script>
 <script src="english.js"></script>
+<script src="../sports/titles.js"></script><script src="../sports/lessons.js"></script><script src="../sports/lessons2.js"></script><script src="sports.js"></script>
 <script src="../games/tycoon/town.js"></script><script src="../games/tycoon/town2.js"></script>
 <script>
 (function () {
@@ -255,6 +256,8 @@ body.th-bw .d-spk{display:none!important}
   var A = '../art/', G = '../games/';
   var Q = new URLSearchParams(location.search);
   var LESSONS = (window.OKS_LESSONS.lessons || []).filter(function (l) { return window.OKS_CONTENT && window.OKS_CONTENT[l.id]; });
+  /* 씽씽 별 마을 체육 학습지 (종목 × 학교급 × 3차시) */
+  if (window.OKS_WS_SPORTS) OKS_WS_SPORTS.lessons().forEach(function (l) { LESSONS.push(l); });
   /* 게임 연계 학습지 */
   LESSONS.push({ id: 'farm-delivery', subject: 'social', subjectName: '사회', schoolName: '게임 연계', unitNo: '', unit: '쑥쑥 햇살 농장', no: '배달', topic: '지도 보고 배달하기', goal: '주소를 읽고 마을 지도에서 집을 찾아 길을 나타낸다', special: true });
   var id = Q.get('id') && LESSONS.some(function (l) { return l.id === Q.get('id'); }) ? Q.get('id') : LESSONS[0].id;
@@ -470,7 +473,7 @@ body.th-bw .d-spk{display:none!important}
   if (theme !== 'bw') theme = 'color';
   document.body.className = 'th-' + theme;
   function render() {
-    var s0 = seed, qs = MAKE[id] ? MAKE[id]() : (window.OKS_WS_EN && OKS_WS_EN.has(id)) ? OKS_WS_EN.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
+    var s0 = seed, qs = MAKE[id] ? MAKE[id]() : (window.OKS_WS_SPORTS && OKS_WS_SPORTS.has(id)) ? OKS_WS_SPORTS.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : (window.OKS_WS_EN && OKS_WS_EN.has(id)) ? OKS_WS_EN.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
     /* 한 장에 너무 많이 몰리면(글씨가 작아질 만큼) 마지막 문제부터 덜어 냅니다 */
     function need1(q) { var box = document.createElement('div'); box.style.cssText = 'position:absolute;left:-9999px;top:0;width:210mm'; box.innerHTML = pageHtml(q, false); document.body.appendChild(box);
       var inn = box.querySelector('.inner'); inn.classList.add('measure'); var h = inn.scrollHeight; box.remove(); return h; }
@@ -487,7 +490,7 @@ body.th-bw .d-spk{display:none!important}
   var sel = document.getElementById('lesson');
   var groups = {};
   LESSONS.forEach(function (l) { var gk = l.subjectName + ' · ' + l.schoolName; if (!groups[gk]) { groups[gk] = document.createElement('optgroup'); groups[gk].label = gk; sel.appendChild(groups[gk]); }
-    var o = document.createElement('option'); o.value = l.id; o.textContent = l.subjectName + ' ' + l.no + ' ' + l.topic; groups[gk].appendChild(o); });
+    var o = document.createElement('option'); o.value = l.id; o.textContent = l.sportName ? l.sportName + ' ' + l.no + '차시 · ' + l.topic : l.subjectName + ' ' + l.no + ' ' + l.topic; groups[gk].appendChild(o); });
   sel.value = id; document.getElementById('level').value = level;
   function go(newSeed) { var u = '?id=' + sel.value + '&level=' + document.getElementById('level').value + '&seed=' + (newSeed ? Math.floor(Math.random() * 1e9) : seed); location.search = u; }
   function freshSeed() {
@@ -508,7 +511,7 @@ body.th-bw .d-spk{display:none!important}
   var thSel = document.getElementById('theme'); thSel.value = theme;
   thSel.onchange = function () { theme = thSel.value; try { localStorage.setItem('oks_ws_theme', theme); } catch (e) {} document.body.className = 'th-' + theme; render(); };
   document.getElementById('print').onclick = function () { var im = [].slice.call(document.images).filter(function (i) { return !i.complete; }); Promise.all(im.map(function (i) { return new Promise(function (r) { i.onload = i.onerror = r; }); })).then(function () { window.print(); }); };
-  document.getElementById('back').href = '../play/?id=' + id + '&level=' + level;
+  document.getElementById('back').href = /^sp-/.test(id) ? '../sports/?festival=summer&sport=' + id.split('-')[1] + '&school=' + id.split('-')[2] : '../play/?id=' + id + '&level=' + level;
   if (!Q.get('seed')) history.replaceState(null, '', '?id=' + id + '&level=' + level + '&seed=' + seed);
   L = LESSONS.filter(function (l) { return l.id === id; })[0];
   render();

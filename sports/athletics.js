@@ -180,7 +180,7 @@
       function saveRacePrefs(){O.jset('oks_athletics_race_preferences_v1',{assisted:assisted,rivals:rivals});assist.setAttribute('aria-pressed',String(assisted));timing.setAttribute('aria-pressed',String(!assisted));together.setAttribute('aria-pressed',String(!rivals));compete.setAttribute('aria-pressed',String(rivals));}
       saveRacePrefs();raceOptions.appendChild(E('p','','경기 방식'));[assist,timing,together,compete].forEach(function(b){raceOptions.appendChild(b);});board.appendChild(raceOptions);
       var go = button('육상 모험 시작', function () { O.unlock(); clear(); st = O.newStats(); ctx = { sh: sh, board: board, level: lv, stats: st, cfg: {}, lesson: { topic: plan.title } }; O.kit(ctx); stepNo = 0; metrics = []; next(); }, 'orange'); var actions = E('div', 'al-intro-actions'); actions.appendChild(go);
-      var ws = E('a', 'oks-btn blue', '학습지 인쇄'); ws.href = 'worksheet.html?sport=athletics&school=' + opt.school + '&lesson=' + opt.lesson + '&level=' + lv; actions.appendChild(ws); board.appendChild(actions);
+      var ws = E('a', 'oks-btn blue', '학습지 인쇄'); ws.href = '../worksheet/?id=sp-athletics-' + opt.school + '-' + opt.lesson + '&level=' + lv; actions.appendChild(ws); board.appendChild(actions);
       var info = E('details', 'al-teacher-guide', '<summary>선생님 · 활동 방법과 기록</summary><p>시간 제한과 탈락은 없습니다. 터치·마우스·키보드로 참여할 수 있어요. 스위치 모드는 공통 설정에서 켜세요.</p><p>출발 반응은 화면 버튼을 누른 시간입니다. 실제 달리기 속도나 운동 능력으로 해석하지 않아요. 기록은 이 기기의 참여가 함께 저장됩니다.</p>');
       info.appendChild(button('이 기기의 육상 기록 CSV', exportRecords, 'blue')); board.appendChild(info); targetIntro(go); focus(go);
     }
