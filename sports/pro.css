@@ -31,3 +31,10 @@
 .pro-lv a,.pro-lv span{display:inline-flex;align-items:center;justify-content:center;min-width:40px;min-height:40px;border-radius:12px;background:#6a4bdc;color:#fff;text-decoration:none;font-size:17px}
 .pro-lv span{background:#c9c4de}
 .pro-teacher{margin-top:10px;font-size:14px}.pro-teacher summary{cursor:pointer;opacity:.9}.pro-teacher .oks-btn{margin-top:6px}
+/* 클로즈업 카메라 */
+.pr-cam{position:absolute;inset:0;will-change:transform}
+.pr-slowtag{position:absolute;left:50%;top:38%;transform:translateX(-50%);z-index:9;display:none;background:rgba(20,10,60,.78);color:#fff;border-radius:999px;padding:4px 16px;font-size:clamp(14px,1.8vw,20px);letter-spacing:.5px;pointer-events:none}
+.pr-slowtag.show{display:block;animation:oks-pop .25s}
+.pr-camtog{position:absolute;right:10px;bottom:8px;z-index:9;border:0;border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;background:rgba(255,255,255,.9);color:#4a2fb5;cursor:pointer;min-height:34px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.pr-camtog.off{color:#8a7bb8;background:rgba(255,255,255,.7)}
+.pr-stage-fix{}

@@ -51,7 +51,7 @@
   var LEVEL_TITLES = ['동네 구단', '씽씽 구단', '별빛 구단', '은하 구단', '우주 챔피언 구단'];
   var LEVEL_AT = [0, 6, 14, 24, 36];
 
-  function def() { return { name: '씽씽 별 구단', lineup: [], built: {}, seen: {}, season: { n: 1, inn: {} }, titles: 0, level: 2, school: 'elem' }; }
+  function def() { return { name: '씽씽 별 구단', lineup: [], built: {}, seen: {}, season: { n: 1, inn: {} }, titles: 0, level: 2, school: 'elem', pro: 'off' }; }
   function load() { var d = O.jget(KEY, null) || def(); var b = def(); Object.keys(b).forEach(function (k) { if (d[k] == null) d[k] = b[k]; }); return d; }
   function save(d) { O.jset(KEY, d); }
   function progress() { try { return JSON.parse(localStorage.getItem('oks_sports_progress_v4') || '{}'); } catch (e) { return {}; } }
@@ -81,9 +81,14 @@
   function lessonFor(d) { return ((d.season.n - 1) % 3) + 1; }
 
   /* 경기 끝 → 이닝 기록 (sports.js endSport 에서 호출) */
-  function inning(sportId, stars) {
+  function proUnlocked() {
+    var p = progress(), ok = [1, 2, 3].every(function (n) { return ((p['baseball-high-' + n] || {}).plays || 0) > 0; }), open = false;
+    try { open = localStorage.getItem('oks_pro_open') === '1' || !!O.settings().openAll; } catch (e) { }
+    return ok || open;
+  }
+  function inning(sportId, stars, opts) {
     var d = load();
-    if (d.season.inn[sportId] == null) d.season.inn[sportId] = stars || 1;
+    if (d.season.inn[sportId] == null) { d.season.inn[sportId] = stars || 1; if (opts && opts.pro) { d.season.pro = d.season.pro || {}; d.season.pro[sportId] = 1; } }
     save(d);
     return { done: seasonDone(d), left: SPORTS.filter(function (s) { return d.season.inn[s.id] == null; }).length };
   }
@@ -163,8 +168,10 @@
       if (!seasonDone(d)) return Promise.resolve();
       var P = power(d), perk = facPerk(d), stars = 0;
       SPORTS.forEach(function (s) { stars += d.season.inn[s.id] || 0; });
-      var coins = 20 + stars * 2 + P.total + perk, xp = 15 + stars;
+      var coins = 20 + stars * 2 + P.total + perk + (d.season.pro && d.season.pro.baseball ? 10 : 0), xp = 15 + stars;
+      var proB = d.season.pro && d.season.pro.baseball ? 10 : 0;
       var rows = [['이닝 별 ' + stars + '개 × 2', stars * 2], ['기본 보상', 20], ['응원력', P.total], ['구단 시설', perk]];
+      if (proB) rows.push(['🌟 스타 리그 보너스', proB]);
       d.titles = (d.titles || 0) + 1; var n = d.season.n; d.season = { n: n + 1, inn: {} }; save(d);
       try { O.eco.reward({ coins: coins, xp: xp, delay: 200 }); } catch (e) { }
       return new Promise(function (res) {
@@ -186,24 +193,31 @@
     }
 
     /* ----- 탭: 오늘의 경기 ----- */
+    function usePro() { return d.pro && d.pro !== 'off' && proUnlocked(); }
     function tabGame() {
       var h = '<section class="tc-sec"><h2>📺 시즌 ' + d.season.n + ' · 오늘의 경기</h2><p class="tc-note">5개 공 운동이 5이닝이에요. 이닝을 눌러 경기를 하고 별을 모으면 점수판이 채워져요.</p>';
       h += '<div class="tc-board"><div class="tc-bh"><span></span>' + SPORTS.map(function (s, i) { return '<span>' + (i + 1) + '회</span>'; }).join('') + '<span>합계</span></div><div class="tc-br"><b>' + O.esc(d.name) + '</b>';
       var sum = 0, first = null;
       SPORTS.forEach(function (s) {
         var v = d.season.inn[s.id]; if (v != null) sum += v; else if (!first) first = s;
-        h += '<button type="button" class="tc-inn ' + (v != null ? 'done' : (first === s ? 'now' : '')) + '" data-s="' + s.id + '"><i>' + s.emo + '</i><em>' + (v != null ? '⭐'.repeat(v) : (first === s ? '▶ 지금' : s.name)) + '</em></button>';
+        var starL = s.id === 'baseball' && ((v != null && d.season.pro && d.season.pro.baseball) || (v == null && usePro())); h += '<button type="button" class="tc-inn ' + (v != null ? 'done' : (first === s ? 'now' : '')) + '" data-s="' + s.id + '"><i>' + (starL ? '🌟' : s.emo) + '</i><em>' + (v != null ? '⭐'.repeat(v) : (first === s ? '▶ 지금' : (starL ? '스타 리그' : s.name))) + '</em></button>';
       });
       h += '<span class="tc-sum2">' + sum + '</span></div></div>';
       h += '<div class="tc-ctl"><div><small>학년</small><div class="tc-pills" data-g="school">' + [['elem', '초등'], ['middle', '중등'], ['high', '고등']].map(function (x) { return '<button type="button" data-v="' + x[0] + '" class="' + (d.school === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div></div>' +
         '<div><small>수준</small><div class="tc-pills" data-g="level">' + [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" data-v="' + n + '" class="' + (d.level === n ? 'on' : '') + '">' + n + '</button>'; }).join('') + '</div></div></div>';
+      if (proUnlocked()) {
+        h += '<div class="tc-ctl"><div><small>야구 이닝 방식</small><div class="tc-pills" data-g="pro">' + [['off', '⚾ 기본'], ['a', '🌟 스타 리그 A'], ['b', '🌟 B'], ['c', '🌟 C']].map(function (x) { return '<button type="button" data-v="' + x[0] + '" class="' + ((d.pro || 'off') === x[0] ? 'on' : '') + '">' + x[1] + '</button>'; }).join('') + '</div></div></div>';
+        if (usePro()) h += '<p class="tc-note">🌟 야구 이닝을 스타 리그로 하면 시즌 보너스 <b>+10</b> 코인! (A 타자 · B 타자+투수 · C 감독)</p>';
+      }
       var P = power(d);
       h += '<p class="tc-note">📣 지금 응원력 <b>' + P.total + '</b> · 🏗️ 시설 보너스 <b>+' + facPerk(d) + '</b> → 시즌이 끝나면 코인으로 돌아와요. 못 하는 경기가 있어도 괜찮아요. 별이 적어도 이닝은 채워져요.</p>';
       var go = first;
       h += go ? '<button type="button" class="oks-btn orange tc-go">▶ ' + go.emo + ' ' + go.name + ' 경기 시작</button>' : '';
       h += '</section>';
       body.innerHTML = h;
-      function launch(sid) { location.href = '?festival=summer&sport=' + sid + '&school=' + d.school + '&lesson=' + lessonFor(d) + '&level=' + d.level + '&play=1&season=1'; }
+      function launch(sid) {
+        if (sid === 'baseball' && usePro()) { location.href = '?festival=summer&sport=baseball&pro=1&mode=' + d.pro + '&school=high&lesson=1&level=' + d.level + '&play=1&season=1'; return; }
+        location.href = '?festival=summer&sport=' + sid + '&school=' + d.school + '&lesson=' + lessonFor(d) + '&level=' + d.level + '&play=1&season=1'; }
       var gobtn = body.querySelector('.tc-go'); if (gobtn) gobtn.onclick = function () { O.sfx('pop'); say(go.name + ' 경기를 시작해요'); setTimeout(function () { launch(go.id); }, 350); };
       Array.prototype.forEach.call(body.querySelectorAll('.tc-inn'), function (b) {
         b.onclick = function () {
@@ -215,7 +229,7 @@
       Array.prototype.forEach.call(body.querySelectorAll('.tc-pills'), function (p) {
         p.onclick = function (e) {
           var b = e.target.closest('button'); if (!b) return; O.sfx('tick');
-          if (p.dataset.g === 'school') d.school = b.dataset.v; else d.level = +b.dataset.v;
+          if (p.dataset.g === 'school') d.school = b.dataset.v; else if (p.dataset.g === 'pro') d.pro = b.dataset.v; else d.level = +b.dataset.v;
           save(d); tabGame(); markTab();
         };
       });

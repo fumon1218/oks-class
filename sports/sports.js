@@ -199,14 +199,14 @@ function proActivity(){
   g.begin().then(function(r){
    var stars=r.stars;save('baseball-pro-'+mode,stars,r.mistakes);
    var sec=Math.round((Date.now()-st.t0)/1000),entry={at:new Date().toISOString(),lesson:'sports-baseball-pro-'+mode,subject:'physical',school:'high',topic:P.NAME+' '+M.name,level:lvl,mistakes:r.mistakes,glow:st.glow,hand:st.hand,asked:st.asked,sec:sec,rounds:inn*2};
-   var season=q.get('season')==='1'&&window.OKS_TYCOON?OKS_TYCOON.inning('baseball',stars):null;
+   var season=q.get('season')==='1'&&window.OKS_TYCOON?OKS_TYCOON.inning('baseball',stars,{pro:true}):null;
    O.finish({stats:st,entry:entry,title:r.win?'스타 리그 승리!':'멋진 경기였어요!',text:'⚾ '+P.NAME+' · '+M.name+' · '+LEVELS[lvl-1].name+' · '+r.text+' · ⭐ '+r.coins,stars:stars,extraCoins:Math.min(5,Math.floor(r.coins/4)),
-    buttons:[
+    buttons:(season?[{label:season.done?'🏆 시즌 결과 보기':'다음 이닝 ▶ (남은 '+season.left+')',color:'orange',href:'?tycoon=1'}]:[]).concat([
      {label:'한 번 더',onClick:function(){location.reload()}},
      lvl<5?{label:'다음 수준 ('+(lvl+1)+')',color:'orange',href:base+'&level='+(lvl+1)+'&play=1'}:null,
      {label:'다른 모드 고르기',color:'blue',href:'?festival=summer&sport=baseball'},
      {label:'🏟️ 스포츠 타이쿤',color:'blue',href:'?tycoon=1'}
-    ].filter(Boolean)});
+    ]).filter(Boolean)});
   }).catch(function(e){console.error(e);O.toast('앗, 문제가 생겼어요. 다시 시작해 주세요.')});
  };
 }

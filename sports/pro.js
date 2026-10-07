@@ -55,19 +55,30 @@
 
     var bar = E('div', 'pr-bar');
     var stage = E('div', 'bb-stage');
-    stage.innerHTML = '<div class="bb-sky"></div><img class="bb-ump" alt="" draggable="false"><img class="bb-catcher" alt="" draggable="false">' +
+    stage.innerHTML = '<div class="pr-cam"><div class="bb-sky"></div><img class="bb-ump" alt="" draggable="false"><img class="bb-catcher" alt="" draggable="false">' +
       '<img class="bb-pitcher" alt="" draggable="false"><img class="bb-batter" alt="" draggable="false"><img class="bb-zone" alt="" draggable="false">' +
-      '<img class="bb-ball" alt="" draggable="false" hidden><div class="bb-fx"></div>' +
+      '<img class="bb-ball" alt="" draggable="false" hidden><div class="bb-fx"></div></div><div class="pr-slowtag">🎬 슬로우 모션</div><button type="button" class="pr-camtog"></button>' +
       '<div class="bb-hud"><span class="bb-count"></span><span class="bb-now"></span><span class="bb-score">⭐ <b>0</b></span></div>' +
       '<div class="pr-plate"></div><div class="bb-banner" aria-live="polite"></div>';
     var dock = E('div', 'bb-dock pr-dock');
     board.appendChild(bar); board.appendChild(stage); board.appendChild(dock);
     var $ = function (s) { return stage.querySelector(s); };
     var sky = $('.bb-sky'), ump = $('.bb-ump'), catcher = $('.bb-catcher'), pitcher = $('.bb-pitcher'), batter = $('.bb-batter'), zone = $('.bb-zone'), ball = $('.bb-ball'),
-      fx = $('.bb-fx'), cnt = $('.bb-count'), nowEl = $('.bb-now'), scoreEl = $('.bb-score b'), banner = $('.bb-banner'), plate = $('.pr-plate');
+      fx = $('.bb-fx'), cam = $('.pr-cam'), slowTag = $('.pr-slowtag'), camTog = $('.pr-camtog'), cnt = $('.bb-count'), nowEl = $('.bb-now'), scoreEl = $('.bb-score b'), banner = $('.bb-banner'), plate = $('.pr-plate');
     sky.style.backgroundImage = 'url(' + A + 'bg_main.webp)'; zone.src = A + 'strikezone.webp'; ump.src = A + 'umpire_idle.webp'; ball.src = A + 'ball.webp';
     function sp(el, n) { if (el._n !== n) { el._n = n; el.src = A + n + '.webp'; } }
     sp(catcher, 'catcher_ready'); sp(pitcher, 'pitcher_ready'); sp(batter, 'batter_wait');
+    /* 클로즈업 카메라: 차분 모드이거나 끄면 쓰지 않아요 */
+    var camOn = !calm; try { if (localStorage.getItem('oks_pro_cam') === '0') camOn = false; } catch (e) { }
+    function drawTog() { camTog.textContent = camOn ? '🎬 클로즈업 켜짐' : '🎬 클로즈업 꺼짐'; camTog.classList.toggle('off', !camOn); }
+    camTog.onclick = function (e) { e.stopPropagation(); camOn = !camOn; try { localStorage.setItem('oks_pro_cam', camOn ? '1' : '0'); } catch (x) { } if (!camOn) zoom(1); drawTog(); O.sfx('tick'); };
+    drawTog();
+    function zoom(sc, ox, oy, ms) {
+      if (!camOn && sc !== 1) return;
+      cam._sc = sc; cam.style.transition = sc === 1 && !ms ? 'none' : 'transform ' + ((ms || 500) / (FAST ? 4 : 1)) + 'ms cubic-bezier(.3,.1,.2,1)';
+      if (ox != null) cam.style.transformOrigin = ox + ' ' + oy;
+      cam.style.transform = sc === 1 ? 'none' : 'scale(' + sc + ')';
+    }
 
     var onMain = null, mainBtn = null, timers = [], raf = 0, last = 0, pit = null, fl = null, mt = null;
     function later(fn, ms) { var h = setTimeout(function () { if (!dead) fn(); }, ms / (FAST ? 4 : 1)); timers.push(h); return h; }
@@ -87,7 +98,7 @@
     }
     document.addEventListener('keydown', onKey);
     stage.addEventListener('pointerdown', function (e) { if (e.target.closest('button')) return; press(); });
-    function stop() { dead = true; cancelAnimationFrame(raf); timers.forEach(clearTimeout); document.removeEventListener('keydown', onKey); }
+    function stop() { dead = true; try { cam.style.transform = 'none'; } catch (e) { } cancelAnimationFrame(raf); timers.forEach(clearTimeout); document.removeEventListener('keydown', onKey); }
     addEventListener('pagehide', stop, { once: true });
 
     /* ---------- 점수판 ---------- */
@@ -106,6 +117,10 @@
 
     /* ---------- 공 길과 던지기 ---------- */
     function rects() {
+      var keep = cam.style.transform; cam.style.transform = 'none'; var tr = cam.style.transition; cam.style.transition = 'none';
+      var out = rects0(); cam.style.transform = keep; void cam.offsetWidth; cam.style.transition = tr; return out;
+    }
+    function rects0() {
       var S0 = stage.getBoundingClientRect(), Z = zone.getBoundingClientRect(), P = pitcher.getBoundingClientRect(), k = S0.width / (stage.clientWidth || S0.width) || 1;
       return { W: S0.width / k, H: S0.height / k, zx: (Z.left - S0.left + Z.width / 2) / k, zy: (Z.top - S0.top + Z.height / 2) / k, zw: Z.width / k, zh: Z.height / k, px: (P.left - S0.left + P.width * .22) / k, py: (P.top - S0.top + P.height * .3) / k };
     }
@@ -131,8 +146,9 @@
       return new Promise(function (res) {
         var R = rects(); target(R, sp0); typeBadge(pt); O.say(pt.name, { noRepeat: true });
         sp(pitcher, 'pitcher_windup'); sp(batter, 'batter_ready'); sp(ump, 'umpire_idle'); sp(catcher, 'catcher_ready'); ball.hidden = true;
+        zoom(1.9, '84%', '40%', 600);
         later(function () {
-          sp(pitcher, 'pitcher_throw'); O.sfx('tick');
+          sp(pitcher, 'pitcher_throw'); O.sfx('tick'); later(function () { zoom(1, null, null, 450); }, 120);
           pit = { R: R, pt: pt, spec: sp0, p: 0, paused: false, active: true, res: res, swung: false, dur: DUR[lv - 1] * pt.dur * slowK };
           ball.hidden = false; ball.style.transition = 'none'; ball.classList.remove('hit'); place(R, 0, .35, pt);
           if (assisted && !sp0.strike) later(function () { if (pit && pit.active) say('존 밖이에요! 참아요 ✋', 1400); }, pit.dur * 450);
@@ -166,12 +182,18 @@
       if (assisted && P.spec.strike && P.p >= .93) { P.p = .93; P.paused = true; say('지금 쳐요!', 0); glow(); if (mainBtn) mainBtn.classList.add('now'); }
       if (P.p >= 1) {
         sp(catcher, 'catcher_catch'); O.sfx('tick'); ball.hidden = true;
+        if (P.spec.strike && !P.res0) { zoom(1.6, '44%', '78%', 220); later(function () { zoom(1, null, null, 500); }, 600); }
         var r = P.res0 === 'swingball' ? 'swingball' : P.res0 ? P.res0 : P.spec.strike ? 'strike' : 'ball';
         endBat(r);
       }
     }
     function hitAway(R, q) {
-      ball.style.transition = 'left 1.1s cubic-bezier(.2,.7,.4,1), top 1.1s cubic-bezier(.3,.1,.2,1), transform 1.1s';
+      var slow = camOn && q >= 2, T = slow ? (q >= 4 ? 2.2 : 1.7) : 1.1;
+      ball.style.transition = 'left ' + T + 's cubic-bezier(.2,.7,.4,1), top ' + T + 's cubic-bezier(.3,.1,.2,1), transform ' + T + 's';
+      if (slow) {
+        slowTag.classList.add('show'); zoom(1.8, R.cx + 'px', R.cy + 'px', 260);
+        later(function () { zoom(1, null, null, 1100); }, 700); later(function () { slowTag.classList.remove('show'); }, 1500);
+      }
       burst(R.cx, R.cy); O.sfx('coin'); stage.classList.remove('shake'); void stage.offsetWidth; if (!calm) stage.classList.add('shake');
       ball.classList.add('hit'); ball.style.setProperty('--s', .28);
       var far = q >= 4 ? [.9, .06] : q === 2 ? [.78, .16] : [.62, .34];
@@ -181,9 +203,9 @@
     function flyBall(pt, sp0, ms) {
       return new Promise(function (res) {
         var R = rects(); target(R, sp0); typeBadge(pt);
-        sp(pitcher, 'pitcher_windup'); sp(batter, 'batter_ready'); ball.hidden = true;
+        sp(pitcher, 'pitcher_windup'); sp(batter, 'batter_ready'); ball.hidden = true; zoom(1.9, '84%', '40%', 500);
         later(function () {
-          sp(pitcher, 'pitcher_throw'); O.sfx('tick'); ball.hidden = false; ball.style.transition = 'none'; ball.classList.remove('hit'); place(R, 0, .35, pt);
+          sp(pitcher, 'pitcher_throw'); O.sfx('tick'); later(function () { zoom(1, null, null, 400); }, 120); ball.hidden = false; ball.style.transition = 'none'; ball.classList.remove('hit'); place(R, 0, .35, pt);
           fl = { R: R, pt: pt, p: 0, dur: ms / 1000, res: res };
           later(function () { sp(pitcher, 'pitcher_ready'); }, 600);
         }, 600);
@@ -377,7 +399,7 @@
     }
     function hideBadgeLater() { plate.classList.remove('show'); }
     function outcome(side, o) {
-      var off = side === 'off', runs = 0;
+      var off = side === 'off', runs = 0; hideBadge();
       if (o.kind === 'hit') {
         runs = advance(o.bases);
         if (off) { hits++; sp(batter, 'batter_cheer'); say(HITNAME[o.bases] + (runs ? ' ' + runs + '점!' : ''), 1100); addScore(o.bases * 10 + runs * 10); O.sfx('win'); S.our += runs; }
