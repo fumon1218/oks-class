@@ -94,6 +94,7 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
 .ans .circ{outline:3px solid #e53935;outline-offset:2px;border-radius:12px;}
 .ans .ansline{display:block!important;}
 .ansline{display:none;color:#e53935;font-size:14px;margin-top:4px;}
+.kg{display:none;} .ans .kg{display:inline;}
 .ansonly{display:none;} .ans .ansonly{display:inline;}
 .dots{display:flex;gap:6px;flex-wrap:wrap;}
 .dots i{width:38px;height:38px;border:1.8px dashed #b9b0a0;border-radius:50%;display:inline-block;}
@@ -234,6 +235,7 @@ body.th-bw .d-spk{display:none!important}
   <select id="lesson"></select>
   <select id="level"><option value="1">1수준 · 느끼기</option><option value="2">2수준 · 고르기</option><option value="3">3수준 · 해 보기</option><option value="4">4수준 · 혼자서</option><option value="5">5수준 · 생활로</option></select>
   <button id="again" type="button">🔄 다른 문제로</button>
+  <span id="koOpts" hidden><select id="kLayout" title="따라 쓰기 칸 배치"><option value="big">📄 한 글자 크게 (칸 많이)</option><option value="multi">📚 여러 글자 연습</option></select> <select id="kGlyph" title="연습할 글자"></select></span>
   <select id="theme" title="인쇄 모양"><option value="color">🎨 컬러 (예쁘게)</option><option value="bw">⚫ 흑백 간단 (잉크 절약)</option></select>
   <label><input type="checkbox" id="withAns"> 정답지 같이</label>
   <button class="print" id="print" type="button">🖨️ 인쇄 / PDF로 저장</button>
@@ -248,6 +250,8 @@ body.th-bw .d-spk{display:none!important}
 <script src="../play/custom.js"></script>
 <script src="generic.js"></script>
 <script src="english.js"></script>
+<script src="../trace/data-hangul.js"></script>
+<script src="hangul.js"></script>
 <script src="../sports/titles.js"></script><script src="../sports/lessons.js"></script><script src="../sports/lessons2.js"></script><script src="../sports/lessons-ball.js"></script><script src="sports.js"></script>
 <script src="../games/tycoon/town.js"></script><script src="../games/tycoon/town2.js"></script>
 <script>
@@ -263,6 +267,8 @@ body.th-bw .d-spk{display:none!important}
   var id = Q.get('id') && LESSONS.some(function (l) { return l.id === Q.get('id'); }) ? Q.get('id') : LESSONS[0].id;
   var level = Math.min(5, Math.max(1, +Q.get('level') || 2));
   var seed = +Q.get('seed') || Math.floor(Math.random() * 1e6);
+  var KL = Q.get('layout') === 'multi' ? 'multi' : 'big', KG = Q.get('g') || '';
+  function kq() { return (KL !== 'big' ? '&layout=' + KL : '') + (KG ? '&g=' + encodeURIComponent(KG) : ''); }
   /* 같은 seed면 같은 문제 (다시 인쇄해도 그대로) */
   function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
   function ri(a, b) { return a + Math.floor(rnd() * (b - a + 1)); }
@@ -473,7 +479,7 @@ body.th-bw .d-spk{display:none!important}
   if (theme !== 'bw') theme = 'color';
   document.body.className = 'th-' + theme;
   function render() {
-    var s0 = seed, qs = MAKE[id] ? MAKE[id]() : (window.OKS_WS_SPORTS && OKS_WS_SPORTS.has(id)) ? OKS_WS_SPORTS.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : (window.OKS_WS_EN && OKS_WS_EN.has(id)) ? OKS_WS_EN.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
+    var s0 = seed, qs = MAKE[id] ? MAKE[id]() : (window.OKS_WS_SPORTS && OKS_WS_SPORTS.has(id)) ? OKS_WS_SPORTS.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : (window.OKS_WS_KO && OKS_WS_KO.has(id)) ? OKS_WS_KO.make({ id: id, level: level, shuf: shuf, ri: ri, box: box, layout: KL, glyph: KG }) : (window.OKS_WS_EN && OKS_WS_EN.has(id)) ? OKS_WS_EN.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
     /* 한 장에 너무 많이 몰리면(글씨가 작아질 만큼) 마지막 문제부터 덜어 냅니다 */
     function need1(q) { var box = document.createElement('div'); box.style.cssText = 'position:absolute;left:-9999px;top:0;width:210mm'; box.innerHTML = pageHtml(q, false); document.body.appendChild(box);
       var inn = box.querySelector('.inner'); inn.classList.add('measure'); var h = inn.scrollHeight; box.remove(); return h; }
@@ -492,7 +498,7 @@ body.th-bw .d-spk{display:none!important}
   LESSONS.forEach(function (l) { var gk = l.subjectName + ' · ' + l.schoolName; if (!groups[gk]) { groups[gk] = document.createElement('optgroup'); groups[gk].label = gk; sel.appendChild(groups[gk]); }
     var o = document.createElement('option'); o.value = l.id; o.textContent = l.sportName ? l.sportName + ' ' + l.no + '차시 · ' + l.topic : l.subjectName + ' ' + l.no + ' ' + l.topic; groups[gk].appendChild(o); });
   sel.value = id; document.getElementById('level').value = level;
-  function go(newSeed) { var u = '?id=' + sel.value + '&level=' + document.getElementById('level').value + '&seed=' + (newSeed ? Math.floor(Math.random() * 1e9) : seed); location.search = u; }
+  function go(newSeed) { var u = '?id=' + sel.value + '&level=' + document.getElementById('level').value + '&seed=' + (newSeed ? Math.floor(Math.random() * 1e9) : seed); location.search = u + (/^01-00-/.test(sel.value) ? kq() : ''); }
   function freshSeed() {
     var next = 0;
     try { var a = new Uint32Array(1); crypto.getRandomValues(a); next = a[0] % 1000000000; }
@@ -502,10 +508,17 @@ body.th-bw .d-spk{display:none!important}
   }
   function randomizeSheet() {
     seed = freshSeed();
-    history.replaceState(null, '', '?id=' + id + '&level=' + level + '&seed=' + seed);
+    history.replaceState(null, '', '?id=' + id + '&level=' + level + '&seed=' + seed + kq());
     render();
   }
   sel.onchange = function () { go(false); }; document.getElementById('level').onchange = function () { go(false); };
+  /* 한글 기초 학습지: 배치·글자 고르기 */
+  if (window.OKS_WS_KO && OKS_WS_KO.has(id)) {
+    var ko = document.getElementById('koOpts'), kl = document.getElementById('kLayout'), kg = document.getElementById('kGlyph'); ko.hidden = false;
+    kl.value = KL; kg.innerHTML = '<option value="">🎲 글자: 무작위</option>' + OKS_WS_KO.list(id).map(function (x) { return '<option value="' + x.k + '">' + x.name + '</option>'; }).join(''); kg.value = KG;
+    function kchg() { KL = kl.value; KG = kg.value; history.replaceState(null, '', '?id=' + id + '&level=' + level + '&seed=' + seed + kq()); render(); }
+    kl.onchange = kchg; kg.onchange = kchg;
+  }
   document.getElementById('again').onclick = randomizeSheet;
   document.getElementById('withAns').onchange = render;
   var thSel = document.getElementById('theme'); thSel.value = theme;
