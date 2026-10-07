@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v115';
+const CACHE_NAME = 'oks-class-v116';
 const ASSETS = [
   './',
   './index.html',
@@ -174,6 +174,7 @@ const ASSETS = [
   './sports/assets/baseball/umpire_out.webp',
   './sports/assets/baseball/umpire_safe.webp',
   './sports/assets/baseball/uniform.webp',
+  './sports/assets/basketball/backboard.webp',
   './sports/assets/basketball/bg_court.webp',
   './sports/assets/basketball/bg_gym.webp',
   './sports/assets/basketball/bottle.webp',
@@ -186,6 +187,9 @@ const ASSETS = [
   './sports/assets/basketball/girl_ready.webp',
   './sports/assets/basketball/girl_release.webp',
   './sports/assets/basketball/girl_shoot.webp',
+  './sports/assets/basketball/hoop.webp',
+  './sports/assets/basketball/jersey.webp',
+  './sports/assets/basketball/shoes.webp',
   './sports/assets/basketball/towel.webp',
   './sports/assets/basketball/whistle.webp',
   './sports/assets/gymnastics.webp',
