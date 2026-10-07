@@ -97,7 +97,7 @@
       e.dataset.system = s.id; e.dataset.depth = '0'; e.style.setProperty('--c', s.color);
       if (directEntry) {
         e.type = 'button'; e.setAttribute('aria-label', s.name + ' 들어가기');
-        e.onclick = function () { O.unlock && O.unlock(); O.sfx('pop'); location.href = s.id === 'play' ? 'playground/' : 'sports/'; };
+        e.onclick = function () { O.unlock && O.unlock(); O.sfx('pop'); leave({ id: s.id, url: s.id === 'play' ? 'playground/' : 'sports/', say: s.say || (s.name + '으로 날아가요!') }, e); };
       } else {
         e.setAttribute('role', 'group'); e.setAttribute('aria-label', s.name + ' · ' + (s.chips || []).join(' · '));
       }

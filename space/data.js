@@ -28,7 +28,7 @@
       map: { x: 13, y: 56, w: 16 }, mapP: { x: 15, y: 36, w: 29 },
       say: '씽씽 별 마을에 오신 것을 환영해요! 하계 스포츠 활동부터 시작해요.' },
     { id: 'play', model: 'star_play', name: '놀이별', short: '놀이별',
-      color: '#ffd66b', chips: ['놀이'], soon: false, spin: .14, yaw: .25, tilt: .36, dist: 2.05,
+      color: '#ffd66b', chips: ['놀이'], soon: false, say: '놀이별로 날아가요! 토끼와 제기차기를 해 봐요.', spin: .14, yaw: .25, tilt: .36, dist: 2.05,
       map: { x: 36, y: 56, w: 15 }, mapP: { x: 47, y: 36, w: 27 } }
   ];
   /* 아직 태어나지 않은 별 (업데이트되면 새 교과·심화 단원으로) */
