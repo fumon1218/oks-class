@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff7eb3">
+<title>점 잇기 · 옥쌤의 즐거운 교실</title>
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../icons/ok-face-192.png">
+<link rel="apple-touch-icon" href="../../icons/ok-face-180.png">
+<link rel="stylesheet" href="../../core/oks-core.css">
+<style>
+/* 미술 감상 놀이 공용 머리 */
+body.oks{background:#ffe6f0 url('../../art/scenes/town_spring_hd.webp') center/cover no-repeat fixed;overflow:hidden;}
+body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.3) 40%,rgba(25,18,45,.3));}
+.oks-app{max-width:none;padding:10px 14px;height:100dvh;display:flex;flex-direction:column;box-sizing:border-box;}
+.oks-top.compact{flex-wrap:nowrap;position:relative;}
+.oks-top.compact .oks-title{flex:0 1 680px;margin:0 auto;min-width:0;background:rgba(255,253,248,.94);border-radius:999px;color:var(--ink);text-shadow:none;box-shadow:0 4px 14px rgba(30,20,50,.2);padding:8px 26px;}
+.oks-top.compact > *:not(.oks-title):not(.oks-menu){flex-shrink:0;white-space:nowrap;}
+.oks-more{font-size:28px;font-weight:800;color:var(--ink);line-height:1;}
+.oks-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:22px;background:#fffdf7;box-shadow:0 14px 34px rgba(60,40,20,.28);min-width:240px;}
+.oks-menu[hidden]{display:none!important;}
+.oks-menu .eco-hud,.oks-menu .oks-level{justify-content:center;flex-wrap:wrap;}
+.oks-menu .oks-dots{justify-content:center;box-shadow:none;}
+@media (max-width:560px){.oks-top.compact .oks-title{display:none;} .oks-top.compact{justify-content:space-between;} .oks-top.compact .oks-pill > span{display:none;}}
+.oks-ask{margin:8px auto 0;max-width:820px;width:100%;}
+.oks-ask .oks-mascot{display:none;}
+.oks-ask-bubble::before,.oks-ask-bubble::after{display:none!important;}
+.oks-ask-bubble{font-size:22px;background:#fffdf8;box-shadow:0 6px 18px rgba(30,40,80,.22);border-radius:24px;display:flex;align-items:center;justify-content:center;gap:12px;min-height:52px;}
+
+.oks-board.dt-board{flex:1;min-height:0;margin:10px auto 0;width:100%;max-width:1000px;padding:0;background:transparent;box-shadow:none;display:flex;flex-direction:column;}
+.dt-stage{flex:1;min-height:0;position:relative;border-radius:30px;background:#fffdf4;box-shadow:0 12px 30px rgba(60,40,20,.28),inset 0 0 0 5px #ffd98f;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:manipulation;}
+.dt-stage svg{height:100%;width:100%;display:block;max-width:100%;}
+.dt-hud{position:absolute;left:14px;top:12px;z-index:5;background:rgba(255,255,255,.95);border-radius:999px;padding:5px 14px;font-weight:900;font-size:18px;color:#5a3b00;box-shadow:0 3px 8px rgba(0,0,0,.15);}
+.dt-dot circle{fill:#ff8a3d;stroke:#fff;stroke-width:1;cursor:pointer;}
+.dt-dot text{fill:#fff;font:700 5px sans-serif;text-anchor:middle;dominant-baseline:central;pointer-events:none;}
+.dt-dot.done circle{fill:#7ed957;}
+.dt-dot.next circle{fill:#e8432e;animation:dt-beat .9s ease-in-out infinite;transform-box:fill-box;transform-origin:center;}
+@keyframes dt-beat{50%{transform:scale(1.2)}}
+.dt-dot.oks-glow circle{filter:drop-shadow(0 0 10px #ffd54f) drop-shadow(0 0 18px #ff9800);}
+.dt-dot.no{animation:dt-no .4s;} @keyframes dt-no{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.dt-line{stroke:#3d8bff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.dt-fill{opacity:0;transition:opacity .9s;}
+.dt-fill.on{opacity:1;}
+.oks-start{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;background:rgba(60,20,60,.35);overflow:auto;}
+.st-card{background:#fffdf8;border-radius:32px;padding:22px 26px;max-width:640px;width:calc(100% - 32px);text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3);margin:16px 0;}
+.st-card h1{margin:2px 0 6px;font-size:32px;font-weight:400;}
+.st-card p{margin:0 0 10px;color:var(--ink-soft);font-size:17px;line-height:1.5;}
+.st-lv{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 12px;}
+.st-lv button{border:3px solid #e6d7bb;background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:16px;cursor:pointer;color:var(--ink);}
+.st-lv button.on{background:#ff6fa6;border-color:#ff6fa6;color:#fff;}
+.st-go{font-size:24px!important;padding:14px 40px!important;}
+</style>
+</head>
+<body class="oks">
+<script src="../../core/oks-core.js"></script>
+<script src="../../core/oks-eco.js"></script>
+<script>
+(function () {
+  'use strict';
+  var O = window.OKS, E = O.el, NS = 'http://www.w3.org/2000/svg';
+  var LESSON = O.qs('lesson') || 'mini-dots';
+  var level = O.levelFor(LESSON);
+  var BACK = O.qs('lesson') ? O.ret(O.ROOT + 'play/?id=' + LESSON) : O.ret(O.ROOT + 'index.html');
+  var sh = O.shell({ compact: true, title: '점 잇기', back: BACK, backLabel: '돌아가기', level: level });
+  if (O.eco) try { sh.menu.insertBefore(O.eco.hud(sh.menu), sh.levelBtn); } catch (e) {}
+  var board = sh.board; board.className = 'oks-board dt-board';
+  var stage = E('div', 'dt-stage'); board.appendChild(stage);
+  function josa(w, a, b) { var c = w.charCodeAt(w.length - 1) - 0xAC00; return (c >= 0 && c % 28) ? a : b; }
+
+  /* ---------- 그림(꼭짓점 목록, 0~100 좌표) ---------- */
+  function heart(n) { var p = []; for (var i = 0; i < n; i++) { var t = i / n * Math.PI * 2; p.push([50 + 3.1 * 16 * Math.pow(Math.sin(t), 3) / 1.0, 46 - 3.1 * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 1.0]); } return p; }
+  function star() { var p = []; for (var i = 0; i < 10; i++) { var r = i % 2 ? 19 : 46, a = -Math.PI / 2 + i * Math.PI / 5; p.push([50 + r * Math.cos(a), 54 + r * Math.sin(a)]); } return p; }
+  function moon() { var p = [], i, a; for (i = 0; i <= 8; i++) { a = (-70 + i * 17.5) * Math.PI / 180; p.push([50 + 36 * Math.cos(a), 50 + 40 * Math.sin(a)]); } for (i = 7; i >= 1; i--) { a = (-60 + (8 - i) * 15) * Math.PI / 180; p.push([50 + 14 + 22 * Math.cos(-a + Math.PI), 50 + 36 * Math.sin(-a + Math.PI) * 0 + 40 * Math.sin((-70 + i * 17.5) * Math.PI / 180) * .75]); } return p; }
+  var SHAPES = [
+    { n: '집', e: '🏠', c: '#ffcc80', v: [[20, 90], [20, 50], [50, 18], [80, 50], [80, 90]], fix: 'poly' },
+    { n: '별', e: '⭐', c: '#ffee58', v: star(), fix: 'poly' },
+    { n: '돛단배', e: '⛵', c: '#90caf9', v: [[50, 14], [50, 62], [18, 62], [8, 66], [24, 86], [76, 86], [92, 66], [82, 62], [64, 62], [64, 36]], fix: 'poly' },
+    { n: '하트', e: '💖', c: '#f48fb1', v: heart(24), fix: 'smooth' },
+    { n: '나무', e: '🌳', c: '#a5d6a7', v: [[50, 8], [66, 30], [58, 30], [74, 52], [60, 52], [60, 90], [40, 90], [40, 52], [26, 52], [42, 30], [34, 30]], fix: 'poly' },
+    { n: '로켓', e: '🚀', c: '#ce93d8', v: [[50, 6], [64, 28], [64, 66], [80, 86], [60, 80], [50, 94], [40, 80], [20, 86], [36, 66], [36, 28]], fix: 'poly' },
+    { n: '물고기', e: '🐟', c: '#80deea', v: [[8, 50], [28, 32], [52, 24], [74, 36], [92, 20], [88, 50], [92, 80], [74, 64], [52, 76], [28, 68]], fix: 'poly' },
+    { n: '나비', e: '🦋', c: '#ffab91', v: [[50, 40], [26, 12], [8, 28], [14, 52], [32, 60], [12, 80], [30, 92], [50, 66], [70, 92], [88, 80], [68, 60], [86, 52], [92, 28], [74, 12]], fix: 'poly' }
+  ];
+  /* 점 수: 꼭짓점이 모자라면 변 가운데에 점을 더하고, 많으면 고르게 골라요 */
+  function pickPts(v, n) {
+    var p = v.map(function (a) { return [a[0], a[1]]; });
+    if (n >= p.length) { while (p.length < n) { var bi = 0, bl = -1; for (var i = 0; i < p.length; i++) { var a = p[i], b = p[(i + 1) % p.length], l = Math.hypot(a[0] - b[0], a[1] - b[1]); if (l > bl) { bl = l; bi = i; } } var A = p[bi], B = p[(bi + 1) % p.length]; p.splice(bi + 1, 0, [(A[0] + B[0]) / 2, (A[1] + B[1]) / 2]); } return p; }
+    var q = []; for (var j = 0; j < n; j++) q.push(p[Math.floor(j * p.length / n)]); return q;
+  }
+  var LV = { 1: { n: 5, rounds: 2 }, 2: { n: 8, rounds: 3 }, 3: { n: 12, rounds: 3 }, 4: { n: 16, rounds: 3 }, 5: { n: 22, rounds: 3 } };
+  var stats = null, cfg = null, round = 0, pts = [], idx = 0, dotEls = [], svg = null, linesG = null, shape = null, busy = false, used = [];
+
+  function mk(t, a) { var e = document.createElementNS(NS, t); for (var k in a) e.setAttribute(k, a[k]); return e; }
+  function newRound() {
+    busy = false; idx = 0;
+    var pool = SHAPES.filter(function (s) { return used.indexOf(s) < 0 && (cfg.n >= (s.fix === 'poly' ? s.v.length : 8) || cfg.n >= s.v.length - 3); });
+    if (cfg.n < 8) pool = SHAPES.filter(function (s) { return used.indexOf(s) < 0 && s.v.length <= 10 && s.fix === 'poly'; }).filter(function (s) { return s.v.length <= Math.max(cfg.n, 5); });
+    if (!pool.length) { used = []; pool = SHAPES.filter(function (s) { return cfg.n < 8 ? (s.fix === 'poly' && s.v.length <= cfg.n) : true; }); }
+    shape = O.shuffle(pool.slice())[0]; used.push(shape);
+    var n = Math.max(cfg.n, cfg.n >= shape.v.length ? cfg.n : cfg.n);
+    pts = pickPts(shape.v, shape.fix === 'poly' && cfg.n < shape.v.length ? shape.v.length : n);
+    stage.innerHTML = '<div class="dt-hud">🔢 <b class="c">0</b> / ' + pts.length + '</div>';
+    svg = mk('svg', { viewBox: '-4 -4 108 108', preserveAspectRatio: 'xMidYMid meet' });
+    var fill = mk('polygon', { points: pts.map(function (p) { return p.join(','); }).join(' '), fill: shape.c, stroke: '#fff', 'stroke-width': 2, class: 'dt-fill' }); svg.appendChild(fill);
+    linesG = mk('g', {}); svg.appendChild(linesG);
+    dotEls = pts.map(function (p, i) {
+      var g = mk('g', { class: 'dt-dot' }); g.appendChild(mk('circle', { cx: p[0], cy: p[1], r: 3.8 })); var t = mk('text', { x: p[0], y: p[1], 'font-size': 4.6 }); t.textContent = i + 1; g.appendChild(t);
+      g.style.cursor = 'pointer'; g.addEventListener('pointerdown', function (e) { e.preventDefault(); tap(i); }); svg.appendChild(g); return g;
+    });
+    stage.appendChild(svg); stage._fill = fill;
+    sh.ask('1번부터 차례대로 점을 눌러 이어요! (' + (round + 1) + '/' + cfg.rounds + ')'); mark();
+    O.target({ get: function () { return idx < pts.length ? [dotEls[idx]] : []; }, say: '반짝이는 점을 눌러요' }, level);
+  }
+  function mark() { dotEls.forEach(function (g, i) { g.classList.toggle('next', i === idx); g.classList.toggle('done', i < idx); }); }
+  async function tap(i) {
+    if (busy) return; O.unlock();
+    if (i < idx) return;
+    if (i !== idx) { stats.mistakes++; O.sfx('no'); var g = dotEls[i]; g.classList.add('no'); setTimeout(function () { g.classList.remove('no'); }, 450); O.say((idx + 1) + '번을 눌러요.', { noRepeat: false }); return; }
+    O.clearPrompt(); O.sfx('tick');
+    if (idx > 0) { var a = pts[idx - 1], b = pts[idx]; linesG.appendChild(mk('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: 'dt-line' })); }
+    idx++; stage.querySelector('.c').textContent = idx; mark();
+    if (idx === pts.length) { busy = true; var a2 = pts[idx - 1], b2 = pts[0]; linesG.appendChild(mk('line', { x1: a2[0], y1: a2[1], x2: b2[0], y2: b2[1], class: 'dt-line' })); await O.wait(300); stage._fill.classList.add('on'); O.sfx('ok'); O.praise(); O.say('와, ' + shape.n + josa(shape.n, '이', '가') + ' 나왔어요!'); await O.wait(2300); round++; if (round >= cfg.rounds) return done(); newRound(); return; }
+    O.target({ get: function () { return idx < pts.length ? [dotEls[idx]] : []; }, say: '반짝이는 점을 눌러요' }, level);
+  }
+  function done() {
+    var entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'art', school: 'elem', topic: '점 잇기', level: level, engine: 'dots', rounds: cfg.rounds, mistakes: stats.mistakes, glow: stats.glow, hand: stats.hand, asked: stats.asked, sec: Math.round((Date.now() - stats.t0) / 1000) };
+    var btns = [{ label: '🔁 한 번 더', color: 'green', onClick: function () { location.reload(); } }];
+    if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(LESSON, level + 1); location.href = '?' + (O.qs('lesson') ? 'lesson=' + LESSON + '&' : '') + 'level=' + (level + 1); } });
+    btns.push({ label: O.qs('lesson') ? '차시로 돌아가기' : '🏠 돌아가기', color: 'blue', href: BACK });
+    O.finish({ stats: stats, entry: entry, title: '그림을 다 완성했어요!', text: '점 잇기 ' + cfg.rounds + '장 · ' + O.LEVELS[level - 1].name, mission: { lesson: 1 }, buttons: btns });
+  }
+  function begin() { cfg = LV[level]; stats = O.newStats(); round = 0; used = []; O.rememberLevel(LESSON, level); sh.setLevel(level); newRound(); }
+  sh.levelBtn.onclick = function () { location.reload(); };
+  function startScreen() {
+    sh.askEl.style.visibility = 'hidden';
+    var ov = E('div', 'oks-start'), lvBtns = O.LEVELS.map(function (L) { return '<button type="button" data-lv="' + L.n + '" class="' + (L.n === level ? 'on' : '') + '" title="' + O.esc(L.desc) + '">' + L.short + ' · 점 ' + LV[L.n].n + '개</button>'; }).join('');
+    ov.innerHTML = '<div class="st-card"><h1>🔢 점 잇기</h1><p>숫자 <b>1, 2, 3…</b> 순서대로 점을 눌러 이어요.<br>다 이으면 무슨 그림이 나올까요?</p><div class="st-lv">' + lvBtns + '</div><button type="button" class="oks-btn green st-go">시작! ▶</button></div>';
+    document.body.appendChild(ov);
+    ov.querySelectorAll('.st-lv button').forEach(function (b) { b.onclick = function () { level = +b.dataset.lv; ov.querySelectorAll('.st-lv button').forEach(function (x) { x.classList.toggle('on', x === b); }); }; });
+    ov.querySelector('.st-go').onclick = function () { O.unlock(); O.hush(); ov.remove(); sh.askEl.style.visibility = ''; begin(); };
+  }
+  if (O.qs('go')) begin(); else startScreen();
+  window.DOTS = { next: function () { return idx; }, n: function () { return pts.length; }, tap: tap, get round() { return round; }, shape: function () { return shape && shape.n; } };
+})();
+</script>
+</body>
+</html>

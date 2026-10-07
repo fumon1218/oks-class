@@ -78,7 +78,8 @@
       { id: 'b_color_studio', name: '색깔 공방', sub: '미술 · 색·그리기', kind: 'lessons', subject: 'art', x: 18, y: 90, s: 1, emo: '🎨', rest: true,
         links: [['🎈 색깔 풍선', 'games/balloons/?mode=color'], ['🎈 색 섞기 풍선', 'games/balloons/?mode=mix'], ['🎨 그림 속 색 찾기', 'games/look/']] },
       { id: 'b_sculpt', name: '조형 스튜디오', sub: '미술 · 만들기', kind: 'lessons', subject: 'art', x: 50, y: 90, s: 1, emo: '🏺',
-        keys: ['공방', '캐릭터 스튜디오', '디자인'] },
+        keys: ['공방', '캐릭터 스튜디오', '디자인'],
+        links: [['🙂 나를 만들어요 (내 얼굴 꾸미기)', 'games/myface/'], ['🔢 점 잇기', 'games/dots/'], ['🖐️ 느낌 짝짓기', 'games/senses/?mode=touch'], ['🚻 생활 그림문자', 'games/senses/?mode=sign']] },
       { id: 'b_gallery', name: '바다 미술관', sub: '미술 · 감상', kind: 'lessons', subject: 'art', x: 82, y: 90, s: 1, emo: '🖼️',
         keys: ['미술관', '감상'],
         links: [['🧩 그림 퍼즐 (10 · 20 · 50 · 100조각)', 'games/puzzle/'], ['🎴 그림 짝 찾기', 'games/match/'], ['🎨 그림 속 색 찾기', 'games/look/'], ['🖨️ 종이 퍼즐 학습지', 'worksheet/puzzle.html']] }
