@@ -110,25 +110,25 @@ function utilityBuilding(id){
  close.type='button';close.setAttribute('aria-label','닫기');close.onclick=function(){modal.remove();O.sfx('pop')};
  box.appendChild(close);
  var data=(D.summerBuildings||[]).filter(function(x){return x.id===id})[0]||{};
- var head=E('div','summer-utility-head','<img src="'+(data.image||'')+'" alt=""><div><small>하계 스포츠 마을</small><h2>'+(data.name||'스포츠 안내')+'</h2><p>'+(data.sub||'')+'</p></div>');
+ var head=E('div','summer-utility-head','<img src="'+(id==='info'?'assets/ballcenter/center_building.webp':(data.image||''))+'" alt=""><div><small>하계 스포츠 마을</small><h2>'+(data.name||'스포츠 안내')+'</h2><p>'+(data.sub||'')+'</p></div>');
  box.appendChild(head);
  var body=E('div','summer-utility-body');box.appendChild(body);
  if(id==='info'){
    var BALLS=[
-    {id:'baseball',name:'야구',emo:'⚾',open:true,img:'assets/baseball/card_baseball.webp',sub:'공을 보고 치고 달려요'},
-    {id:'basketball',name:'농구',emo:'🏀',sub:'공을 던져 골대에 넣어요'},
-    {id:'rugby',name:'럭비',emo:'🏉',sub:'공을 들고 달리고 패스해요'},
-    {id:'tennis',name:'테니스',emo:'🎾',sub:'공을 라켓으로 쳐요'},
-    {id:'tabletennis',name:'탁구',emo:'🏓',sub:'작은 공을 주고받아요'}];
+    {id:'baseball',name:'야구',emo:'⚾',open:true,img:'assets/ballcenter/card_baseball.webp',ic:'assets/ballcenter/icon_baseball.webp',sub:'공을 보고 치고 달려요'},
+    {id:'basketball',name:'농구',emo:'🏀',img:'assets/ballcenter/card_basketball.webp',ic:'assets/ballcenter/icon_basketball.webp',sub:'공을 던져 골대에 넣어요'},
+    {id:'rugby',name:'럭비',emo:'🏉',img:'assets/ballcenter/card_rugby.webp',ic:'assets/ballcenter/icon_rugby.webp',sub:'공을 들고 달리고 패스해요'},
+    {id:'tennis',name:'테니스',emo:'🎾',img:'assets/ballcenter/card_tennis.webp',ic:'assets/ballcenter/icon_tennis.webp',sub:'공을 라켓으로 쳐요'},
+    {id:'tabletennis',name:'탁구',emo:'🏓',img:'assets/ballcenter/card_tabletennis.webp',ic:'assets/ballcenter/icon_tabletennis.webp',sub:'작은 공을 주고받아요'}];
    var pr=progress(),gates=E('div','ball-gates');
    BALLS.forEach(function(g){
     var tot=0,plays=0;Object.keys(pr).forEach(function(k){if(k.indexOf(g.id+'-')===0){var x=pr[k]||{};plays+=x.plays||0;Object.keys(x.best||{}).forEach(function(lv){tot+=x.best[lv]||0})}});
     var c=E(g.open?'a':'button','ball-gate'+(g.open?'':' lock'));if(g.open){c.href='?festival=summer&sport='+g.id}else c.type='button';
-    c.innerHTML=(g.img?'<img src="'+g.img+'" alt="">':'<span class="ball-emo">'+g.emo+'</span>')+'<b>'+g.name+'</b><small>'+(g.open?g.sub:'🔒 곧 열려요')+'</small>'+(tot?'<i>★ '+tot+'</i>':'');
+    c.innerHTML='<span class="ball-pic"><img src="'+g.img+'" alt=""><img class="ball-ic" src="'+g.ic+'" alt=""></span><b>'+g.name+'</b><small>'+(g.open?g.sub:'🔒 곧 열려요')+'</small>'+(tot?'<i>★ '+tot+'</i>':'');
     if(!g.open)c.onclick=function(){O.sfx('tick');O.toast(g.name+' 경기장은 준비 중이에요');O.say(g.name+'은 곧 열려요')};
     gates.appendChild(c);
    });
-   body.innerHTML='<p class="summer-note">좋아하는 공 운동을 골라 보세요. 야구부터 열려 있어요.</p>';body.appendChild(gates);
+   body.innerHTML='<div class="ball-lobby" style="background-image:url(assets/ballcenter/center_lobby.webp)"></div><p class="summer-note">좋아하는 공 운동을 골라 보세요. 야구부터 열려 있어요.</p>';body.appendChild(gates);
    body.insertAdjacentHTML('beforeend','<div class="summer-tip"><b>오늘은 이렇게 시작해요</b><p>처음이라면 야구 1수준 ‘느껴 보기’부터 시작해 보세요. 공이 멈추면 단추를 눌러 휘두르면 돼요. 학생의 반응 속도에 따라 수준을 자유롭게 바꿀 수 있어요.</p></div>');
  }else if(id==='medal'){
    var p=progress(),keys=Object.keys(p),plays=0,stars=0;
