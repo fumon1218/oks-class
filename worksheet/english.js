@@ -29,8 +29,14 @@ window.OKS_WS_EN = (function () {
       '<line x1="4" x2="' + (w - 4) + '" y1="' + (base + cap * .38) + '" y2="' + (base + cap * .38) + '" stroke="#d9d9d9" stroke-width="1"/>';
     return '<svg class="en4" viewBox="0 0 ' + w + ' ' + H + '" width="100%" style="max-width:' + w + 'px;display:block;margin:2px 0">' + gl + parts + '</svg>';
   }
+  /* 동물 친구 탭이 붙은 따라 쓰기 카드 (컬러 테마에서만 보임) */
+  var MASC = ['rabbit', 'panda', 'cat', 'monkey', 'koala', 'bear', 'dog', 'tiger', 'penguin'], mc = 0;
+  function tcard(inner, label) {
+    var n = mc++, m = MASC[n % MASC.length];
+    return '<div class="tcard tc' + (n % 5) + '"><div class="ttab"><img class="deco" src="../art/ws/mascot_' + m + '.webp" alt=""><b>' + esc(label || '따라 써요') + '</b></div>' + inner + '</div>';
+  }
   /* 따라 쓰기 줄: 점선 n번 + 빈칸 m번 */
-  function traceRow(t, nT, nB) { var a = []; for (var i = 0; i < nT; i++) a.push({ t: t, trace: true }); for (var j = 0; j < nB; j++) a.push({ t: t, space: t.length * 34 + 10 }); return lines(a); }
+  function traceRow(t, nT, nB) { var a = []; for (var i = 0; i < nT; i++) a.push({ t: t, trace: true }); for (var j = 0; j < nB; j++) a.push({ t: t, space: t.length * 34 + 10 }); return tcard(lines(a), t.length > 14 ? '따라 써요' : t); }
   function fill(a, w) { return '<span class="fillans" data-a="' + esc(a) + '" style="display:inline-block;min-width:' + (w || 90) + 'px;border-bottom:2px solid #3d3a35;text-align:center;font-size:22px">&nbsp;</span>'; }
   function choices(opts, ok) { return '<span class="row" style="display:inline-flex;gap:8px">' + opts.map(function (v) { return '<span class="card' + (v === ok ? ' circ' : '') + '" style="font-size:22px;padding:4px 12px;font-family:' + FONT + ';font-weight:700">' + esc(v) + '</span>'; }).join('') + '</span>'; }
   function match(L, R, ansText) {
@@ -39,7 +45,7 @@ window.OKS_WS_EN = (function () {
   function bigL(t) { return '<span style="font-family:' + FONT + ';font-weight:700;font-size:30px">' + esc(t) + '</span>'; }
 
   function make(W) {
-    var id = W.id, lv = W.level, shuf = W.shuf, C = window.OKS_CONTENT[id] || {}, B = window.OKS_EN_BASICS, qs = [];
+    mc = 0; var id = W.id, lv = W.level, shuf = W.shuf, C = window.OKS_CONTENT[id] || {}, B = window.OKS_EN_BASICS, qs = [];
     var k = [3, 4, 5, 6, 6][lv - 1];
     /* ---------- 알파벳 ---------- */
     if (id === '05-00-01-01') {
@@ -129,7 +135,7 @@ window.OKS_WS_EN = (function () {
       qs.push({ t: '그림을 보고 빈칸에 알맞은 낱말을 〈보기〉에서 골라 쓰세요.', b: '<div style="margin-bottom:8px;font-size:18px">〈보기〉 ' + bank.map(function (w) { return '<span class="card" style="display:inline-block;padding:2px 10px;font-family:' + FONT + ';font-weight:700">' + esc(w) + '</span>'; }).join(' ') + '</div>' +
         S.map(function (s) { var ws = s.en.split(' '), a = ws[s.blank].replace(/[.!?,]/g, ''), tail = ws[s.blank].replace(a, ''); return '<div class="row" style="margin-bottom:6px">' + vis(s, 48) + '<span style="font-size:24px;font-family:' + FONT + ';font-weight:700">' + ws.map(function (w, i) { return i === s.blank ? fill(a, 100) + esc(tail) : esc(w); }).join(' ') + '</span></div>'; }).join('') });
       var t3 = shuf(C.sets).slice(0, lv >= 4 ? 2 : 3);
-      qs.push({ t: '문장을 따라 쓰세요.', b: t3.map(function (s) { return lines([{ t: s.en, trace: true }], { h: 60, w: 700 }) + (lv >= 2 ? lines([{ t: s.en, space: 600 }], { h: 60, w: 700 }) : ''); }).join('') });
+      qs.push({ t: '문장을 따라 쓰세요.', b: t3.map(function (s) { return tcard(lines([{ t: s.en, trace: true }], { h: 60, w: 700 }) + (lv >= 2 ? lines([{ t: s.en, space: 600 }], { h: 60, w: 700 }) : ''), '문장 쓰기'); }).join('') });
       if (lv >= 4) {
         var o3 = shuf(C.sets).slice(0, 2);
         qs.push({ t: '낱말의 순서를 바로잡아 문장을 쓰세요.', b: o3.map(function (s) { var ws2 = s.en.split(' '), sh; do { sh = shuf(ws2.slice()); } while (sh.join(' ') === s.en); return '<div style="margin-bottom:8px"><div class="row">' + vis(s, 40) + sh.map(function (w) { return '<span class="card" style="padding:2px 10px;font-size:20px;font-family:' + FONT + ';font-weight:700">' + esc(w) + '</span>'; }).join('') + '</div>' + lines([{ t: s.en, ghost: true, space: 600 }], { h: 56, w: 700 }) + '</div>'; }).join('') });

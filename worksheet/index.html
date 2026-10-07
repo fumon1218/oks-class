@@ -166,6 +166,67 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   .page{border-radius:0!important}
 }
 
+/* ===== 학습지 디자인 v3: 컬러(귀여운) / 흑백(간단) 테마. 바탕은 항상 흰색 ===== */
+.deco{position:absolute;pointer-events:none;display:block}
+.head .tt .deco{z-index:0}
+.d-books{left:6px;top:50%;transform:translateY(-50%);width:54px}
+.d-star{right:8px;top:4px;width:28px}
+.d-cloud{right:46px;top:2px;width:44px;opacity:.9}
+.d-bush{right:10px;bottom:0;width:52px}
+.d-sstar{right:-6px;top:-8px;width:26px;z-index:2}
+.d-nb{left:7px;top:50%;transform:translateY(-50%);width:24px}
+.d-cal{right:7px;top:50%;transform:translateY(-50%);width:24px}
+.d-spk{position:static!important;display:inline-block;width:22px;height:22px;margin-right:4px;vertical-align:middle}
+.tcard{position:relative;margin:2px 0}
+.ttab{display:none}
+body.th-color .head .tt{background:#fff!important;border:2.5px solid #f2a65a!important;padding-left:72px;position:relative}
+body.th-color .head{border:0!important;border-radius:0;padding:0 0 4px;margin-bottom:2px;overflow:visible}
+body.th-color .head:before,body.th-color .head:after{display:none}
+body.th-color .info{grid-template-columns:1.6fr 1.1fr 1fr 2.4fr 1.9fr}
+body.th-color .head h1 em{font-style:normal;color:#ff4f8b}
+body.th-color .head h1{font-size:26px}
+body.th-color .score{background:#fff!important;border:2px solid #7fbcf0;overflow:visible;position:relative;justify-content:flex-end;padding-bottom:6px}
+body.th-color .score b{position:absolute;left:0;right:0;top:0;background:#bfe3ff!important;color:#2a6db0;border-radius:11px 11px 0 0;padding:3px 0;text-align:center}
+body.th-color .score span{border:1.5px dashed #9cc9ee;border-radius:8px;width:80%;text-align:center;padding:4px 0;margin-top:22px}
+body.th-color .info{border:2px solid #f2a65a;border-radius:14px;position:relative}
+body.th-color .info div:first-of-type{padding-left:38px}
+body.th-color .info div:last-of-type{padding-right:38px}
+body.th-color .info div{border-right-color:#f6d3ab}
+body.th-color .q{border:0!important;padding:0 0 4px!important;margin-top:19px}
+body.th-color .qb{margin-top:13px}
+body.th-color .qh{border-radius:999px;padding:4px 14px 4px 5px;font-weight:700;background:var(--pb)!important}
+body.th-color .qh .no{background:var(--pc)!important;color:#fff!important;border-radius:50%;width:32px;height:32px;font-size:17px}
+body.th-color .q.c0{--pb:#ffe3ea;--pc:#ff5d73}
+body.th-color .q.c1{--pb:#e3f6e4;--pc:#42b957}
+body.th-color .q.c2{--pb:#ece4ff;--pc:#8157e8}
+body.th-color .q.c3{--pb:#dff0ff;--pc:#3f9ee8}
+body.th-color .q.c4{--pb:#fff0d9;--pc:#f59a23}
+body.th-color .q.c5{--pb:#dcf7f4;--pc:#12a999}
+body.th-color .qb{margin-left:12px}
+body.th-color .card,body.th-color .box{border-color:#cfe6fb}
+body.th-color .tcard{margin-top:20px;border:2px solid var(--tc);background:#fff;border-radius:14px;padding:6px 8px 2px}
+body.th-color .ttab{display:flex;align-items:center;gap:4px;position:absolute;left:8px;top:-20px;z-index:2}
+body.th-color .ttab img{position:static;width:34px;height:34px;object-fit:contain;background:#fff;border-radius:50%}
+body.th-color .ttab b{background:var(--tc);color:#fff;border-radius:999px;padding:1px 10px;font-size:13px;font-weight:700;font-family:inherit}
+body.th-color .tc0{--tc:#ff8fa8}
+body.th-color .tc1{--tc:#f2c23c}
+body.th-color .tc2{--tc:#5cc26a}
+body.th-color .tc3{--tc:#5aaaf0}
+body.th-color .tc4{--tc:#a583f0}
+body.th-bw .deco,body.th-bw .ttab{display:none!important}
+body.th-bw .head h1 em{font-style:normal}
+body.th-bw .tcard{border:0}
+body.th-bw .d-spk{display:none!important}
+@media print{
+  body.th-color .head .tt{border:2.5px solid #f2a65a!important}
+  body.th-color .score{border:2px solid #7fbcf0!important;background:#fff!important}
+  body.th-color .score b{background:#bfe3ff!important}
+  body.th-color .info{border:2px solid #f2a65a!important}
+  body.th-color .qh{background:var(--pb)!important}
+  body.th-color .tcard{border:2px solid var(--tc)!important}
+  body.th-color .card,body.th-color .box{border-color:#cfe6fb!important}
+}
+
 </style>
 </head>
 <body>
@@ -173,6 +234,7 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   <select id="lesson"></select>
   <select id="level"><option value="1">1수준 · 느끼기</option><option value="2">2수준 · 고르기</option><option value="3">3수준 · 해 보기</option><option value="4">4수준 · 혼자서</option><option value="5">5수준 · 생활로</option></select>
   <button id="again" type="button">🔄 다른 문제로</button>
+  <select id="theme" title="인쇄 모양"><option value="color">🎨 컬러 (예쁘게)</option><option value="bw">⚫ 흑백 간단 (잉크 절약)</option></select>
   <label><input type="checkbox" id="withAns"> 정답지 같이</label>
   <button class="print" id="print" type="button">🖨️ 인쇄 / PDF로 저장</button>
   <a id="back" href="../learn/">⬅ 돌아가기</a>
@@ -383,11 +445,13 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   var LVN = ['1수준 · 느끼기', '2수준 · 고르기', '3수준 · 해 보기', '4수준 · 혼자서', '5수준 · 생활로'];
   function pageHtml(qs, ans) {
     var n = qs.length, base = Math.floor(100 / n), pts = qs.map(function (q, i) { return i < n - 1 ? base : 100 - base * (n - 1); });
+    var D = function (n, c) { return '<img class="deco ' + c + '" src="../art/ws/deco_' + n + '.webp" alt="" draggable="false">'; };
+    function hl(t) { var k = t.indexOf(' ('), main = k > 0 ? t.slice(0, k) : t, rest = k > 0 ? t.slice(k) : '', w = main.split(' '), last = w.pop(); return (w.length ? w.join(' ') + ' ' : '') + '<em>' + last + '</em>' + rest; }
     return '<section class="page' + (ans ? ' ans' : '') + '"><div class="inner">' + '' +
-      '<div class="head"><div class="tt"><div class="sub">' + (L.special ? L.subjectName + ' · ' + L.unit + ' 게임 연계 학습지' : L.subjectName + ' · ' + L.schoolName + ' ' + L.unitNo + '단원 · ' + L.unit + ' · ' + L.no + '차시') + '</div><h1>' + L.topic + (ans ? ' <span style="color:#e53935;font-size:22px">[정답지]</span>' : '') + '</h1><div class="goal">🎯 학습 목표: ' + L.goal + '</div><div class="lv">' + LVN[level - 1] + '</div></div>' +
-      '<div class="score"><b>점수</b><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ 100</span></div></div>' +
-      '<div class="info"><div>학년<i></i></div><div>반<i></i></div><div>번호<i></i></div><div>이름<i></i></div><div>날짜<i>&nbsp;&nbsp;&nbsp;월&nbsp;&nbsp;&nbsp;&nbsp;일</i></div></div>' +
-      qs.map(function (q, i) { return '<div class="q"><div class="qh"><span class="no">' + (i + 1) + '</span><span>' + q.t + '</span><span class="pt">(' + pts[i] + '점)</span></div><div class="qb">' + q.b + '</div></div>'; }).join('') +
+      '<div class="head"><div class="tt">' + D('books', 'd-books') + D('star', 'd-star') + D('cloud', 'd-cloud') + D('bush', 'd-bush') + '<div class="sub">' + (L.special ? L.subjectName + ' · ' + L.unit + ' 게임 연계 학습지' : L.subjectName + ' · ' + L.schoolName + ' ' + L.unitNo + '단원 · ' + L.unit + ' · ' + L.no + '차시') + '</div><h1>' + hl(L.topic) + (ans ? ' <span style="color:#e53935;font-size:22px">[정답지]</span>' : '') + '</h1><div class="goal">🎯 학습 목표: ' + L.goal + '</div><div class="lv">' + LVN[level - 1] + '</div></div>' +
+      '<div class="score"><b>점수</b><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ 100</span>' + D('star', 'd-sstar') + '</div></div>' +
+      '<div class="info">' + D('notebook', 'd-nb') + D('calendar', 'd-cal') + '<div>학년<i></i></div><div>반<i></i></div><div>번호<i></i></div><div>이름<i></i></div><div>날짜<i>&nbsp;&nbsp;&nbsp;월&nbsp;&nbsp;&nbsp;&nbsp;일</i></div></div>' +
+      qs.map(function (q, i) { return '<div class="q c' + (i % 6) + '"><div class="qh"><span class="no">' + (i + 1) + '</span>' + (/읽어 주는|듣고|잘 듣/.test(q.t) ? '<img class="deco d-spk" src="../art/ws/deco_speaker.webp" alt="">' : '') + '<span>' + q.t + '</span><span class="pt">(' + pts[i] + '점)</span></div><div class="qb">' + q.b + '</div></div>'; }).join('') +
       '<div class="foot"><b style="font-weight:400">선생님 확인</b><div class="chk"><span>□ 독립</span><span>□ 언어힌트</span><span>□ 시각힌트</span><span>□ 시범</span><span>□ 신체지원</span></div><div class="stamp">참 잘했어요</div><div class="maker"><span><img src="../space/img/maker.webp" alt="">Made by</span></div></div></div></section>';
   }
   /* 한 장(A4)에 들어가도록: 넘치면 살짝 줄여요 */
@@ -402,6 +466,9 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   }
   addEventListener('beforeprint', fit);
   addEventListener('load', function () { fit(); });
+  var theme = (new URLSearchParams(location.search).get('theme')) || (function () { try { return localStorage.getItem('oks_ws_theme'); } catch (e) { return null; } })() || 'color';
+  if (theme !== 'bw') theme = 'color';
+  document.body.className = 'th-' + theme;
   function render() {
     var s0 = seed, qs = MAKE[id] ? MAKE[id]() : (window.OKS_WS_EN && OKS_WS_EN.has(id)) ? OKS_WS_EN.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
     /* 한 장에 너무 많이 몰리면(글씨가 작아질 만큼) 마지막 문제부터 덜어 냅니다 */
@@ -438,6 +505,8 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   sel.onchange = function () { go(false); }; document.getElementById('level').onchange = function () { go(false); };
   document.getElementById('again').onclick = randomizeSheet;
   document.getElementById('withAns').onchange = render;
+  var thSel = document.getElementById('theme'); thSel.value = theme;
+  thSel.onchange = function () { theme = thSel.value; try { localStorage.setItem('oks_ws_theme', theme); } catch (e) {} document.body.className = 'th-' + theme; render(); };
   document.getElementById('print').onclick = function () { var im = [].slice.call(document.images).filter(function (i) { return !i.complete; }); Promise.all(im.map(function (i) { return new Promise(function (r) { i.onload = i.onerror = r; }); })).then(function () { window.print(); }); };
   document.getElementById('back').href = '../play/?id=' + id + '&level=' + level;
   if (!Q.get('seed')) history.replaceState(null, '', '?id=' + id + '&level=' + level + '&seed=' + seed);

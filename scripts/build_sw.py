@@ -23,7 +23,7 @@ PAGES = [
     './quests/index.html', './curriculum/teacher-guide.html', './curriculum/reports.html',
 ]
 files = sorted(glob.glob('sports/assets/**/*.webp', recursive=True)) + sorted(glob.glob('playground/jegi/assets/*.webp'))
-for pat in ['core/ui/*.webp', 'core/ui/*.png', 'art/scene/*.webp', 'art/space/*.webp', 'space/img/*.webp', 'art/3d/*.glb', 'art/build/*.webp', 'art/char/*.webp', 'art/obj/*.webp', 'art/en/*.webp', 'art/act/*.webp', 'art/people/*.webp', 'art/avatar/*.webp', 'games/farm/assets/*.webp', 'games/birds/img/*.webp', 'games/shapes/img/*.webp', 'games/fishing/img/*.webp', 'games/balloons/img/*.webp', 'games/tycoon/img/*.webp', 'games/tycoon/img/drone/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
+for pat in ['core/ui/*.webp', 'core/ui/*.png', 'art/scene/*.webp', 'art/space/*.webp', 'space/img/*.webp', 'art/3d/*.glb', 'art/build/*.webp', 'art/char/*.webp', 'art/obj/*.webp', 'art/en/*.webp', 'art/ws/*.webp', 'art/act/*.webp', 'art/people/*.webp', 'art/avatar/*.webp', 'games/farm/assets/*.webp', 'games/birds/img/*.webp', 'games/shapes/img/*.webp', 'games/fishing/img/*.webp', 'games/balloons/img/*.webp', 'games/tycoon/img/*.webp', 'games/tycoon/img/drone/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
     files += sorted(glob.glob(pat))
 assets = [p for p in PAGES if p.endswith('/') or os.path.exists(p)] + ['./' + f for f in files]
 src = open('sw.js', encoding='utf-8').read()

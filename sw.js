@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v99';
+const CACHE_NAME = 'oks-class-v100';
 const ASSETS = [
   './',
   './index.html',
@@ -504,6 +504,24 @@ const ASSETS = [
   './art/en/toycar.webp',
   './art/en/tshirt.webp',
   './art/en/zebra.webp',
+  './art/ws/deco_books.webp',
+  './art/ws/deco_bow.webp',
+  './art/ws/deco_bush.webp',
+  './art/ws/deco_calendar.webp',
+  './art/ws/deco_cloud.webp',
+  './art/ws/deco_notebook.webp',
+  './art/ws/deco_speaker.webp',
+  './art/ws/deco_star.webp',
+  './art/ws/deco_trophy.webp',
+  './art/ws/mascot_bear.webp',
+  './art/ws/mascot_cat.webp',
+  './art/ws/mascot_dog.webp',
+  './art/ws/mascot_koala.webp',
+  './art/ws/mascot_monkey.webp',
+  './art/ws/mascot_panda.webp',
+  './art/ws/mascot_penguin.webp',
+  './art/ws/mascot_rabbit.webp',
+  './art/ws/mascot_tiger.webp',
   './art/act/do_brush.webp',
   './art/act/do_call.webp',
   './art/act/do_card.webp',
