@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v114';
+const CACHE_NAME = 'oks-class-v93';
 const ASSETS = [
   './',
   './index.html',
@@ -41,8 +41,8 @@ const ASSETS = [
   './play/content.js',
   './play/content2.js',
   './play/content-extra.js',
-  './play/english-basic-content.js',
-  './play/english-basic-engine.js',
+  './play/english-content.js',
+  './play/english.js',
   './play/custom.js',
   './play/scenes.js',
   './curriculum/editor.html',
@@ -56,7 +56,6 @@ const ASSETS = [
   './core/oks-kit.js',
   './core/oks-eco.js',
   './curriculum/lessons.js',
-  './curriculum/english-basic.js',
   './shop/',
   './shop/index.html',
   './shop/shop.css',
@@ -80,6 +79,7 @@ const ASSETS = [
   './games/tycoon/delivery.js',
   './worksheet/index.html',
   './worksheet/generic.js',
+  './worksheet/english.js',
   './minigames/farm-v8/index.html',
   './career/cafe.html',
   './career/barista.html',
@@ -776,7 +776,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           return response;
         })
-        .catch(() => caches.match(event.request, { ignoreSearch: isPage }).then((cached) => cached || caches.match('./index.html')))
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./index.html')))
     );
     return;
   }

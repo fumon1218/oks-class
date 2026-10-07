@@ -94,6 +94,7 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
 .ans .circ{outline:3px solid #e53935;outline-offset:2px;border-radius:12px;}
 .ans .ansline{display:block!important;}
 .ansline{display:none;color:#e53935;font-size:14px;margin-top:4px;}
+.ansonly{display:none;} .ans .ansonly{display:inline;}
 .dots{display:flex;gap:6px;flex-wrap:wrap;}
 .dots i{width:38px;height:38px;border:1.8px dashed #b9b0a0;border-radius:50%;display:inline-block;}
 .match{display:grid;grid-template-columns:auto 125px auto;align-items:center;row-gap:11px;max-width:150mm;}
@@ -178,13 +179,13 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
 </div>
 <div class="pages" id="pages"></div>
 <script src="../curriculum/lessons.js"></script>
-<script src="../curriculum/english-basic.js"></script>
 <script src="../play/content.js"></script>
 <script src="../play/content2.js"></script>
 <script src="../play/content-extra.js"></script>
-<script src="../play/english-basic-content.js"></script>
+<script src="../play/english-content.js"></script>
 <script src="../play/custom.js"></script>
 <script src="generic.js"></script>
+<script src="english.js"></script>
 <script src="../games/tycoon/town.js"></script><script src="../games/tycoon/town2.js"></script>
 <script>
 (function () {
@@ -397,7 +398,7 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   addEventListener('beforeprint', fit);
   addEventListener('load', function () { fit(); });
   function render() {
-    var s0 = seed, qs = MAKE[id] ? MAKE[id]() : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
+    var s0 = seed, qs = MAKE[id] ? MAKE[id]() : (window.OKS_WS_EN && OKS_WS_EN.has(id)) ? OKS_WS_EN.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
     var html = pageHtml(qs, false);
     if (document.getElementById('withAns').checked) html += pageHtml(qs, true);
     document.getElementById('pages').innerHTML = html;

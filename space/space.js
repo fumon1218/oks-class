@@ -345,7 +345,7 @@
     }
     schools.slice().reverse().forEach(function (x) {
       var n = list.filter(function (l) { return l.school === x.key; }).length;
-      var t = E('button', 'sp-floor', '<b>' + ({ elem: '1층', middle: '2층', high: '3층' }[x.key] || '') + '</b> ' + x.name + ' <small>' + n + '</small>');
+      var t = E('button', 'sp-floor', '<b>' + ({ basic: '🔤 기초층', elem: '1층', middle: '2층', high: '3층' }[x.key] || '') + '</b> ' + (x.key === 'basic' ? '알파벳·낱말·문장' : x.name) + ' <small>' + n + '</small>');
       t.type = 'button'; t.dataset.k = x.key;
       t.onclick = function () { sel = x.key; var ll = O.jget('oks_learn_last', {}) || {}; ll.school = sel; O.jset('oks_learn_last', ll); O.sfx('tick'); draw(); O.say(x.name, { noRepeat: true }); };
       tabs.appendChild(t);
@@ -360,7 +360,7 @@
     var btns = E('div', 'sp-links');
     if (O.eco) { var m = E('button', 'sp-link', '🎯 오늘의 미션'); m.type = 'button'; m.onclick = function () { O.eco.missionsView(); }; btns.appendChild(m); }
     [
-      [O.iconHtml('icon_map.png', '배움 지도 (7교과 144차시 한눈에)'), 'learn/'],
+      [O.iconHtml('icon_map.png', '배움 지도 (7교과 '+D.lessons.length+'차시 한눈에)'), 'learn/'],
       [O.iconHtml('icon_teacher.png', '선생님 지도 계획서'), 'curriculum/plan.html'],
       ['✏️ 선생님 문항 편집', 'curriculum/editor.html'],
       [O.iconHtml('icon_settings.png', '설정 (목소리·움직임·큰 버튼)'), 'learn/?set=1']

@@ -51,13 +51,13 @@ console.log(`PASS 오프라인 캐시 목록 ${listed.length}개`);
 const lessonsPath = path.join(root, 'curriculum/lessons.json');
 if (fs.existsSync(lessonsPath)) {
   const data = JSON.parse(fs.readFileSync(lessonsPath, 'utf8'));
-  assert.equal(data.lessons.length, 126, '126차시가 있어야 합니다');
+  assert.equal(data.lessons.length, 152, '152차시(엑셀 126 + 영어 기초 26)가 있어야 합니다');
   const ids = new Set();
   for (const l of data.lessons) {
     assert(!ids.has(l.id), '중복 차시 ID ' + l.id); ids.add(l.id);
     assert.equal(l.levels.length, 5, '차시마다 5수준 ' + l.id);
   }
-  console.log('PASS 교육과정 126차시 · 5수준');
+  console.log('PASS 교육과정 152차시 · 5수준');
 }
 
 // 차시 게임 내용표: 활동ID가 교육과정에 있고, 엔진이 있고, 쓰는 그림 파일이 모두 있어야 합니다.
@@ -67,8 +67,9 @@ if (fs.existsSync(contentPath)) {
   vm.runInNewContext(fs.readFileSync(contentPath, 'utf8'), { window: win });
   const c2 = path.join(root, 'play/content2.js'); if (fs.existsSync(c2)) vm.runInNewContext(fs.readFileSync(c2, 'utf8'), { window: win });
   const c3 = path.join(root, 'play/content-extra.js'); if (fs.existsSync(c3)) vm.runInNewContext(fs.readFileSync(c3, 'utf8'), { window: win });
+  const c4 = path.join(root, 'play/english-content.js'); if (fs.existsSync(c4)) vm.runInNewContext(fs.readFileSync(c4, 'utf8'), { window: win });
   const engWin = { OKS: {}, OKS_ENGINES: {} };
-  for (const f of ['engines.js', 'engines2.js', 'farm.js']) vm.runInNewContext(fs.readFileSync(path.join(root, 'play', f), 'utf8'), { window: engWin, document: {} });
+  for (const f of ['engines.js', 'engines2.js', 'farm.js', 'english.js']) vm.runInNewContext(fs.readFileSync(path.join(root, 'play', f), 'utf8'), { window: engWin, document: {} });
   const data = JSON.parse(fs.readFileSync(lessonsPath, 'utf8'));
   const ids = new Set(data.lessons.map(l => l.id));
   let imgs = 0;
