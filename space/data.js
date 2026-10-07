@@ -55,7 +55,8 @@
     center: [
       { id: 'b_hall', name: '학생회관', sub: '오늘의 미션 · 배움 지도', kind: 'hub', x: 50, y: 50, s: 1.3, emo: '🏫' },
       { id: 'b_library', name: '이야기 도서관', sub: '국어 · 읽기', kind: 'lessons', subject: 'korean', x: 20, y: 52, s: 1, emo: '📚',
-        keys: ['소리 숲', '글자 정원', '동화', '이야기', '정보 탐정', '서류'] },
+        keys: ['소리 숲', '글자 정원', '동화', '이야기', '정보 탐정', '서류'],
+        links: [['✏️ 한글 따라 쓰기 (자음·모음·글자·낱말)', 'trace/hangul.html']] },
       { id: 'b_english', name: '영어 여행사', sub: '영어', kind: 'lessons', subject: 'english', x: 80, y: 52, s: 1, emo: '🌏',
         links: [['✏️ 알파벳 따라 쓰기 (기초 알파벳 쓰기)', 'trace/alpha.html']] },
       { id: 'b_post', name: '동물 우체국', sub: '국어 · 쓰기', kind: 'lessons', subject: 'korean', x: 17, y: 90, s: .95, emo: '📮',

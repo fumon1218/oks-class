@@ -62,6 +62,7 @@
 
     function drawLines(lines) {
       var h = '';
+      if (cfg.cross) { h += '<rect x="0" y="0" width="100" height="100" fill="none" stroke="#c9bfae" stroke-width="1.4"/><line x1="50" x2="50" y1="0" y2="100" stroke="#d8cfbf" stroke-width="1" stroke-dasharray="4 4"/><line x1="0" x2="100" y1="50" y2="50" stroke="#d8cfbf" stroke-width="1" stroke-dasharray="4 4"/>'; gLines.innerHTML = h; return; }
       (lines || [0, 40, 100, 160]).forEach(function (y) {
         var base = y === 100;
         h += '<line x1="-20" x2="120" y1="' + y + '" y2="' + y + '" stroke="' + (base ? '#ff9db8' : '#c9bfae') + '" stroke-width="' + (base ? 1.6 : 1) + '"' + (base ? '' : ' stroke-dasharray="4 4"') + '/>';
@@ -73,17 +74,18 @@
 
     function setupGlyph(g) {
       var step = cfgL.step || 3.5;
+      R = cfgL.R * (g.rScale || 1); var sw = g.sw || 13, gw = sw + 2, nr = g.nr || 9.5;
       S = { g: g, strokes: g.strokes.map(function (poly) { var pts = resample(poly, step); return { poly: poly, pts: pts, prog: 0, done: false, dot: poly.length === 1 }; }), si: 0, miss: 0, hints: 0, doneAll: false };
       drawLines(g.lines);
       var gh = '', nums = '';
       S.strokes.forEach(function (st, i) {
         if (st.dot) gh += '<circle cx="' + st.pts[0][0] + '" cy="' + st.pts[0][1] + '" r="7" class="tr-g' + i + '" fill="#e9e1d3"/>';
-        else gh += '<path class="tr-g' + i + '" d="' + pathD(st.pts) + '" fill="none" stroke="#e9e1d3" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>' +
+        else gh += '<path class="tr-g' + i + '" d="' + pathD(st.pts) + '" fill="none" stroke="#e9e1d3" stroke-width="' + gw + '" stroke-linecap="round" stroke-linejoin="round"/>' +
           '<path d="' + pathD(st.pts) + '" fill="none" stroke="#bfb3a0" stroke-width="1.6" stroke-dasharray="3 5" stroke-linecap="round"/>';
         nums += '<g class="tr-n tr-n' + i + '"><circle cx="' + st.pts[0][0] + '" cy="' + st.pts[0][1] + '" r="9.5"/><text x="' + st.pts[0][0] + '" y="' + (st.pts[0][1] + 4.2) + '" text-anchor="middle">' + (i + 1) + '</text></g>';
       });
       gGhost.innerHTML = gh; gNums.innerHTML = nums;
-      gFill.innerHTML = S.strokes.map(function (st, i) { return st.dot ? '<circle class="tr-f' + i + '" cx="' + st.pts[0][0] + '" cy="' + st.pts[0][1] + '" r="0" fill="#ff6fa6"/>' : '<path class="tr-f' + i + '" d="" fill="none" stroke="#ff6fa6" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>'; }).join('');
+      gFill.innerHTML = S.strokes.map(function (st, i) { return st.dot ? '<circle class="tr-f' + i + '" cx="' + st.pts[0][0] + '" cy="' + st.pts[0][1] + '" r="0" fill="#ff6fa6"/>' : '<path class="tr-f' + i + '" d="" fill="none" stroke="#ff6fa6" stroke-width="' + sw + '" stroke-linecap="round" stroke-linejoin="round"/>'; }).join('');
       gGhost.style.opacity = guide.ghost ? 1 : 0; gNums.style.display = guide.num ? '' : 'none';
       refreshNums();
       pen.setAttribute('cx', -99);
@@ -213,7 +215,7 @@
       big.textContent = S.g.label;
       pic.innerHTML = w ? (w.img ? '<img src="' + O.ROOT + 'art/' + w.img + '" alt="' + O.esc(w.text) + '">' : '<span class="tr-emoji">' + (w.emoji || '') + '</span>') : '';
       wordEl.innerHTML = w ? '<b>' + O.esc(w.text) + '</b>' + (w.ko ? '<small>' + O.esc(w.ko) + '</small>' : '') : '';
-      pic.classList.toggle('hide', !reveal); wordEl.classList.toggle('hide', !reveal);
+      pic.classList.toggle('hide', !(reveal || S.g.picAlways)); wordEl.classList.toggle('hide', !reveal);
     }
     function speakGlyph() { var f = cfg.speak ? cfg.speak(S.g) : null; if (f) return O.say(f.text, { lang: f.lang, rate: f.rate }); return Promise.resolve(); }
     async function glyphDone() {

@@ -26,7 +26,7 @@
   function eng(g) { return { text: g.group.toLowerCase() === g.label ? g.label + '. ' + g.word.text : g.label + '. ' + g.word.text, lang: 'en-US', rate: .8 }; }
 
   OKS_TRACE.start({
-    title: '알파벳 따라 쓰기', icon: '✏️', lessonDefault: 'mini-alpha-trace', subject: 'english', school: 'elem', topic: '알파벳 따라 쓰기', engine: 'alpha',
+    title: '알파벳 따라 쓰기', icon: '✏️', lessonDefault: 'mini-alpha-trace', subject: 'english', school: 'basic', topic: '알파벳 따라 쓰기', engine: 'alpha',
     back: O.ROOT + 'index.html', doneTitle: '알파벳을 잘 썼어요!',
     intro: '번호 순서대로 손가락으로 따라 써요.<br>글자를 쓰면 그림 낱말과 소리를 들을 수 있어요.',
     sets: SETS,
