@@ -163,10 +163,10 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
 .bigdeliver{border:none;border-radius:999px;background:linear-gradient(#5fd06a,#2fa846);color:#fff;font:inherit;font-size:20px;display:flex;align-items:center;justify-content:center;gap:6px;padding:6px 12px;box-shadow:0 5px 0 #1f7a33,0 8px 14px rgba(0,0,0,.2);cursor:pointer;white-space:nowrap;}
 .bigdeliver img{height:40px;}
 .bigdeliver.oks-glow{animation:pglow 1s ease-in-out infinite;}
-.farmer{position:absolute;left:55%;top:30%;width:clamp(90px,12vw,170px);z-index:6;pointer-events:none;transform:translateX(-50%);}
-.farmer img{width:100%;filter:drop-shadow(0 8px 8px rgba(0,0,0,.25));}
-.speech{position:absolute;left:-40%;right:-40%;bottom:100%;margin-bottom:8px;background:#fffdf6;border-radius:18px;padding:8px 12px;font-size:17px;text-align:center;box-shadow:0 6px 16px rgba(0,0,0,.2);opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;}
-.speech::after{content:'';position:absolute;left:50%;bottom:-10px;margin-left:-10px;border:10px solid transparent;border-top-color:#fffdf6;border-bottom:0;}
+.farmer{position:absolute;left:55%;top:4%;width:clamp(70px,9vw,130px);z-index:6;pointer-events:none;}   /* 위치·크기는 placeFarmer()가 손님 주문 카드 위의 빈 곳에 맞춰요 */
+.farmer img{display:block;max-width:none;filter:drop-shadow(0 8px 8px rgba(0,0,0,.25));}
+.speech{position:absolute;left:calc(100% + 12px);right:auto;bottom:34%;width:max-content;max-width:min(260px,26vw);margin-bottom:0;background:#fffdf6;border-radius:18px;padding:8px 12px;font-size:17px;text-align:center;box-shadow:0 6px 16px rgba(0,0,0,.2);opacity:0;transform:translateY(6px);transition:opacity .25s,transform .25s;}
+.speech::after{content:'';position:absolute;left:-10px;top:50%;margin-top:-10px;border:10px solid transparent;border-right-color:#fffdf6;border-left:0;}
 .speech.on{opacity:1;transform:none;}
 .say{display:none;}
 .tools{gap:10px;align-items:stretch;flex-wrap:nowrap;}
@@ -357,7 +357,17 @@ body.calm .plot .bubble,body.calm .plot.oks-glow{animation:none;}
       custs.appendChild(c);
     });
   }
-  function drawAll() { drawTop(); drawPlots(); drawBarn(); drawCusts(); save(); guide(); }
+  /* 토끼 도우미: 손님 주문 카드를 가리지 않게, 카드 위쪽 빈 곳(없으면 작게)에 세워요 */
+  function placeFarmer() {
+    var f = app.querySelector('.farmer'), c = app.querySelector('.counter'), st = app.querySelector('.stage'); if (!f || !c || !st || getComputedStyle(f).display === 'none') return;
+    var cr = c.getBoundingClientRect(), sr = st.getBoundingClientRect(), ords = [].slice.call(custs.querySelectorAll('.ord'));
+    var top = ords.length ? Math.min.apply(null, ords.map(function (o) { return o.getBoundingClientRect().top; })) : cr.bottom;
+    var free = top - cr.top - 8, h = Math.max(64, Math.min(free, 190)), img = f.querySelector('img');
+    img.style.height = h + 'px'; img.style.width = 'auto'; f.style.width = 'auto';
+    f.style.left = (cr.left - sr.left + 6) + 'px'; f.style.top = (cr.top - sr.top + Math.max(0, free - h)) + 'px';
+  }
+  addEventListener('resize', function () { setTimeout(placeFarmer, 60); });
+  function drawAll() { drawTop(); drawPlots(); drawBarn(); drawCusts(); save(); guide(); placeFarmer(); setTimeout(placeFarmer, 400); }
 
   /* ---------- 주문 ---------- */
   function newOrder() {
