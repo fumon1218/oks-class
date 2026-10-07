@@ -132,7 +132,51 @@
   function q(en, img, blank) { var o = s(en, blank == null ? 3 : blank, img); o.q = 'What is this?'; return o; }
   var WHAT = [q('It is a cat.', J + 'animals/cat.webp'), q('It is a dog.', J + 'animals/dog.webp'), q('It is a bus.', OB + 'bus.webp'), q('It is a car.', OB + 'car.webp'),
     q('It is a tree.', OB + 'tree.webp'), q('It is a bird.', OB + 'bird.webp'), q('It is a clock.', OB + 'alarm.webp'), q('It is a chair.', OB + 'chair.webp')];
-  var MIX = [].concat(GREET.slice(0, 3), THIS.slice(0, 3), COLOR.slice(0, 3), LIKE.slice(0, 3), WANT.slice(0, 2), CAN.slice(0, 3), SEE.slice(0, 2), HAVE.slice(0, 2), WHAT.slice(0, 3), MYBODY.slice(0, 2), WEAR.slice(0, 2));
+
+  /* ===== 풍성하게: 우리 별 마을에 이미 있는 그림(동물·농장·부엌·직업·과학 도구…)을 낱말로 ===== */
+  var PP = 'art/people/', ST = 'art/stickers/', FM = J + 'farm/', KT = J + 'kitchen/', SN = J + 'snack/', RC = J + 'recycle/';
+  function add(a, b) { Array.prototype.push.apply(a, b); }
+  add(ANIMALS, [w('penguin', '펭귄', J + 'animals/penguin.webp'), w('elephant', '코끼리', J + 'animals/elephant.webp'), w('koala', '코알라', J + 'animals/koala.webp'), w('parrot', '앵무새', J + 'animals/parrot.webp'),
+    w('bee', '벌', J + 'foes/bee.webp'), w('spider', '거미', J + 'foes/spider.webp'), w('snake', '뱀', J + 'foes/snake.webp'), w('bat', '박쥐', J + 'foes/bat.webp'),
+    w('butterfly', '나비', OB + 'butterfly.webp'), w('snail', '달팽이', OB + 'snail.webp'), w('turtle', '거북이', OB + 'turtle.webp'), w('dolphin', '돌고래', OB + 'dolphin.webp'),
+    w('octopus', '문어', OB + 'octopus.webp'), w('squirrel', '다람쥐', OB + 'squirrel.webp'), w('chicken', '닭', OB + 'chicken.webp'), w('sloth', '나무늘보', J + 'animals/sloth.webp')]);
+  add(FRUITS, [w('tangerine', '귤', BF + 'f_tangerine.webp'), w('watermelon', '수박', ST + 'watermelon.png'), w('strawberry', '딸기', FM + 'ripe_strawberry.webp'), w('cucumber', '오이', OB + 'cucumber.webp'),
+    w('cabbage', '배추', OB + 'cabbage.webp'), w('mushroom', '버섯', OB + 'mushroom.webp'), w('pepper', '고추', OB + 'pepper.webp'), w('spinach', '시금치', SN + 'spinach.webp')]);
+  add(FOOD, [w('rice', '밥', EN + 'food_rice.webp'), w('bread', '빵', EN + 'food_bread.webp'), w('sandwich', '샌드위치', EN + 'food_sandwich.webp'), w('hamburger', '햄버거', EN + 'food_hamburger.webp'),
+    w('candy', '사탕', EN + 'food_candy.webp'), w('fries', '감자튀김', EN + 'food_fries.webp'), w('chicken', '치킨', EN + 'food_chicken.webp'), w('water', '물', EN + 'food_water.webp'),
+    w('chocolate', '초콜릿', KT + 'ing_choco.webp'), w('coconut', '코코넛', KT + 'ing_coconut.webp'), w('ramen', '라면', SN + 'ramen_bowl.webp')]);
+  add(VEHICLES, [w('motorbike', '오토바이', OB + 'motorbike.webp'), w('firetruck', '소방차', OB + 'firetruck.webp'), w('policecar', '경찰차', OB + 'policecar.webp'), w('excavator', '포클레인', OB + 'excavator.webp')]);
+  add(THINGS, [w('bulb', '전구', OB + 'bulb.webp'), w('fan', '선풍기', OB + 'fan.webp'), w('tv', '텔레비전', OB + 'tv.webp'), w('fridge', '냉장고', OB + 'fridge.webp'),
+    w('newspaper', '신문', RC + 'newspaper.webp'), w('bottle', '병', RC + 'milk_bottle.webp'), w('shampoo', '샴푸', RC + 'shampoo.webp'), w('can', '캔', RC + 'can.webp'), w('scale', '저울', OB + 'scale.webp')]);
+  add(NATURE, [w('mountain', '산', OB + 'mountain.webp'), w('rock', '바위', OB + 'rock.webp'), w('wave', '파도', OB + 'wave.webp'), w('grass', '풀', OB + 'grass.webp'), w('fire', '불', OB + 'fire.webp'), w('lightning', '번개', OB + 'lightning.webp')]);
+  add(MUSIC, [w('castanets', '캐스터네츠', OB + 'castanets.webp')]);
+  add(PLACES, [w('cinema', '영화관', OB + 'pl_cinema.webp'), w('pharmacy', '약국', OB + 'pl_pharmacy.webp'), w('station', '역', OB + 'pl_station.webp'), w('cafeteria', '급식실', OB + 'pl_cafeteria.webp'), w('toilet', '화장실', OB + 'pl_toilet.webp')]);
+  add(SCHOOL, [w('brush', '붓', OB + 'brush.webp'), w('palette', '팔레트', OB + 'palette.webp'), w('easel', '이젤', OB + 'easel.webp'), w('clay', '점토', OB + 'clay.webp')]);
+  var FAMILY = [w('mom', '엄마', EN + 'fam_mom.webp'), w('dad', '아빠', EN + 'fam_dad.webp'), w('baby', '아기', EN + 'fam_baby.webp'), w('brother', '형·오빠·남동생', EN + 'fam_brother.webp'),
+    w('sister', '누나·언니·여동생', EN + 'fam_sister.webp'), w('grandma', '할머니', EN + 'fam_grandma.webp'), w('grandpa', '할아버지', EN + 'fam_grandpa.webp'), w('friend', '친구', EN + 'fam_friend.webp'), w('teacher', '선생님', EN + 'fam_teacher.webp')];
+  var NUMBERS = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'].map(function (n, i) { return w(n, String(i + 1), EN + 'n' + (i + 1) + '.webp'); });
+  var FEEL = [w('happy', '기뻐요', EN + 'f_happy.webp'), w('sad', '슬퍼요', EN + 'f_sad.webp'), w('angry', '화나요', EN + 'f_angry.webp'), w('sleepy', '졸려요', EN + 'f_sleepy.webp'),
+    w('surprised', '놀랐어요', EN + 'f_surprised.webp'), w('scared', '무서워요', EN + 'f_scared.webp'), w('hungry', '배고파요', EN + 'f_hungry.webp'), w('sick', '아파요', EN + 'f_sick.webp'), w('shy', '부끄러워요', EN + 'f_shy.webp')];
+  var ACTS = [w('run', '달리다', EN + 'a_run.webp'), w('jump', '뛰다', EN + 'a_jump.webp'), w('swim', '수영하다', EN + 'a_swim.webp'), w('eat', '먹다', EN + 'a_eat.webp'), w('sleep', '자다', EN + 'a_sleep.webp'),
+    w('sit', '앉다', EN + 'a_sit.webp'), w('stand', '서다', EN + 'a_stand.webp'), w('read', '읽다', EN + 'a_read.webp'), w('dance', '춤추다', EN + 'a_dance.webp')];
+  var KITCHEN = [w('pan', '프라이팬', KT + 'tool_pan.webp'), w('pot', '냄비', KT + 'tool_pot.webp'), w('knife', '칼', KT + 'tool_knife.webp'), w('board', '도마', KT + 'tool_board.webp'),
+    w('spoon', '숟가락', OB + 'spoon.webp'), w('cup', '컵', RC + 'cup.webp'), w('bowl', '그릇', SN + 'ramen_bowl.webp'), w('bottle', '병', RC + 'milk_bottle.webp'), w('basket', '바구니', FM + 'basket.webp'), w('tongs', '집게', FM + 'tongs.webp')];
+  var LAB = [w('magnet', '자석', OB + 'magnet.webp'), w('magnifier', '돋보기', OB + 'magnifier.webp'), w('compass', '나침반', OB + 'compass.webp'), w('prism', '프리즘', OB + 'prism.webp'),
+    w('beaker', '비커', OB + 'beaker.webp'), w('dropper', '스포이트', OB + 'dropper.webp'), w('hourglass', '모래시계', OB + 'hourglass.webp'), w('stopwatch', '초시계', OB + 'stopwatch.webp'), w('scale', '저울', OB + 'scale.webp'), w('bulb', '전구', OB + 'bulb.webp')];
+  var JOBS = [w('baker', '제빵사', PP + 'p_baker.webp'), w('banker', '은행원', PP + 'p_banker.webp'), w('barista', '바리스타', PP + 'p_barista.webp'), w('cashier', '계산원', PP + 'p_cashier.webp'),
+    w('cleaner', '청소원', PP + 'p_cleaner.webp'), w('driver', '운전기사', PP + 'p_driver.webp'), w('farmer', '농부', PP + 'p_farmer.webp'), w('postman', '우체부', PP + 'p_postman.webp')];
+  function sx(en, blank, img) { return s(en, blank, img); }
+  var IAM = FEEL.map(function (f) { return sx('I am ' + f.en + '.', 2, f.img); });
+  var ICAN = ACTS.map(function (f) { return sx('I can ' + f.en + '.', 2, f.img); });
+  var MYFAM = FAMILY.map(function (f) { return sx('This is my ' + f.en + '.', 3, f.img); });
+  var EATD = [sx('I eat rice.', 2, EN + 'food_rice.webp'), sx('I eat bread.', 2, EN + 'food_bread.webp'), sx('I eat a sandwich.', 3, EN + 'food_sandwich.webp'), sx('I eat a hamburger.', 3, EN + 'food_hamburger.webp'),
+    sx('I eat fries.', 2, EN + 'food_fries.webp'), sx('I eat an egg.', 3, KT + 'ing_egg.webp'), sx('I drink water.', 2, EN + 'food_water.webp'), sx('I drink milk.', 2, KT + 'ing_milk.webp'), sx('I drink juice.', 2, EN + 'juice.webp')];
+  add(SEE, [sx('I see a butterfly.', 3, OB + 'butterfly.webp'), sx('I see a snail.', 3, OB + 'snail.webp'), sx('I see a turtle.', 3, OB + 'turtle.webp'), sx('I see a dolphin.', 3, OB + 'dolphin.webp'), sx('I see a mountain.', 3, OB + 'mountain.webp'), sx('I see a squirrel.', 3, OB + 'squirrel.webp')]);
+  add(LIKE, [sx('I like pizza.', 2, EN + 'pizza.webp'), sx('I like cake.', 2, EN + 'cake.webp'), sx('I like cookies.', 2, EN + 'cookie.webp'), sx('I like melons.', 2, EN + 'melon.webp'), sx('I like zebras.', 2, EN + 'zebra.webp'), sx('I like penguins.', 2, J + 'animals/penguin.webp')]);
+  add(WANT, [sx('I want juice.', 2, EN + 'juice.webp'), sx('I want bread.', 2, EN + 'food_bread.webp'), sx('I want a cookie.', 3, EN + 'cookie.webp'), sx('I want a ball.', 3, EN + 'ball.webp'), sx('I want a robot.', 3, EN + 'robot.webp')]);
+  add(CAN, [sx('A penguin can swim.', 3, J + 'animals/penguin.webp'), sx('A turtle can swim.', 3, OB + 'turtle.webp'), sx('A squirrel can climb.', 3, OB + 'squirrel.webp'), sx('A butterfly can fly.', 3, OB + 'butterfly.webp'), sx('A dolphin can jump.', 3, OB + 'dolphin.webp')]);
+  add(THIS, [sx('This is a pizza.', 3, EN + 'pizza.webp'), sx('This is a ball.', 3, EN + 'ball.webp'), sx('This is a zebra.', 3, EN + 'zebra.webp'), sx('This is a pencil.', 3, EN + 'pencil.webp'), sx('This is a robot.', 3, EN + 'robot.webp'), sx('This is a kite.', 3, EN + 'kite.webp')]);
+  var MIX = [].concat(GREET.slice(0, 3), IAM.slice(0, 2), ICAN.slice(0, 2), MYFAM.slice(0, 2), EATD.slice(0, 2), THIS.slice(0, 3), COLOR.slice(0, 3), LIKE.slice(0, 3), WANT.slice(0, 2), CAN.slice(0, 3), SEE.slice(0, 2), HAVE.slice(0, 2), WHAT.slice(0, 3), MYBODY.slice(0, 2), WEAR.slice(0, 2));
   C['05-00-01-07'] = L('order', null, ['첫 글자가 놓인 칸에 이어서 3글자를 순서대로 누르기', '4글자를 순서대로 누르기(첫 글자만 보여 줌)', '5글자 사이에서 빠진 글자를 3개 중에서 고르기', '5글자를 처음부터 순서대로 누르기', '소문자로 빠진 글자 찾기 · 6글자 순서 놓기']);
   C['05-00-02-07'] = Wd(NATURE);
   C['05-00-02-08'] = Wd(MUSIC);
@@ -146,7 +190,18 @@
   C['05-00-02-13'] = Wd(TOYS);
   C['05-00-03-10'] = Sn(MYBODY);
   C['05-00-03-11'] = Sn(WEAR);
-  C['05-00-03-12'] = Sn(MIX);
+  C['05-00-02-14'] = Wd(FAMILY);
+  C['05-00-02-15'] = Wd(NUMBERS);
+  C['05-00-02-16'] = Wd(FEEL);
+  C['05-00-02-17'] = Wd(ACTS);
+  C['05-00-02-18'] = Wd(KITCHEN);
+  C['05-00-02-19'] = Wd(LAB);
+  C['05-00-02-20'] = Wd(JOBS);
+  C['05-00-03-12'] = Sn(IAM);
+  C['05-00-03-13'] = Sn(ICAN);
+  C['05-00-03-14'] = Sn(MYFAM);
+  C['05-00-03-15'] = Sn(EATD);
+  C['05-00-03-16'] = Sn(MIX);
 
   window.OKS_EN_BASICS = { ABC: ABC, ANIMALS: ANIMALS, FRUITS: FRUITS, FOOD: FOOD, VEHICLES: VEHICLES, THINGS: THINGS, COLORS: COLORS, GREET: GREET, THIS: THIS, COLOR: COLOR, LIKE: LIKE, WANT: WANT, CAN: CAN, NATURE: NATURE, MUSIC: MUSIC, BODY: BODY, SCHOOL: SCHOOL, CLOTHES: CLOTHES, TOYS: TOYS, MYBODY: MYBODY, WEAR: WEAR, PLACES: PLACES, SEE: SEE, HAVE: HAVE, WHAT: WHAT };
 })();

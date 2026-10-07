@@ -51,13 +51,13 @@ console.log(`PASS 오프라인 캐시 목록 ${listed.length}개`);
 const lessonsPath = path.join(root, 'curriculum/lessons.json');
 if (fs.existsSync(lessonsPath)) {
   const data = JSON.parse(fs.readFileSync(lessonsPath, 'utf8'));
-  assert.equal(data.lessons.length, 158, '158차시(엑셀 126 + 영어 기초 32)가 있어야 합니다');
+  assert.equal(data.lessons.length, 169, '170차시(엑셀 126 + 영어 기초 43)가 있어야 합니다');
   const ids = new Set();
   for (const l of data.lessons) {
     assert(!ids.has(l.id), '중복 차시 ID ' + l.id); ids.add(l.id);
     assert.equal(l.levels.length, 5, '차시마다 5수준 ' + l.id);
   }
-  console.log('PASS 교육과정 158차시 · 5수준');
+  console.log('PASS 교육과정 169차시 · 5수준');
 }
 
 // 차시 게임 내용표: 활동ID가 교육과정에 있고, 엔진이 있고, 쓰는 그림 파일이 모두 있어야 합니다.
