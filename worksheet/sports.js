@@ -23,7 +23,7 @@ window.OKS_WS_SPORTS = (function () {
   }
   function vis(it, sz) {
     sz = sz || 56; var e = it[0] || '';
-    if (String(e).indexOf('img:') === 0) return '<img src="../sports/' + e.slice(4) + '" alt="" style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain">';
+    if (String(e).indexOf('img:') === 0) return '<img src="../' + e.slice(4) + '" alt="" style="width:' + sz + 'px;height:' + sz + 'px;object-fit:contain">';
     return '<span style="font-size:' + Math.round(sz * .78) + 'px;line-height:1">' + e + '</span>';
   }
   function card(it, circ, sz) { return '<div class="card' + (sz > 60 ? ' big' : '') + (circ ? ' circ' : '') + '" style="min-width:86px">' + vis(it, sz || 54) + '<span style="font-size:16px;text-align:center">' + it[1] + '</span></div>'; }

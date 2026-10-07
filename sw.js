@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v105';
+const CACHE_NAME = 'oks-class-v106';
 const ASSETS = [
   './',
   './index.html',
@@ -148,6 +148,29 @@ const ASSETS = [
   './sports/assets/sports_building_training_zone.webp',
   './sports/assets/summer_hub.webp',
   './sports/assets/summer_map.webp',
+  './sports/assets/swim/armstroke.webp',
+  './sports/assets/swim/breathe.webp',
+  './sports/assets/swim/cooldown.webp',
+  './sports/assets/swim/depthflag.webp',
+  './sports/assets/swim/dressing.webp',
+  './sports/assets/swim/drinkwater.webp',
+  './sports/assets/swim/floatback.webp',
+  './sports/assets/swim/floatring.webp',
+  './sports/assets/swim/glide.webp',
+  './sports/assets/swim/goggles.webp',
+  './sports/assets/swim/kick.webp',
+  './sports/assets/swim/kickboard.webp',
+  './sports/assets/swim/lifebuoy.webp',
+  './sports/assets/swim/lifeguard.webp',
+  './sports/assets/swim/lifevest.webp',
+  './sports/assets/swim/shower.webp',
+  './sports/assets/swim/standwater.webp',
+  './sports/assets/swim/swimcap.webp',
+  './sports/assets/swim/swimsuit.webp',
+  './sports/assets/swim/towel.webp',
+  './sports/assets/swim/washbody.webp',
+  './sports/assets/swim/waterbottle.webp',
+  './sports/assets/swim/whistle.webp',
   './sports/assets/swimming.webp',
   './sports/assets/taekwondo.webp',
   './playground/jegi/assets/court.webp',
