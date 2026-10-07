@@ -252,8 +252,13 @@
     }
 
     btnUndo.onclick = function () {
-      if (!playing || !S || S.doneAll) return;     /* 다 쓴 글자는 '다음'으로 */
-      var m = S.miss, h = S.hints; setupGlyph(S.g); S.miss = m; S.hints = h; armDemo(); setTarget(); O.sfx('tick');
+      if (!playing || !S) return;
+      O.unlock(); O.hush(); O.clearPrompt();
+      if (S.doneAll) {                             /* 다 쓴 글자도 처음부터 다시 쓸 수 있어요 (이번 판은 무르고 다시 셈) */
+        round = Math.max(0, round - 1); results.pop(); sh.setRounds(queue.length, round);
+        setupGlyph(S.g); btnNext.hidden = true; starsEl.innerHTML = ''; showWord(!!guide.reveal);
+      } else { var m = S.miss, h = S.hints; setupGlyph(S.g); S.miss = m; S.hints = h; }
+      pressed = drawing = lost = false; O.sfx('tick'); armDemo(); setTarget();
     };
     btnListen.onclick = function () { O.unlock(); if (S) speakGlyph(); };
 
