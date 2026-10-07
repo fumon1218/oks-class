@@ -14,7 +14,7 @@
   var BX = .075, FX = .925;                   /* 내 자리, 건너편 친구 자리(무대 너비 비율) */
   var GFAR = 1;
   /* 그림 높이(무대 높이 비율) — 원본 그림 크기에 맞춰요 */
-  var U = .52 / 1359;
+  var U = .40 / 1359;
   var HT = { girl_ready: 1359, girl_serve: 1356, girl_hit: 1161, girl_cheer: 1383, boy_ready: 1345, boy_hit: 1124 };
 
   function it(o) { var v = String(o[0] || ''); return v.indexOf('img:') === 0 ? { img: v.slice(4), label: o[1] } : { emo: v, label: o[1] }; }
@@ -71,8 +71,8 @@
     /* ---------- 좌표 ---------- */
     function pts() {
       var D = d(), W = D.W, H = D.H;
-      var hit = [BX * W + .185 * H, .62 * H];                      /* 내 탁구채 앞 */
-      var rel = [FX * W - .19 * H, .6 * H];                        /* 건너편 친구가 치는 곳 */
+      var hit = [BX * W + .145 * H, .64 * H];                      /* 내 탁구채 앞 */
+      var rel = [FX * W - .147 * H, .62 * H];                        /* 건너편 친구가 치는 곳 */
       var bnc = [.30 * W, .6 * H];                                 /* 내 쪽 탁구대에 튕기는 곳 */
       var bn2 = [.70 * W, .6 * H];                                 /* 되받아친 공이 튕기는 곳 */
       return { W: W, H: H, hit: hit, rel: rel, bnc: bnc, bn2: bn2 };

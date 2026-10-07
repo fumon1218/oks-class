@@ -4,13 +4,13 @@
 .pp-sky{position:absolute;inset:0;background:center 45%/cover no-repeat}
 .pp-stage img{position:absolute;display:block;pointer-events:none;user-select:none;width:auto}
 .pp-stage img[hidden]{display:none}
-.pp-girl{bottom:5%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
-.pp-boy{bottom:5%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
+.pp-girl{bottom:9%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
+.pp-boy{bottom:9%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
 .pp-ring{position:absolute;width:74px;height:74px;margin:-37px 0 0 -37px;border-radius:50%;border:5px dashed #fff;box-shadow:0 0 0 3px rgba(40,140,70,.7);background:rgba(61,220,111,.25);z-index:3;pointer-events:none}
 .pp-ring[hidden]{display:none}
 .pp-ring.now{background:rgba(61,220,111,.6);border-style:solid;animation:ppRing .45s infinite alternate}
 @keyframes ppRing{to{transform:scale(1.18);box-shadow:0 0 0 3px #1b9c46,0 0 20px 8px rgba(255,235,80,.8)}}
-.pp-ball{--s:1;width:3.6%;max-width:30px;min-width:15px;left:0;top:0;transform:translate(-50%,-50%) scale(var(--s));filter:drop-shadow(0 4px 3px rgba(0,0,0,.3));z-index:6}
+.pp-ball{--s:1;width:2.6%;max-width:24px;min-width:13px;left:0;top:0;transform:translate(-50%,-50%) scale(var(--s));filter:drop-shadow(0 4px 3px rgba(0,0,0,.3));z-index:6}
 .pp-fx{position:absolute;inset:0;pointer-events:none;z-index:7}
 .pp-star{position:absolute;font-size:42px;margin:-21px 0 0 -21px;animation:ppStar .8s ease-out forwards}
 @keyframes ppStar{from{transform:scale(.4);opacity:1}to{transform:scale(1.8) translateY(-24px);opacity:0}}
