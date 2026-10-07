@@ -404,4 +404,15 @@
       });
     }
   };
+
+  /* ================= 따라 쓰기 쪽지(tracepage) ================= */
+  /* 따라 쓰기 엔진(trace/)은 따로 열려요. 시작 버튼을 누르면 이 차시와 수준을 들고 이동해요. */
+  EN.tracepage = {
+    rounds: [1, 1, 1, 1, 1],
+    setup: function (ctx) {
+      location.href = O.ROOT + ctx.cfg.href + 'lesson=' + ctx.id + '&level=' + ctx.level + '&direct=1';
+      return new Promise(function () {});
+    },
+    round: function () { return new Promise(function () {}); }
+  };
 })();

@@ -345,7 +345,7 @@
     }
     schools.slice().reverse().forEach(function (x) {
       var n = list.filter(function (l) { return l.school === x.key; }).length;
-      var t = E('button', 'sp-floor', '<b>' + ({ basic: '🔤 기초층', elem: '1층', middle: '2층', high: '3층' }[x.key] || '') + '</b> ' + (x.key === 'basic' ? '알파벳·낱말·문장' : x.name) + ' <small>' + n + '</small>');
+      var t = E('button', 'sp-floor', '<b>' + ({ basic: '🔤 기초층', elem: '1층', middle: '2층', high: '3층' }[x.key] || '') + '</b> ' + (x.key === 'basic' ? (b.subject === 'korean' ? '자음·모음·글자·낱말' : '알파벳·낱말·문장') : x.name) + ' <small>' + n + '</small>');
       t.type = 'button'; t.dataset.k = x.key;
       t.onclick = function () { sel = x.key; var ll = O.jget('oks_learn_last', {}) || {}; ll.school = sel; O.jset('oks_learn_last', ll); O.sfx('tick'); draw(); O.say(x.name, { noRepeat: true }); };
       tabs.appendChild(t);

@@ -36,7 +36,7 @@
   function start(cfg) {
     var LESSON = O.qs('lesson') || cfg.lessonDefault;
     var level = O.levelFor(LESSON);
-    var BACK = O.qs('lesson') ? O.ret(O.ROOT + 'play/?id=' + LESSON) : O.ret(cfg.back || (O.ROOT + 'index.html'));
+    var BACK = O.qs('lesson') ? (O.qs('direct') ? O.ret(O.ROOT + 'learn/?subject=' + cfg.subject + '&school=basic#' + LESSON) : O.ret(O.ROOT + 'play/?id=' + LESSON)) : O.ret(cfg.back || (O.ROOT + 'index.html'));
     var setId = O.qs('set') || cfg.sets[0].id;
     var sh = O.shell({ compact: true, title: cfg.title, back: BACK, backLabel: '돌아가기', level: level });
     if (O.eco) try { sh.menu.insertBefore(O.eco.hud(sh.menu), sh.levelBtn); } catch (e) {}
@@ -264,7 +264,7 @@
       var entry = { at: new Date().toISOString(), lesson: LESSON, subject: cfg.subject, school: cfg.school, topic: cfg.topic, level: level, engine: cfg.engine, rounds: queue.length,
         mistakes: st.mistakes, glow: st.glow, hand: st.hand, asked: st.asked, sec: Math.round((Date.now() - st.t0) / 1000), items: results.map(function (r) { return r.id + ':' + r.stars; }).join(',') };
       var btns = [{ label: '🔁 한 번 더', color: 'green', onClick: function () { location.reload(); } }];
-      if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(LESSON, level + 1); location.href = '?' + (O.qs('lesson') ? 'lesson=' + LESSON + '&' : '') + (O.qs('set') ? 'set=' + O.qs('set') + '&' : '') + 'level=' + (level + 1); } });
+      if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(LESSON, level + 1); location.href = '?' + (O.qs('lesson') ? 'lesson=' + LESSON + '&' : '') + (O.qs('set') ? 'set=' + O.qs('set') + '&' : '') + (O.qs('direct') ? 'direct=1&' : '') + 'level=' + (level + 1); } });
       btns.push({ label: O.qs('lesson') ? '차시로 돌아가기' : '🏠 돌아가기', color: 'blue', href: BACK });
       O.finish({ stats: st, entry: entry, stars: avg >= 2.5 ? 3 : (avg >= 1.6 ? 2 : 1), title: cfg.doneTitle || '글자를 잘 썼어요!', text: cfg.topic + ' ' + queue.length + '글자 · ' + O.LEVELS[level - 1].name, mission: { lesson: 1 }, buttons: btns });
     }

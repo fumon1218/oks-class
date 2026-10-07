@@ -20,18 +20,21 @@ for r in wb['전체_차시'].iter_rows(min_row=2, values_only=True):
         'levels': [r[9], r[10], r[11], r[12], r[13]],
         'record': r[14], 'verify': r[15], 'source': r[16],
     })
-# 영어 기초층(알파벳 → 낱말 → 문장): 학교급과 상관없이 누구나 시작하는 단계
-EB = json.load(open(os.path.join(ROOT, 'curriculum/source/english_basics.json'), encoding='utf-8'))
-for u in EB['units']:
-    for k, L in enumerate(u['lessons'], 1):
-        lessons.append({
-            'id': '05-00-%02d-%02d' % (u['no'], k), 'subject': 'english', 'subjectName': '영어',
-            'school': 'basic', 'schoolName': '기초', 'track': EB['track'],
-            'unit': u['name'], 'unitNo': u['no'], 'lessonNo': k, 'no': '%d-%d' % (u['no'], k),
-            'topic': L['topic'], 'goal': L['goal'], 'space': u['space'],
-            'levels': ['〈%s〉 %s' % (u['space'], t) for t in L['levels']],
-            'record': '참여·선택·쓰기·독립 수행(단계별 관찰)', 'verify': '자체 구성(기초 영어)', 'source': '',
-        })
+# 기초층(학교급과 상관없이 누구나 시작하는 단계): 영어(알파벳 → 낱말 → 문장), 국어(한글 자음·모음 → 글자 → 낱말)
+def basics(fname, key, subj, subjName, code, verify):
+    EB = json.load(open(os.path.join(ROOT, 'curriculum/source/' + fname), encoding='utf-8'))
+    for u in EB['units']:
+        for k, L in enumerate(u['lessons'], 1):
+            lessons.append({
+                'id': '%s-00-%02d-%02d' % (code, u['no'], k), 'subject': subj, 'subjectName': subjName,
+                'school': 'basic', 'schoolName': '기초', 'track': EB['track'],
+                'unit': u['name'], 'unitNo': u['no'], 'lessonNo': k, 'no': '%d-%d' % (u['no'], k),
+                'topic': L['topic'], 'goal': L['goal'], 'space': u['space'],
+                'levels': ['〈%s〉 %s' % (u['space'], t) for t in L['levels']],
+                'record': '참여·선택·쓰기·독립 수행(단계별 관찰)', 'verify': verify, 'source': '',
+            })
+basics('english_basics.json', 'en', 'english', '영어', '05', '자체 구성(기초 영어)')
+basics('korean_basics.json', 'ko', 'korean', '국어', '01', '자체 구성(기초 한글 · 수업 설계 제안)')
 out = {
     'title': guide.get('옥쌤의 즐거운 교실 | 7교과 3D 교육게임 통합 설계표') or '7교과 3D 교육게임 통합 설계표',
     'version': guide.get('버전'), 'note': guide.get('중요 구분'),
