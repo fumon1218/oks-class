@@ -118,6 +118,18 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
   var dpr = Math.min(2, window.devicePixelRatio || 1);
   var geo = null, frame, ghost, slot, peek, hud, helpOn = false;
   var hitCtx = E('canvas').getContext('2d');
+  /* 종이 질감: 거친 알갱이와 섬유 무늬를 한 번 만들어 모든 조각에 덮어요 */
+  var PAPER = (function () {
+    var c = E('canvas'); c.width = c.height = 256; var x = c.getContext('2d'), i;
+    x.fillStyle = '#fff'; x.fillRect(0, 0, 256, 256);
+    var id = x.getImageData(0, 0, 256, 256), d = id.data;
+    for (i = 0; i < d.length; i += 4) { var v = 205 + Math.random() * 50; d[i] = d[i + 1] = d[i + 2] = v; }
+    x.putImageData(id, 0, 0);
+    x.lineWidth = 1;
+    for (i = 0; i < 420; i++) { var px = Math.random() * 256, py = Math.random() * 256, a = Math.random() * 6.28, l = 6 + Math.random() * 22;
+      x.strokeStyle = Math.random() < .5 ? 'rgba(120,100,70,.10)' : 'rgba(255,255,255,.35)'; x.beginPath(); x.moveTo(px, py); x.quadraticCurveTo(px + Math.cos(a + .6) * l * .5, py + Math.sin(a + .6) * l * .5, px + Math.cos(a) * l, py + Math.sin(a) * l); x.stroke(); }
+    return c;
+  })();
 
   function loadImg(src) { return new Promise(function (res, rej) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = rej; im.src = R + src; }); }
 
@@ -144,9 +156,9 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
   /* ---------- 자리 계산 ---------- */
   function measure() {
     var W = stage.clientWidth, H = stage.clientHeight;
-    var bw = Math.min(W * (N <= 20 ? .6 : .62), (H * .78) * AS), bh = bw / AS;
-    var bx = Math.round(Math.max(14, (W - bw) / 2 - (W > 900 ? W * .04 : 0))), by = Math.round(Math.max(48, (H - bh) / 2 + 14));
-    if (by + bh > H - 10) { bh = H - 10 - by; bw = bh * AS; }
+    var bw = Math.min(W * .72, (H - 70) * AS), bh = bw / AS;
+    var bx = Math.round((W - bw) / 2), by = Math.round(Math.max(46, (H - bh) / 2 + 16));
+    if (by + bh > H - 14) { bh = H - 14 - by; bw = bh * AS; }
     bw = Math.round(bw); bh = Math.round(bh);
     var pw = bw / cols, ph = bh / rows, m = Math.min(pw, ph), t = Math.ceil(m * .38);
     return { W: W, H: H, bx: bx, by: by, bw: bw, bh: bh, pw: pw, ph: ph, m: m, t: t };
@@ -165,7 +177,14 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
     frame = E('div', 'pz-frame'); frame.style.cssText = 'left:' + geo.bx + 'px;top:' + geo.by + 'px;width:' + geo.bw + 'px;height:' + geo.bh + 'px';
     ghost = E('canvas'); ghost.width = src.width; ghost.height = src.height;
     var gx = ghost.getContext('2d'); gx.fillStyle = '#fffdf8'; gx.fillRect(0, 0, ghost.width, ghost.height); gx.globalAlpha = GHOST[level - 1]; gx.drawImage(src, 0, 0);
-    if (!GHOST[level - 1]) { gx.globalAlpha = 1; gx.strokeStyle = 'rgba(0,0,0,.12)'; gx.lineWidth = 1; for (var i = 1; i < cols; i++) { gx.beginPath(); gx.moveTo(i * ghost.width / cols, 0); gx.lineTo(i * ghost.width / cols, ghost.height); gx.stroke(); } for (var j = 1; j < rows; j++) { gx.beginPath(); gx.moveTo(0, j * ghost.height / rows); gx.lineTo(ghost.width, j * ghost.height / rows); gx.stroke(); } }
+    gx.scale(dpr, dpr);                                  /* 실제 퍼즐판처럼 조각 모양 홈(안내선)을 새겨요 */
+    var gp = new Path2D();
+    pieces.forEach(function (pc) { var pp = new Path2D(), q = piecePath(pc, geo.pw, geo.ph, 0, geo.m); gp.addPath(q, new DOMMatrix().translate(pc.c * geo.pw, pc.r * geo.ph)); });
+    gx.lineJoin = 'round'; gx.lineCap = 'round';
+    gx.translate(1.3, 1.3); gx.strokeStyle = 'rgba(255,255,255,.9)'; gx.lineWidth = 2.2; gx.stroke(gp);
+    gx.translate(-1.3, -1.3); gx.strokeStyle = 'rgba(120,85,40,.6)'; gx.lineWidth = 2; gx.stroke(gp);
+    gx.strokeStyle = 'rgba(0,0,0,.18)'; gx.lineWidth = 3.5; gx.globalAlpha = .6; gx.stroke(gp);
+    frame.style.boxShadow = '0 0 0 8px #f4dca6,0 0 0 12px #c8964a,0 10px 22px rgba(80,50,10,.35),inset 0 0 18px rgba(120,80,20,.25)';
     frame.appendChild(ghost); stage.appendChild(frame);
     slot = E('div', 'pz-slot'); slot.hidden = true; slot.style.width = geo.pw + 'px'; slot.style.height = geo.ph + 'px'; stage.appendChild(slot);
     hud = E('div', 'pz-hud', '<span>🧩 <b class="n">' + placedN + '</b> / ' + N + '</span>'); stage.appendChild(hud);
@@ -174,9 +193,18 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
       cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr); cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
       pc.path = piecePath(pc, geo.pw, geo.ph, geo.t, geo.m);
       var x = cv.getContext('2d'); x.scale(dpr, dpr); x.save(); x.clip(pc.path);
-      x.drawImage(src, (pc.c * geo.pw - geo.t) * dpr, (pc.r * geo.ph - geo.t) * dpr, cw * dpr, ch * dpr, 0, 0, cw, ch); x.restore();
-      x.lineJoin = 'round'; x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 1; x.stroke(pc.path);
-      x.save(); x.clip(pc.path); x.strokeStyle = 'rgba(30,20,50,.6)'; x.lineWidth = 3; x.stroke(pc.path); x.restore();
+      x.drawImage(src, (pc.c * geo.pw - geo.t) * dpr, (pc.r * geo.ph - geo.t) * dpr, cw * dpr, ch * dpr, 0, 0, cw, ch);
+      x.fillStyle = 'rgba(255,250,240,.10)'; x.fillRect(0, 0, cw, ch);                                   /* 종이처럼 살짝 바랜 느낌 */
+      x.globalCompositeOperation = 'multiply'; x.globalAlpha = .55; x.fillStyle = x.createPattern(PAPER, 'repeat'); x.fillRect(0, 0, cw, ch);
+      x.globalCompositeOperation = 'soft-light'; x.globalAlpha = .45; x.fillRect(0, 0, cw, ch);
+      x.globalCompositeOperation = 'source-over'; x.globalAlpha = 1;
+      var gl = x.createLinearGradient(0, 0, cw, ch); gl.addColorStop(0, 'rgba(255,255,255,.22)'); gl.addColorStop(.5, 'rgba(255,255,255,0)'); gl.addColorStop(1, 'rgba(60,40,20,.16)'); x.fillStyle = gl; x.fillRect(0, 0, cw, ch);
+      x.restore();
+      /* 판지 두께: 안쪽 가장자리에 밝은 선(왼쪽 위)과 어두운 선(오른쪽 아래) */
+      x.lineJoin = 'round';
+      x.save(); x.clip(pc.path); x.translate(-1.2, -1.2); x.strokeStyle = 'rgba(255,255,255,.7)'; x.lineWidth = 2.4; x.stroke(pc.path); x.restore();
+      x.save(); x.clip(pc.path); x.translate(1.2, 1.2); x.strokeStyle = 'rgba(70,45,20,.45)'; x.lineWidth = 2.4; x.stroke(pc.path); x.restore();
+      x.save(); x.clip(pc.path); x.strokeStyle = 'rgba(40,28,20,.55)'; x.lineWidth = 2; x.stroke(pc.path); x.restore();
       pc.el = cv; cv._pc = pc;
       var hx = geo.bx + pc.c * geo.pw, hy = geo.by + pc.r * geo.ph; pc.hx = hx; pc.hy = hy;
       if (pc.placed) { pc.x = hx; pc.y = hy; } else { pc.x = Math.max(-geo.t, Math.min(geo.W - geo.pw - geo.t, pc.fx * geo.W)); pc.y = Math.max(-geo.t, Math.min(geo.H - geo.ph - geo.t, pc.fy * geo.H)); }
