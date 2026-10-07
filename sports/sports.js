@@ -71,21 +71,42 @@ function info(s,sk,no){
  return (map[s.id]&&map[s.id][sk]&&map[s.id][sk][Math.max(0,Math.min(2,no-1))])||[s.title,s.goal];
 }
 
-/* ---------- 씽씽 별 마을 ---------- */
+/* ---------- 씽씽 별 마을 (우리 별 마을과 같은 틀: 지도 배경 + 건물 + 이름표 + 안내자) ---------- */
+var HUB_W=1672,HUB_H=941;
+var HUB=[
+ {id:'summer',name:'하계 올림픽',sub:'달리고 · 뛰고 · 헤엄쳐요',img:'hub_bld_summer',x:840,y:445,w:330,open:true,url:'?festival=summer',say:'하계 올림픽 마을로 들어가요!'},
+ {id:'winter',name:'동계 올림픽',sub:'눈과 얼음 위 스포츠',img:'hub_bld_winter',x:895,y:152,w:250,say:'동계 올림픽 마을은 곧 열려요. 조금만 기다려요!'},
+ {id:'summer_para',name:'하계 패럴림픽',sub:'함께 즐기는 여름 스포츠',img:'hub_bld_summer_para',x:392,y:308,w:290,say:'하계 패럴림픽 마을은 곧 열려요. 조금만 기다려요!'},
+ {id:'winter_para',name:'동계 패럴림픽',sub:'함께 즐기는 겨울 스포츠',img:'hub_bld_winter_para',x:1280,y:312,w:280,say:'동계 패럴림픽 마을은 곧 열려요. 조금만 기다려요!'},
+ {id:'asian',name:'아시안게임',sub:'아시아의 다양한 스포츠',img:'hub_bld_asian',x:355,y:632,w:330,say:'아시안게임 마을은 곧 열려요. 조금만 기다려요!'},
+ {id:'medal',name:'메달 하우스',sub:'나의 기록 · 참여 메달',img:'hub_bld_medal',x:1340,y:660,w:250,open:true,util:'medal'},
+ {id:'info',name:'스포츠 안내센터',sub:'오늘의 추천 · 이용 안내',img:'hub_bld_info',x:835,y:714,w:200,open:true,util:'info'}
+];
 function villageHub(){
- var sh=top('씽씽 별 마을','체육 · 놀이','../','우주로',false);
- sh.ask('가 보고 싶은 스포츠 마을을 골라 보세요.',{silent:true});
- var b=E('div','sports-village');
- b.innerHTML='<div class="sports-town-head"><h1>씽씽 별 마을</h1><p>스포츠와 놀이를 한 단계씩 탐험해요</p></div><div class="festival-grid"></div>';
- var g=b.querySelector('.festival-grid');
- (D.festivals||[]).forEach(function(f){
-   var a=E('button','festival-card'+(f.active?'':' locked'));
-   var visual=f.image?'<img src="'+f.image+'" alt="">':'<span class="festival-emo">'+(f.emo||'⭐')+'</span>';
-   a.innerHTML=visual+'<span class="festival-label"><b>'+f.name+'</b><small>'+f.sub+'</small><em>'+(f.active?'들어가기':'곧 만나요')+'</em></span>';
-   a.onclick=function(){if(f.active){O.sfx('pop');location.href='?festival='+f.id}else O.toast('이 스포츠 마을은 준비 중이에요')};
-   g.appendChild(a);
+ document.body.classList.add('sports-hubmap');
+ var root=E('div','sh-root'),
+ hello='씽씽 별 마을에 오신 것을 환영해요! 건물을 눌러 보세요. 하계 올림픽 마을부터 시작해요.';
+ root.innerHTML='<div class="sh-back" style="background-image:url(assets/hub_map.webp)"></div><div class="sh-scroll"><div class="sh-map"><img class="sh-bg" src="assets/hub_map.webp" alt="씽씽 별 마을 지도"></div></div>'+
+  '<div class="sh-top"><a class="oks-pill sh-exit" href="../">🚀 <span>우주로</span></a><div class="sh-title"><b>씽씽 별 마을</b><span>체육 · 놀이 · 건물을 눌러요</span></div><div class="sh-hud"></div></div>'+
+  '<div class="sh-guide"><img src="../art/char/ok_wave.webp" alt=""><div class="sh-bubble"></div></div>';
+ var map=root.querySelector('.sh-map'),bub=root.querySelector('.sh-bubble'),guide=root.querySelector('.sh-guide');
+ function talk(t,speak){bub.textContent=t;guide.dataset.say=t;guide.classList.remove('pop');void guide.offsetWidth;guide.classList.add('pop');guide.classList.remove('quiet');clearTimeout(talk.t);talk.t=setTimeout(function(){guide.classList.add('quiet')},7000);if(speak!==false)O.say(t,{noRepeat:true});}
+ guide.onclick=function(){guide.classList.remove('quiet');clearTimeout(talk.t);talk.t=setTimeout(function(){guide.classList.add('quiet')},7000);if(guide.dataset.say)O.say(guide.dataset.say)};
+ HUB.forEach(function(b,i){
+  var e=E('button','sh-bld'+(b.open?'':' lock'));e.type='button';e.dataset.id=b.id;
+  e.style.left=b.x/HUB_W*100+'%';e.style.top=b.y/HUB_H*100+'%';e.style.width=b.w/HUB_W*100+'%';e.style.zIndex=Math.round(b.y);e.style.animationDelay=(i*70)+'ms';
+  e.innerHTML='<img class="sh-img" src="assets/'+b.img+'.webp" alt="">'+(b.open?'':'<img class="sh-cloud" src="../art/space/space_cloud.webp" alt="">')+
+   '<span class="sh-name"><b>'+O.esc(b.name)+'</b><small>'+(b.open?O.esc(b.sub):'🔒 곧 만나요')+'</small></span>';
+  e.onclick=function(){
+   if(b.open){O.sfx('pop');if(b.util){utilityBuilding(b.util);return}talk(b.say);setTimeout(function(){location.href=b.url},650);}
+   else{O.sfx('tick');talk(b.say);O.toast('이 스포츠 마을은 준비 중이에요');e.classList.remove('shake');void e.offsetWidth;e.classList.add('shake');}
+  };
+  map.appendChild(e);
  });
- sh.board.innerHTML='';sh.board.appendChild(b);
+ document.body.innerHTML='';document.body.appendChild(root);
+ var sc=root.querySelector('.sh-scroll');sc.scrollLeft=(sc.scrollWidth-sc.clientWidth)/2;
+ if(O.eco&&O.eco.hud){try{O.eco.hud(root.querySelector('.sh-hud'))}catch(x){}}
+ talk(hello);
 }
 /* ---------- 하계 올림픽 종목 ---------- */
 function summerHub(){
