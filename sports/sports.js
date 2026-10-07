@@ -119,7 +119,7 @@ function utilityBuilding(id){
     {id:'basketball',name:'농구',emo:'🏀',open:true,img:'assets/ballcenter/card_basketball.webp',ic:'assets/ballcenter/icon_basketball.webp',sub:'공을 던져 골대에 넣어요'},
     {id:'rugby',name:'럭비',emo:'🏉',open:true,img:'assets/ballcenter/card_rugby.webp',ic:'assets/ballcenter/icon_rugby.webp',sub:'공을 들고 달리고 패스해요'},
     {id:'tennis',name:'테니스',emo:'🎾',open:true,img:'assets/ballcenter/card_tennis.webp',ic:'assets/ballcenter/icon_tennis.webp',sub:'공을 라켓으로 쳐요'},
-    {id:'tabletennis',name:'탁구',emo:'🏓',img:'assets/ballcenter/card_tabletennis.webp',ic:'assets/ballcenter/icon_tabletennis.webp',sub:'작은 공을 주고받아요'}];
+    {id:'tabletennis',name:'탁구',emo:'🏓',open:true,img:'assets/ballcenter/card_tabletennis.webp',ic:'assets/ballcenter/icon_tabletennis.webp',sub:'작은 공을 주고받아요'}];
    var pr=progress(),gates=E('div','ball-gates');
    BALLS.forEach(function(g){
     var tot=0,plays=0;Object.keys(pr).forEach(function(k){if(k.indexOf(g.id+'-')===0){var x=pr[k]||{};plays+=x.plays||0;Object.keys(x.best||{}).forEach(function(lv){tot+=x.best[lv]||0})}});
@@ -178,7 +178,7 @@ function lessonRow(s,sk,no){
 
 /* ---------- 우리 별 마을 차시 화면과 같은 공통 활동 틀 ---------- */
 function sceneLesson(s){
- var bg=s.id==='athletics'?'sports/assets/athletics/athletics_bg_main.webp':s.id==='baseball'?'sports/assets/baseball/scene.webp':s.id==='basketball'?'sports/assets/basketball/bg_gym.webp':s.id==='rugby'?'sports/assets/rugby/bg_front.webp':s.id==='tennis'?'sports/assets/tennis/bg_scene.webp':'sports/'+(s.scene||s.image);
+ var bg=s.id==='athletics'?'sports/assets/athletics/athletics_bg_main.webp':s.id==='baseball'?'sports/assets/baseball/scene.webp':s.id==='basketball'?'sports/assets/basketball/bg_gym.webp':s.id==='rugby'?'sports/assets/rugby/bg_front.webp':s.id==='tennis'?'sports/assets/tennis/bg_scene.webp':s.id==='tabletennis'?'sports/assets/tabletennis/bg_scene.webp':'sports/'+(s.scene||s.image);
  return {subject:'physical',space:s.name+' 경기장',sceneKey:'arena',sceneBg:bg};
 }
 function sessionsKey(){return 'oks_athletics_sessions_v2'}
@@ -220,6 +220,12 @@ function activity(){
 }
 function levelDesc(s,li,lv){
  lv=lv||level;
+ if(s.id==='tabletennis')return [
+  '큰 단추 하나로 쳐요. 공이 표시에 멈추면 쳐요!',
+  '동그란 표시에 공이 올 때 쳐요.',
+  '탁구대에서 튕겨 오는 공을 보고 타이밍에 맞춰 쳐요.',
+  '더 빠른 공! 좁은 타이밍에 쳐요.',
+  '가장 빠른 공도 스스로 판단해 쳐서 넘겨요.'][lv-1];
  if(s.id==='tennis')return [
   '큰 단추 하나로 쳐요. 공이 표시에 멈추면 쳐요!',
   '동그란 표시에 공이 올 때 쳐요.',
@@ -262,7 +268,7 @@ function begin(sh,s,li,total,ath){
  O.kit(ctx);ctx.clear=function(){O.clearPrompt();sh.board.innerHTML='';sh.board.className='oks-board in-scene'};ctx.newStep=function(){sh.mood('idle')};
  st.t0=Date.now();st.glow=0;st.hand=0;ctx.clear();
  var scene=window.OKS_SCENE?OKS_SCENE.mount(sh,sceneLesson(s),total):null;
- var BALLG=s.id==='baseball'?window.OKS_BALL:s.id==='basketball'?window.OKS_HOOP:s.id==='rugby'?window.OKS_TAG:s.id==='tennis'?window.OKS_RALLY:null;
+ var BALLG=s.id==='baseball'?window.OKS_BALL:s.id==='basketball'?window.OKS_HOOP:s.id==='rugby'?window.OKS_TAG:s.id==='tennis'?window.OKS_RALLY:s.id==='tabletennis'?window.OKS_PING:null;
  if(BALLG){
   var bgm=BALLG.mount({sh:sh,school:school,lesson:lessonNo,level:level,stats:st,ctx:ctx,scene:scene,data:lessonData(s),total:total});
   return bgm.begin().then(function(r){
