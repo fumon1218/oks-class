@@ -38,10 +38,24 @@
     var sky = $('.tn-sky'), girl = $('.tn-girl'), ring = $('.tn-ring'), boy = $('.tn-boy'), ball = $('.tn-ball'), fx = $('.tn-fx'),
       nowEl = $('.tn-now'), scoreEl = $('.tn-score b'), banner = $('.tn-banner');
     sky.style.backgroundImage = 'url(' + A + 'bg_main.webp)'; ball.src = A + 'ball.webp';
-    function sp(el, n, far) { if (el._n !== n) { el._n = n; el.src = A + n + '.webp'; el.style.height = (HT[n] * U * (far ? GFAR : 1) * 100) + '%'; } }
+    var farMax = 1e9;                                     /* 건너편 친구가 네트 뒤에서 화면 밖으로 잘리지 않을 최대 높이(px) */
+    function hOf(n, far) { var pct = HT[n] * U * (far ? GFAR : 1) * 100; return far && farMax < 1e9 ? 'min(' + pct + '%,' + farMax + 'px)' : pct + '%'; }
+    function sp(el, n, far) { if (el._n !== n) { el._n = n; el.src = A + n + '.webp'; el.style.height = hOf(n, far); } }
+    /* 건너편 친구는 네트 '뒤'에 서야 해요: 배경의 네트 위치(그림 안 40%~52%)를 화면 크기에 맞춰 계산하고,
+       네트 띠만 앞에 한 번 더 덮어 친구의 아랫부분이 네트에 가려지게 해요. */
+    var netFG = E('div', 'tn-netfg'); stage.insertBefore(netFG, ring);
+    function layoutNet() {
+      var D = d(), W = D.W, H = D.H, sc = Math.max(W / 1672, H / 941), Hi = 941 * sc, offY = (H - Hi) * .85;
+      var top = offY + .395 * Hi, bot = offY + .518 * Hi, feet = offY + .50 * Hi;
+      netFG.style.backgroundImage = sky.style.backgroundImage;
+      netFG.style.clipPath = 'inset(' + Math.max(0, top).toFixed(1) + 'px 0 ' + Math.max(0, H - bot).toFixed(1) + 'px 0)';
+      girl.style.bottom = (H - feet).toFixed(1) + 'px';
+      farMax = Math.max(60, feet - 10);
+      if (girl._n) girl.style.height = hOf(girl._n, true);
+    }
     function d() { return { W: stage.clientWidth || 800, H: stage.clientHeight || 380 }; }
     boy.style.left = (BX * 100) + '%'; girl.style.left = (FX * 100) + '%';
-    sp(boy, 'boy_ready'); sp(girl, 'girl_ready', true);
+    sp(boy, 'boy_ready'); sp(girl, 'girl_ready', true); layoutNet(); addEventListener('resize', layoutNet);
 
     var onMain = null, mainBtn = null, timers = [], raf = 0, last = 0;
     var S = 'idle', u = 0, dur = 2, zw = .1, assisted = assisted0, P = null, paused = false;

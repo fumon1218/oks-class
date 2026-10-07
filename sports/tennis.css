@@ -5,6 +5,7 @@
 .tn-stage img{position:absolute;display:block;pointer-events:none;user-select:none;width:auto}
 .tn-stage img[hidden]{display:none}
 .tn-boy{bottom:6%;transform:translateX(-50%);z-index:4;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
+.tn-netfg{position:absolute;inset:0;background:center 85%/cover no-repeat;z-index:3;pointer-events:none}
 .tn-girl{bottom:50%;transform:translateX(-50%);z-index:2;filter:drop-shadow(0 3px 3px rgba(0,0,0,.2))}
 .tn-girl.flip{transform:translateX(-50%) scaleX(-1)}
 .tn-ring{position:absolute;width:74px;height:74px;margin:-37px 0 0 -37px;border-radius:50%;border:5px dashed #fff;box-shadow:0 0 0 3px rgba(40,140,70,.7);background:rgba(61,220,111,.25);z-index:3;pointer-events:none}
