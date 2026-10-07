@@ -19,6 +19,7 @@
     sea:     { name: '바닷가', bg: 'art/scenes/pond.jpg', guide: 'penguin', piece: '🐠', finale: '🐳', done: '바다 친구들이 돌아왔어요!', keys: ['바다', '바닷가', '물놀이', '호수', '보호 본부'] },
     school:  { name: '학교', bg: 'icons/bg-artroom.jpg', guide: 'koala', piece: '⭐', finale: '🏅', done: '칭찬 스티커판 완성!', keys: ['학교', '교실', '진로', '면접', '방송국', '토론'] },
     sky:     { name: '하늘', bg: 'art/scenes/snow.jpg', guide: 'parrot', piece: '☁️', finale: '🌈', done: '맑은 하늘에 무지개가 떴어요!', keys: ['하늘', '날씨', '구름', '기후', '관측'] },
+    arena:   { name: '경기장', bg: 'sports/assets/athletics/athletics_bg_main.webp', guide: 'dog', piece: '🏅', finale: '🏆', done: '멋진 경기였어요!', keys: ['경기장'] },
     village: { name: '마을', bg: 'icons/world-summer.jpg', guide: 'dog', piece: '🏠', finale: '🎆', done: '마을에 불이 반짝반짝 켜졌어요!', keys: ['마을', '광장', '타운', '지도', '안내소', '서비스', '놀이터', '섬', '거리', '인사'] },
     garden:  { name: '정원', bg: 'core/ui/greenhouse.webp', guide: 'rabbit', piece: '🌷', finale: '🌻', done: '정원에 꽃이 가득 피었어요!', keys: ['농장', '온실', '정원'] },
     museum:  { name: '박물관', bg: 'art/jj/scenes/ruins.webp', guide: 'sloth', piece: '🏺', finale: '👑', done: '보물을 모두 찾았어요!', keys: ['박물관', '역사', '유적', '이야기관', '동화'] },
@@ -27,6 +28,7 @@
   var ORDER = ['museum', 'school', 'garden', 'sea', 'sky', 'forest', 'cafe', 'post', 'station', 'lab', 'hall', 'mart', 'stage', 'gallery', 'village'];
   var SUBJ = { korean: 'post', math: 'mart', social: 'village', science: 'lab', english: 'cafe', art: 'gallery', music: 'stage' };
   function pick(lesson) {
+    if (lesson.sceneKey && T[lesson.sceneKey]) return lesson.sceneKey;
     var s = lesson.space || '';
     var best = null;
     ORDER.forEach(function (k) { T[k].keys.forEach(function (w) { if (!best && s.indexOf(w) >= 0) best = k; }); });
@@ -35,7 +37,7 @@
     return best || SUBJ[lesson.subject] || 'village';
   }
   /* 안내자: 교과 별의 별지기 (그림이 없으면 예전 동물) */
-  var GUIDE = { korean: 'ok', english: 'ok', music: 'sea', art: 'sea', math: 'love', science: 'love', social: 'dream' };
+  var GUIDE = { physical: 'ok', korean: 'ok', english: 'ok', music: 'sea', art: 'sea', math: 'love', science: 'love', social: 'dream' };
   var ART = {}; ((window.OKS_ART && window.OKS_ART.ready) || []).forEach(function (p) { ART[p] = 1; });
   function guideSrc(lesson, t, pose) {
     var g = GUIDE[lesson.subject], p = g && 'art/char/' + g + '_' + pose + '.webp';
@@ -47,7 +49,7 @@
   /* 장면 띠 달기 */
   function mount(sh, lesson, rounds) {
     var k = pick(lesson), t = T[k];
-    var bg = src(k) || t.bg, pieceImg = src(k, 'piece');
+    var bg = lesson.sceneBg || src(k) || t.bg, pieceImg = src(k, 'piece');
     var strip = E('div', 'scene-strip');
     strip.style.backgroundImage = 'url(' + O.ROOT + bg + ')';
     strip.innerHTML = '<img class="sc-guide" src="' + O.ROOT + guideSrc(lesson, t, 'wave') + '" alt=""><div class="sc-title">〈' + O.esc(lesson.space) + '〉</div>' +

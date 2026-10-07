@@ -163,64 +163,110 @@ function lessonRow(s,sk,no){
 }
 
 /* ---------- 우리 별 마을 차시 화면과 같은 공통 활동 틀 ---------- */
+function sceneLesson(s){
+ var bg=s.id==='athletics'?'sports/assets/athletics/athletics_bg_main.webp':'sports/'+(s.scene||s.image);
+ return {subject:'physical',space:s.name+' 경기장',sceneKey:'arena',sceneBg:bg};
+}
+function sessionsKey(){return 'oks_athletics_sessions_v2'}
+function exportRecords(){
+ var rows=O.jget(sessionsKey(),[]),blob=new Blob([OKS_ATHLETICS.csv(rows)],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download='씽씽별_육상_수업기록.csv';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},500);
+}
 function activity(){
  var s=byId(sid);if(!s){summerHub();return}
- var li=info(s,school,lessonNo),sc=schoolInfo();
- var sh=top(s.name+' '+lessonNo+'차시 · '+li[0],sc.name+' · 체육 · 놀이','?festival=summer&sport='+s.id+'&school='+school,s.name+' 목차',true,s.id==='athletics'?false:undefined);
- if(s.id==='athletics') document.body.classList.add('athletics-game');
+ var li=info(s,school,lessonNo),sc=schoolInfo(),ath=s.id==='athletics'&&window.OKS_RUN&&window.OKS_ATHLETICS;
+ var sh=top(s.name+' '+lessonNo+'차시 · '+li[0],'〈'+s.name+' 경기장〉 '+li[1],'?festival=summer&sport='+s.id+'&school='+school,s.name+' 목차',true,true);
  document.body.classList.add('oks-play','sports-play');
- if(s.id==='athletics'&&window.OKS_ATHLETICS){OKS_ATHLETICS.mount({sh:sh,school:school,lesson:lessonNo,level:level,save:function(stars,mistakes){save('athletics-'+school+'-'+lessonNo,stars,mistakes)}});return;}
- sh.setLevel(level);sh.setRounds(level===1?3:5,0);
+ document.title=li[0]+' · 옥쌤의 즐거운 교실';
+ if(O.eco){var ehud=O.eco.hud(sh.menu);sh.menu.insertBefore(ehud,sh.levelBtn);}
+ sh.levelBtn.onclick=function(){
+  var ov=E('div','oks-overlay'),box=E('div','oks-finish oks-levelpick');
+  box.innerHTML='<h2>수준 고르기</h2><p>'+O.esc(li[0])+'</p><div class="btns"></div><div class="note">수준을 바꾸면 처음부터 다시 시작해요.</div>';
+  O.LEVELS.forEach(function(L){
+   var b=E('button','oks-lv'+(L.n===level?' on':''),'<b>'+L.n+'</b><span><strong>'+L.name+'</strong><small>'+O.esc(levelDesc(s,li,L.n))+'</small></span>');
+   b.type='button';b.onclick=function(){location.href='?festival=summer&sport='+s.id+'&school='+school+'&lesson='+lessonNo+'&level='+L.n+'&play=1'};
+   box.querySelector('.btns').appendChild(b);
+  });
+  var close=E('button','oks-btn blue','닫기');close.type='button';close.onclick=function(){ov.remove()};box.querySelector('.btns').appendChild(close);
+  ov.appendChild(box);document.body.appendChild(ov);
+ };
+ var total=ath?OKS_ATHLETICS.course(school,lessonNo).steps.length:(level===1?3:5);
+ sh.setLevel(level);sh.setRounds(total,0);
  sh.ask(li[0]+'! 시작해 볼까요?',{silent:true});
 
- var start=E('div','oks-start sports-start');
- var preview=s.id==='athletics'?'assets/athletics/athletics_bg_main.webp':(s.scene||s.image);
- start.innerHTML='<div class="oks-start-lv">'+LEVELS[level-1].name+'</div><p class="gdesc">'+levelDesc(s,li)+'</p><p>'+li[1]+'</p><div class="sports-start-preview'+(s.id==='athletics'?' athletics-preview':'')+'"><img class="preview-bg" src="'+preview+'" alt="">'+(s.id==='athletics'?'<img class="preview-runner" src="assets/athletics/runner_idle.webp" alt="">':'')+'</div>';
+ var start=E('div','oks-start');
+ start.innerHTML='<div class="oks-start-lv">'+LEVELS[level-1].name+'</div><p class="gdesc">'+levelDesc(s,li,level)+'</p><p>'+O.esc(li[1])+'</p>';
  var go=E('button','oks-btn',O.iconHtml('icon_play.png','시작하기'));go.type='button';start.appendChild(go);
  var ws=E('a','oks-btn blue oks-extra','학습지 인쇄');ws.href='../worksheet/?id=sp-'+s.id+'-'+school+'-'+lessonNo+'&level='+level;start.appendChild(ws);
+ if(ath){var dt=E('details','rn-teacher','<summary>선생님 · 수업 기록</summary><p>화면 활동 기록(첫 반응·시도·도움)을 이 기기에 모아 CSV로 내려받아요. 실제 운동 기능은 교사가 관찰해 주세요.</p>');
+  var ex=E('button','oks-btn blue','육상 기록 CSV');ex.type='button';ex.onclick=exportRecords;dt.appendChild(ex);start.appendChild(dt);}
  sh.board.appendChild(start);
  O.target({get:function(){return go}},Math.min(level,2));
- go.onclick=function(){O.unlock();O.clearPrompt();runGame(sh,s,li)};
+ go.onclick=function(){O.unlock();O.clearPrompt();begin(sh,s,li,total,ath)};
 }
-function levelDesc(s,li){
- var d=[
+function levelDesc(s,li,lv){
+ lv=lv||level;
+ if(s.id==='athletics')return [
+  '큰 단추 하나로 달려요. 허들 앞에서는 기다려 줘요.',
+  '허들 앞에서 점프! 문제 문에서 알맞은 그림을 골라요.',
+  '허들을 타이밍에 맞춰 넘고 문제를 풀며 결승선까지!',
+  '더 빠른 트랙! 허들도 문제도 스스로 해결해요.',
+  '가장 빠른 트랙에서 모든 도전을 완주해요.'][lv-1];
+ return [
   '큰 그림과 움직임을 눌러 보며 '+s.name+'을 느껴 봐요.',
   '두 가지 보기에서 알맞은 것을 골라 봐요.',
   '직접 옮기고 순서를 맞추며 움직임을 익혀요.',
   '힌트 없이 스스로 판단하며 미니게임에 도전해요.',
-  '새로운 상황에서 나에게 맞는 방법을 선택하고 적용해요.'
- ];return d[level-1];
+  '새로운 상황에서 나에게 맞는 방법을 선택하고 적용해요.'][lv-1];
 }
-function runGame(sh,s,li){
+function begin(sh,s,li,total,ath){
  var st=O.newStats(),ctx={sh:sh,board:sh.board,level:level,stats:st,cfg:{},lesson:{topic:li[0]},id:'sports-'+s.id};
- O.kit(ctx);ctx.clear=function(){O.clearPrompt();sh.board.innerHTML='';sh.board.className='oks-board sports-game-board'};ctx.newStep=function(){sh.mood('idle')};
- st.t0=Date.now();var round=0,total=level===1?3:5,wrong0=0,LD=lessonData(s)||OKS_SPORT_LESSONS[s.id].elem[0],PLAN=makePlan(s,LD,ctx);
+ O.kit(ctx);ctx.clear=function(){O.clearPrompt();sh.board.innerHTML='';sh.board.className='oks-board in-scene'};ctx.newStep=function(){sh.mood('idle')};
+ st.t0=Date.now();st.glow=0;st.hand=0;ctx.clear();
+ var scene=window.OKS_SCENE?OKS_SCENE.mount(sh,sceneLesson(s),total):null;
+ if(ath){
+  var game=OKS_RUN.mount({sh:sh,school:school,lesson:lessonNo,level:level,stats:st,ctx:ctx,scene:scene});
+  return game.begin().then(function(r){
+   var fin=scene?scene.finale():Promise.resolve();
+   return fin.then(function(){endSport(sh,s,li,st,scene,total,r)});
+  }).catch(function(e){console.error(e);O.toast('앗, 문제가 생겼어요. 다시 시작해 주세요.')});
+ }
+ runGame(sh,s,li,st,ctx,scene,total);
+}
+function endSport(sh,s,li,st,scene,total,r){
+ sh.setRounds(total,total);
+ var mistakes=r?r.mistakes:(st.mistakes||0),stars=mistakes<=1?3:mistakes<=3?2:1,sc=scene?scene.stats():{maxCombo:0},sec=Math.round((Date.now()-st.t0)/1000);
+ save(s.id+'-'+school+'-'+lessonNo,stars,mistakes);
+ var entry={at:new Date().toISOString(),lesson:'sports-'+s.id+'-'+school+'-'+lessonNo,subject:'physical',school:school,topic:li[0],level:level,mistakes:mistakes,glow:st.glow,hand:st.hand,asked:st.asked,sec:sec,rounds:total};
+ if(sc.maxCombo>=2)entry.combo=sc.maxCombo;
+ var text=s.name+' · '+li[0]+' · '+LEVELS[level-1].name+(sc.maxCombo>=2?' · 최고 '+sc.maxCombo+'콤보':'');
+ if(r)text+=' · ⭐ '+r.coins+'개 · '+['🥇 금메달','🥈 은메달','🥉 동메달'][r.place-1]+' · '+r.sec+'초'+(r.newBest?(r.prev?' (내 최고 기록!)':''):(r.prev?' (내 최고 '+r.prev+'초)':''));
+ var base='?festival=summer&sport='+s.id+'&school='+school+'&lesson='+lessonNo;
+ O.finish({stats:st,entry:entry,title:scene?scene.tpl.done:'멋진 스포츠 탐험!',text:text,stars:r?stars:undefined,extraCoins:(sc.maxCombo>=2?sc.maxCombo:0)+(r?Math.min(5,Math.floor(r.coins/4)):0),
+  buttons:[
+   {label:'한 번 더',onClick:function(){location.reload()}},
+   level<5?{label:'다음 수준 ('+(level+1)+')',color:'orange',href:base+'&level='+(level+1)+'&play=1'}:null,
+   {label:'📄 학습지 인쇄',color:'blue',href:'../worksheet/?id=sp-'+s.id+'-'+school+'-'+lessonNo+'&level='+level},
+   {label:s.name+' 목차',color:'blue',href:base.replace(/&lesson=\d+/,'')}
+  ].filter(Boolean)});
+ if(r&&window.OKS_ATHLETICS){
+  var all=O.jget(sessionsKey(),[]);all.push({at:entry.at,school:school,topic:li[0],level:level,input:'run-game',engine:'athletics-run-v1',mistakes:mistakes,steps:r.metrics,coins:r.coins,seconds:r.sec});O.jset(sessionsKey(),all.slice(-200));
+  var box=document.querySelector('.oks-overlay:last-child .oks-finish'),c=OKS_ATHLETICS.course(school,lessonNo);
+  if(box){var note=E('div','al-transfer','<b>교실에서 이어 해요</b><p>'+O.esc(c.transfer)+'</p><small>별은 참여 보상이에요. 실제 운동 기능과 생활 적용은 교사가 관찰해요.</small>');
+   var anchor=box.querySelector('.btns')||box.lastChild;box.insertBefore(note,anchor);}
+ }
+}
+function runGame(sh,s,li,st,ctx,scene,total){
+ var round=0,LD=lessonData(s)||OKS_SPORT_LESSONS[s.id].elem[0],PLAN=makePlan(s,LD,ctx);
  if(q.get('dev')==='game'&&level>=4){PLAN=[PLAN[level===4?3:2]];total=1}
  function next(){
-  if(round>=total)return finish();
-  sh.setRounds(total,round);ctx.clear();
-  var strip=sceneStrip(s,round,total);sh.board.appendChild(strip);
+  if(round>=total)return (scene?scene.finale():Promise.resolve()).then(function(){endSport(sh,s,li,st,scene,total)});
+  sh.setRounds(total,round);ctx.clear();ctx.newStep();var m0=st.mistakes;
+  if(scene){scene.now(round);if(round===total-1)scene.bonus()}
   var playArea=E('div','sports-play-area');sh.board.appendChild(playArea);
-  return Promise.resolve(PLAN[round](playArea)).then(function(){round++;setTimeout(next,550)});
- }
- function finish(){
-  sh.setRounds(total,total);var mistakes=st.mistakes||0,stars=mistakes<=1?3:mistakes<=3?2:1;
-  save(s.id+'-'+school+'-'+lessonNo,stars,mistakes);
-  O.finish({stats:st,entry:{at:new Date().toISOString(),lesson:'sports-'+s.id+'-'+school+'-'+lessonNo,subject:'physical',school:school,topic:li[0],level:level,mistakes:mistakes,sec:Math.round((Date.now()-st.t0)/1000)},title:'멋진 스포츠 탐험!',text:s.name+' · '+li[0]+' · '+LEVELS[level-1].name,
-   buttons:[
-    {label:'한 번 더',onClick:function(){location.reload()}},
-    level<5?{label:'다음 수준 ('+(level+1)+')',color:'orange',href:'?festival=summer&sport='+s.id+'&school='+school+'&lesson='+lessonNo+'&level='+(level+1)+'&play=1'}:null,
-    {label:'학습지 인쇄',color:'blue',href:'../worksheet/?id=sp-'+s.id+'-'+school+'-'+lessonNo+'&level='+level},
-    {label:s.name+' 목차',color:'blue',href:'?festival=summer&sport='+s.id+'&school='+school}
-   ].filter(Boolean)});
+  return Promise.resolve(PLAN[round](playArea)).then(function(){O.clearPrompt();if(scene)scene.advance(round,st.mistakes===m0);round++;return O.wait(650).then(next)}).catch(function(e){console.error(e);O.toast('앗, 문제가 생겼어요. 다시 시작해 주세요.')});
  }
  next();
-}
-function sceneStrip(s,i,n){
- var d=E('div','sports-scene-strip');
- var bg=s.id==='athletics'?'assets/athletics/athletics_bg_main.webp':(s.scene||s.image);
- d.innerHTML='<img src="'+bg+'" alt=""><div class="sports-scene-title">'+s.emo+' '+s.name+' 탐험</div><div class="sports-scene-dots">'+Array.from({length:n},function(_,k){return '<i class="'+(k<i?'done':k===i?'now':'')+'">'+(k<i?'★':k+1)+'</i>'}).join('')+'</div>';
- return d;
 }
 /* ---------- 라운드 만들기: 차시 자료(lessons.js)에서 수준에 맞게 ---------- */
 function lessonData(s){

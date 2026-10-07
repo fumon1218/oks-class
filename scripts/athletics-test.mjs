@@ -25,7 +25,7 @@ assert.equal(step.attempts,2); assert.equal(step.errors,1);
 const output=A.csv([{at:'2026-10-04',school:'elem',topic:'내 "기록"',level:2,input:'one-button',steps:[step]}]);
 assert(output.includes('내 ""기록""')); assert(output.includes('미관찰')); assert(output.startsWith('\uFEFF'));
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
-for(const f of ['sports/athletics.js','sports/athletics.css'])assert(sw.includes("'./"+f+"'"),'오프라인 등록 누락');
+for(const f of ['sports/athletics.js','sports/athletics.css','sports/athletics-run.js','sports/athletics-run.css'])assert(sw.includes("'./"+f+"'"),'오프라인 등록 누락');
 console.log('PASS 육상 9차시 목표·전이, 첫 반응 기록, CSV, 오프라인 연결');
 vm.runInNewContext(fs.readFileSync(path.join(root,'sports/athletics-race.js'),'utf8'),{window});
 const R=window.OKS_ATHLETICS_RACE;
