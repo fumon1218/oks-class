@@ -2,9 +2,10 @@
    id 형식: sp-<종목>-<학교급>-<차시>   예) sp-swimming-elem-1 */
 window.OKS_WS_SPORTS = (function () {
   'use strict';
-  var SP = [['athletics', '육상', '🏃'], ['swimming', '수영', '🏊'], ['archery', '양궁', '🏹'], ['gymnastics', '체조', '🤸'], ['taekwondo', '태권도', '🥋'], ['soccer', '축구', '⚽'], ['baseball', '야구', '⚾'], ['basketball', '농구', '🏀'], ['rugby', '럭비', '🏉']];
+  var SP = [['athletics', '육상', '🏃'], ['swimming', '수영', '🏊'], ['archery', '양궁', '🏹'], ['gymnastics', '체조', '🤸'], ['taekwondo', '태권도', '🥋'], ['soccer', '축구', '⚽'], ['baseball', '야구', '⚾'], ['basketball', '농구', '🏀'], ['rugby', '럭비', '🏉'], ['tennis', '테니스', '🎾']];
   var SC = [['elem', '초등'], ['middle', '중등'], ['high', '고등']];
   var GAME = {
+    rally: '말랑한 공이나 풍선을 친구가 살살 던져 주면 라켓(또는 손바닥)으로 쳐서 돌려 줘요.',
     tag: '말랑한 공이나 신문지 공을 안고 달리다가, 옆(뒤)에 있는 친구에게 건네 줘요. 앞으로는 던지지 않아요.',
     hoop: '신문지 공을 두 손으로 위로 올려 바구니에 던져 넣어 봐요. 콘으로 자리를 표시해요.',
     bat: '신문지 공을 가볍게 던져 주면 풍선이나 종이 방망이로 쳐 봐요. 친구와 거리를 두어요.',

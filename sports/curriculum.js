@@ -30,7 +30,8 @@ window.OKS_SPORTS_DATA = {
     {id:'soccer',name:'축구',emo:'⚽',color:'#f3c24b',title:'공을 목표로 보내요',goal:'공과 골대의 관계를 알고 발로 공을 보내는 기초 움직임을 경험해요.',concepts:['공','골대','차기','패스','협동'],image:'assets/sports_building_soccer.webp',scene:'assets/soccer.webp'},
     {id:'baseball',name:'야구',emo:'⚾',color:'#3b82f6',title:'공을 보고 치고 달려요',goal:'공을 끝까지 보고 방망이를 휘두른 뒤 베이스로 달리는 야구의 기본을 경험해요.',concepts:['공','방망이','스트라이크','베이스','세이프'],image:'assets/baseball/card_baseball.webp',scene:'assets/baseball/scene.webp'},
     {id:'basketball',name:'농구',emo:'🏀',color:'#ff8b45',title:'공을 주고받고 골대에 던져요',goal:'공을 주고받고 알맞은 힘으로 골대를 향해 던지며 함께 즐기는 농구의 기본을 경험해요.',concepts:['공','패스','드리블','슛','골대'],image:'assets/ballcenter/card_basketball.webp',scene:'assets/basketball/bg_gym.webp'},
-    {id:'rugby',name:'럭비',emo:'🏉',color:'#2fa84f',title:'공을 안고 달리고 패스해요',goal:'공을 안고 달리다가 옆 친구에게 패스하고 끝 선에 공을 내려놓는 태그 럭비의 기본을 경험해요.',concepts:['공','깃발','패스','달리기','트라이'],image:'assets/ballcenter/card_rugby.webp',scene:'assets/rugby/bg_side.webp'}
+    {id:'rugby',name:'럭비',emo:'🏉',color:'#2fa84f',title:'공을 안고 달리고 패스해요',goal:'공을 안고 달리다가 옆 친구에게 패스하고 끝 선에 공을 내려놓는 태그 럭비의 기본을 경험해요.',concepts:['공','깃발','패스','달리기','트라이'],image:'assets/ballcenter/card_rugby.webp',scene:'assets/rugby/bg_side.webp'},
+    {id:'tennis',name:'테니스',emo:'🎾',color:'#3b82f6',title:'공을 보고 라켓으로 쳐요',goal:'공을 끝까지 보고 라켓을 휘둘러 네트 너머로 보내며 친구와 주고받는 테니스의 기본을 경험해요.',concepts:['라켓','공','네트','서브','랠리'],image:'assets/ballcenter/card_tennis.webp',scene:'assets/tennis/bg_scene.webp'}
   ],
   summerBuildings: [
     {id:'athletics',type:'sport',name:'육상 경기장',sub:'달리기 · 허들 · 이어달리기',image:'assets/sports_building_athletics.webp',color:'#ff8b45'},
