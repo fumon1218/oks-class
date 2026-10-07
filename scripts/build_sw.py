@@ -13,7 +13,7 @@ PAGES = [
     './learn/', './learn/index.html', './learn/learn.css', './learn/learn.js',
     './play/', './play/index.html', './play/play.css', './play/play.js', './play/content.js', './play/content2.js', './play/content-extra.js', './play/english-content.js', './play/english.js', './play/custom.js', './curriculum/editor.html', './play/describe.js', './curriculum/plan.html',
     './play/engines.js', './play/engines2.js', './play/farm.js',
-    './core/oks-core.css', './core/oks-core.js', './core/oks-kit.js', './core/oks-eco.js', './curriculum/lessons.js', 
+    './core/oks-core.css', './core/oks-core.js', './core/oks-kit.js', './core/oks-eco.js', './curriculum/lessons.js', './curriculum/art-standards.js', 
     './shop/', './shop/index.html', './shop/shop.css', './shop/shop.js', './shop/shops.js', './shop/stations.js',
     './town/', './town/index.html', './town/town.css', './town/town.js', './town/cc.webp', './town/wj.webp',
     './games/farm/index.html', './games/birds/index.html', './games/shapes/index.html', './games/fishing/index.html', './games/balloons/index.html', './games/tycoon/index.html', './games/tycoon/town.js', './games/tycoon/town2.js', './games/tycoon/delivery.js', './worksheet/index.html', './worksheet/generic.js', './worksheet/english.js', './minigames/farm-v8/index.html',

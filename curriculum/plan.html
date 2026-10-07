@@ -46,6 +46,7 @@ td.orig{color:var(--soft);font-size:12.5px}
 </header>
 <main id="main"></main>
 <script src="lessons.js"></script>
+<script src="art-standards.js"></script>
 <script src="../play/content.js"></script>
 <script src="../play/content2.js"></script>
 <script src="../play/content-extra.js"></script>
@@ -61,6 +62,12 @@ td.orig{color:var(--soft);font-size:12.5px}
   var q = new URLSearchParams(location.search);
   var subj = q.get('subject') || 'all', school = q.get('school') || 'all', showOrig = q.get('orig') !== '0';
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function stdHtml(l){
+    var m = window.OKS_ART_STD && window.OKS_ART_STD[l.id], T = window.OKS_ART_STD_TEXT || {};
+    if(!m) return '';
+    return '<div class="goal">📐 <b>성취기준</b> ' + m.std.map(function(k){ return '<span class="tag" title="' + esc(T[k] || '') + '">' + esc(k) + '</span>' + esc(T[k] || ''); }).join(' · ') + '</div>' +
+      '<div class="goal">✅ <b>평가 준거</b> ' + esc(m.crit) + ' <small style="color:var(--soft)">(수업 설계안 제안 · 고시 아님)</small></div>';
+  }
   function strip(t){ return String(t).replace(/^〈[^〉]*〉\s*/, ''); }
   document.getElementById('sub').textContent = D.title + ' · ' + D.version + ' · ' + D.note;
   var bar = document.getElementById('bar');
@@ -92,7 +99,7 @@ td.orig{color:var(--soft);font-size:12.5px}
       if(l.school !== lastSch || l.unit !== lastU){ html += '<h3>' + esc(l.schoolName) + ' · ' + l.unitNo + '단원 ' + esc(l.unit) + ' <small>(' + esc(l.track) + ')</small></h3>'; lastSch = l.school; lastU = l.unit; }
       var shops = shopsOf(l.id);
       html += '<section class="lesson" style="--c:' + col + '"><div class="lh"><span class="no">' + esc(l.schoolName + ' ' + l.no) + '</span><b>' + esc(l.topic) + '</b><span class="sp">〈' + esc(l.space) + '〉</span><span class="eng">🎮 ' + esc(c ? engName(c, 3) : '준비 중') + '</span></div>' +
-        '<div class="goal">🎯 <b>학습 목표</b> ' + esc(l.goal) + '</div><table><tbody>';
+        '<div class="goal">🎯 <b>학습 목표</b> ' + esc(l.goal) + '</div>' + stdHtml(l) + '<table><tbody>';
       for(var i = 1; i <= 5; i++){
         html += '<tr><th>' + LV[i - 1] + '</th><td>' + esc(c ? desc(c, i) : '—') + '</td><td class="orig">' + esc(strip(l.levels[i - 1])) + '</td></tr>';
       }
