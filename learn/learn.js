@@ -101,22 +101,48 @@
     box.querySelector('.btns').appendChild(close); ov.appendChild(box); document.body.appendChild(ov);
   };
 
+  /* 학생 프로필 (이름 대신 별명·번호) */
+  function profBtnText() { document.getElementById('profName').textContent = O.profile.label(O.profile.active()); }
+  profBtnText();
+  document.getElementById('profBtn').onclick = function () {
+    var ov = E('div', 'oks-overlay'), box = E('div', 'oks-finish settings');
+    box.innerHTML = '<h2>학생 선택</h2><p>학생별로 기록과 수준이 따로 저장돼요. 이름 대신 <b>별명이나 번호</b>를 써 주세요. 이 기기 안에만 저장돼요.</p><div class="set-rows"></div><div class="prof-add"><input id="profIn" maxlength="12" placeholder="별명·번호 (예: 별1, 3번)" aria-label="새 학생 별명"><button type="button" class="oks-btn orange" id="profAdd">추가</button></div><div class="btns"></div>';
+    var rows = box.querySelector('.set-rows');
+    function draw() {
+      rows.innerHTML = '';
+      var act = O.profile.active();
+      var items = [{ id: '', label: '공용 (학생 구분 없이)' }].concat(O.profile.list());
+      items.forEach(function (p) {
+        var r = E('div', 'prof-row'); var b = E('button', 'tog' + (p.id === act ? ' on' : ''), O.esc(p.label) + '<span>' + (p.id === act ? '선택됨' : '선택') + '</span>'); b.type = 'button';
+        b.onclick = function () { O.profile.setActive(p.id); profBtnText(); draw(); render(); };
+        r.appendChild(b);
+        if (p.id) { var d = E('button', 'prof-del', '🗑'); d.type = 'button'; d.setAttribute('aria-label', p.label + ' 삭제'); d.onclick = function () { if (confirm('「' + p.label + '」의 기록과 수준을 모두 지울까요?')) { O.profile.remove(p.id); profBtnText(); draw(); render(); } }; r.appendChild(d); }
+        rows.appendChild(r);
+      });
+    }
+    draw();
+    box.querySelector('#profAdd').onclick = function () { var i = box.querySelector('#profIn'); if (O.profile.add(i.value)) { i.value = ''; profBtnText(); draw(); render(); } };
+    var close = E('button', 'oks-btn blue', '닫기'); close.type = 'button'; close.onclick = function () { ov.remove(); };
+    box.querySelector('.btns').appendChild(close); ov.appendChild(box); document.body.appendChild(ov);
+  };
+
   /* 기록 */
   document.getElementById('recBtn').onclick = function () {
-    var log = O.jget('oks_learning_log_v1', []).slice().reverse();
+    var actP = O.profile.active();
+    var log = O.jget('oks_learning_log_v1', []).filter(function (r) { return (r.profile || '') === actP; }).slice().reverse();
     var byId = {}; D.lessons.forEach(function (l) { byId[l.id] = l; });
     var ov = E('div', 'oks-overlay'), box = E('div', 'oks-finish records');
     var rowsHtml = log.slice(0, 60).map(function (r) {
       var l = byId[r.lesson] || {}; var d = new Date(r.at);
       return '<tr><td>' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0') + '</td><td>' + O.esc((l.subjectName || '') + ' ' + (l.schoolName || '') + ' ' + (l.no || '') + ' ' + (l.topic || r.lesson)) + '</td><td>' + r.level + '</td><td>' + '★'.repeat(r.stars || 0) + '</td><td>' + O.esc(r.independence || '') + (r.teacherSet ? '✎' : '') + '</td><td>' + r.mistakes + '</td><td>' + (r.glow + r.hand) + '/' + r.asked + '</td><td>' + r.sec + '초</td></tr>';
     }).join('');
-    box.innerHTML = '<h2>배움 기록</h2><p>이 기기에 저장된 최근 기록이에요. 도움 정도는 끝 화면에서 선생님이 고칠 수 있어요(✎).</p>' +
+    box.innerHTML = '<h2>배움 기록 · ' + O.esc(O.profile.label(actP)) + '</h2><p>이 기기에 저장된 최근 기록이에요. 도움 정도는 끝 화면에서 선생님이 고칠 수 있어요(✎).</p>' +
       (log.length ? '<div class="tbl"><table><thead><tr><th>날짜</th><th>차시</th><th>수준</th><th>별</th><th>도움</th><th>틀림</th><th>힌트/요청</th><th>시간</th></tr></thead><tbody>' + rowsHtml + '</tbody></table></div>' : '<p>아직 기록이 없어요.</p>') +
       '<div class="btns"></div>';
     var csv = E('button', 'oks-btn orange', 'CSV로 저장'); csv.type = 'button';
     csv.onclick = function () {
-      var head = ['날짜', '활동ID', '교과', '학교급', '차시', '주제', '수준', '별', '도움정도', '틀림', '반짝임', '손가락', '도와줘', '초'];
-      var lines = [head.join(',')].concat(O.jget('oks_learning_log_v1', []).map(function (r) { var l = byId[r.lesson] || {}; return [r.at, r.lesson, l.subjectName, l.schoolName, l.no, l.topic, r.level, r.stars, r.independence, r.mistakes, r.glow, r.hand, r.asked, r.sec].map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','); }));
+      var head = ['학생', '날짜', '활동ID', '교과', '학교급', '차시', '주제', '수준', '별', '도움정도', '틀림', '반짝임', '손가락', '도와줘', '초'];
+      var lines = [head.join(',')].concat(O.jget('oks_learning_log_v1', []).filter(function (r) { return (r.profile || '') === actP; }).map(function (r) { var l = byId[r.lesson] || {}; return [O.profile.label(actP), r.at, r.lesson, l.subjectName, l.schoolName, l.no, l.topic, r.level, r.stars, r.independence, r.mistakes, r.glow, r.hand, r.asked, r.sec].map(function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }).join(','); }));
       var blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv' }); var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = '배움기록.csv'; a.click();
     };
     var close = E('button', 'oks-btn blue', '닫기'); close.type = 'button'; close.onclick = function () { ov.remove(); };

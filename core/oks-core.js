@@ -29,6 +29,32 @@
     return '<span class="oks-icon-label' + (label ? '' : ' only') + (cls ? ' ' + cls : '') + '"><img class="oks-ico" src="' + UI + file + '" alt="">' + (label ? '<span class="txt">' + esc(label) + '</span>' : '') + '</span>';
   }
 
+  /* ---------- 학생 프로필 (익명) ----------
+     이름 대신 별명·번호만 씁니다. 프로필을 고르지 않으면 예전처럼 '공용' 하나로 기록됩니다.
+     저장: localStorage 'oks_profiles_v1' {active, list:[{id,label}]} — 기록은 학생별로 나뉘고 이 기기 안에만 있습니다. */
+  var PROF_KEY = 'oks_profiles_v1';
+  function profData() { var d = jget(PROF_KEY, null); if (!d || !Array.isArray(d.list)) d = { active: '', list: [] }; return d; }
+  function activeProfile() { var d = profData(); return d.list.some(function (x) { return x.id === d.active; }) ? d.active : ''; }
+  function profLabel(id) { if (!id) return '공용'; var f = profData().list.filter(function (x) { return x.id === id; })[0]; return f ? f.label : '공용'; }
+  function profKey(base) { var a = activeProfile(); return a ? base + '__' + a : base; }
+  var profile = {
+    list: function () { return profData().list.slice(); },
+    active: activeProfile,
+    label: profLabel,
+    setActive: function (id) { var d = profData(); d.active = id || ''; jset(PROF_KEY, d); },
+    add: function (label) {
+      label = String(label || '').replace(/\s+/g, ' ').trim().slice(0, 12); if (!label) return '';
+      var d = profData(); var id = 'p' + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36);
+      d.list.push({ id: id, label: label }); if (d.list.length > 40) d.list = d.list.slice(-40); d.active = id; jset(PROF_KEY, d); return id;
+    },
+    rename: function (id, label) { label = String(label || '').replace(/\s+/g, ' ').trim().slice(0, 12); if (!label) return; var d = profData(); d.list.forEach(function (x) { if (x.id === id) x.label = label; }); jset(PROF_KEY, d); },
+    remove: function (id) {
+      var d = profData(); d.list = d.list.filter(function (x) { return x.id !== id; }); if (d.active === id) d.active = ''; jset(PROF_KEY, d);
+      try { localStorage.removeItem('oks_learning_progress_v1__' + id); localStorage.removeItem('oks_levels_v1__' + id); } catch (e) {}
+      var all = jget('oks_learning_log_v1', []).filter(function (r) { return r.profile !== id; }); jset('oks_learning_log_v1', all);
+    }
+  };
+
   /* ---------- 설정 ---------- */
   function settings() {
     var a = jget('oksaem-settings', {}), b = jget('oks_core_v1', {});
@@ -46,13 +72,18 @@
   }
   function levelFor(lessonId) {
     var q = parseInt(qs('level'), 10); if (q >= 1 && q <= 5) return q;
-    var s = settings(); var v = s.levels[lessonId]; if (v >= 1 && v <= 5) return v;
+    var s = settings(); var pa = activeProfile();
+    var v = pa ? jget('oks_levels_v1__' + pa, {})[lessonId] : s.levels[lessonId]; if (v >= 1 && v <= 5) return v;
     return s.defaultLevel;
   }
   /* 우주 지도 건물에서 들어왔으면 그 건물로 돌아가기 */
   function ret(def) { try { var r = sessionStorage.getItem('oks_return'); if (r) return ROOT + r; } catch (e) {} return def; }
   function fromSpace() { try { return !!sessionStorage.getItem('oks_return'); } catch (e) { return false; } }
-  function rememberLevel(lessonId, lv) { var b = jget('oks_core_v1', {}); b.levels = b.levels || {}; b.levels[lessonId] = lv; jset('oks_core_v1', b); }
+  function rememberLevel(lessonId, lv) {
+    var pa = activeProfile();
+    if (pa) { var m = jget('oks_levels_v1__' + pa, {}); m[lessonId] = lv; jset('oks_levels_v1__' + pa, m); return; }
+    var b = jget('oks_core_v1', {}); b.levels = b.levels || {}; b.levels[lessonId] = lv; jset('oks_core_v1', b);
+  }
   function applyBody() {
     var s = settings(); var b = document.body; if (!b) return;
     b.classList.toggle('calm', s.calm); b.classList.toggle('big-targets', s.big);
@@ -321,17 +352,19 @@
     return 1;
   }
   function log(entry) {
-    var all = jget('oks_learning_log_v1', []); all.push(entry); if (all.length > 800) all = all.slice(-800); jset('oks_learning_log_v1', all);
-    var pr = jget('oks_learning_progress_v1', {}); var p = pr[entry.lesson] || { best: {}, plays: 0 };
+    var pa = activeProfile(); if (pa) entry.profile = pa;
+    var all = jget('oks_learning_log_v1', []); all.push(entry); if (all.length > 2000) all = all.slice(-2000); jset('oks_learning_log_v1', all);
+    var pk = profKey('oks_learning_progress_v1');
+    var pr = jget(pk, {}); var p = pr[entry.lesson] || { best: {}, plays: 0 };
     p.plays++; p.last = entry.level; p.at = entry.at;
     p.best[entry.level] = Math.max(p.best[entry.level] || 0, entry.stars);
-    pr[entry.lesson] = p; jset('oks_learning_progress_v1', pr);
+    pr[entry.lesson] = p; jset(pk, pr);
     /* 기존 선생님 화면(reports.html)도 볼 수 있도록 예전 기록에도 한 줄 남김 */
     var old = jget('oks-activity-log', []);
     old.push({ at: entry.at, subject: entry.subject, method: entry.engine, level: entry.level, stars: entry.stars, mistakes: entry.mistakes, hints: entry.glow + entry.hand, sec: entry.sec, lesson: entry.lesson });
     if (old.length > 500) old = old.slice(-500); jset('oks-activity-log', old);
   }
-  function progress() { return jget('oks_learning_progress_v1', {}); }
+  function progress() { return jget(profKey('oks_learning_progress_v1'), {}); }
 
   /* ---------- 끝 화면 ---------- */
   function finish(o) {
@@ -383,7 +416,7 @@
     say: say, repeat: repeat, setReplay: setReplay, hush: hush, sfx: sfx, tone: tone, noise: noise, inst: inst, unlock: actx,
     target: target, clearPrompt: clearPrompt, help: help, showNow: showNow,
     shell: shell, toast: toast, praise: praise, mascot: mascot,
-    log: log, progress: progress, finish: finish, newStats: newStats, starsFor: starsFor,
+    profile: profile, log: log, progress: progress, finish: finish, newStats: newStats, starsFor: starsFor,
     _cur: function () { return curTarget; },
     get stats() { return stats; }
   };
