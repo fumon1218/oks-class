@@ -117,7 +117,7 @@ function utilityBuilding(id){
    var BALLS=[
     {id:'baseball',name:'야구',emo:'⚾',open:true,img:'assets/ballcenter/card_baseball.webp',ic:'assets/ballcenter/icon_baseball.webp',sub:'공을 보고 치고 달려요'},
     {id:'basketball',name:'농구',emo:'🏀',open:true,img:'assets/ballcenter/card_basketball.webp',ic:'assets/ballcenter/icon_basketball.webp',sub:'공을 던져 골대에 넣어요'},
-    {id:'rugby',name:'럭비',emo:'🏉',img:'assets/ballcenter/card_rugby.webp',ic:'assets/ballcenter/icon_rugby.webp',sub:'공을 들고 달리고 패스해요'},
+    {id:'rugby',name:'럭비',emo:'🏉',open:true,img:'assets/ballcenter/card_rugby.webp',ic:'assets/ballcenter/icon_rugby.webp',sub:'공을 들고 달리고 패스해요'},
     {id:'tennis',name:'테니스',emo:'🎾',img:'assets/ballcenter/card_tennis.webp',ic:'assets/ballcenter/icon_tennis.webp',sub:'공을 라켓으로 쳐요'},
     {id:'tabletennis',name:'탁구',emo:'🏓',img:'assets/ballcenter/card_tabletennis.webp',ic:'assets/ballcenter/icon_tabletennis.webp',sub:'작은 공을 주고받아요'}];
    var pr=progress(),gates=E('div','ball-gates');
@@ -178,7 +178,7 @@ function lessonRow(s,sk,no){
 
 /* ---------- 우리 별 마을 차시 화면과 같은 공통 활동 틀 ---------- */
 function sceneLesson(s){
- var bg=s.id==='athletics'?'sports/assets/athletics/athletics_bg_main.webp':s.id==='baseball'?'sports/assets/baseball/scene.webp':s.id==='basketball'?'sports/assets/basketball/bg_gym.webp':'sports/'+(s.scene||s.image);
+ var bg=s.id==='athletics'?'sports/assets/athletics/athletics_bg_main.webp':s.id==='baseball'?'sports/assets/baseball/scene.webp':s.id==='basketball'?'sports/assets/basketball/bg_gym.webp':s.id==='rugby'?'sports/assets/rugby/bg_front.webp':'sports/'+(s.scene||s.image);
  return {subject:'physical',space:s.name+' 경기장',sceneKey:'arena',sceneBg:bg};
 }
 function sessionsKey(){return 'oks_athletics_sessions_v2'}
@@ -220,6 +220,12 @@ function activity(){
 }
 function levelDesc(s,li,lv){
  lv=lv||level;
+ if(s.id==='rugby')return [
+  '큰 단추 하나로 패스해요. 친구가 준비되면 기다려 줘요.',
+  '초록 띠에서 옆 친구에게 패스해요.',
+  '상대가 다가오는 타이밍에 맞춰 패스해요.',
+  '더 좁은 띠! 빠르게 오는 상대를 보고 패스해요.',
+  '가장 빠른 상대에게도 스스로 판단해 패스하고 트라이해요.'][lv-1];
  if(s.id==='basketball')return [
   '큰 단추 하나로 던져요. 표시가 멈추면 눌러요!',
   '초록 칸에 표시가 올 때 던져요.',
@@ -250,7 +256,7 @@ function begin(sh,s,li,total,ath){
  O.kit(ctx);ctx.clear=function(){O.clearPrompt();sh.board.innerHTML='';sh.board.className='oks-board in-scene'};ctx.newStep=function(){sh.mood('idle')};
  st.t0=Date.now();st.glow=0;st.hand=0;ctx.clear();
  var scene=window.OKS_SCENE?OKS_SCENE.mount(sh,sceneLesson(s),total):null;
- var BALLG=s.id==='baseball'?window.OKS_BALL:s.id==='basketball'?window.OKS_HOOP:null;
+ var BALLG=s.id==='baseball'?window.OKS_BALL:s.id==='basketball'?window.OKS_HOOP:s.id==='rugby'?window.OKS_TAG:null;
  if(BALLG){
   var bgm=BALLG.mount({sh:sh,school:school,lesson:lessonNo,level:level,stats:st,ctx:ctx,scene:scene,data:lessonData(s),total:total});
   return bgm.begin().then(function(r){

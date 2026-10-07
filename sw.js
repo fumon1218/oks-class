@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v116';
+const CACHE_NAME = 'oks-class-v118';
 const ASSETS = [
   './',
   './index.html',
@@ -39,7 +39,9 @@ const ASSETS = [
   './sports/baseball.js',
   './sports/baseball.css',
   './sports/basketball.js',
+  './sports/rugby.js',
   './sports/basketball.css',
+  './sports/rugby.css',
   './sports/games.js',
   './learn/',
   './learn/index.html',
@@ -201,6 +203,25 @@ const ASSETS = [
   './sports/assets/hub_bld_winter.webp',
   './sports/assets/hub_bld_winter_para.webp',
   './sports/assets/hub_map.webp',
+  './sports/assets/rugby/ball.webp',
+  './sports/assets/rugby/bg_front.webp',
+  './sports/assets/rugby/bg_side.webp',
+  './sports/assets/rugby/boy_cheer.webp',
+  './sports/assets/rugby/boy_stand.webp',
+  './sports/assets/rugby/boy_try.webp',
+  './sports/assets/rugby/building.webp',
+  './sports/assets/rugby/catch.webp',
+  './sports/assets/rugby/flag_belt.webp',
+  './sports/assets/rugby/flag_yellow.webp',
+  './sports/assets/rugby/girl_chase.webp',
+  './sports/assets/rugby/girl_flag.webp',
+  './sports/assets/rugby/goalposts.webp',
+  './sports/assets/rugby/kneel.webp',
+  './sports/assets/rugby/mouthguard.webp',
+  './sports/assets/rugby/pass.webp',
+  './sports/assets/rugby/run_a.webp',
+  './sports/assets/rugby/run_b.webp',
+  './sports/assets/rugby/run_c.webp',
   './sports/assets/sb_archery.webp',
   './sports/assets/sb_athletics.webp',
   './sports/assets/sb_gymnastics.webp',
