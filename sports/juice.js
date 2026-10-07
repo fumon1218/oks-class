@@ -76,4 +76,30 @@
     return { round: round, win: win, best: best, golds: golds, confetti: confetti, cheer: cheer };
   }
   g.OKS_JUICE = { attach: attach };
+
+  /* ---------- 랠리 난이도 고르기 (테니스·탁구 공용) ----------
+     n = 한 번의 공에서 주고받는 횟수, ramp = 한 번 칠 때마다 공이 빨라지는 정도(0이면 그대로) */
+  var RALLY = [
+    { id: 0, name: '한 번씩', n: 1, ramp: 0, desc: '한 번 치고 문제를 풀어요 (예전 방식)' },
+    { id: 1, name: '쉬움', n: 3, ramp: 0, desc: '3번 주고받아요 · 속도는 그대로' },
+    { id: 2, name: '보통', n: 5, ramp: .04, desc: '5번 주고받아요 · 조금씩 빨라져요' },
+    { id: 3, name: '어려움', n: 8, ramp: .07, desc: '8번 주고받아요 · 점점 빨라져요' }
+  ];
+  function choose(key) {
+    var O = g.OKS, E = O.el, K = 'oks_rally_' + key + '_v1', saved = O.jget(K, 2);
+    var pick = RALLY.filter(function (r) { return r.id === saved; })[0] || RALLY[2];
+    if (/[?&]dev=fast/.test(location.search)) return Promise.resolve(pick);
+    return new Promise(function (res) {
+      var ov = E('div', 'oks-overlay'), box = E('div', 'oks-finish oks-levelpick');
+      box.innerHTML = '<h2>랠리 난이도</h2><p>공을 몇 번 주고받을까요?</p><div class="btns"></div><div class="note">친구와 공을 주고받을수록 랠리 점수가 쌓여요. 놓쳐도 괜찮아요.</div>';
+      var btns = box.querySelector('.btns');
+      RALLY.forEach(function (r) {
+        var b = E('button', 'oks-lv' + (r.id === pick.id ? ' on' : ''), '<b>' + (r.n > 1 ? r.n : '1') + '</b><span><strong>' + r.name + '</strong><small>' + O.esc(r.desc) + '</small></span>');
+        b.type = 'button'; b.onclick = function () { O.jset(K, r.id); ov.remove(); res(r); }; btns.appendChild(b);
+      });
+      ov.appendChild(box); document.body.appendChild(ov);
+      try { O.say('공을 몇 번 주고받을까요?', { noRepeat: true }); } catch (e) {}
+    });
+  }
+  g.OKS_RALLYSEL = { choose: choose, LIST: RALLY };
 })(window);

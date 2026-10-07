@@ -31,7 +31,7 @@
     var stage = E('div', 'pp-stage');
     stage.innerHTML = '<div class="pp-sky"></div><img class="pp-boy" alt="" draggable="false"><div class="pp-ring" hidden></div>' +
       '<img class="pp-girl" alt="" draggable="false"><img class="pp-ball" alt="" draggable="false" hidden><div class="pp-fx"></div>' +
-      '<div class="pp-hud"><span class="pp-now"></span><span class="pp-score">⭐ <b>0</b></span></div><div class="pp-banner" aria-live="polite"></div>';
+      '<div class="pp-hud"><span class="pp-now"></span><span class="pp-rally" hidden>🔥 랠리 <b>0</b></span><span class="pp-score">⭐ <b>0</b></span></div><div class="pp-banner" aria-live="polite"></div>';
     var dock = E('div', 'pp-dock');
     board.appendChild(stage); board.appendChild(dock);
     var $ = function (s) { return stage.querySelector(s); };
@@ -40,6 +40,8 @@
     sky.style.backgroundImage = 'url(' + A + 'bg_main.webp)'; ball.src = A + 'ball.webp';
     function sp(el, n, far) { if (el._n !== n) { el._n = n; el.src = A + n + '.webp'; el.style.height = (HT[n] * U * (far ? GFAR : 1) * 100) + '%'; } }
     function d() { return { W: stage.clientWidth || 800, H: stage.clientHeight || 380 }; }
+    var RL = { n: 5, ramp: .04 }, rallyEl = $('.pp-rally');
+    function setRally(n) { rallyEl.hidden = n < 2; rallyEl.querySelector('b').textContent = n; rallyEl.classList.remove('pop'); void rallyEl.offsetWidth; rallyEl.classList.add('pop'); }
     girl.style.left = (BX * 100) + '%'; boy.style.left = (FX * 100) + '%';
     sp(girl, 'girl_ready'); sp(boy, 'boy_ready');
 
@@ -111,13 +113,14 @@
         }
       }
     }
-    function doPlay(i, first) {
-      PT = pts(); u = 0; dur = DUR[lv - 1]; zw = ZW[lv - 1] * (assisted ? 1.2 : 1);
+    function doPlay(i, first, k, more) {
+      k = k || 0;
+      PT = pts(); u = 0; dur = DUR[lv - 1] * Math.max(.62, Math.pow(1 - RL.ramp, k)); zw = ZW[lv - 1] * (assisted ? 1.2 : 1);
       sp(boy, 'boy_ready'); sp(girl, 'girl_ready'); ball.hidden = true; paused = false;
       ring.style.left = PT.hit[0] + 'px'; ring.style.top = PT.hit[1] + 'px'; ring.hidden = false; ring.classList.remove('now');
       if (i === 0 && first) say('탁구 시작!', 1100);
-      return wait(first ? 800 : 500).then(function () {
-        sp(boy, 'boy_hit'); O.sfx('tick'); return wait(160);
+      return wait(first ? 800 : (k ? 80 : 500)).then(function () {
+        sp(boy, 'boy_hit'); O.sfx('tick'); return wait(k ? 90 : 160);
       }).then(function () {
         ball.hidden = false; ballAt(0); O.sfx('pop'); sp(boy, 'boy_ready');
         return new Promise(function (resolve) {
@@ -141,11 +144,14 @@
           ball.hidden = false; ball.style.left = from[0] + 'px'; ball.style.top = from[1] + 'px';
           return fly(from, b2, .55, H * .26, 1, 1);
         }).then(function () {
-          O.sfx('tick'); sp(boy, 'boy_ready'); return fly(b2, out, .4, H * .12, 1, 1);
-        }).then(function () {
-          sp(girl, 'girl_cheer'); burst(.8 * W, H * .5); O.sfx('coin'); say(o.kind === 'great' ? '멋진 샷! 득점!' : '넘겼어요! 득점!', 1100);
-          return wait(900);
-        }).then(function () { ball.hidden = true; return { kind: o.kind }; });
+          O.sfx('tick');
+          if (more) { sp(girl, 'girl_ready'); burst(b2[0], b2[1]); return { kind: o.kind, cont: true }; }   /* 랠리 계속: 친구가 되받아 쳐요 */
+          sp(boy, 'boy_ready');
+          return fly(b2, out, .4, H * .12, 1, 1).then(function () {
+            sp(girl, 'girl_cheer'); burst(.8 * W, H * .5); O.sfx('coin'); say(k > 0 ? '랠리 ' + (k + 1) + '번 성공!' : (o.kind === 'great' ? '멋진 샷! 득점!' : '넘겼어요! 득점!'), 1100);
+            return wait(900);
+          }).then(function () { ball.hidden = true; return { kind: o.kind }; });
+        });
       });
     }
     function fail(kind) {
@@ -156,7 +162,7 @@
         S = 'idle'; return new Promise(function (res) { (function go() { if (dead) return; u = Math.min(1.4, u + .06); ballAt(u); if (u < 1.4) later(go, 30); else res(); })(); });
       }).then(function () { ball.hidden = true; return wait(700); }).then(function () { return { kind: kind }; });
     }
-    function award(res) { made++; var great = res.kind === 'great'; if (great) greats++; addScore(great ? 30 : 20); O.sfx('ok'); }
+    function award(res, k) { made++; var great = res.kind === 'great'; if (great) greats++; addScore((great ? 30 : 20) + Math.min(k || 0, 10) * 5); O.sfx('ok'); }
 
     /* ---------- 문제(랠리 사이) ---------- */
     function quizFor(i) {
@@ -185,12 +191,19 @@
     }
 
     function turn(i) {
-      var m0 = st.mistakes, fails = 0; assisted = assisted0; nowEl.textContent = (i + 1) + '번째 공';
+      var m0 = st.mistakes, fails = 0; assisted = assisted0; nowEl.textContent = (i + 1) + '번째 공'; setRally(0);
       J.round(i, total); if (scene) { scene.now(i); if (i === total - 1) scene.bonus(); }
-      function again() {
-        return doPlay(i, fails === 0).then(function (res) {
-          if (res.kind === 'early' || res.kind === 'late') { st.mistakes++; fails++; if (fails >= 2) assisted = true; return again(); }
-          metrics.push({ at: i + 1, result: res.kind, tries: fails + 1 }); award(res); return wait(300);
+      function again() { return rally(0); }
+      /* 랠리: 내가 칠 때마다 친구가 되받아 쳐 줘요(정해진 횟수까지). 도중에 놓쳐도 괜찮아요 */
+      function rally(k) {
+        var more = k + 1 < RL.n;
+        return doPlay(i, fails === 0 && k === 0, k, more).then(function (res) {
+          if (res.kind === 'early' || res.kind === 'late') {
+            if (k === 0) { st.mistakes++; fails++; if (fails >= 2) assisted = true; return rally(0); }
+            say('랠리 ' + k + '번! 잘했어요', 1400); O.sfx('ok'); return wait(900);
+          }
+          metrics.push({ at: i + 1, result: res.kind, tries: fails + 1, rally: k + 1 }); award(res, k); setRally(k + 1);
+          return res.cont ? rally(k + 1) : wait(300);
         });
       }
       return again().then(function () { return quiz(i); }).then(function () {
@@ -199,7 +212,8 @@
       });
     }
 
-    function begin() {
+    function begin() { return g.OKS_RALLYSEL.choose('tabletennis').then(function (r) { RL = r; return run(); }); }
+    function run() {
       last = performance.now(); raf = requestAnimationFrame(frame);
       var chain = Promise.resolve();
       for (var i = 0; i < total; i++) (function (k) { chain = chain.then(function () { return turn(k); }); })(i);

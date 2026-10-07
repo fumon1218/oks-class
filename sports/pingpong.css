@@ -31,3 +31,8 @@
   .pp-hud>span{font-size:15px;padding:4px 10px}.pp-ring{width:56px;height:56px;margin:-28px 0 0 -28px}
 }
 @media (prefers-reduced-motion:reduce){.pp-main.now,.pp-ring.now{animation:none}}
+
+.pp-hud>.pp-rally{position:absolute;left:0;top:44px;font-size:17px!important}
+.pp-rally{background:linear-gradient(#ffb74d,#ff8a3d)!important;color:#fff!important}
+.pp-rally.pop{animation:rallyPop .35s ease}
+@keyframes rallyPop{40%{transform:scale(1.25)}}
