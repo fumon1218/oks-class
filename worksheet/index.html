@@ -351,6 +351,11 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
       var ks = shuf(['circle', 'tri', 'square']), unit3 = (level >= 3 ? [ks[0], ks[1], ks[1]] : [ks[0], ks[1]]).map(function (k) { return { n: SHN[k], h: shape(k, 'none', 36) }; });
       var p3 = pat(unit3, level >= 3 ? 9 : 8, [level >= 3 ? 7 : 5]);
       qs.push({ t: '빈칸에 들어갈 모양을 그리세요.', b: '<div class="pattern">' + p3.html.replace(/>\?</g, '><') + '</div><div class="ansline">답: ' + p3.cells[level >= 3 ? 7 : 5].n + '</div>' });
+      if (level <= 3) {
+        var ks4 = shuf(['circle', 'tri', 'square']), unit4 = [ks4[0], ks4[1]].map(function (k) { return { n: SHN[k], h: shape(k, 'none', 36) }; });
+        var p4 = pat(unit4, level === 1 ? 7 : 9, level === 1 ? [5, 6] : [6, 7, 8]), bl4 = level === 1 ? [5, 6] : [6, 7, 8];
+        qs.push({ t: '규칙에 맞게 이어서 모양을 그리세요.', b: '<div class="pattern">' + p4.html.replace(/>\?</g, '><') + '</div><div class="ansline">답: ' + bl4.map(function (i) { return p4.cells[i].n; }).join(', ') + '</div>' });
+      }
       if (level >= 4) qs.push({ t: '나만의 규칙을 만들어 색칠하세요. (규칙: ____________ )', b: '<div class="pattern">' + new Array(9).join('<div class="cell empty"></div>') + '</div>' });
       return qs;
     },
@@ -399,6 +404,10 @@ body{margin:0;background:#e9e4da;font-family:'Jua','Nanum Gothic',sans-serif;col
   addEventListener('load', function () { fit(); });
   function render() {
     var s0 = seed, qs = MAKE[id] ? MAKE[id]() : (window.OKS_WS_EN && OKS_WS_EN.has(id)) ? OKS_WS_EN.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
+    /* 한 장에 너무 많이 몰리면(글씨가 작아질 만큼) 마지막 문제부터 덜어 냅니다 */
+    function need1(q) { var box = document.createElement('div'); box.style.cssText = 'position:absolute;left:-9999px;top:0;width:210mm'; box.innerHTML = pageHtml(q, false); document.body.appendChild(box);
+      var inn = box.querySelector('.inner'); inn.classList.add('measure'); var h = inn.scrollHeight; box.remove(); return h; }
+    try { while (qs.length > 3 && need1(qs) > 1005 * 1.18) qs = qs.slice(0, -1); } catch (e) {}
     var html = pageHtml(qs, false);
     if (document.getElementById('withAns').checked) html += pageHtml(qs, true);
     document.getElementById('pages').innerHTML = html;
