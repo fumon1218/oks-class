@@ -47,8 +47,11 @@ function villageHub(){
  hello='씽씽 별 마을에 오신 것을 환영해요! 건물을 눌러 보세요. 하계 올림픽 마을부터 시작해요.';
  root.innerHTML='<div class="sh-back" style="background-image:url(assets/hub_map.webp)"></div><div class="sh-scroll"><div class="sh-map"><img class="sh-bg" src="assets/hub_map.webp" alt="씽씽 별 마을 지도"></div></div>'+
   '<div class="sh-top"><a class="oks-pill sh-exit" href="../">🚀 <span>우주로</span></a><div class="sh-title"><b>씽씽 별 마을</b><span>체육 · 놀이 · 건물을 눌러요</span></div><div class="sh-hud"></div></div>'+
-  '<div class="sh-guide"><img src="../art/char/ok_wave.webp" alt=""><div class="sh-bubble"></div></div>';
+  '<div class="sh-guide"><img src="../art/char/ok_wave.webp" alt=""><div class="sh-bubble"></div></div>'+
+  '<button type="button" class="sh-tycoon"><img src="assets/baseball/mascot.webp" alt=""><span><b>🏟️ 스포츠 타이쿤</b><small>카드 모으고 구단 키우기</small></span></button>';
  var map=root.querySelector('.sh-map'),bub=root.querySelector('.sh-bubble'),guide=root.querySelector('.sh-guide');
+ (function(){var tb=root.querySelector('.sh-tycoon');try{var nn=OKS_TYCOON.owned().length-Object.keys((OKS_TYCOON.load().seen)||{}).filter(function(k){return k!=='_init'}).length;if(nn>0)tb.insertAdjacentHTML('beforeend','<i>NEW '+nn+'</i>')}catch(e){}
+  tb.onclick=function(){O.sfx('pop');talk('스포츠 타이쿤으로 가요!');setTimeout(function(){location.href='?tycoon=1'},450)};})();
  function talk(t,speak){bub.textContent=t;guide.dataset.say=t;guide.classList.remove('pop');void guide.offsetWidth;guide.classList.add('pop');guide.classList.remove('quiet');clearTimeout(talk.t);talk.t=setTimeout(function(){guide.classList.add('quiet')},7000);if(speak!==false)O.say(t,{noRepeat:true});}
  guide.onclick=function(){guide.classList.remove('quiet');clearTimeout(talk.t);talk.t=setTimeout(function(){guide.classList.add('quiet')},7000);if(guide.dataset.say)O.say(guide.dataset.say)};
  HUB.forEach(function(b,i){
@@ -295,13 +298,14 @@ function endSport(sh,s,li,st,scene,total,r){
  if(r&&r.text)text+=' · '+r.text+' · ⭐ '+r.coins;
  else if(r)text+=' · ⭐ '+r.coins+'개 · '+['🥇 금메달','🥈 은메달','🥉 동메달'][r.place-1]+' · '+r.sec+'초'+(r.newBest?(r.prev?' (내 최고 기록!)':''):(r.prev?' (내 최고 '+r.prev+'초)':''));
  var base='?festival=summer&sport='+s.id+'&school='+school+'&lesson='+lessonNo;
+ var season=q.get('season')==='1'&&window.OKS_TYCOON?OKS_TYCOON.inning(s.id,stars):null;
  O.finish({stats:st,entry:entry,title:scene?scene.tpl.done:'멋진 스포츠 탐험!',text:text,stars:r?stars:undefined,extraCoins:(sc.maxCombo>=2?sc.maxCombo:0)+(r?Math.min(5,Math.floor(r.coins/4)):0),
-  buttons:[
+  buttons:(season?[{label:season.done?'🏆 시즌 결과 보기':'다음 이닝 ▶ (남은 '+season.left+')',color:'orange',href:'?tycoon=1'}]:[]).concat([
    {label:'한 번 더',onClick:function(){location.reload()}},
    level<5?{label:'다음 수준 ('+(level+1)+')',color:'orange',href:base+'&level='+(level+1)+'&play=1'}:null,
    {label:'📄 학습지 인쇄',color:'blue',href:'../worksheet/?id=sp-'+s.id+'-'+school+'-'+lessonNo+'&level='+level},
    {label:s.name+' 목차',color:'blue',href:base.replace(/&lesson=\d+/,'')}
-  ].filter(Boolean)});
+  ]).filter(Boolean)});
  if(r&&s.id==='athletics'&&window.OKS_ATHLETICS){
   var all=O.jget(sessionsKey(),[]);all.push({at:entry.at,school:school,topic:li[0],level:level,input:'run-game',engine:'athletics-run-v1',mistakes:mistakes,steps:r.metrics,coins:r.coins,seconds:r.sec});O.jset(sessionsKey(),all.slice(-200));
   var box=document.querySelector('.oks-overlay:last-child .oks-finish'),c=OKS_ATHLETICS.course(school,lessonNo);
@@ -391,7 +395,8 @@ function makePlan(s,L,ctx){
  return R;
 }
 
-if(play&&sid)activity();
+if(q.get('tycoon')==='1'&&window.OKS_TYCOON)OKS_TYCOON.open();
+else if(play&&sid)activity();
 else if(festival==='summer'&&sid)sportToc();
 else if(festival==='summer')summerHub();
 else villageHub();
