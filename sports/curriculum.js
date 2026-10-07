@@ -28,7 +28,8 @@ window.OKS_SPORTS_DATA = {
     {id:'gymnastics',name:'체조',emo:'🤸',color:'#bf78ef',title:'몸의 균형을 느껴요',goal:'서기·팔 벌리기·한 발 균형 동작을 차례로 경험해요.',concepts:['자세','균형','순서','몸','안전'],image:'assets/sports_building_gymnastics.webp',scene:'assets/gymnastics.webp'},
     {id:'taekwondo',name:'태권도',emo:'🥋',color:'#ef6c68',title:'기본 발차기를 익혀요',goal:'준비 자세와 발차기 방향을 알고 안전한 목표를 향해 움직여요.',concepts:['준비','발차기','방향','예절','안전'],image:'assets/sports_building_taekwondo.webp',scene:'assets/taekwondo.webp'},
     {id:'soccer',name:'축구',emo:'⚽',color:'#f3c24b',title:'공을 목표로 보내요',goal:'공과 골대의 관계를 알고 발로 공을 보내는 기초 움직임을 경험해요.',concepts:['공','골대','차기','패스','협동'],image:'assets/sports_building_soccer.webp',scene:'assets/soccer.webp'},
-    {id:'baseball',name:'야구',emo:'⚾',color:'#3b82f6',title:'공을 보고 치고 달려요',goal:'공을 끝까지 보고 방망이를 휘두른 뒤 베이스로 달리는 야구의 기본을 경험해요.',concepts:['공','방망이','스트라이크','베이스','세이프'],image:'assets/baseball/card_baseball.webp',scene:'assets/baseball/scene.webp'}
+    {id:'baseball',name:'야구',emo:'⚾',color:'#3b82f6',title:'공을 보고 치고 달려요',goal:'공을 끝까지 보고 방망이를 휘두른 뒤 베이스로 달리는 야구의 기본을 경험해요.',concepts:['공','방망이','스트라이크','베이스','세이프'],image:'assets/baseball/card_baseball.webp',scene:'assets/baseball/scene.webp'},
+    {id:'basketball',name:'농구',emo:'🏀',color:'#ff8b45',title:'공을 주고받고 골대에 던져요',goal:'공을 주고받고 알맞은 힘으로 골대를 향해 던지며 함께 즐기는 농구의 기본을 경험해요.',concepts:['공','패스','드리블','슛','골대'],image:'assets/ballcenter/card_basketball.webp',scene:'assets/basketball/bg_gym.webp'}
   ],
   summerBuildings: [
     {id:'athletics',type:'sport',name:'육상 경기장',sub:'달리기 · 허들 · 이어달리기',image:'assets/sports_building_athletics.webp',color:'#ff8b45'},

@@ -2,9 +2,10 @@
    id 형식: sp-<종목>-<학교급>-<차시>   예) sp-swimming-elem-1 */
 window.OKS_WS_SPORTS = (function () {
   'use strict';
-  var SP = [['athletics', '육상', '🏃'], ['swimming', '수영', '🏊'], ['archery', '양궁', '🏹'], ['gymnastics', '체조', '🤸'], ['taekwondo', '태권도', '🥋'], ['soccer', '축구', '⚽'], ['baseball', '야구', '⚾']];
+  var SP = [['athletics', '육상', '🏃'], ['swimming', '수영', '🏊'], ['archery', '양궁', '🏹'], ['gymnastics', '체조', '🤸'], ['taekwondo', '태권도', '🥋'], ['soccer', '축구', '⚽'], ['baseball', '야구', '⚾'], ['basketball', '농구', '🏀']];
   var SC = [['elem', '초등'], ['middle', '중등'], ['high', '고등']];
   var GAME = {
+    hoop: '신문지 공을 두 손으로 위로 올려 바구니에 던져 넣어 봐요. 콘으로 자리를 표시해요.',
     bat: '신문지 공을 가볍게 던져 주면 풍선이나 종이 방망이로 쳐 봐요. 친구와 거리를 두어요.',
     aim: '신문지 공을 과녁(그림)의 가운데에 던져 맞혀요.', breath: '대야 물에 얼굴을 가까이 대고 "후~" 숨을 내쉬어 봐요.', lane: '바닥에 붙인 선(레인)을 따라 한 줄로 걸어요.',
     hold: '한 발로 서서 3초 동안 균형을 잡아요.', pose: '선생님 동작을 보고 순서대로 따라 해요.', dir: '선생님이 말한 방향(왼쪽·오른쪽)으로 몸을 돌려요.', pass: '친구에게 공을 굴려 패스해 봐요.'

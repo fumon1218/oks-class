@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v114';
+const CACHE_NAME = 'oks-class-v115';
 const ASSETS = [
   './',
   './index.html',
@@ -38,6 +38,8 @@ const ASSETS = [
   './sports/lessons-ball.js',
   './sports/baseball.js',
   './sports/baseball.css',
+  './sports/basketball.js',
+  './sports/basketball.css',
   './sports/games.js',
   './learn/',
   './learn/index.html',
@@ -172,6 +174,20 @@ const ASSETS = [
   './sports/assets/baseball/umpire_out.webp',
   './sports/assets/baseball/umpire_safe.webp',
   './sports/assets/baseball/uniform.webp',
+  './sports/assets/basketball/bg_court.webp',
+  './sports/assets/basketball/bg_gym.webp',
+  './sports/assets/basketball/bottle.webp',
+  './sports/assets/basketball/boy_catch.webp',
+  './sports/assets/basketball/building.webp',
+  './sports/assets/basketball/cone.webp',
+  './sports/assets/basketball/girl_cheer.webp',
+  './sports/assets/basketball/girl_dribble.webp',
+  './sports/assets/basketball/girl_pass.webp',
+  './sports/assets/basketball/girl_ready.webp',
+  './sports/assets/basketball/girl_release.webp',
+  './sports/assets/basketball/girl_shoot.webp',
+  './sports/assets/basketball/towel.webp',
+  './sports/assets/basketball/whistle.webp',
   './sports/assets/gymnastics.webp',
   './sports/assets/hub_bld_asian.webp',
   './sports/assets/hub_bld_info.webp',
