@@ -49,7 +49,8 @@
     function later(fn, ms) { var h = setTimeout(function () { if (!dead) fn(); }, ms / (FAST ? 4 : 1)); timers.push(h); return h; }
     function wait(ms) { return new Promise(function (res) { later(res, ms); }); }
     function say(t, ms) { banner.textContent = t; banner.classList.remove('show'); void banner.offsetWidth; banner.classList.add('show'); if (ms) later(function () { banner.classList.remove('show'); }, ms); }
-    function addScore(n) { score += n; coins += Math.max(1, n / 10 | 0); scoreEl.textContent = score; }
+    var J = g.OKS_JUICE.attach({ stage: stage, later: later, calm: calm, st: st, balls: function () { return [ball]; } });
+    function addScore(n) { n = J.win(n); score += n; coins += Math.max(1, n / 10 | 0); scoreEl.textContent = score; }
     function setMain(label, fn, cls) {
       dock.innerHTML = ''; var b = E('button', 'oks-btn rg-main ' + (cls || ''), label); b.type = 'button'; mainBtn = b; onMain = fn;
       b.onclick = function () { if (onMain) onMain(); }; dock.appendChild(b); return b;
@@ -192,7 +193,7 @@
 
     function turn(i) {
       var m0 = st.mistakes, fails = 0; assisted = assisted0; nowEl.textContent = (i + 1) + '번째 공격';
-      if (scene) { scene.now(i); if (i === total - 1) scene.bonus(); }
+      J.round(i, total); if (scene) { scene.now(i); if (i === total - 1) scene.bonus(); }
       function again() {
         return doPlay(i, fails === 0).then(function (res) {
           if (res.kind === 'pulled' || res.kind === 'early') { st.mistakes++; fails++; if (fails >= 2) assisted = true; return again(); }
@@ -218,7 +219,7 @@
         stop(); var sec = Math.round((Date.now() - t0) / 100) / 10, key = 'rugby-' + opt.school + '-' + opt.lesson + '-' + lv, Bt = best(), prev = Bt[key], newBest = prev == null || score > prev;
         if (newBest) { Bt[key] = score; O.jset(BEST_KEY, Bt); }
         var miss = st.mistakes, place = miss <= 1 ? 1 : miss <= 3 ? 2 : 3;
-        var text = '트라이 ' + made + '번' + (greats ? ' · 멋진 패스 ' + greats : '') + ' · 점수 ' + score + '점' + (newBest ? (prev != null ? ' (내 최고 점수!)' : '') : ' (내 최고 ' + prev + '점)');
+        var text = '트라이 ' + made + '번' + (greats ? ' · 멋진 패스 ' + greats : '') + (J.best() >= 3 ? ' · 최고 ' + J.best() + '연속' : '') + ' · 점수 ' + score + '점' + (newBest ? (prev != null ? ' (내 최고 점수!)' : '') : ' (내 최고 ' + prev + '점)');
         return { sec: sec, prev: prev, newBest: newBest, coins: coins, place: place, metrics: metrics, mistakes: miss, text: text, score: score };
       });
     }
