@@ -113,7 +113,8 @@
     F_SIZE = ['🎣 큰 물고기 작은 물고기', 'games/fishing/?mode=size&'], F_WORD = ['🎣 낱말 카드 낚시', 'games/fishing/?mode=word&'];
   var B = function (m, label, extra) { return ['🎈 ' + label, 'games/balloons/?mode=' + m + (extra || '') + '&']; };
   var TRU = ['✏️ 번호 따라 쓰기', 'trace/alpha.html?set=up&'], TRL = ['✏️ 번호 따라 쓰기', 'trace/alpha.html?set=low&'];
-  var EXTRA = { '05-00-01-02': [TRU], '05-00-01-03': [TRL], '02-01-01-01': [BIRDS, F_CNT, B('number', '숫자 풍선')], '02-01-01-02': [F_CNT], '02-01-03-02': [BIRDS], '02-01-02-01': [SHAPEG, F_SHP], '02-02-03-01': [SHAPEG],
+  var PUZ = ['🧩 그림 퍼즐', 'games/puzzle/?'];
+  var EXTRA = { '06-01-03-01': [PUZ], '06-01-03-02': [PUZ], '06-02-03-01': [PUZ], '06-02-03-02': [PUZ], '06-03-03-01': [PUZ], '06-03-03-02': [PUZ], '05-00-01-02': [TRU], '05-00-01-03': [TRL], '02-01-01-01': [BIRDS, F_CNT, B('number', '숫자 풍선')], '02-01-01-02': [F_CNT], '02-01-03-02': [BIRDS], '02-01-02-01': [SHAPEG, F_SHP], '02-02-03-01': [SHAPEG],
     '02-01-02-02': [F_SIZE], '01-01-01-02': [F_WORD, B('word', '낱말 풍선')], '01-01-02-01': [B('fruit', '과일 풍선')], '01-01-03-01': [B('word', '낱말 풍선')],
     '06-01-01-01': [B('color', '색깔 풍선')], '06-01-01-02': [B('mix', '색 섞기 풍선')], '07-01-01-01': [B('sound', '악기 소리 풍선')], '07-01-01-02': [B('pitch', '높은 소리 낮은 소리')],
     '05-01-01-02': [B('color', 'Color Balloons', '&lang=en')], '05-01-02-01': [B('fruit', 'Fruit Balloons', '&lang=en')], '05-01-03-02': [B('fruit', 'Fruit Balloons', '&lang=en')] };

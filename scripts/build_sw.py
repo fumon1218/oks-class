@@ -16,14 +16,14 @@ PAGES = [
     './core/oks-core.css', './core/oks-core.js', './core/oks-kit.js', './core/oks-eco.js', './curriculum/lessons.js', './curriculum/art-standards.js', 
     './shop/', './shop/index.html', './shop/shop.css', './shop/shop.js', './shop/shops.js', './shop/stations.js',
     './town/', './town/index.html', './town/town.css', './town/town.js', './town/cc.webp', './town/wj.webp',
-    './games/farm/index.html', './games/birds/index.html', './games/shapes/index.html', './trace/alpha.html', './trace/trace.js', './trace/trace.css', './trace/data-alpha.js', './trace/hangul.html', './trace/hangul.js', './trace/data-hangul.js', './trace/alpha.js', './games/fishing/index.html', './games/balloons/index.html', './games/tycoon/index.html', './games/tycoon/town.js', './games/tycoon/town2.js', './games/tycoon/delivery.js', './worksheet/index.html', './worksheet/generic.js', './worksheet/english.js', './worksheet/hangul.js', './minigames/farm-v8/index.html',
+    './games/farm/index.html', './games/birds/index.html', './games/shapes/index.html', './games/puzzle/index.html', './trace/alpha.html', './trace/trace.js', './trace/trace.css', './trace/data-alpha.js', './trace/hangul.html', './trace/hangul.js', './trace/data-hangul.js', './trace/alpha.js', './games/fishing/index.html', './games/balloons/index.html', './games/tycoon/index.html', './games/tycoon/town.js', './games/tycoon/town2.js', './games/tycoon/delivery.js', './worksheet/index.html', './worksheet/generic.js', './worksheet/english.js', './worksheet/hangul.js', './minigames/farm-v8/index.html',
     './career/cafe.html', './career/barista.html', './korean/index.html', './korean/catch.html',
     './lobby/lobby-v2.css', './lobby/lobby-v3.css', './curriculum/catalog.json', './curriculum/game-blueprint.json',
     './minigames/index.html', './minigames/art-tycoon.html', './minigames/packs.js',
     './quests/index.html', './curriculum/teacher-guide.html', './curriculum/reports.html',
 ]
 files = sorted(glob.glob('sports/assets/**/*.webp', recursive=True)) + sorted(glob.glob('playground/jegi/assets/*.webp'))
-for pat in ['core/ui/*.webp', 'core/ui/*.png', 'art/scene/*.webp', 'art/space/*.webp', 'space/img/*.webp', 'art/3d/*.glb', 'art/build/*.webp', 'art/char/*.webp', 'art/obj/*.webp', 'art/en/*.webp', 'art/ws/*.webp', 'art/act/*.webp', 'art/people/*.webp', 'art/avatar/*.webp', 'games/farm/assets/*.webp', 'games/birds/img/*.webp', 'games/shapes/img/*.webp', 'games/fishing/img/*.webp', 'games/balloons/img/*.webp', 'games/tycoon/img/*.webp', 'games/tycoon/img/drone/*.webp', 'art/jj/*/*.webp', 'icons/*.png', 'icons/*.jpg']:
+for pat in ['core/ui/*.webp', 'core/ui/*.png', 'art/scene/*.webp', 'art/space/*.webp', 'space/img/*.webp', 'art/3d/*.glb', 'art/build/*.webp', 'art/char/*.webp', 'art/obj/*.webp', 'art/en/*.webp', 'art/ws/*.webp', 'art/act/*.webp', 'art/people/*.webp', 'art/avatar/*.webp', 'games/farm/assets/*.webp', 'games/birds/img/*.webp', 'games/shapes/img/*.webp', 'games/fishing/img/*.webp', 'games/balloons/img/*.webp', 'games/tycoon/img/*.webp', 'games/tycoon/img/drone/*.webp', 'art/jj/*/*.webp', 'art/scenes/*.jpg', 'art/scenes/*.webp', 'icons/*.png', 'icons/*.jpg']:
     files += sorted(glob.glob(pat))
 assets = [p for p in PAGES if p.endswith('/') or os.path.exists(p)] + ['./' + f for f in files]
 src = open('sw.js', encoding='utf-8').read()

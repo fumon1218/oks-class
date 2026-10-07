@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff7eb3">
+<title>그림 퍼즐 · 옥쌤의 즐거운 교실</title>
+<link rel="manifest" href="../../manifest.json">
+<link rel="icon" href="../../icons/ok-face-192.png">
+<link rel="apple-touch-icon" href="../../icons/ok-face-180.png">
+<link rel="stylesheet" href="../../core/oks-core.css">
+<style>
+/* 그림 퍼즐(직소): 10·20·50·100조각. 교실 그림 중에서 골라 조각을 맞춰요 */
+body.oks{background:#ffe6f0 url('../../art/scenes/town_spring_hd.webp') center/cover no-repeat fixed;overflow:hidden;}
+body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.3) 40%,rgba(25,18,45,.3));}
+.oks-app{max-width:none;padding:10px 14px;height:100dvh;display:flex;flex-direction:column;box-sizing:border-box;}
+.oks-top.compact{flex-wrap:nowrap;position:relative;}
+.oks-top.compact .oks-title{flex:0 1 680px;margin:0 auto;min-width:0;background:rgba(255,253,248,.94);border-radius:999px;color:var(--ink);text-shadow:none;box-shadow:0 4px 14px rgba(30,20,50,.2);padding:8px 26px;}
+.oks-top.compact > *:not(.oks-title):not(.oks-menu){flex-shrink:0;white-space:nowrap;}
+.oks-more{font-size:28px;font-weight:800;color:var(--ink);line-height:1;}
+.oks-menu{position:absolute;right:0;top:calc(100% + 8px);z-index:60;display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:22px;background:#fffdf7;box-shadow:0 14px 34px rgba(60,40,20,.28);min-width:240px;}
+.oks-menu[hidden]{display:none!important;}
+.oks-menu .eco-hud,.oks-menu .oks-level{justify-content:center;flex-wrap:wrap;}
+.oks-menu .oks-dots{justify-content:center;box-shadow:none;}
+@media (max-width:560px){.oks-top.compact .oks-title{display:none;} .oks-top.compact{justify-content:space-between;} .oks-top.compact .oks-pill > span{display:none;}}
+.oks-ask{margin:8px auto 0;max-width:820px;width:100%;}
+.oks-ask .oks-mascot{display:none;}
+.oks-ask-bubble::before,.oks-ask-bubble::after{display:none!important;}
+.oks-ask-bubble{font-size:22px;background:#fffdf8;box-shadow:0 6px 18px rgba(30,40,80,.22);border-radius:24px;display:flex;align-items:center;justify-content:center;gap:12px;min-height:52px;}
+
+.oks-board.pz-board{flex:1;min-height:0;margin:10px auto 0;width:100%;max-width:1280px;padding:0;background:transparent;box-shadow:none;display:flex;flex-direction:column;gap:10px;}
+.pz-stage{flex:1;min-height:0;position:relative;border-radius:30px;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;
+  background:linear-gradient(180deg,#fff4dc,#ffe3b0);box-shadow:0 12px 30px rgba(60,40,20,.28),inset 0 0 0 5px #ffd98f;}
+.pz-frame{position:absolute;z-index:0;border-radius:10px;background:#fffdf8;box-shadow:0 0 0 7px #fff,0 0 0 10px #e7c98a,0 8px 18px rgba(80,50,10,.3);overflow:hidden;}
+.pz-frame canvas{display:block;width:100%;height:100%;}
+.pz-slot{position:absolute;z-index:1;border:4px dashed #ff6fa6;border-radius:12px;background:rgba(255,111,166,.18);pointer-events:none;animation:pz-slot .9s ease-in-out infinite alternate;}
+.pz-slot[hidden]{display:none;}
+@keyframes pz-slot{to{background:rgba(255,111,166,.42)}}
+.pz-p{position:absolute;touch-action:none;cursor:grab;-webkit-user-drag:none;}
+.pz-p.placed{pointer-events:none;z-index:1!important;}
+.pz-p.drag{cursor:grabbing;filter:drop-shadow(0 10px 8px rgba(0,0,0,.35));transition:none;}
+.pz-p.snap{animation:pz-snap .35s ease;}
+@keyframes pz-snap{40%{filter:brightness(1.25) drop-shadow(0 0 10px #ffd54f)}}
+.pz-p.oks-glow{animation:pz-glow .8s ease-in-out infinite;}
+@keyframes pz-glow{50%{filter:drop-shadow(0 0 10px #ffd54f) drop-shadow(0 0 20px #ff9800);}}
+.pz-peek{position:absolute;z-index:80;border-radius:10px;overflow:hidden;box-shadow:0 0 0 7px #fff,0 12px 28px rgba(0,0,0,.4);pointer-events:none;}
+.pz-peek canvas{display:block;width:100%;height:100%;}
+.pz-peek[hidden]{display:none;}
+.pz-hud{position:absolute;left:14px;top:12px;z-index:90;display:flex;gap:8px;pointer-events:none;}
+.pz-hud span{background:rgba(255,255,255,.95);border-radius:999px;padding:5px 14px;font-weight:900;font-size:18px;color:#5a3b00;box-shadow:0 3px 8px rgba(0,0,0,.15);}
+.pz-name{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:90;background:rgba(255,255,255,.95);border-radius:999px;padding:5px 18px;font-weight:900;font-size:18px;color:#c2185b;box-shadow:0 3px 8px rgba(0,0,0,.15);pointer-events:none;}
+.pz-done{position:absolute;z-index:70;border-radius:10px;overflow:hidden;opacity:0;transition:opacity .8s;pointer-events:none;}
+.pz-done.on{opacity:1;}
+.pz-done canvas{display:block;width:100%;height:100%;}
+.pz-star{position:absolute;z-index:95;pointer-events:none;font-size:26px;animation:pz-star .8s ease forwards;transform:translate(-50%,-50%);}
+@keyframes pz-star{to{transform:translate(-50%,-150%) scale(1.5);opacity:0}}
+.pz-dock{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;}
+.pz-dock .oks-btn{font-size:20px;padding:10px 22px;}
+
+/* 시작 화면 */
+.oks-start{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;background:rgba(60,20,60,.35);overflow:auto;}
+.st-card{background:#fffdf8;border-radius:32px;padding:22px 26px;max-width:760px;width:calc(100% - 32px);text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.3);margin:16px 0;}
+.st-card h1{margin:2px 0 6px;font-size:32px;font-weight:400;}
+.st-card p{margin:0 0 10px;color:var(--ink-soft);font-size:17px;line-height:1.5;}
+.st-card h3{margin:10px 0 6px;font-size:18px;font-weight:400;color:#c2185b;}
+.pz-cnt{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.pz-cnt button{flex:1 1 120px;max-width:160px;border:3px solid #f1e3c8;border-radius:20px;background:#fff;padding:8px 6px;font:inherit;color:var(--ink);cursor:pointer;}
+.pz-cnt button b{display:block;font-size:26px;font-weight:700;color:#e0457b;line-height:1.1;} .pz-cnt button span{font-size:14px;color:var(--ink-soft);}
+.pz-cnt button svg{display:block;margin:0 auto 4px;height:34px;width:auto;}
+.pz-cnt button.on{border-color:#ff6fa6;background:#fff0f6;}
+.pz-imgs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center;}
+.pz-imgs button{border:4px solid #f1e3c8;border-radius:16px;background:#fff;padding:0;cursor:pointer;overflow:hidden;width:150px;position:relative;font:inherit;}
+.pz-imgs button img{display:block;width:100%;height:84px;object-fit:cover;}
+.pz-imgs button i{display:block;font-style:normal;font-size:14px;padding:2px 4px;color:var(--ink);}
+.pz-imgs button.on{border-color:#ff6fa6;}
+.pz-imgs .dice{width:auto;padding:10px 14px;font-size:18px;border-radius:999px;}
+.st-go{font-size:24px!important;padding:14px 40px!important;margin-top:14px;}
+</style>
+</head>
+<body class="oks">
+<script src="../../core/oks-core.js"></script>
+<script src="../../core/oks-eco.js"></script>
+<script>
+(function () {
+  'use strict';
+  var O = window.OKS, E = O.el, R = '../../';
+  /* 우리 교실의 큰 그림 중 퍼즐로 예쁜 것을 골랐어요 */
+  var IMGS = [
+    ['폭포 정글', 'art/scenes/jungle.jpg'], ['한옥 정자 공원', 'art/scenes/park.jpg'], ['연못', 'art/scenes/pond.jpg'], ['눈 나라', 'art/scenes/snow.jpg'],
+    ['가을 마을', 'art/scenes/town_autumn.jpg'], ['봄 마을', 'art/scenes/town_spring.jpg'], ['여름 마을', 'art/scenes/town_summer.jpg'], ['겨울 마을', 'art/scenes/town_winter.jpg'],
+    ['나무 위 집', 'art/scenes/treehouse.jpg'], ['꽃 섬 마을', 'art/scenes/town_spring_hd.webp'], ['반짝 사원', 'art/jj/scenes/temple.webp'], ['옛 숲 유적', 'art/jj/scenes/ruins.webp'],
+    ['보석 동굴', 'art/jj/scenes/crystal.webp'], ['화산 섬', 'art/jj/scenes/volcano.webp'], ['초록별', 'art/space/land_center.webp'], ['보라별', 'art/space/land_dream.webp'],
+    ['농장별', 'art/space/land_farm.webp'], ['분홍별', 'art/space/land_love.webp'], ['바다별 해변', 'art/space/land_sea.webp'], ['맑은 하늘', 'games/birds/img/sky.webp'],
+    ['바닷속', 'games/fishing/img/sea.webp'], ['동물 마을 지도', 'games/tycoon/img/town.webp'], ['스포츠 센터', 'sports/assets/ballcenter/center_outside.webp'], ['은하수', 'space/img/galaxy.webp'],
+    ['호수 섬 마을', 'town/wj.webp'], ['꽃 온실', 'core/ui/greenhouse.webp']
+  ];
+  var GRID = { 10: [5, 2], 20: [5, 4], 50: [10, 5], 100: [10, 10] };
+  var DEF_BY_LEVEL = [10, 10, 20, 50, 100];
+  var AS = 16 / 9;
+  var GHOST = [.5, .38, .25, .12, 0], TOL = [.62, .52, .44, .38, .32];
+  var LESSON = O.qs('lesson') || 'mini-puzzle';
+  var level = O.levelFor(LESSON);
+  var BACK = O.qs('lesson') ? O.ret(O.ROOT + 'play/?id=' + LESSON) : O.ret(O.ROOT + 'index.html');
+  var KEY = 'oks_puzzle_pieces_v1';
+  function josa(w, a, b) { var c = w.charCodeAt(w.length - 1) - 0xAC00; return (c >= 0 && c % 28) ? a : b; }
+
+  var sh = O.shell({ compact: true, title: '그림 퍼즐', back: BACK, backLabel: '돌아가기', level: level });
+  if (O.eco) try { sh.menu.insertBefore(O.eco.hud(sh.menu), sh.levelBtn); } catch (e) {}
+  var board = sh.board; board.className = 'oks-board pz-board';
+  var stage = E('div', 'pz-stage'), dock = E('div', 'pz-dock');
+  board.appendChild(stage); board.appendChild(dock);
+  var btnPeek = E('button', 'oks-btn blue', '🖼️ 그림 보기'), btnHelp = E('button', 'oks-btn orange', '🖐️ 도와줘');
+  btnPeek.type = btnHelp.type = 'button'; dock.appendChild(btnPeek); dock.appendChild(btnHelp);
+
+  /* ---------- 상태 ---------- */
+  var N = 0, cols = 0, rows = 0, pick = null, img = null, stats = null, playing = false, finished = false;
+  var pieces = [], edgesR = [], edgesB = [], zTop = 20, placedN = 0;
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  var geo = null, frame, ghost, slot, peek, hud, helpOn = false;
+  var hitCtx = E('canvas').getContext('2d');
+
+  function loadImg(src) { return new Promise(function (res, rej) { var im = new Image(); im.onload = function () { res(im); }; im.onerror = rej; im.src = R + src; }); }
+
+  /* ---------- 조각 모양(직소) ---------- */
+  function edge(p, x0, y0, x1, y1, dir, m) {
+    if (!dir) { p.lineTo(x1, y1); return; }
+    var dx = x1 - x0, dy = y1 - y0, L = Math.sqrt(dx * dx + dy * dy), ux = dx / L, uy = dy / L, nx = uy * dir, ny = -ux * dir, cx = x0 + dx / 2, cy = y0 + dy / 2;
+    function P(a, b) { return [cx + ux * a * m + nx * b * m, cy + uy * a * m + ny * b * m]; }
+    function C(a1, b1, a2, b2, a3, b3) { var q = P(a1, b1), r = P(a2, b2), s = P(a3, b3); p.bezierCurveTo(q[0], q[1], r[0], r[1], s[0], s[1]); }
+    var s0 = P(-.15, 0); p.lineTo(s0[0], s0[1]);
+    C(-.06, 0, -.08, .08, -.08, .14); C(-.20, .16, -.20, .34, 0, .34); C(.20, .34, .20, .16, .08, .14); C(.08, .08, .06, 0, .15, 0);
+    p.lineTo(x1, y1);
+  }
+  function piecePath(pc, pw, ph, t, m) {
+    var p = new Path2D(), x = t, y = t;
+    p.moveTo(x, y);
+    edge(p, x, y, x + pw, y, pc.top, m);
+    edge(p, x + pw, y, x + pw, y + ph, pc.right, m);
+    edge(p, x + pw, y + ph, x, y + ph, pc.bottom, m);
+    edge(p, x, y + ph, x, y, pc.left, m);
+    p.closePath(); return p;
+  }
+
+  /* ---------- 자리 계산 ---------- */
+  function measure() {
+    var W = stage.clientWidth, H = stage.clientHeight;
+    var bw = Math.min(W * (N <= 20 ? .6 : .62), (H * .78) * AS), bh = bw / AS;
+    var bx = Math.round(Math.max(14, (W - bw) / 2 - (W > 900 ? W * .04 : 0))), by = Math.round(Math.max(48, (H - bh) / 2 + 14));
+    if (by + bh > H - 10) { bh = H - 10 - by; bw = bh * AS; }
+    bw = Math.round(bw); bh = Math.round(bh);
+    var pw = bw / cols, ph = bh / rows, m = Math.min(pw, ph), t = Math.ceil(m * .38);
+    return { W: W, H: H, bx: bx, by: by, bw: bw, bh: bh, pw: pw, ph: ph, m: m, t: t };
+  }
+  function coverCanvas(w, h) {                     /* 그림을 16:9로 잘라 판 크기에 맞춰요 */
+    var c = E('canvas'); c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+    var iw = img.naturalWidth, ih = img.naturalHeight, sw = iw, sh2 = iw / AS;
+    if (sh2 > ih) { sh2 = ih; sw = ih * AS; }
+    c.getContext('2d').drawImage(img, (iw - sw) / 2, (ih - sh2) / 2, sw, sh2, 0, 0, c.width, c.height);
+    return c;
+  }
+  function build() {
+    var old = geo; geo = measure();
+    stage.innerHTML = '';
+    var src = coverCanvas(geo.bw, geo.bh);
+    frame = E('div', 'pz-frame'); frame.style.cssText = 'left:' + geo.bx + 'px;top:' + geo.by + 'px;width:' + geo.bw + 'px;height:' + geo.bh + 'px';
+    ghost = E('canvas'); ghost.width = src.width; ghost.height = src.height;
+    var gx = ghost.getContext('2d'); gx.fillStyle = '#fffdf8'; gx.fillRect(0, 0, ghost.width, ghost.height); gx.globalAlpha = GHOST[level - 1]; gx.drawImage(src, 0, 0);
+    if (!GHOST[level - 1]) { gx.globalAlpha = 1; gx.strokeStyle = 'rgba(0,0,0,.12)'; gx.lineWidth = 1; for (var i = 1; i < cols; i++) { gx.beginPath(); gx.moveTo(i * ghost.width / cols, 0); gx.lineTo(i * ghost.width / cols, ghost.height); gx.stroke(); } for (var j = 1; j < rows; j++) { gx.beginPath(); gx.moveTo(0, j * ghost.height / rows); gx.lineTo(ghost.width, j * ghost.height / rows); gx.stroke(); } }
+    frame.appendChild(ghost); stage.appendChild(frame);
+    slot = E('div', 'pz-slot'); slot.hidden = true; slot.style.width = geo.pw + 'px'; slot.style.height = geo.ph + 'px'; stage.appendChild(slot);
+    hud = E('div', 'pz-hud', '<span>🧩 <b class="n">' + placedN + '</b> / ' + N + '</span>'); stage.appendChild(hud);
+    pieces.forEach(function (pc) {
+      var cv = E('canvas', 'pz-p' + (pc.placed ? ' placed' : '')), cw = geo.pw + 2 * geo.t, ch = geo.ph + 2 * geo.t;
+      cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr); cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
+      pc.path = piecePath(pc, geo.pw, geo.ph, geo.t, geo.m);
+      var x = cv.getContext('2d'); x.scale(dpr, dpr); x.save(); x.clip(pc.path);
+      x.drawImage(src, (pc.c * geo.pw - geo.t) * dpr, (pc.r * geo.ph - geo.t) * dpr, cw * dpr, ch * dpr, 0, 0, cw, ch); x.restore();
+      x.lineJoin = 'round'; x.strokeStyle = 'rgba(255,255,255,.55)'; x.lineWidth = 1; x.stroke(pc.path);
+      x.save(); x.clip(pc.path); x.strokeStyle = 'rgba(30,20,50,.6)'; x.lineWidth = 3; x.stroke(pc.path); x.restore();
+      pc.el = cv; cv._pc = pc;
+      var hx = geo.bx + pc.c * geo.pw, hy = geo.by + pc.r * geo.ph; pc.hx = hx; pc.hy = hy;
+      if (pc.placed) { pc.x = hx; pc.y = hy; } else { pc.x = Math.max(-geo.t, Math.min(geo.W - geo.pw - geo.t, pc.fx * geo.W)); pc.y = Math.max(-geo.t, Math.min(geo.H - geo.ph - geo.t, pc.fy * geo.H)); }
+      place(pc); cv.style.zIndex = pc.placed ? 1 : pc.z; stage.appendChild(cv);
+    });
+    peek = E('div', 'pz-peek'); peek.hidden = true; peek.style.cssText = 'left:' + geo.bx + 'px;top:' + geo.by + 'px;width:' + geo.bw + 'px;height:' + geo.bh + 'px';
+    var pcv = E('canvas'); pcv.width = src.width; pcv.height = src.height; pcv.getContext('2d').drawImage(src, 0, 0); peek.appendChild(pcv); stage.appendChild(peek);
+    var nm = E('div', 'pz-name', '🖼️ ' + pick[0]); stage.appendChild(nm);
+    stage._src = src;
+  }
+  function place(pc) { pc.el.style.left = (pc.x - geo.t) + 'px'; pc.el.style.top = (pc.y - geo.t) + 'px'; }
+
+  /* ---------- 시작: 조각 흩뿌리기 ---------- */
+  function newPuzzle() {
+    var g = GRID[N]; cols = g[0]; rows = g[1]; placedN = 0; finished = false;
+    var R1 = [], B1 = [], r, c;
+    for (r = 0; r < rows; r++) { R1[r] = []; B1[r] = []; for (c = 0; c < cols; c++) { R1[r][c] = Math.random() < .5 ? 1 : -1; B1[r][c] = Math.random() < .5 ? 1 : -1; } }
+    pieces = [];
+    for (r = 0; r < rows; r++) for (c = 0; c < cols; c++) pieces.push({ c: c, r: r, id: r * cols + c,
+      top: r > 0 ? -B1[r - 1][c] : 0, bottom: r < rows - 1 ? B1[r][c] : 0, left: c > 0 ? -R1[r][c - 1] : 0, right: c < cols - 1 ? R1[r][c] : 0, placed: false, z: 10 });
+    var m0 = measure();
+    pieces.forEach(function (pc) {                      /* 판 바깥쪽에 흩뿌려요 */
+      var x, y, k = 0;
+      do { x = Math.random() * (m0.W - m0.pw - 8) + 4; y = Math.random() * (m0.H - m0.ph - 8) + 4; k++; }
+      while (k < 60 && x + m0.pw > m0.bx - 6 && x < m0.bx + m0.bw + 6 && y + m0.ph > m0.by - 6 && y < m0.by + m0.bh + 6);
+      pc.fx = x / m0.W; pc.fy = y / m0.H; pc.z = 10 + Math.floor(Math.random() * 10);
+    });
+    build();
+  }
+  function hint() {                                      /* 다음에 놓을 조각: 왼쪽 위부터 차례로 */
+    for (var i = 0; i < pieces.length; i++) if (!pieces[i].placed) return pieces[i];
+    return null;
+  }
+  function showSlot(on) {
+    var pc = hint(); if (!pc || !on) { slot.hidden = true; return; }
+    slot.style.left = pc.hx + 'px'; slot.style.top = pc.hy + 'px'; slot.hidden = false;
+  }
+  function setTarget() {
+    var pc = hint(); showSlot(helpOn || level <= 2);
+    O.target({ get: function () { var p = hint(); return p ? [p.el] : []; }, say: '반짝이는 조각을 빛나는 자리에 놓아요' }, level);
+  }
+
+  /* ---------- 끌기 ---------- */
+  var drag = null;
+  function pieceAt(px, py) {
+    var best = null;
+    for (var i = pieces.length - 1; i >= 0; i--) {                          /* 위에 있는 조각부터 */
+      var pc = pieces[i]; if (pc.placed) continue;
+      var lx = px - (pc.x - geo.t), ly = py - (pc.y - geo.t);
+      if (lx < 0 || ly < 0 || lx > geo.pw + 2 * geo.t || ly > geo.ph + 2 * geo.t) continue;
+      if (hitCtx.isPointInPath(pc.path, lx, ly) && (!best || pc.z > best.z)) best = pc;
+    }
+    if (best) return best;
+    var d0 = geo.m * .55;                                                   /* 손가락이 조금 빗나가도 가까운 조각 */
+    pieces.forEach(function (pc) { if (pc.placed) return; var d = Math.hypot(px - (pc.x + geo.pw / 2), py - (pc.y + geo.ph / 2)); if (d < Math.max(d0, Math.min(geo.pw, geo.ph) * .6) && (!best || d < best.d)) { best = pc; best.d = d; } });
+    return best;
+  }
+  function pt(e) { var r = stage.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+  stage.addEventListener('pointerdown', function (e) {
+    if (!playing || drag || finished) return;
+    O.unlock(); var p = pt(e), pc = pieceAt(p[0], p[1]); if (!pc) return;
+    e.preventDefault(); try { stage.setPointerCapture(e.pointerId); } catch (x) {}
+    O.clearPrompt(); pc.z = ++zTop; pc.el.style.zIndex = pc.z; pc.el.classList.add('drag'); pc.el.classList.remove('oks-glow');
+    drag = { pc: pc, dx: p[0] - pc.x, dy: p[1] - pc.y, id: e.pointerId }; O.sfx('tick');
+  });
+  stage.addEventListener('pointermove', function (e) {
+    if (!drag || e.pointerId !== drag.id) return; var p = pt(e), pc = drag.pc;
+    pc.x = Math.max(-geo.t * .6, Math.min(geo.W - geo.pw + geo.t * .6, p[0] - drag.dx)); pc.y = Math.max(-geo.t * .6, Math.min(geo.H - geo.ph + geo.t * .6, p[1] - drag.dy)); place(pc);
+  });
+  function drop(e) {
+    if (!drag || (e && e.pointerId !== drag.id)) return; var pc = drag.pc; drag = null; pc.el.classList.remove('drag');
+    var tol = Math.max(16, geo.m * TOL[level - 1]);
+    if (Math.hypot(pc.x - pc.hx, pc.y - pc.hy) <= tol) snap(pc);
+    else { pc.fx = pc.x / geo.W; pc.fy = pc.y / geo.H; if (pc.x + geo.pw > geo.bx && pc.x < geo.bx + geo.bw && pc.y + geo.ph > geo.by && pc.y < geo.by + geo.bh) { stats.mistakes++; O.sfx('no'); } }
+  }
+  stage.addEventListener('pointerup', drop); stage.addEventListener('pointercancel', drop);
+
+  function star(x, y) { var s = E('span', 'pz-star', '⭐'); s.style.left = x + 'px'; s.style.top = y + 'px'; stage.appendChild(s); setTimeout(function () { s.remove(); }, 850); }
+  function snap(pc) {
+    pc.placed = true; pc.x = pc.hx; pc.y = pc.hy; place(pc); pc.el.classList.add('placed', 'snap'); pc.el.style.zIndex = 1; placedN++;
+    star(pc.hx + geo.pw / 2, pc.hy + geo.ph / 2); O.sfx(placedN % 5 === 0 ? 'ok' : 'pop');
+    var n = hud.querySelector('.n'); if (n) n.textContent = placedN;
+    if (placedN === N) { playing = false; complete(); return; }
+    var half = Math.floor(N / 2);
+    if (N >= 20 && placedN === half) O.say('반이나 맞췄어요!'); else if (placedN === 1 || placedN % 10 === 0 && N >= 50) O.say('잘 맞췄어요!');
+    setTarget();
+  }
+  async function complete() {
+    O.clearPrompt(); slot.hidden = true;
+    var d = E('div', 'pz-done'); d.style.cssText = 'left:' + geo.bx + 'px;top:' + geo.by + 'px;width:' + geo.bw + 'px;height:' + geo.bh + 'px';
+    var c = E('canvas'); c.width = stage._src.width; c.height = stage._src.height; c.getContext('2d').drawImage(stage._src, 0, 0); d.appendChild(c); stage.appendChild(d);
+    O.sfx('ok'); await O.wait(250); d.classList.add('on');
+    O.say('완성! ' + pick[0] + josa(pick[0], '이에요', '예요') + '!'); await O.wait(2200);
+    finished = true;
+    var entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'art', school: 'elem', topic: '그림 퍼즐 ' + N + '조각', level: level, engine: 'puzzle', pieces: N, image: pick[1],
+      mistakes: stats.mistakes, glow: stats.glow, hand: stats.hand, asked: stats.asked + (helpUsed || 0), sec: Math.round((Date.now() - stats.t0) / 1000) };
+    var btns = [{ label: '🔁 다른 그림으로 (' + N + '조각)', color: 'green', onClick: function () { go(N); } }];
+    var nxt = { 10: 20, 20: 50, 50: 100 }[N];
+    if (nxt) btns.push({ label: '🧩 ' + nxt + '조각 도전', color: 'orange', onClick: function () { go(nxt); } });
+    btns.push({ label: O.qs('lesson') ? '차시로 돌아가기' : '🏠 돌아가기', color: 'blue', href: BACK });
+    O.finish({ stats: stats, entry: entry, title: '퍼즐 완성!', text: pick[0] + ' · ' + N + '조각 · ' + O.LEVELS[level - 1].name, mission: { lesson: 1 }, buttons: btns });
+  }
+  function go(n) { var q = ['pieces=' + n, 'go=1']; if (O.qs('lesson')) q.push('lesson=' + LESSON); q.push('level=' + level); location.href = '?' + q.join('&'); }
+
+  /* ---------- 버튼 ---------- */
+  var peekT = 0, helpUsed = 0;
+  btnPeek.onclick = function () { if (!peek) return; O.unlock(); peek.hidden = false; clearTimeout(peekT); peekT = setTimeout(function () { peek.hidden = true; }, 3200); };
+  btnHelp.onclick = function () { if (!playing) return; O.unlock(); helpUsed++; helpOn = true; var pc = hint(); if (!pc) return; showSlot(true); pc.el.style.zIndex = ++zTop; pc.z = zTop; pc.el.classList.add('oks-glow'); O.say('반짝이는 조각을 빛나는 자리에 놓아요'); };
+  sh.levelBtn.onclick = function () { location.reload(); };
+  var rz = 0; addEventListener('resize', function () { clearTimeout(rz); rz = setTimeout(function () { if (!pieces.length || drag || !img) return; pieces.forEach(function (pc) { if (!pc.placed) { pc.fx = pc.x / geo.W; pc.fy = pc.y / geo.H; } }); build(); if (playing) setTarget(); }, 250); });
+
+  /* ---------- 시작 화면: 조각 수와 그림 고르기 ---------- */
+  function miniGrid(n) {
+    var g = GRID[n], w = 56, h = 32, s = '<svg viewBox="0 0 ' + w + ' ' + h + '"><rect x="1" y="1" width="' + (w - 2) + '" height="' + (h - 2) + '" rx="3" fill="#ffe6a8" stroke="#c98a00" stroke-width="1.5"/>';
+    for (var i = 1; i < g[0]; i++) s += '<line x1="' + (i * w / g[0]) + '" y1="1" x2="' + (i * w / g[0]) + '" y2="' + (h - 1) + '" stroke="#c98a00" stroke-width=".8"/>';
+    for (var j = 1; j < g[1]; j++) s += '<line x1="1" y1="' + (j * h / g[1]) + '" x2="' + (w - 1) + '" y2="' + (j * h / g[1]) + '" stroke="#c98a00" stroke-width=".8"/>';
+    return s + '</svg>';
+  }
+  var HINT_TXT = { 10: '아주 쉬워요', 20: '쉬워요', 50: '도전!', 100: '대도전!' };
+  function startScreen() {
+    sh.askEl.style.visibility = 'hidden';
+    var saved = 0; try { saved = +localStorage.getItem(KEY) || 0; } catch (e) {}
+    N = +O.qs('pieces') || saved || DEF_BY_LEVEL[level - 1]; if (!GRID[N]) N = 20;
+    var ov = E('div', 'oks-start'), choices = [], pickIdx = 0;
+    function roll() { var idx = O.shuffle(IMGS.map(function (x, i) { return i; })); choices = idx.slice(0, 3); pickIdx = choices[0]; }
+    roll();
+    ov.innerHTML = '<div class="st-card"><h1>🧩 그림 퍼즐</h1><p>조각을 끌어서 알맞은 자리에 놓아 그림을 완성해요.</p>' +
+      '<h3>몇 조각으로 할까요?</h3><div class="pz-cnt">' + [10, 20, 50, 100].map(function (n) { return '<button type="button" data-n="' + n + '">' + miniGrid(n) + '<b>' + n + '</b><span>' + HINT_TXT[n] + '</span></button>'; }).join('') + '</div>' +
+      '<h3>어떤 그림으로 할까요?</h3><div class="pz-imgs"></div><button type="button" class="oks-btn green st-go">시작! ▶</button></div>';
+    document.body.appendChild(ov);
+    var imgsEl = ov.querySelector('.pz-imgs');
+    function drawChoices() {
+      imgsEl.innerHTML = '';
+      choices.forEach(function (i) { var b = E('button', i === pickIdx ? 'on' : '', '<img src="' + R + IMGS[i][1] + '" alt=""><i>' + IMGS[i][0] + '</i>'); b.type = 'button'; b.onclick = function () { pickIdx = i; O.unlock(); O.say(IMGS[i][0]); drawChoices(); }; imgsEl.appendChild(b); });
+      var d = E('button', 'dice', '🎲 다른 그림'); d.type = 'button'; d.onclick = function () { roll(); drawChoices(); }; imgsEl.appendChild(d);
+    }
+    drawChoices();
+    function markN() { ov.querySelectorAll('.pz-cnt button').forEach(function (b) { b.classList.toggle('on', +b.dataset.n === N); }); }
+    ov.querySelectorAll('.pz-cnt button').forEach(function (b) { b.onclick = function () { N = +b.dataset.n; O.unlock(); markN(); O.say(N + '조각'); }; }); markN();
+    ov.querySelector('.st-go').onclick = function () { O.unlock(); O.hush(); ov.remove(); begin(pickIdx); };
+  }
+  function begin(idx) {
+    try { localStorage.setItem(KEY, N); } catch (e) {}
+    pick = IMGS[idx]; sh.askEl.style.visibility = '';
+    loadImg(pick[1]).then(function (im) {
+      img = im; stats = O.newStats(); O.rememberLevel(LESSON, level); sh.setLevel(level);
+      sh.ask(pick[0] + ' 퍼즐 ' + N + '조각! 조각을 끌어서 맞춰요.'); newPuzzle(); playing = true; helpOn = false; helpUsed = 0; setTarget();
+    }).catch(function () { sh.ask('그림을 불러오지 못했어요. 다시 해 봐요.'); });
+  }
+  if (O.qs('go')) { N = +O.qs('pieces') || 20; if (!GRID[N]) N = 20; begin(+O.qs('img') >= 0 && O.qs('img') != null && O.qs('img') !== '' ? +O.qs('img') : Math.floor(Math.random() * IMGS.length)); } else startScreen();
+  window.PUZZLE_GAME = { pieces: function () { return pieces; }, get playing() { return playing; }, get N() { return N; }, get placed() { return placedN; }, snap: function (pc) { snap(pc); }, geo: function () { return geo; } };
+})();
+</script>
+</body>
+</html>

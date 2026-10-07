@@ -80,7 +80,8 @@
       { id: 'b_sculpt', name: '조형 스튜디오', sub: '미술 · 만들기', kind: 'lessons', subject: 'art', x: 50, y: 90, s: 1, emo: '🏺',
         keys: ['공방', '캐릭터 스튜디오', '디자인'] },
       { id: 'b_gallery', name: '바다 미술관', sub: '미술 · 감상', kind: 'lessons', subject: 'art', x: 82, y: 90, s: 1, emo: '🖼️',
-        keys: ['미술관', '감상'] }
+        keys: ['미술관', '감상'],
+        links: [['🧩 그림 퍼즐 (10 · 20 · 50 · 100조각)', 'games/puzzle/']] }
     ],
     love: [
       { id: 'b_bakery', name: '동물 베이커리', sub: '수학 · 수·나누기', kind: 'lessons', subject: 'math', x: 20, y: 52, s: 1, emo: '🎂', keys: ['베이커리'] },
