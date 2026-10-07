@@ -308,5 +308,5 @@
     claim().then(newCards).then(function () { if (!document.querySelector('.tc-modal')) say('구단에 온 걸 환영해요. 오늘의 경기를 시작해 봐요'); });
   }
 
-  g.OKS_TYCOON = { open: open, inning: inning, cards: CARDS, owned: owned, load: load };
+  g.OKS_TYCOON = { lineup: function () { var d = load(), os = ownedSet(); return d.lineup.map(function (id) { return id && os[id] ? BYID[id] : null; }); }, open: open, inning: inning, cards: CARDS, owned: owned, load: load };
 })(window);

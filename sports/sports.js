@@ -147,6 +147,69 @@ function utilityBuilding(id){
  }
  modal.onclick=function(e){if(e.target===modal)modal.remove()};modal.appendChild(box);document.body.appendChild(modal);
 }
+
+/* ---------- ⚾ 스타 리그 (야구 전문가반) ---------- */
+function proUnlocked(){
+ var p=progress(),ok=[1,2,3].every(function(n){return (p['baseball-high-'+n]||{}).plays>0});
+ var open=false;try{open=localStorage.getItem('oks_pro_open')==='1'||!!O.settings().openAll}catch(e){}
+ return ok||open;
+}
+function proBlock(){
+ var P=window.OKS_PRO;if(!P)return null;
+ var p=progress(),done=[1,2,3].filter(function(n){return (p['baseball-high-'+n]||{}).plays>0}).length,un=proUnlocked();
+ var box=E('section','pro-block'+(un?'':' lock'));
+ box.innerHTML='<div class="pro-head"><span class="pro-ic">'+(un?'🌟':'🔒')+'</span><div><h2>⚾ '+P.NAME+' <small>야구 전문가반</small></h2><p>'+(un?'기초를 모두 마친 선수들을 위한 진짜 야구! 하고 싶은 방식을 골라요.':'고등 1~3차시를 한 번씩 마치면 열려요. 지금 '+done+'/3')+'</p></div></div>';
+ var modes=E('div','pro-modes');
+ ['a','b','c'].forEach(function(k){
+  var m=P.MODES[k],c=E('div','pro-mode'),lv='';
+  O.LEVELS.forEach(function(L){lv+=un?'<a href="?festival=summer&sport=baseball&pro=1&mode='+k+'&school=high&lesson=1&level='+L.n+'&play=1" title="'+O.esc(L.name)+'">'+L.n+'</a>':'<span>'+L.n+'</span>'});
+  c.innerHTML='<div class="pro-mic">'+m.emo+'</div><b>'+String.fromCharCode(65+['a','b','c'].indexOf(k))+'. '+m.name+'</b><small>'+m.desc+'</small><div class="pro-lv"><em>수준</em>'+lv+'</div>';
+  modes.appendChild(c);
+ });
+ box.appendChild(modes);
+ if(!un){
+  var t=E('details','pro-teacher','<summary>선생님 · 미리 열기</summary><p>이 기기에서 스타 리그를 미리 열어요. 기초 과정을 건너뛰고 해 볼 수 있어요.</p>');
+  var b=E('button','oks-btn blue','🔓 전문가반 열기');b.type='button';b.onclick=function(){try{localStorage.setItem('oks_pro_open','1')}catch(e){}location.reload()};t.appendChild(b);box.appendChild(t);
+ }
+ return box;
+}
+function proActivity(){
+ var P=window.OKS_PRO,mode=['a','b','c'].indexOf(q.get('mode'))>=0?q.get('mode'):'a',M=P.MODES[mode],lvl=level;
+ var sh=top('⚾ '+P.NAME+' · '+M.name,'야구 전문가반','?festival=summer&sport=baseball','야구 목차',true,true);
+ document.body.classList.add('oks-play','sports-play');document.title=P.NAME+' · 옥쌤의 즐거운 교실';
+ if(O.eco){var ehud=O.eco.hud(sh.menu);sh.menu.insertBefore(ehud,sh.levelBtn);}
+ var base='?festival=summer&sport=baseball&pro=1&mode='+mode+'&school=high&lesson=1';
+ sh.levelBtn.onclick=function(){
+  var ov=E('div','oks-overlay'),box=E('div','oks-finish oks-levelpick');
+  box.innerHTML='<h2>수준 고르기</h2><p>'+O.esc(P.NAME+' · '+M.name)+'</p><div class="btns"></div><div class="note">수준을 바꾸면 처음부터 다시 시작해요.</div>';
+  O.LEVELS.forEach(function(L){var b=E('button','oks-lv'+(L.n===level?' on':''),'<b>'+L.n+'</b><span><strong>'+L.name+'</strong></span>');b.type='button';b.onclick=function(){location.href=base+'&level='+L.n+'&play=1'};box.querySelector('.btns').appendChild(b)});
+  var close=E('button','oks-btn blue','닫기');close.type='button';close.onclick=function(){ov.remove()};box.querySelector('.btns').appendChild(close);ov.appendChild(box);document.body.appendChild(ov);
+ };
+ var inn=lvl===1?2:3;sh.setLevel(lvl);sh.setRounds(inn*2,0);sh.ask(P.NAME+'! 시작해 볼까요?',{silent:true});
+ var start=E('div','oks-start');
+ start.innerHTML='<div class="oks-start-lv">'+LEVELS[lvl-1].name+'</div><p class="gdesc">'+M.emo+' <b>'+M.name+'</b> — '+O.esc(M.desc)+'</p><p>'+inn+'이닝 · 3아웃이면 공수 교대 · 이기지 못해도 별은 받아요</p>';
+ var go=E('button','oks-btn',O.iconHtml('icon_play.png','시작하기'));go.type='button';start.appendChild(go);sh.board.appendChild(start);
+ O.target({get:function(){return go}},Math.min(lvl,2));
+ go.onclick=function(){
+  O.unlock();O.clearPrompt();
+  var st=O.newStats(),ctx={sh:sh,board:sh.board,level:lvl,stats:st,cfg:{},lesson:{topic:P.NAME},id:'sports-baseball-pro'};
+  O.kit(ctx);ctx.clear=function(){O.clearPrompt();sh.board.innerHTML='';sh.board.className='oks-board in-scene'};ctx.newStep=function(){sh.mood('idle')};
+  st.t0=Date.now();st.glow=0;st.hand=0;ctx.clear();
+  var g=P.mount({sh:sh,level:lvl,mode:mode,stats:st,ctx:ctx});
+  g.begin().then(function(r){
+   var stars=r.stars;save('baseball-pro-'+mode,stars,r.mistakes);
+   var sec=Math.round((Date.now()-st.t0)/1000),entry={at:new Date().toISOString(),lesson:'sports-baseball-pro-'+mode,subject:'physical',school:'high',topic:P.NAME+' '+M.name,level:lvl,mistakes:r.mistakes,glow:st.glow,hand:st.hand,asked:st.asked,sec:sec,rounds:inn*2};
+   var season=q.get('season')==='1'&&window.OKS_TYCOON?OKS_TYCOON.inning('baseball',stars):null;
+   O.finish({stats:st,entry:entry,title:r.win?'스타 리그 승리!':'멋진 경기였어요!',text:'⚾ '+P.NAME+' · '+M.name+' · '+LEVELS[lvl-1].name+' · '+r.text+' · ⭐ '+r.coins,stars:stars,extraCoins:Math.min(5,Math.floor(r.coins/4)),
+    buttons:[
+     {label:'한 번 더',onClick:function(){location.reload()}},
+     lvl<5?{label:'다음 수준 ('+(lvl+1)+')',color:'orange',href:base+'&level='+(lvl+1)+'&play=1'}:null,
+     {label:'다른 모드 고르기',color:'blue',href:'?festival=summer&sport=baseball'},
+     {label:'🏟️ 스포츠 타이쿤',color:'blue',href:'?tycoon=1'}
+    ].filter(Boolean)});
+  }).catch(function(e){console.error(e);O.toast('앗, 문제가 생겼어요. 다시 시작해 주세요.')});
+ };
+}
 /* ---------- 종목 차시 + 수준 ---------- */
 function sportToc(){
  var s=byId(sid);if(!s){summerHub();return}
@@ -165,6 +228,7 @@ function sportToc(){
   list.innerHTML='';[1,2,3].forEach(function(no){list.appendChild(lessonRow(s,sel,no))});
  }
  draw();sh.board.innerHTML='';sh.board.appendChild(host);
+ if(s.id==='baseball'){var pb=proBlock();if(pb)host.appendChild(pb);}
 }
 function lessonRow(s,sk,no){
  var li=info(s,sk,no),key=s.id+'-'+sk+'-'+no,pr=progress()[key]||{},row=E('article','sports-lesson');
@@ -396,6 +460,7 @@ function makePlan(s,L,ctx){
 }
 
 if(q.get('tycoon')==='1'&&window.OKS_TYCOON)OKS_TYCOON.open();
+else if(play&&sid==='baseball'&&q.get('pro')==='1'&&window.OKS_PRO&&proUnlocked())proActivity();
 else if(play&&sid)activity();
 else if(festival==='summer'&&sid)sportToc();
 else if(festival==='summer')summerHub();
