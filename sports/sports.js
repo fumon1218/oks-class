@@ -12,23 +12,6 @@ var SCHOOLS=[
 ];
 var LEVELS=O.LEVELS;
 
-var SPORT_ITEMS={
- athletics:{tools:[
-  ['img:assets/athletics/outfit_sneakers.webp','운동화'],
-  ['img:assets/athletics/start_block.webp','스타팅 블록'],
-  ['img:assets/athletics/finish_ribbon.webp','결승선'],
-  ['img:assets/athletics/start_signal.webp','출발 신호']
-],bad:[
-  ['img:assets/athletics/outfit_coat.webp','두꺼운 겨울 외투'],
-  ['img:assets/athletics/outfit_sandals.webp','샌들']
-],action:'달리기'},
- swimming:{tools:[['🥽','물안경'],['🩱','수영복'],['🏊','수영'],['🛟','튜브']],bad:[['🧤','야구 글러브'],['🎸','기타']],action:'수영'},
- archery:{tools:[['🏹','활'],['🎯','과녁'],['➡️','방향'],['🧍','안전선']],bad:[['⚽','축구공'],['🥄','숟가락']],action:'양궁'},
- gymnastics:{tools:[['🧍','바른 자세'],['🙆','팔 벌리기'],['🦩','한 발 균형'],['🤸','체조']],bad:[['🏹','활'],['🥽','물안경']],action:'체조'},
- taekwondo:{tools:[['🥋','도복'],['🙇','인사'],['🦵','발차기'],['↔️','방향']],bad:[['🎣','낚싯대'],['🥽','물안경']],action:'태권도'},
- soccer:{tools:[['⚽','축구공'],['🥅','골대'],['👟','운동화'],['🤝','협동']],bad:[['🏹','활'],['🥽','물안경']],action:'축구'}
-};
-
 function byId(id){return D.sports.filter(function(s){return s.id===id})[0];}
 function schoolInfo(){return SCHOOLS.filter(function(x){return x.key===school})[0]||SCHOOLS[0];}
 function top(title,sub,back,label,compact,fit){
@@ -219,14 +202,14 @@ function levelDesc(s,li){
 function runGame(sh,s,li){
  var st=O.newStats(),ctx={sh:sh,board:sh.board,level:level,stats:st,cfg:{},lesson:{topic:li[0]},id:'sports-'+s.id};
  O.kit(ctx);ctx.clear=function(){O.clearPrompt();sh.board.innerHTML='';sh.board.className='oks-board sports-game-board'};ctx.newStep=function(){sh.mood('idle')};
- st.t0=Date.now();var round=0,total=level===1?3:5,wrong0=0;
- tryBg(sh.board,s);
+ st.t0=Date.now();var round=0,total=level===1?3:5,wrong0=0,LD=lessonData(s)||OKS_SPORT_LESSONS[s.id].elem[0],PLAN=makePlan(s,LD,ctx);
+ if(q.get('dev')==='game'&&level>=4){PLAN=[PLAN[level===4?3:2]];total=1}
  function next(){
   if(round>=total)return finish();
-  sh.setRounds(total,round);ctx.clear();tryBg(sh.board,s);
+  sh.setRounds(total,round);ctx.clear();
   var strip=sceneStrip(s,round,total);sh.board.appendChild(strip);
   var playArea=E('div','sports-play-area');sh.board.appendChild(playArea);
-  return Promise.resolve(roundFor(s,li,ctx,playArea,round)).then(function(){round++;setTimeout(next,550)});
+  return Promise.resolve(PLAN[round](playArea)).then(function(){round++;setTimeout(next,550)});
  }
  function finish(){
   sh.setRounds(total,total);var mistakes=st.mistakes||0,stars=mistakes<=1?3:mistakes<=3?2:1;
@@ -247,71 +230,74 @@ function sceneStrip(s,i,n){
  d.innerHTML='<img src="'+bg+'" alt=""><div class="sports-scene-title">'+s.emo+' '+s.name+' 탐험</div><div class="sports-scene-dots">'+Array.from({length:n},function(_,k){return '<i class="'+(k<i?'done':k===i?'now':'')+'">'+(k<i?'★':k+1)+'</i>'}).join('')+'</div>';
  return d;
 }
-function roundFor(s,li,ctx,host,i){
- if(level===1)return exploreRound(s,ctx,host,i);
- if(level===2)return chooseRound(s,ctx,host,i,2);
- if(level===3)return i%2===0?dragRound(s,ctx,host,i):sequenceRound(s,ctx,host,i);
- if(level===4)return i===3?timingRound(s,ctx,host):chooseRound(s,ctx,host,i,4);
- return lifeRound(s,ctx,host,i);
+/* ---------- 라운드 만들기: 차시 자료(lessons.js)에서 수준에 맞게 ---------- */
+function lessonData(s){
+ var A=window.OKS_SPORT_LESSONS&&OKS_SPORT_LESSONS[s.id],arr=A&&(A[school]||A.elem);
+ return arr&&arr[Math.max(0,Math.min(arr.length-1,lessonNo-1))];
 }
 function item(o){
   var v=o[0]||'';
   if(String(v).indexOf('img:')===0) return {img:String(v).slice(4),label:o[1]};
   return {emo:v,label:o[1]};
 }
-function sportSet(s){return SPORT_ITEMS[s.id]||SPORT_ITEMS.athletics}
-function exploreRound(s,ctx,host,i){
- var set=sportSet(s),arr=set.tools.slice(i%2,i%2+3);if(arr.length<3)arr=set.tools.slice(0,3);
- ctx.sh.ask('그림을 하나씩 눌러 '+s.name+'에 쓰는 것을 살펴봐요.');
- var cards=arr.map(function(x){return ctx.card(item(x),{big:true})});host.appendChild(ctx.grid(cards));
- return new Promise(function(res){var left=cards.length;ctx.target({get:function(){return cards.filter(function(c){return!c._done})}});
-  cards.forEach(function(c){c.onclick=function(){if(c._done)return;c._done=true;c.classList.add('good');O.say(c._item.label,{noRepeat:true});O.sfx('pop');left--;if(!left){O.praise();setTimeout(res,900)}else ctx.target({get:function(){return cards.filter(function(x){return!x._done})}})}})
- });
-}
-function chooseRound(s,ctx,host,i,nopt){
- var set=sportSet(s),right=set.tools[i%set.tools.length],wrong=set.bad,opts=[right].concat(O.shuffle(wrong).slice(0,nopt-1));
- ctx.sh.ask(s.name+' 활동에 알맞은 것을 골라 보세요.');
- var cards=O.shuffle(opts).map(function(x){return ctx.card(item(x),{big:nopt<=2})});host.appendChild(ctx.grid(cards));
- var ok=cards.filter(function(c){return c._item.label===right[1]})[0];ctx.target({get:function(){return ok}});
- return ctx.tapWait(cards,function(c){return c===ok}).then(function(c){ctx.good(c);O.say(c._item.label,{noRepeat:true});return O.wait(800)});
-}
-function dragRound(s,ctx,host,i){
- var set=sportSet(s),right=set.tools[i%set.tools.length],wrong=set.bad[0];
- ctx.sh.ask('알맞은 스포츠 도구를 경기장으로 옮겨 보세요.');
- var row=E('div','sports-drag-row'),zone=E('div','sports-dropzone','<b>'+s.emo+'</b><span>'+s.name+' 경기장</span>'),items=[ctx.card(item(right)),ctx.card(item(wrong))];
- row.appendChild(ctx.grid(items,2));row.appendChild(zone);host.appendChild(row);ctx.target({get:function(){return items[0]},to:zone});
- return ctx.dnd(items,[zone],function(it){return it._item.label===right[1]},function(it){ctx.good(it);zone.innerHTML='<b>'+it.innerHTML+'</b><span>잘 옮겼어요!</span>'},function(){return !!items[0]._done}).then(function(){return O.wait(800)});
-}
-function sequenceRound(s,ctx,host,i){
- var seq=s.id==='athletics'?[['🚩','출발'],['🏃','달리기'],['🏁','도착']]:
-         s.id==='swimming'?[['🙆','준비운동'],['🏊','수영'],['🧴','정리']]:
-         s.id==='taekwondo'?[['🙇','인사'],['🥋','준비'],['🦵','발차기']]:
-         s.id==='gymnastics'?[['🧍','서기'],['🙆','팔 벌리기'],['🦩','균형']]:
-         s.id==='archery'?[['🧍','안전선'],['🏹','준비'],['🎯','과녁']]:
-         [['⚽','공 준비'],['👟','차기'],['🥅','목표']];
- ctx.sh.ask('동작 순서를 차례대로 눌러 보세요.');
- var order=O.shuffle(seq.slice()),cards=order.map(function(x){return ctx.card(item(x))}),k=0;host.appendChild(ctx.grid(cards,3));
- ctx.target({get:function(){return cards.filter(function(c){return c._item.label===seq[k][1]})}});
- return new Promise(function(res){cards.forEach(function(c){c.onclick=function(){if(c._done||k>=seq.length)return;if(c._item.label===seq[k][1]){c._done=true;c.classList.add('good');O.sfx('tick');k++;if(k===seq.length){O.praise();setTimeout(res,800)}else ctx.target({get:function(){return cards.filter(function(x){return!x._done&&x._item.label===seq[k][1]})}})}else ctx.bad(c)}})});
-}
-function timingRound(s,ctx,host){
- ctx.sh.ask('신호가 나오면 빠르게 눌러 보세요.');
- var box=E('div','sports-timing','<div class="sports-ready">준비…</div>'),b=E('button','oks-btn orange','기다려요');b.disabled=true;box.appendChild(b);host.appendChild(box);
- return new Promise(function(res){setTimeout(function(){box.querySelector('.sports-ready').textContent='출발!';b.disabled=false;b.textContent=s.emo+' 지금!';var t=performance.now();ctx.target({get:function(){return b}});b.onclick=function(){var ms=Math.round(performance.now()-t);box.querySelector('.sports-ready').innerHTML='좋아요! <b>'+ms+'ms</b>';ctx.good(b);setTimeout(res,800)}},800+Math.random()*1200)});
-}
-function lifeRound(s,ctx,host,i){
- var sets={
- athletics:[['오늘 운동장에서 달리기를 해요. 먼저 무엇을 할까요?',[['🙆','준비운동',1],['⚡','바로 전력질주',0],['👟','신발 확인',1]]],['나의 목표를 골라요.',[['🙂','끝까지 달리기',1],['⏱️','내 기록 확인',1],['🙈','친구 기록만 보기',0]]]],
- swimming:[['수영장에 들어가기 전에 무엇을 할까요?',[['🙆','준비운동',1],['🏃','뛰어서 입수',0],['🥽','물안경 확인',1]]],['안전한 행동을 골라요.',[['🛟','안전도구 확인',1],['😜','친구 밀기',0],['🚶','천천히 이동',1]]]],
- archery:[['양궁 차례를 기다릴 때 어떻게 할까요?',[['🧍','안전선 뒤 기다리기',1],['🏃','과녁 앞으로 뛰기',0],['👀','신호 보기',1]]]],
- gymnastics:[['체조를 시작하기 전에 무엇을 할까요?',[['🙆','몸 풀기',1],['🪑','좁은 곳에서 하기',0],['↔️','주변 공간 확인',1]]]],
- taekwondo:[['친구와 태권도를 할 때 무엇이 중요할까요?',[['🙇','인사하기',1],['🦵','아무 때나 차기',0],['↔️','거리 지키기',1]]]],
- soccer:[['친구와 축구할 때 좋은 행동을 골라요.',[['🤝','패스하기',1],['😠','공 독차지',0],['👀','빈 공간 보기',1]]]]
- };
- var sset=(sets[s.id]||sets.athletics)[i%(sets[s.id]||sets.athletics).length],qtxt=sset[0],opts=sset[1];ctx.sh.ask(qtxt);
- var cards=opts.map(function(x){return ctx.card({emo:x[0],label:x[1]})});host.appendChild(ctx.grid(cards));
- var good=cards.filter(function(c,idx){return opts[idx][2]===1}),need=Math.min(2,good.length),got=0;ctx.target({get:function(){return good.filter(function(x){return!x._done})}});
- return new Promise(function(res){cards.forEach(function(c,idx){c.onclick=function(){if(opts[idx][2]===1&&!c._done){c._done=true;c.classList.add('good');got++;O.sfx('ok');if(got>=need){O.praise();setTimeout(res,800)}else ctx.target({get:function(){return good.filter(function(x){return!x._done})}})}else ctx.bad(c)}})});
+function makePlan(s,L,ctx){
+ var it=O.shuffle(L.i.slice()),nr=O.shuffle(L.n.slice()),tt=O.shuffle(L.t.slice()),R=[],gm=String(L.g||'').split(':'),gk=gm[0],ga=gm[1];
+ function game(){return function(host){return OKS_SPORT_GAMES[gk](ctx,host,{level:level,arg:ga,lesson:L,sport:s})}}
+ function explore(i){return function(host){
+  var a=[];for(var k=0;k<3;k++)a.push(it[(i*2+k)%it.length]);
+  ctx.sh.ask('그림을 하나씩 눌러 보세요. '+(L.q||'').replace(/을 골라요|를 골라요/,'을 알아봐요'));
+  var cards=a.map(function(x){return ctx.card(item(x),{big:true})});host.appendChild(ctx.grid(cards));
+  return new Promise(function(res){var left=cards.length;ctx.target({get:function(){return cards.filter(function(c){return!c._done})}});
+   cards.forEach(function(c){c.onclick=function(){if(c._done)return;c._done=true;c.classList.add('good');O.say(c._item.label,{noRepeat:true});O.sfx('pop');left--;if(!left){O.praise();setTimeout(res,900)}else ctx.target({get:function(){return cards.filter(function(x){return!x._done})}})}})});
+ }}
+ function pick(i,nopt){return function(host){
+  var right=it[i%it.length],wr=O.shuffle(nr.slice()).slice(0,nopt-1),opts=O.shuffle([right].concat(wr));
+  ctx.sh.ask(L.q);var cards=opts.map(function(x){return ctx.card(item(x),{big:nopt<=2})});host.appendChild(ctx.grid(cards,nopt>3?2:undefined));
+  var ok=cards.filter(function(c){return c._item.label===right[1]})[0];ctx.target({get:function(){return ok}});
+  O.say(L.q,{noRepeat:true});
+  return ctx.tapWait(cards,function(c){return c===ok}).then(function(c){ctx.good(c);O.say(c._item.label,{noRepeat:true});return O.wait(800)});
+ }}
+ function drag(i){return function(host){
+  var right=it[i%it.length],wrong=nr[i%nr.length];
+  ctx.sh.ask('알맞은 것을 "'+L.z+'"(으)로 옮겨 보세요.');
+  var row=E('div','sports-drag-row'),zone=E('div','sports-dropzone','<b>'+s.emo+'</b><span>'+L.z+'</span>'),items=O.shuffle([ctx.card(item(right)),ctx.card(item(wrong))]),good=items.filter(function(c){return c._item.label===right[1]})[0];
+  row.appendChild(ctx.grid(items,2));row.appendChild(zone);host.appendChild(row);ctx.target({get:function(){return good},to:zone});
+  return ctx.dnd(items,[zone],function(c){return c._item.label===right[1]},function(c){ctx.good(c);zone.innerHTML='<b>'+c.querySelector('.pic').innerHTML+'</b><span>'+O.esc(right[1])+' · 잘 옮겼어요!</span>'},function(){return !!good._done}).then(function(){return O.wait(800)});
+ }}
+ function order(){return function(host){
+  var seq=L.s.slice(0,4),cards,k=0;ctx.sh.ask('일이 일어나는 순서대로 눌러 보세요.');
+  cards=O.shuffle(seq.slice()).map(function(x){return ctx.card(item(x))});host.appendChild(ctx.grid(cards,Math.min(4,seq.length)));
+  ctx.target({get:function(){return cards.filter(function(c){return c._item.label===seq[k][1]})}});
+  return new Promise(function(res){cards.forEach(function(c){c.onclick=function(){if(c._done||k>=seq.length)return;
+   if(c._item.label===seq[k][1]){c._done=true;c.classList.add('good');O.sfx('tick');O.say(c._item.label,{noRepeat:true});k++;
+    if(k===seq.length){O.praise();setTimeout(res,800)}else ctx.target({get:function(){return cards.filter(function(x){return!x._done&&x._item.label===seq[k][1]})}})}else ctx.bad(c)}})});
+ }}
+ function nextStep(i){return function(host){
+  var seq=L.s.slice(0,4),n=seq.length,kk=1+(i%(n-2)),right=seq[kk],others=seq.filter(function(x,idx){return idx!==kk&&idx!==kk-1});
+  ctx.sh.ask('다음에 할 일은 무엇일까요?');
+  var done=E('div','sports-done-row',seq.slice(0,kk).map(function(x){return '<span>'+x[0]+' '+O.esc(x[1])+'</span>'}).join('<i>→</i>')+'<i>→</i><span class="q">❓</span>');host.appendChild(done);
+  var opts=O.shuffle([right].concat(O.shuffle(others).slice(0,2))),cards=opts.map(function(x){return ctx.card(item(x))});host.appendChild(ctx.grid(cards));
+  var ok=cards.filter(function(c){return c._item.label===right[1]})[0];ctx.target({get:function(){return ok}});
+  return ctx.tapWait(cards,function(c){return c===ok}).then(function(c){ctx.good(c);O.say(c._item.label,{noRepeat:true});return O.wait(800)});
+ }}
+ function situ(i,nopt){return function(host){
+  var T=tt[i%tt.length],good=T.o.filter(function(x){return x[2]}),bad=T.o.filter(function(x){return!x[2]});
+  var opts=nopt?O.shuffle([good[0]].concat(O.shuffle(bad.slice()).slice(0,nopt-1))):O.shuffle(T.o.slice());
+  ctx.sh.ask(T.q);O.say(T.q,{noRepeat:true});
+  var cards=opts.map(function(x){return ctx.card({emo:x[0],label:x[1]})});host.appendChild(ctx.grid(cards));
+  var need=nopt?1:Math.min(2,good.length),got=0;ctx.target({get:function(){return cards.filter(function(c,idx){return opts[idx][2]&&!c._done})}});
+  return new Promise(function(res){cards.forEach(function(c,idx){c.onclick=function(){
+   if(c._done)return;
+   if(opts[idx][2]){c._done=true;c.classList.add('good');got++;O.sfx('ok');O.say(opts[idx][1],{noRepeat:true});
+    if(got>=need){O.praise();setTimeout(res,900)}else ctx.target({get:function(){return cards.filter(function(x,j){return opts[j][2]&&!x._done})}})}
+   else ctx.bad(c)}})});
+ }}
+ if(level===1){for(var a=0;a<3;a++)R.push(explore(a));}
+ else if(level===2){R=[pick(0,2),pick(1,2),pick(2,2),pick(3,2),situ(0,2)];}
+ else if(level===3){R=[drag(0),order(),drag(1),nextStep(0),drag(2)];}
+ else if(level===4){R=[pick(0,4),pick(1,4),pick(2,4),game(),situ(1,3)];}
+ else{R=[situ(0),situ(1),game(),situ(2),situ(3)];}
+ return R;
 }
 
 if(play&&sid)activity();
