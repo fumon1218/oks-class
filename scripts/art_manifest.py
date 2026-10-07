@@ -73,6 +73,8 @@ GROUPS = [
    'prompt': 'A big friendly two-story school building for kids with a round clock tower in the middle (clock face with no numbers), a small golden star flag on top, big arched front door, pastel cream walls and a soft coral roof, flower boxes under the windows.'},
   {'file': 'b_library', 'star': '가운데 별', 'ko': '이야기 도서관 (국어 — 읽기)', 'kind': 'cut', 'size': 512, 'use': '국어 읽기 차시',
    'prompt': 'A cute small library building whose roof looks like an open storybook, stacks of giant books forming the walls, a round reading window, warm yellow light inside.'},
+  {'file': 'b_arcade', 'star': '가운데 별', 'ko': '미니게임 놀이터', 'kind': 'cut', 'size': 512, 'use': '가운데 별의 미니게임 놀이터',
+   'prompt': 'A cute round circus-tent playhouse with red and cream stripes, gold stars, a blue flag with a star on top, a red arched door, toy blocks and balls in a little garden.'},
   {'file': 'b_post', 'star': '가운데 별', 'ko': '동물 우체국 (국어 — 쓰기)', 'kind': 'cut', 'size': 512, 'use': '국어 쓰기·낱말 차시',
    'prompt': 'A cute small post office building shaped like a big red round mailbox, a letter slot above the door, a little envelope-shaped window, a paper airplane weather vane on the roof.'},
   {'file': 'b_broadcast', 'star': '가운데 별', 'ko': '방송국 (국어 — 말하기·듣기)', 'kind': 'cut', 'size': 512, 'use': '국어 말하기·듣기 차시',
