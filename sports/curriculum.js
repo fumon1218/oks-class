@@ -27,7 +27,8 @@ window.OKS_SPORTS_DATA = {
     {id:'archery',name:'양궁',emo:'🏹',color:'#76c94f',title:'과녁의 중심을 향해요',goal:'과녁과 방향을 살피고 주의 집중하여 목표를 맞혀요.',concepts:['과녁','중심','방향','집중','안전'],image:'assets/sports_building_archery.webp',scene:'assets/archery.webp'},
     {id:'gymnastics',name:'체조',emo:'🤸',color:'#bf78ef',title:'몸의 균형을 느껴요',goal:'서기·팔 벌리기·한 발 균형 동작을 차례로 경험해요.',concepts:['자세','균형','순서','몸','안전'],image:'assets/sports_building_gymnastics.webp',scene:'assets/gymnastics.webp'},
     {id:'taekwondo',name:'태권도',emo:'🥋',color:'#ef6c68',title:'기본 발차기를 익혀요',goal:'준비 자세와 발차기 방향을 알고 안전한 목표를 향해 움직여요.',concepts:['준비','발차기','방향','예절','안전'],image:'assets/sports_building_taekwondo.webp',scene:'assets/taekwondo.webp'},
-    {id:'soccer',name:'축구',emo:'⚽',color:'#f3c24b',title:'공을 목표로 보내요',goal:'공과 골대의 관계를 알고 발로 공을 보내는 기초 움직임을 경험해요.',concepts:['공','골대','차기','패스','협동'],image:'assets/sports_building_soccer.webp',scene:'assets/soccer.webp'}
+    {id:'soccer',name:'축구',emo:'⚽',color:'#f3c24b',title:'공을 목표로 보내요',goal:'공과 골대의 관계를 알고 발로 공을 보내는 기초 움직임을 경험해요.',concepts:['공','골대','차기','패스','협동'],image:'assets/sports_building_soccer.webp',scene:'assets/soccer.webp'},
+    {id:'baseball',name:'야구',emo:'⚾',color:'#3b82f6',title:'공을 보고 치고 달려요',goal:'공을 끝까지 보고 방망이를 휘두른 뒤 베이스로 달리는 야구의 기본을 경험해요.',concepts:['공','방망이','스트라이크','베이스','세이프'],image:'assets/baseball/card_baseball.webp',scene:'assets/baseball/scene.webp'}
   ],
   summerBuildings: [
     {id:'athletics',type:'sport',name:'육상 경기장',sub:'달리기 · 허들 · 이어달리기',image:'assets/sports_building_athletics.webp',color:'#ff8b45'},
@@ -36,7 +37,7 @@ window.OKS_SPORTS_DATA = {
     {id:'gymnastics',type:'sport',name:'체조관',sub:'균형 · 순서 · 표현',image:'assets/sports_building_gymnastics.webp',color:'#bf78ef'},
     {id:'taekwondo',type:'sport',name:'태권도장',sub:'예절 · 방향 · 발차기',image:'assets/sports_building_taekwondo.webp',color:'#ef6c68'},
     {id:'soccer',type:'sport',name:'축구장',sub:'공 · 패스 · 협동',image:'assets/sports_building_soccer.webp',color:'#f3c24b'},
-    {id:'info',type:'utility',name:'스포츠 안내센터',sub:'오늘의 추천 · 이용 안내',image:'assets/sports_building_info_center.webp',color:'#4cb9e9'},
+    {id:'info',type:'utility',name:'볼 스포츠 센터',sub:'야구 · 농구 · 럭비 · 테니스 · 탁구',image:'assets/sports_building_info_center.webp',color:'#4cb9e9'},
     {id:'medal',type:'utility',name:'메달 하우스',sub:'나의 기록 · 참여 메달',image:'assets/sports_building_medal_house.webp',color:'#f4b83f'},
     {id:'play',type:'utility',name:'놀이 체험장',sub:'가볍게 몸을 움직여요',image:'assets/sports_building_play_zone.webp',color:'#65c77a'},
     {id:'training',type:'utility',name:'복습 훈련장',sub:'배운 종목 다시 연습하기',image:'assets/sports_building_training_zone.webp',color:'#7e9ee8'}
