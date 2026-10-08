@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v146';
+const CACHE_NAME = 'oks-class-v147';
 const ASSETS = [
   './',
   './index.html',
@@ -21,6 +21,12 @@ const ASSETS = [
   './playground/jegi/jegi.js',
   './playground/jegi/motion.js',
   './playground/jegi/pose-worker.js',
+  './playground/chess/',
+  './playground/chess/index.html',
+  './playground/chess/chess.css',
+  './playground/chess/chess.js',
+  './playground/chess/engine.js',
+  './playground/chess/ai-worker.js',
   './sports/',
   './sports/index.html',
   './sports/sports.css',
@@ -136,6 +142,14 @@ const ASSETS = [
   './quests/index.html',
   './curriculum/teacher-guide.html',
   './curriculum/reports.html',
+  './vendor/three/addons/controls/OrbitControls.js',
+  './vendor/three/addons/loaders/GLTFLoader.js',
+  './vendor/three/addons/utils/BufferGeometryUtils.js',
+  './vendor/three/addons/utils/SkeletonUtils.js',
+  './vendor/three/three.core.js',
+  './vendor/three/three.module.js',
+  './playground/chess/assets/board.glb',
+  './playground/chess/assets/pieces.glb',
   './sports/assets/archery.webp',
   './sports/assets/athletics.webp',
   './sports/assets/athletics/athletics_bg_main.webp',

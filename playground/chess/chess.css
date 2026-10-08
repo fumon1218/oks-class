@@ -1,0 +1,51 @@
+html,body{margin:0;height:100%;overflow:hidden;touch-action:none}
+body.chess-page{background:radial-gradient(ellipse at 50% 30%,#4d6f96 0%,#2b3f5c 55%,#1a2740 100%);color:#fff;font-family:var(--font),sans-serif;-webkit-user-select:none;user-select:none}
+body.chess-page::before{display:none}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none;touch-action:none}
+.ch-top{position:fixed;left:0;right:0;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:max(10px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) 6px max(14px,env(safe-area-inset-left));pointer-events:none}
+.ch-top>*{pointer-events:auto}
+.ch-title{display:flex;flex-direction:column;align-items:center;line-height:1.1;text-shadow:0 2px 6px rgba(0,0,0,.45)}
+.ch-title span{font-size:13px;opacity:.85}.ch-title b{font-size:26px}
+.ch-tools{display:flex;gap:8px}
+.ch-btn{appearance:none;border:0;cursor:pointer;font:inherit;font-weight:800;font-size:17px;color:#2b3f5c;background:rgba(255,253,246,.94);border-radius:999px;padding:10px 18px;min-height:46px;box-shadow:0 4px 12px rgba(0,0,0,.28);text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent}
+.ch-btn:active{transform:translateY(1px)}
+.ch-btn[disabled]{opacity:.45;cursor:default}
+.ch-btn.big{font-size:18px;min-height:54px;padding:10px 20px}
+.ch-btn.on,.ch-btn[aria-pressed="true"]{background:#fff1b8;box-shadow:0 0 0 3px #ffc93c,0 4px 12px rgba(0,0,0,.28)}
+.ch-btn:focus-visible,a:focus-visible{outline:4px solid #ffd767;outline-offset:3px}
+.ch-msg{position:fixed;left:50%;top:calc(max(10px,env(safe-area-inset-top)) + 62px);transform:translateX(-50%);z-index:4;max-width:min(92vw,720px);background:rgba(255,253,246,.96);color:#2b3f5c;border-radius:26px;padding:12px 24px;font-size:23px;font-weight:800;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.3);pointer-events:none;transition:background .2s}
+.ch-msg.warn{background:#ffe2dc;color:#8a2b1d}.ch-msg.good{background:#dcf7e0;color:#1d6a32}
+.ch-bottom{position:fixed;left:0;right:0;bottom:0;z-index:5;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:8px max(14px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));pointer-events:none}
+.ch-bottom>*{pointer-events:auto}
+.ch-captured{position:fixed;left:max(10px,env(safe-area-inset-left));top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:2px;font-size:30px;line-height:1;text-shadow:0 2px 4px rgba(0,0,0,.5);pointer-events:none;writing-mode:horizontal-tb}
+.ch-captured.b{left:auto;right:max(10px,env(safe-area-inset-right))}
+.ch-captured span{display:block;text-align:center}
+.ch-loading{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;background:#2b3f5c;font-size:22px;font-weight:700;text-align:center;transition:opacity .4s}
+.ch-loading.off{opacity:0;pointer-events:none}
+.ch-spin{width:54px;height:54px;border-radius:50%;border:6px solid #ffffff44;border-top-color:#ffd767;margin:0 auto 14px;animation:chspin 1s linear infinite}
+@keyframes chspin{to{transform:rotate(360deg)}}
+.ch-overlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:rgba(15,25,45,.62);overflow:auto;padding:16px;box-sizing:border-box}
+.ch-overlay[hidden]{display:none}
+.ch-card{width:min(760px,100%);background:#fffdf6;color:#2b3f5c;border-radius:30px;padding:24px 26px;box-shadow:0 18px 50px rgba(0,0,0,.45);text-align:center}
+.ch-card h1{margin:0 0 4px;font-size:34px}.ch-card h2{margin:0 0 12px;font-size:26px}
+.ch-card p{margin:4px 0 12px;font-size:18px;line-height:1.5}
+.ch-modes{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:12px 0}
+.ch-mode{appearance:none;border:4px solid #e8dcc4;background:#fff;border-radius:22px;padding:14px 8px;font:inherit;color:#2b3f5c;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.ch-mode b{display:block;font-size:22px;margin:4px 0}.ch-mode span{font-size:15px;opacity:.85}.ch-mode i{font-style:normal;font-size:44px;display:block}
+.ch-mode.on{border-color:#ffc93c;background:#fff6d4;box-shadow:0 0 0 3px #ffe08a}
+.ch-row{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin:10px 0}
+.ch-row label{font-weight:800;font-size:18px;margin-right:4px}
+.ch-chip{appearance:none;border:3px solid #cfd9e6;background:#fff;border-radius:16px;padding:8px 14px;min-width:52px;font:inherit;font-weight:800;font-size:19px;color:#2b3f5c;cursor:pointer}
+.ch-chip.on{border-color:#ff9d2e;background:#ffe9c8}
+.ch-chip small{display:block;font-size:12px;font-weight:600;opacity:.8}
+.ch-go{appearance:none;border:0;border-radius:999px;background:#2f966f;color:#fff;font:inherit;font-weight:900;font-size:26px;padding:14px 44px;margin-top:8px;cursor:pointer;box-shadow:0 5px 0 #1f6b4e}
+.ch-go:active{transform:translateY(3px);box-shadow:0 2px 0 #1f6b4e}
+.ch-promo{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.ch-promo button{appearance:none;border:4px solid #e8dcc4;background:#fff;border-radius:22px;padding:10px 18px;font:inherit;color:#2b3f5c;font-size:20px;font-weight:800;cursor:pointer}
+.ch-promo button i{display:block;font-style:normal;font-size:56px;line-height:1.1}
+.ch-dialog{border:0;border-radius:26px;padding:22px 26px;max-width:min(640px,92vw);color:#2b3f5c;font-size:18px;line-height:1.6}
+.ch-dialog::backdrop{background:rgba(15,25,45,.6)}
+.ch-dialog h2{margin:0 0 8px}.ch-dialog form{text-align:center;margin-top:10px}
+@media (max-width:700px){.ch-title b{font-size:20px}.ch-msg{font-size:19px;padding:10px 16px}.ch-btn{padding:8px 12px;font-size:15px}.ch-btn.big{font-size:15px;min-height:46px;padding:8px 12px}.ch-modes{grid-template-columns:1fr}.ch-captured{font-size:22px}}
+@media (prefers-reduced-motion:reduce){.ch-spin{animation-duration:3s}}
+@media (max-height:720px){.ch-btn.big{font-size:15px;min-height:42px;padding:6px 12px}.ch-msg{font-size:19px;padding:8px 18px;top:calc(max(10px,env(safe-area-inset-top)) + 54px)}.ch-title b{font-size:22px}.ch-bottom{gap:6px;padding-top:4px}}
