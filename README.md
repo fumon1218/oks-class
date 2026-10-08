@@ -102,6 +102,7 @@ GitHub Pages 배포 후 `https://<계정>.github.io/oks-class/` 에서 바로 �
 - 수업(`lessons.js` 틀 + `lessons-l1~l4.js` 내용 + `lessons-eval.js`): 입문(바둑판과 돌·활로·단수·착수금지·패·집과 계가·이음과 끊음·두 눈 살기·첫 대국) → 초급(축·양단수·도망과 되잡기·포석·대국) → 중급(살고 죽는 모양·급소·형세 판단·접바둑·13줄 대국) → 고급(심화 사활·형세 심화·AI와 함께 생각하기·패 싸움과 팻감·전략의 큰 그림·19줄 대국). 각 수업은 설명 장면(돌이 저절로 놓이는 연출)과 문제로 되어 있고, 문제는 풀 때마다 판을 돌리고 뒤집어 모양이 달라 보입니다.
 - 규칙·AI 엔진 `engine.js`: 따내기·자충·패(단순 패 금지)·접바둑·계가, 몬테카를로 트리 탐색 컴퓨터(수준 3~5), 집 어림 계산, 사활/축 풀이기. 정답은 풀이기로 직접 확인하고, 오래 걸리는 사활 정답은 `node scripts/go-lessons-solve.mjs`로 미리 계산해 `lessons-solved.js`에 저장합니다. 컴퓨터 대국에서 뽑은 장면으로 만든 형세 판단·최선의 수 문제는 `node scripts/go-lessons-eval.mjs`로 다시 만들 수 있습니다.
 - 검사: `node scripts/go-engine-test.mjs`(규칙·계가·AI), `node scripts/go-lessons-test.mjs`(모든 수업 문제에 정답이 있는지, 연출이 규칙에 맞는지).
+- 연습장(`lessons-prac.js`): 따내기·단수·양단수·축·사활 연습 6개 수업(약 60문제). 문제는 `node scripts/go-practice-gen.mjs`가 규칙 엔진으로 만들고(정답 개수·단수·축 결과를 직접 검증), 사활 정답은 `node scripts/go-lessons-solve.mjs`로 미리 계산해요. 프로 기보(SGF)는 쓰지 않았어요.
 - 컴퓨터 생각은 `ai-worker.js`(웹 워커)에서 하고 화면은 멈추지 않습니다. 바둑돌 모델은 `playground/go/assets/stones.glb`를 오목과 함께 씁니다.
 
 ### 놀이별 · 카메라 제기차기
