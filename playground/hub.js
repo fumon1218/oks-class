@@ -31,7 +31,7 @@
         { name: '3D 다트', sub: '숫자 맞히기 · 301 줄이기', img: 'hub_bld_darts', ph: '🎯', x: 330, y: 215, w: 330, url: 'darts/', color: '#e0508a', say: '다트 놀이관으로 가요!' },
         { name: '3D 볼링', sub: '스트라이크 · 스페어', img: 'hub_bld_bowling', ph: '🎳', x: 838, y: 205, w: 330, url: 'bowling/', color: '#8a5ae0', say: '볼링장으로 가요!' },
         { name: '주차장 탈출', sub: '러시아워 · 차 빼기 퍼즐', img: 'hub_bld_parking', ph: '🚗', x: 1345, y: 215, w: 330, url: 'rushhour/', color: '#3d8bff', say: '주차장으로 가요!' },
-        { name: '우주 도시 건설', soon: 1, x: 322, y: 615, w: 330 }, { name: '새 놀이 준비 중', soon: 1, x: 838, y: 612, w: 330 }, { name: '스피드 레이스', sub: '자동차 경주 · 차고', img: 'hub_bld_racing', ph: '🏎️', x: 1360, y: 615, w: 330, url: 'racing/', color: '#e5392d', say: '자동차 경기장으로 가요!', today: 1 }
+        { name: '우주 도시 건설', soon: 1, x: 322, y: 615, w: 330 }, { name: '새 놀이 준비 중', soon: 1, x: 838, y: 612, w: 330 }, { name: '스피드 레이스', sub: '자동차 경주 · 차고', img: 'hub_bld_racing', ph: '🏎️', x: 1360, y: 595, w: 390, url: 'racing/', color: '#e5392d', say: '자동차 경기장으로 가요!', today: 1 }
       ] }
   };
   var zid = (location.search.match(/[?&]zone=(\w+)/) || [])[1]; var Z = ZONES[zid] || ZONES.main; if (!ZONES[zid]) zid = 'main';
