@@ -103,6 +103,7 @@ GitHub Pages 배포 후 `https://<계정>.github.io/oks-class/` 에서 바로 �
 - 규칙·AI 엔진 `engine.js`: 따내기·자충·패(단순 패 금지)·접바둑·계가, 몬테카를로 트리 탐색 컴퓨터(수준 3~5), 집 어림 계산, 사활/축 풀이기. 정답은 풀이기로 직접 확인하고, 오래 걸리는 사활 정답은 `node scripts/go-lessons-solve.mjs`로 미리 계산해 `lessons-solved.js`에 저장합니다. 컴퓨터 대국에서 뽑은 장면으로 만든 형세 판단·최선의 수 문제는 `node scripts/go-lessons-eval.mjs`로 다시 만들 수 있습니다.
 - 검사: `node scripts/go-engine-test.mjs`(규칙·계가·AI), `node scripts/go-lessons-test.mjs`(모든 수업 문제에 정답이 있는지, 연출이 규칙에 맞는지).
 - 연습장(`lessons-prac.js`): 따내기·단수·양단수·축·사활 연습 6개 수업(약 60문제). 문제는 `node scripts/go-practice-gen.mjs`가 규칙 엔진으로 만들고(정답 개수·단수·축 결과를 직접 검증), 사활 정답은 `node scripts/go-lessons-solve.mjs`로 미리 계산해요. 프로 기보(SGF)는 쓰지 않았어요.
+- 복기 수업(`lessons-replay.js`): 기보를 한 수씩 따라 두고(따냄·단수·도망·이음은 엔진이 확인해 해설) 같은 대국 장면에서 문제를 푸는 수업이에요. `node scripts/go-replay-gen.mjs selfplay 2 7`로 컴퓨터 대국을 만들고(`scripts/data/`), `scripts/data/sgf/`에 SGF 파일을 넣고 `node scripts/go-replay-gen.mjs build`를 실행하면 수업이 새로 만들어져요(9·13·19줄). 지금 들어 있는 6개는 컴퓨터끼리 둔 9줄 대국이에요. 프로 기보는 사용 조건을 확인한 뒤 넣어 주세요.
 - 컴퓨터 생각은 `ai-worker.js`(웹 워커)에서 하고 화면은 멈추지 않습니다. 바둑돌 모델은 `playground/go/assets/stones.glb`를 오목과 함께 씁니다.
 
 ### 놀이별 · 카메라 제기차기

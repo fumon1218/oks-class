@@ -11,7 +11,7 @@ const Go = require(path.join(dir, 'engine.js'));
 const out = path.join(dir, 'lessons-solved.js');
 globalThis.OKS_GO_SOLVED = undefined;
 const L = require(path.join(dir, 'lessons.js'));
-for (const f of fs.readdirSync(dir).filter((x) => /^lessons-(l\d|eval|prac)\.js$/.test(x)).sort()) require(path.join(dir, f));
+for (const f of fs.readdirSync(dir).filter((x) => /^lessons-(l\d|eval|prac|replay)\.js$/.test(x)).sort()) require(path.join(dir, f));
 let old = {};
 if (fs.existsSync(out)) { try { const m = fs.readFileSync(out, 'utf8').match(/OKS_GO_SOLVED\s*=\s*(\{[\s\S]*?\});\s*\n/); if (m) old = JSON.parse(m[1]); } catch (e) { old = {}; } }
 const res = {}; let ran = 0, kept = 0;

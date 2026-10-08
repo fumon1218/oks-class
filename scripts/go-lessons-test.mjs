@@ -11,7 +11,7 @@ const Go = require(path.join(dir, 'engine.js'));
 const solvedFile = path.join(dir, 'lessons-solved.js');
 if (fs.existsSync(solvedFile)) vm.runInThisContext(fs.readFileSync(solvedFile, 'utf8').replace('window.', 'globalThis.'));
 const L = require(path.join(dir, 'lessons.js'));
-for (const f of fs.readdirSync(dir).filter((x) => /^lessons-(l\d|eval|prac)\.js$/.test(x)).sort()) require(path.join(dir, f));
+for (const f of fs.readdirSync(dir).filter((x) => /^lessons-(l\d|eval|prac|replay)\.js$/.test(x)).sort()) require(path.join(dir, f));
 let pass = 0; const ok = (m) => { pass++; console.log('PASS', m); };
 const ids = new Set(); let items = 0, pages = 0;
 for (const lesson of L.LESSONS) {
