@@ -9,6 +9,6 @@ body.rush-page{background:linear-gradient(#8fd0ff 0%,#c9e8ff 55%,#e9f6d8 100%)}
 .rh-nums button.done{border-color:#55c27a;background:#e6f8ec}
 .rh-nums button.done::after{content:"✓";position:absolute;right:5px;top:0;font-size:12px;color:#2d9a55}
 .rh-nums button .st{display:block;font-size:11px;letter-spacing:-1px;min-height:13px}
-@media (max-width:520px){.rh-chip{min-width:78px;padding:4px 10px}.rh-chip b{font-size:22px}.rh-info{top:calc(max(10px,env(safe-area-inset-top)) + 128px)}body.rush-page .ch-msg{width:max-content;max-width:94vw}.rh-nums{grid-template-columns:repeat(4,1fr)}}
+@media (max-width:520px){.rh-chip{min-width:78px;padding:4px 10px}.rh-chip b{font-size:22px}.rh-info{top:calc(max(10px,env(safe-area-inset-top)) + 128px)}body.rush-page .ch-msg{width:max-content;max-width:94vw}.rh-nums{grid-template-columns:repeat(6,1fr);gap:6px}.rh-nums button{padding:6px 0;font-size:16px;border-radius:12px}}
 @media (max-height:720px){.rh-info{top:calc(max(10px,env(safe-area-inset-top)) + 100px)}}
 body.rush-page .ch-title b{white-space:nowrap}@media (max-width:520px){body.rush-page .ch-title b{font-size:17px}body.rush-page .ch-title span{font-size:11px;white-space:nowrap}body.rush-page .ch-btn{padding:8px 9px}}

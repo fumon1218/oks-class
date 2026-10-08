@@ -1,9 +1,9 @@
 /* 러시아워 문제 만들기: 무작위 배치 → 도달 가능한 모든 상태를 따라가 → 출구까지 최소 횟수(d)를 구해 수준별로 뽑아요.
-   node scripts/rush-gen.mjs  →  playground/rushhour/puzzles.js */
+   SEED=1 WANT=30,30,30,30,30 T1=220000 T2=800000 OUT=a.json node scripts/rush-gen.mjs  (여러 개를 돌린 뒤)  node scripts/rush-merge.mjs a.json b.json  →  playground/rushhour/puzzles.js */
 import fs from 'node:fs';
 import { SIZE, EXIT_ROW, validLayout, posOf, moves, apply, solved, solve } from '../playground/rushhour/engine.js';
-const TIER = [[2, 6], [7, 11], [12, 16], [17, 22], [23, 60]], WANT = [12, 12, 12, 12, 6];
-let seed = 20261008; const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296), ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
+const TIER = [[2, 6], [7, 11], [12, 16], [17, 22], [23, 60]], WANT = (process.env.WANT || '12,12,12,12,6').split(',').map(Number), T1 = +(process.env.T1 || 200000), T2MAX = +(process.env.T2 || 330000);
+let seed = +(process.env.SEED || 20261008); const rnd = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296), ri = (a, b) => a + Math.floor(rnd() * (b - a + 1));
 function randomLayout() {
   const n = ri(5, 12), cars = [{ x: ri(0, 3), y: EXIT_ROW, len: 2, dir: 'h' }]; let trucks = 0, tries = 0;
   while (cars.length < n && tries++ < 200) {
@@ -24,7 +24,7 @@ function analyze(cars) {
   return { states, d };
 }
 const out = [[], [], [], [], []], seen = new Set(); const t0 = Date.now(); let comps = 0;
-while (out.slice(0, 4).some((a, i) => a.length < WANT[i]) && Date.now() - t0 < 200000) {
+while (out.slice(0, 4).some((a, i) => a.length < WANT[i]) && Date.now() - t0 < T1) {
   const cars = randomLayout(); if (!cars) continue; const an = analyze(cars); if (!an) continue; comps++;
   const used = new Set();
   for (let t = 4; t >= 0; t--) {
@@ -51,7 +51,7 @@ function climb() {
   }
   return { cars, an, cur };
 }
-const T2 = Date.now(); while ((out[4].length < WANT[4] || out[3].length < WANT[3]) && Date.now() - T2 < 330000) {
+const T2 = Date.now(); while ((out[4].length < WANT[4] || out[3].length < WANT[3]) && Date.now() - T2 < T2MAX) {
   const { cars, an, cur } = climb(); const t = cur >= 23 ? 4 : cur >= 17 ? 3 : -1; if (t < 0 || out[t].length >= WANT[t]) continue;
   const best = an.d.reduce((bi, v, i, a) => (v > a[bi] ? i : bi), 0), s = an.states[best];
   const sig = cars.map((c, i) => `${c.dir}${c.dir === 'h' ? s[i] : c.x}${c.dir === 'h' ? c.y : s[i]}${c.len}`).sort().join('|'); if (seen.has(sig)) continue; seen.add(sig);
@@ -62,6 +62,5 @@ out.forEach((a) => a.sort((x, y) => x.min - y.min || x.cars.length - y.cars.leng
 // 검증: 풀이 프로그램으로 다시 확인
 let bad = 0; out.forEach((a, t) => a.forEach((p) => { const cars = p.cars.map(([x, y, len, v]) => ({ x, y, len, dir: v ? 'v' : 'h' })); const sol = solve(cars, cars.map(posOf)); if (!sol || sol.length !== p.min) { bad++; console.log('불일치', t, p.min, sol && sol.length); } }));
 console.log('배치', comps, '수준별', out.map((a) => a.length), '최소횟수', out.map((a) => a.map((p) => p.min).join(' ')), '불일치', bad, (Date.now() - t0) / 1000 + '초');
-const lines = out.map((a, t) => `  ${t + 1}: [\n${a.map((p) => `    { min: ${p.min}, cars: ${JSON.stringify(p.cars)} }`).join(',\n')}\n  ]`);
-fs.writeFileSync(new URL('../playground/rushhour/puzzles.js', import.meta.url), `/* 만들어진 문제 (scripts/rush-gen.mjs). cars: [x, y, 길이, 세로(1)/가로(0)] — 첫 번째가 빨간 차, min = 가장 적은 움직임 */\nexport const PUZZLES = {\n${lines.join(',\n')}\n};\n`);
+fs.writeFileSync(process.env.OUT || '/tmp/rush-gen.json', JSON.stringify(out));
 process.exit(bad ? 1 : 0);

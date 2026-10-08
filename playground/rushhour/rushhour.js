@@ -59,12 +59,13 @@ function curb(x0, z0, x1, z1, k) {
   curb(o, er - 0.62, o + 4, er - 0.62, 2); curb(o, er + 0.62, o + 4, er + 0.62, 0); }
 // 출구 표지
 { const er = cx2w(EXIT_ROW), sx = HALF + 1.4, sz = er - 1.3;
-  const panel = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.85), new THREE.MeshBasicMaterial({ map: canvasTex(340, 170, (g, w, h) => { g.fillStyle = '#2f8f5a'; g.fillRect(0, 0, w, h); g.strokeStyle = '#fff'; g.lineWidth = 10; g.strokeRect(8, 8, w - 16, h - 16); g.fillStyle = '#fff'; g.font = '900 78px system-ui'; g.textAlign = 'center'; g.fillText('출구 ▶', w / 2, 112); }) }));
+  const panel = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.85), new THREE.MeshBasicMaterial({ side: THREE.DoubleSide, map: canvasTex(340, 170, (g, w, h) => { g.fillStyle = '#2f8f5a'; g.fillRect(0, 0, w, h); g.strokeStyle = '#fff'; g.lineWidth = 10; g.strokeRect(8, 8, w - 16, h - 16); g.fillStyle = '#fff'; g.font = '900 78px system-ui'; g.textAlign = 'center'; g.fillText('출구 ▶', w / 2, 112); }) }));
   panel.position.set(sx, 1.45, sz); scene.add(panel);
   [-0.7, 0.7].forEach((d) => { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.5, 10), new THREE.MeshStandardMaterial({ color: 0xdddddd })); p.position.set(sx + d, 0.75, sz - 0.02); scene.add(p); }); }
-// 둘레 장식(덤불·나무)
-function bush(x, z, s) { const g = new THREE.Group(); const m = new THREE.MeshStandardMaterial({ color: 0x4fbf5a, roughness: 0.8 }); [[0, 0, 0, 1], [0.35, 0, 0.1, 0.75], [-0.3, 0, -0.1, 0.7]].forEach((p) => { const b = new THREE.Mesh(new THREE.SphereGeometry(0.4 * p[3], 14, 10), m); b.position.set(p[0] * s, 0.3 * p[3], p[2] * s); b.scale.setScalar(s); g.add(b); }); g.position.set(x, 0, z); scene.add(g); }
-function tree(x, z, s) { const g = new THREE.Group(); const t = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0x9a6a3c })); t.position.y = 0.3; g.add(t); const m = new THREE.MeshStandardMaterial({ color: 0x6fd36a, roughness: 0.8 }); [[0, 0.9, 0.55], [0.18, 1.2, 0.4], [-0.15, 1.35, 0.3]].forEach((p) => { const b = new THREE.Mesh(new THREE.SphereGeometry(p[2], 14, 10), m); b.position.set(p[0] * 0.4, p[1] - 0.15, 0); g.add(b); }); g.scale.setScalar(s); g.position.set(x, 0, z); scene.add(g); }
+// 둘레 장식(덤불·나무) — 돌려 볼 때 앞을 가리면 작아져요
+const decor = [];
+function bush(x, z, s) { const g = new THREE.Group(); const m = new THREE.MeshStandardMaterial({ color: 0x4fbf5a, roughness: 0.8 }); [[0, 0, 0, 1], [0.35, 0, 0.1, 0.75], [-0.3, 0, -0.1, 0.7]].forEach((p) => { const b = new THREE.Mesh(new THREE.SphereGeometry(0.4 * p[3], 14, 10), m); b.position.set(p[0] * s, 0.3 * p[3], p[2] * s); b.scale.setScalar(s); g.add(b); }); g.userData.s0 = 1; g.position.set(x, 0, z); scene.add(g); decor.push(g); }
+function tree(x, z, s) { const g = new THREE.Group(); const t = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.6, 8), new THREE.MeshStandardMaterial({ color: 0x9a6a3c })); t.position.y = 0.3; g.add(t); const m = new THREE.MeshStandardMaterial({ color: 0x6fd36a, roughness: 0.8 }); [[0, 0.9, 0.55], [0.18, 1.2, 0.4], [-0.15, 1.35, 0.3]].forEach((p) => { const b = new THREE.Mesh(new THREE.SphereGeometry(p[2], 14, 10), m); b.position.set(p[0] * 0.4, p[1] - 0.15, 0); g.add(b); }); g.scale.setScalar(s); g.userData.s0 = s; g.position.set(x, 0, z); scene.add(g); decor.push(g); }
 [[-4.1, -3.6, 1.2], [-4.1, 3.6, 1], [3.9, -4.0, 1.1], [4.2, 4.2, 1.2], [0, -4.3, 1], [-1.8, 4.4, 1.1], [2.2, 4.7, 1], [6.2, -2.6, 1.2], [6.4, 1.8, 1]].forEach((p, i) => (i % 2 ? bush : tree)(p[0], p[2] > 1.15 ? p[1] : p[1], 1));
 tree(-4.4, -1, 1.5); tree(-4.3, 2, 1.3); tree(7.2, -0.3, 1.4); tree(5.9, 3.8, 1.2); tree(5.8, -4.0, 1.3); bush(-4.2, 0.6, 1.2); bush(5.0, 2.6, 1.1); bush(-4, -4.1, 1.1);
 
@@ -197,12 +198,21 @@ function hint() {
   if (busy || over) return; O.unlock(); clearSel();
   const sol = solve(cars, pos); if (!sol || !sol.length) { say('힌트를 찾지 못했어요. 다시 해 봐요.'); return; }
   const [i, to] = sol[0], c = cars[i], d = to - pos[i], n = Math.abs(d), dirWord = c.dir === 'h' ? (d > 0 ? '오른쪽으로' : '왼쪽으로') : (d > 0 ? '아래로' : '위로');
-  const fix = views[i].name + '를 ' + dirWord + ' ' + n + '칸 옮겨요!';
+  const fix = isDefaultView() ? views[i].name + '를 ' + dirWord + ' ' + n + '칸 옮겨요!' : '반짝이는 ' + views[i].name + '를 초록 동그라미까지 옮겨요!';
   say(fix, null, fix); hintCar = i; hintT = performance.now() + 5000; stats.asked++;
   showTargets(i); markG.children.forEach((m) => { if (m.userData.to !== to) m.visible = false; });
 }
 
 /* ---------- 입력 ---------- */
+const orb = new Map(); let pinch0 = 0, orbMoved = false;
+function startOrbit(e) { orb.set(e.pointerId, { x: e.clientX, y: e.clientY }); orbMoved = false; try { canvas.setPointerCapture(e.pointerId); } catch (er) {} if (orb.size === 2) { const [a, b] = [...orb.values()]; pinch0 = Math.hypot(a.x - b.x, a.y - b.y) / viewT.zoom; } }
+function orbitMove(e) {
+  const o = orb.get(e.pointerId); if (!o) return false;
+  if (orb.size === 2) { const prev = o; orb.set(e.pointerId, { x: e.clientX, y: e.clientY }); const [a, b] = [...orb.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); if (pinch0 > 0 && d > 0) { viewT.zoom = view.zoom = Math.max(0.55, Math.min(1.5, pinch0 / d)); applyCam(); orbMoved = true; } return true; }
+  const dx = e.clientX - o.x, dy = e.clientY - o.y; if (!orbMoved && Math.hypot(dx, dy) < 6) return true; orbMoved = true;
+  o.x = e.clientX; o.y = e.clientY; view.az = viewT.az = view.az - dx * 0.008; view.el = viewT.el = Math.max(EL_MIN, Math.min(EL_MAX, view.el + dy * 0.005)); applyCam(); return true;
+}
+function orbitEnd(e) { if (!orb.has(e.pointerId)) return false; orb.delete(e.pointerId); if (!orb.size && !orbMoved) clearSel(); pinch0 = 0; return true; }
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -0.3);
 function setRay(e) { const r = canvas.getBoundingClientRect(); ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(ndc, camera); }
 function pickCar(e) { setRay(e); const hits = ray.intersectObjects(carsG.children, true); for (const h of hits) { let o = h.object; while (o && o.userData.car === undefined) o = o.parent; if (o) return o.userData.car; } return -1; }
@@ -210,12 +220,13 @@ function pickMark(e) { setRay(e); const hits = ray.intersectObjects(markG.childr
 canvas.addEventListener('pointerdown', (e) => {
   O.unlock(); if (busy || over || !cfg) return;
   const mk = pickMark(e); if (mk) { commitMove(mk.car, mk.to); return; }
-  const i = pickCar(e); if (i < 0) { clearSel(); return; }
+  const i = pickCar(e); if (i < 0) { startOrbit(e); return; }
   setRay(e); const pt = new THREE.Vector3(); if (!ray.ray.intersectPlane(plane, pt)) return;
   const c = cars[i], u = c.dir === 'h' ? pt.x + HALF : pt.z + HALF; const [lo, hi] = range(cars, pos, i);
   drag = { id: e.pointerId, i, sx: e.clientX, sy: e.clientY, moved: false, off: u - (pos[i] + c.len / 2), lo, hi, p: pos[i] }; try { canvas.setPointerCapture(e.pointerId); } catch (er) {}
 });
 canvas.addEventListener('pointermove', (e) => {
+  if (orbitMove(e)) return;
   if (!drag || e.pointerId !== drag.id) return;
   if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 9) { drag.moved = true; clearSel(); }
   if (!drag.moved) return;
@@ -230,8 +241,8 @@ function endDrag(e, cancel) {
   if (to === pos[d.i]) { tween(120, (k) => carTransform(d.i, d.p + (pos[d.i] - d.p) * k)).then(() => { views[d.i].cp = undefined; carTransform(d.i, pos[d.i]); }); return; }
   commitMove(d.i, to);
 }
-canvas.addEventListener('pointerup', (e) => endDrag(e, false));
-canvas.addEventListener('pointercancel', (e) => endDrag(e, true));
+canvas.addEventListener('pointerup', (e) => { if (orbitEnd(e)) return; endDrag(e, false); });
+canvas.addEventListener('pointercancel', (e) => { if (orbitEnd(e)) return; endDrag(e, true); });
 $('btnUndo').onclick = undo; $('btnHint').onclick = hint;
 $('btnReset').onclick = () => { O.unlock(); if (cfg) newGame(cfg); };
 $('btnMenu').onclick = () => { O.unlock(); openMenu(false); };
@@ -243,8 +254,8 @@ $('btnHelp').onclick = () => { O.unlock(); const d = $('helpDialog'); if (d.show
 })();
 
 /* ---------- 저장·메뉴 ---------- */
-function loadSave() { try { const s = JSON.parse(localStorage.getItem('oks_rush_v1') || '{}'); return { done: s.done || {}, best: s.best || {}, stars: s.stars || {} }; } catch (e) { return { done: {}, best: {}, stars: {} }; } }
-function writeSave(s) { try { localStorage.setItem('oks_rush_v1', JSON.stringify(s)); } catch (e) {} }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem('oks_rush_v2') || '{}'); return { done: s.done || {}, best: s.best || {}, stars: s.stars || {} }; } catch (e) { return { done: {}, best: {}, stars: {} }; } }
+function writeSave(s) { try { localStorage.setItem('oks_rush_v2', JSON.stringify(s)); } catch (e) {} }
 const prefs = (() => { const d = { mode: 'puzzle' }; try { return Object.assign(d, JSON.parse(localStorage.getItem('oks_rush_prefs_v1') || '{}')); } catch (e) { return d; } })();
 function savePrefs() { try { localStorage.setItem('oks_rush_prefs_v1', JSON.stringify(prefs)); } catch (e) {} }
 function openMenu(fromFinish) {
@@ -268,25 +279,38 @@ function openMenu(fromFinish) {
   render(); O.say('주차장 탈출이에요. 하고 싶은 놀이를 골라요.');
 }
 
-/* ---------- 카메라·그리기 ---------- */
+/* ---------- 카메라·그리기 (끌어서 돌려 보기·두 손가락/휠로 확대) ---------- */
+const view = { az: 0, el: 0.82, zoom: 1 }, viewT = { az: 0, el: 0.82, zoom: 1 }; let baseDist = 12, baseEl = 0.82, shiftX = 0, shiftY = 0;
+const EL_MIN = 0.42, EL_MAX = 1.35;
 function resize() {
-  const w = window.innerWidth, h = window.innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  const w = window.innerWidth, h = window.innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h;
   const hudTop = h < 720 ? 190 : 215, hudBot = 80, avail = Math.max(260, h - hudTop - hudBot);
   const vf = THREE.MathUtils.degToRad(camera.fov) / 2, pitch = THREE.MathUtils.degToRad(h > w ? 56 : 47);
-  const needW = h > w ? 9.4 : 10.6, needH = 7.2;                         // 보여야 할 가로(출구 길 포함)·세로
+  const needW = h > w ? 9.4 : 10.6, needH = 7.2;
   const distW = needW / 2 / (Math.tan(vf) * camera.aspect), distH = (needH / 2) * Math.sin(pitch) / Math.tan(vf) / (avail / h) + 0.5;
-  const dist = Math.max(distW, distH * 1.0, 9);
-  const cxw = h > w ? 1.15 : 1.0;
-  camera.position.set(cxw, Math.sin(pitch) * dist, Math.cos(pitch) * dist + 0.2); camera.lookAt(cxw, 0, 0.2);
-  camera.setViewOffset(w, h, 0, -(hudTop - hudBot) / 2, w, h); camera.updateProjectionMatrix();
+  baseDist = Math.max(distW, distH, 9); const cxw = h > w ? 1.15 : 1.0, visW = 2 * Math.tan(vf) * baseDist * camera.aspect;
+  shiftX = (cxw / visW) * w; shiftY = -(hudTop - hudBot) / 2;
+  const wasDefault = Math.abs(viewT.el - baseEl) < 1e-6; baseEl = pitch; if (wasDefault) { view.el = viewT.el = pitch; }
+  applyCam(w, h);
 }
+function applyCam(w, h) {
+  w = w || window.innerWidth; h = h || window.innerHeight; const d = baseDist * view.zoom, ce = Math.cos(view.el);
+  camera.position.set(Math.sin(view.az) * ce * d, Math.sin(view.el) * d, Math.cos(view.az) * ce * d + 0.2); camera.lookAt(0, 0, 0.2);
+  camera.setViewOffset(w, h, shiftX, shiftY, w, h); camera.updateProjectionMatrix(); camera.updateMatrixWorld();
+}
+const isDefaultView = () => Math.abs(viewT.az) < 0.35 && Math.abs(viewT.el - baseEl) < 0.2;
+function resetView() { viewT.az = Math.round(view.az / (Math.PI * 2)) * Math.PI * 2; viewT.el = baseEl; viewT.zoom = 1; }
 window.addEventListener('resize', resize);
+canvas.addEventListener('wheel', (e) => { e.preventDefault(); viewT.zoom = Math.max(0.55, Math.min(1.5, viewT.zoom * (e.deltaY > 0 ? 1.08 : 0.92))); view.zoom = viewT.zoom; }, { passive: false });
+$('btnView').onclick = () => { O.unlock(); resetView(); note('시점을 처음으로 돌렸어요.'); };
 let lastT = performance.now();
 function frame(now) {
   lastT = now;
+  { const k = 0.2; const dz = viewT.az - view.az, de = viewT.el - view.el, dd = viewT.zoom - view.zoom; if (Math.abs(dz) + Math.abs(de) + Math.abs(dd) > 1e-4) { view.az += dz * k; view.el += de * k; view.zoom += dd * k; applyCam(); } }
   if (hintCar >= 0 && views[hintCar]) { const k = 0.5 + Math.sin(now / 160) * 0.5; views[hintCar].g.userData.body.emissive.setRGB(0.55 * k, 0.45 * k, 0.05 * k); if (now > hintT) { views[hintCar].g.userData.body.emissive.setRGB(0, 0, 0); hintCar = -1; markG.children.forEach((m) => { m.visible = true; }); if (sel < 0) markG.clear(); } }
   else views.forEach((v, i) => { const e = v.g.userData.body.emissive; if (i === sel) e.setRGB(0.25, 0.22, 0.02); else if (e.r > 0) e.setRGB(0, 0, 0); });
   markG.children.forEach((m) => { const s = 1 + Math.sin(now / 200) * 0.1; m.scale.setScalar(s); });
+  { const sx = Math.sin(view.az), cz = Math.cos(view.az); decor.forEach((g) => { const front = g.position.x * sx + g.position.z * cz > 2.6 && Math.abs(view.az) > 0.3 || (g.position.x * sx + g.position.z * cz > 3.2); const goal = (front ? 0.001 : 1) * (g.userData.s0 || 1); const cur = g.scale.x; g.scale.setScalar(cur + (goal - cur) * 0.2); g.visible = g.scale.x > 0.01; }); }
   renderer.render(scene, camera); requestAnimationFrame(frame);
 }
 (function boot() {
@@ -297,5 +321,5 @@ function frame(now) {
 /* 시험용 손잡이 */
 window.__rush = {
   state: () => ({ cfg, pos: pos.slice(), moves, busy, over, sel, min: P && P.min, n: cars.length }), start: newGame, solve: () => solve(cars, pos), cars: () => cars,
-  move: (i, to) => commitMove(i, to), over: () => over, busy: () => busy, openMenu, hint, undo
+  move: (i, to) => commitMove(i, to), view, screen: (i) => { const v = new THREE.Vector3(); views[i].g.getWorldPosition(v); v.y = 0.3; v.project(camera); const r = canvas.getBoundingClientRect(); return { x: r.left + (v.x + 1) / 2 * r.width, y: r.top + (1 - v.y) / 2 * r.height }; }, over: () => over, busy: () => busy, openMenu, hint, undo
 };
