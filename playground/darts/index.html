@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#3a2a4f">
+<title>3D 다트 · 놀이별</title><link rel="icon" href="../../icons/ok-face-192.png"><link rel="apple-touch-icon" href="../../icons/ok-face-180.png">
+<link rel="stylesheet" href="../../core/oks-core.css"><link rel="stylesheet" href="../chess/chess.css"><link rel="stylesheet" href="darts.css"></head>
+<body class="oks chess-page darts-page">
+<canvas id="gl" aria-label="3D 다트판"></canvas>
+<header class="ch-top">
+  <a class="ch-btn" id="back" href="../">← 놀이별</a>
+  <div class="ch-title"><span id="modeLabel">보드게임</span><b>3D 다트</b></div>
+  <div class="ch-tools">
+    <button class="ch-btn" id="btnHelp" type="button" aria-label="놀이 방법">❓</button>
+    <button class="ch-btn" id="btnVoice" type="button" aria-label="안내 음성 켜기·끄기">🔊</button>
+    <button class="ch-btn" id="btnMenu" type="button" aria-label="새 놀이 고르기">☰ 새로</button>
+  </div>
+</header>
+<div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">다트판을 걸고 있어요…</span></div>
+<div class="dt-score" id="score" aria-label="점수판"></div>
+<div class="dt-pop" id="pop" aria-hidden="true"></div>
+<footer class="ch-bottom">
+  <button class="ch-btn big dt-throw" id="btnThrow" type="button">🎯 던지기!</button>
+  <button class="ch-btn big" id="btnHint" type="button">💡 힌트</button>
+  <button class="ch-btn big" id="btnAim" type="button">🔄 조준 방식</button>
+</footer>
+<div class="ch-loading" id="loading"><div><div class="ch-spin"></div><p>다트판을 거는 중…</p></div></div>
+<div class="ch-overlay" id="menu" hidden></div>
+<dialog id="helpDialog" class="ch-dialog"><h2>이렇게 놀아요</h2>
+<ol><li><b>조준:</b> 자동 조준은 빨간 동그라미가 천천히 움직여요. 원하는 곳에 왔을 때 <b>화면이나 던지기 단추</b>를 눌러요. 직접 누르기는 다트판을 누른 채 움직이다가 손을 떼면 던져요.</li><li>한 번에 <b>다트 3개</b>를 던져요.</li><li><b>가운데 불</b>은 50점, 바깥 가운데는 25점이에요. <b>얇은 바깥 띠</b>는 두 배, <b>안쪽 띠</b>는 세 배예요.</li><li>숫자 맞히기는 노란 칸의 숫자를 맞혀요. 301 줄이기는 점수를 빼서 정확히 0을 만들어요.</li></ol>
+<form method="dialog"><button class="ch-btn big">알겠어요</button></form></dialog>
+<script src="../../core/oks-core.js"></script><script src="../../core/oks-eco.js"></script>
+<script type="module" src="darts.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('../../sw.js').catch(function(){});</script>
+</body></html>
