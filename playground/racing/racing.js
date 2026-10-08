@@ -13,7 +13,16 @@ const W = 8;                       // 길 폭의 절반(m)
 const SAVE_KEY = 'oks_race_v1';
 
 const CARS = [
-  { id: 'toy', build: true, colors: true, name: '꼬마 스포츠카', sub: '카툰 · 웃는 얼굴 친구', title: '', src: '', front: 1, vmax: 60, acc: 26, lat: 12, nmul: 1.3, stats: [3, 5, 4, 4] },
+  { id: 'toy_sport', build: 'toy', style: 'sport', dc: 0, colors: true, name: '스프린트', sub: '카툰 · 레드 스프린트 · 날쌘 스포츠', title: '', src: '', front: 1, vmax: 62, acc: 23, lat: 11, nmul: 1.3, stats: [4, 4, 3, 4] },
+  { id: 'toy_formula', build: 'toy', style: 'formula', dc: 6, colors: true, name: '썬볼트', sub: '카툰 · 포뮬러 · 번개처럼 빨라요', title: '', src: '', front: 1, vmax: 68, acc: 23, lat: 11, nmul: 1.3, stats: [5, 4, 3, 4] },
+  { id: 'toy_wave', build: 'toy', style: 'wave', dc: 1, colors: true, name: '스플래시', sub: '카툰 · 파도 지느러미 · 핸들이 좋아요', title: '', src: '', front: 1, vmax: 62, acc: 20, lat: 13, nmul: 1.3, stats: [4, 3, 5, 4] },
+  { id: 'toy_buggy', build: 'toy', style: 'buggy', dc: 2, colors: true, name: '버기', sub: '카툰 · 튼튼한 바퀴 · 숲길 친구', title: '', src: '', front: 1, vmax: 56, acc: 23, lat: 13, nmul: 1.3, stats: [3, 4, 5, 4] },
+  { id: 'toy_flower', build: 'toy', style: 'flower', dc: 5, colors: true, name: '블로섬', sub: '카툰 · 꽃을 단 · 부드러운 핸들', title: '', src: '', front: 1, vmax: 56, acc: 27, lat: 13, nmul: 1.3, stats: [3, 5, 5, 4] },
+  { id: 'toy_star', build: 'toy', style: 'star', dc: 4, colors: true, name: '스타', sub: '카툰 · 별이 반짝 · 균형형', title: '', src: '', front: 1, vmax: 62, acc: 23, lat: 12, nmul: 1.3, stats: [4, 4, 4, 4] },
+  { id: 'toy_rocket', build: 'toy', style: 'rocket', dc: 3, colors: true, name: '로켓', sub: '카툰 · 로켓 꼬리 · 가장 빨라요', title: '', src: '', front: 1, vmax: 68, acc: 27, lat: 9.5, nmul: 1.3, stats: [5, 5, 2, 4] },
+  { id: 'toy_cloud', build: 'toy', style: 'cloud', dc: 7, colors: true, name: '클라우드', sub: '카툰 · 구름 지붕 · 핸들이 좋아요', title: '', src: '', front: 1, vmax: 56, acc: 23, lat: 13, nmul: 1.3, stats: [3, 4, 5, 4] },
+  { id: 'toy_knight', build: 'toy', style: 'knight', dc: 8, colors: true, name: '나이트', sub: '카툰 · 기사 투구 · 든든해요', title: '', src: '', front: 1, vmax: 62, acc: 20, lat: 11, nmul: 1.3, stats: [4, 3, 3, 4] },
+  { id: 'toy_comet', build: 'toy', style: 'comet', dc: 9, colors: true, name: '코멧', sub: '카툰 · 혜성 꼬리 · 만능이에요', title: '', src: '', front: 1, vmax: 68, acc: 27, lat: 12, nmul: 1.3, stats: [5, 5, 4, 4] },
   { id: 'rx7', file: 'assets/rx7.glb', name: '마쓰다 RX-7', sub: '2002 · 일본 스포츠카', title: '2002 Mazda RX-7 Spirit-R', src: 'https://sketchfab.com/3d-models/2002-mazda-rx-7-spirit-r-277e2569280d4c9fa3bc3a85bbc627f1', front: 1, vmax: 56, acc: 24, lat: 12.5, nmul: 1.3, stats: [3, 4, 5, 3] },
   { id: 'm720', file: 'assets/mclaren720s.glb', name: '맥라렌 720S GT3', sub: '2019 · 영국 레이싱카', title: '2019 McLaren 720S GT3', src: 'https://sketchfab.com/3d-models/2019-mclaren-720s-gt3-cdf4ca67a56b497493931e8852e70b05', front: 1, vmax: 70, acc: 19, lat: 10.5, nmul: 1.26, stats: [5, 3, 3, 4] },
 ];
@@ -27,7 +36,7 @@ const DIFFS = [{ id: 0, name: '여유롭게', pace: 0.8 }, { id: 1, name: '보�
 const AI_COLORS = ['#ff7a2e', '#3d8bff', '#39c46a'];
 
 /* ---------- 저장 ---------- */
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return { best: s.best || {}, done: s.done || {}, prefs: Object.assign({ car: 0, course: 0, diff: 1, assist: 1, color: 0 }, s.prefs || {}) }; } catch (e) { return { best: {}, done: {}, prefs: { car: 0, course: 0, diff: 1, assist: 1, color: 0 } }; } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return { best: s.best || {}, done: s.done || {}, prefs: Object.assign({ car: 0, course: 0, diff: 1, assist: 1, color: -1 }, s.prefs || {}) }; } catch (e) { return { best: {}, done: {}, prefs: { car: 0, course: 0, diff: 1, assist: 1, color: -1 } }; } }
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 const save = loadSave();
 const prefs = save.prefs;
@@ -79,9 +88,11 @@ function loadModels(onProg) {
 }
 const blobTex = canvasTex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(0,0,0,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
 const flameMat = new THREE.MeshBasicMaterial({ color: 0xff9a3c, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }), flameMat2 = new THREE.MeshBasicMaterial({ color: 0x8fe6ff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+const aiColor = (d, pc) => { const c = d.dc || 0; return c === pc ? (c + 5) % TOY_COLORS.length : c; };
+const colOf = (def, c) => (c >= 0 ? c : (def.dc || 0));
 function makeCarObject(def, colorIdx) {
   let model, wl, len, wid;
-  if (def.build) { const b = buildToyCar(THREE, TOY_COLORS[(colorIdx || 0) % TOY_COLORS.length][0]); model = b.group; wl = b.wheels; len = b.len; wid = b.wid; }
+  if (def.build) { const b = buildToyCar(THREE, TOY_COLORS[(colorIdx || 0) % TOY_COLORS.length][0], def.style); model = b.group; wl = b.wheels; len = b.len; wid = b.wid; }
   else { const p = protos[def.id]; model = p.holder.clone(true); wl = p.wheels; len = p.len; wid = p.wid; }
   model.rotation.y = def.front < 0 ? Math.PI : 0;
   const root = new THREE.Group(), tilt = new THREE.Group(); root.add(tilt); tilt.add(model);
@@ -103,8 +114,8 @@ const turn = new THREE.Group(); gScene.add(turn);
   const stage = new THREE.Mesh(new THREE.CircleGeometry(30, 48), new THREE.MeshStandardMaterial({ color: 0x1a2038, roughness: 0.9 })); stage.rotation.x = -Math.PI / 2; stage.position.y = -0.25; gScene.add(stage); }
 let gCar = null, gYaw = 0.6, gSpin = 0.35, gPop = 1, gDrag = null, gIdx = 0;
 function showGarageCar(i) {
-  gIdx = (i + CARS.length) % CARS.length; prefs.car = gIdx; writeSave();
-  if (gCar) { turn.remove(gCar.root); } gCar = makeCarObject(CARS[gIdx], prefs.color); turn.add(gCar.root); gPop = 0; renderGarageInfo();
+  const ni = (i + CARS.length) % CARS.length; if (ni !== prefs.car) prefs.color = -1; gIdx = ni; prefs.car = gIdx; writeSave();
+  if (gCar) { turn.remove(gCar.root); } gCar = makeCarObject(CARS[gIdx], colOf(CARS[gIdx], prefs.color)); turn.add(gCar.root); gPop = 0; renderGarageInfo();
 }
 
 /* ---------- 경기 장면 ---------- */
@@ -176,8 +187,8 @@ function startRace() {
   O.unlock(); runId++; $('garage').hidden = true; $('hud').hidden = false; $('pad').hidden = false; $('count').hidden = false;
   const co = COURSES[prefs.course]; buildRace(co);
   racers = []; const slots = [{ s: 8, d: 2.6 }, { s: 8, d: -2.6 }, { s: 0, d: 2.6 }, { s: 0, d: -2.6 }];
-  const pdef = CARS[prefs.car]; player = newRacer(pdef, true, slots[0], 0, prefs.color); racers.push(player);
-  for (let i = 0; i < 3; i++) { const r = newRacer(CARS[(i + (prefs.car + 1)) % CARS.length], false, slots[i + 1], i + 1, (prefs.color + 1 + i * 2) % TOY_COLORS.length); r.pace = DIFFS[prefs.diff].pace * (0.95 + i * 0.035); r.name = AI_COLORS[i]; racers.push(r); }
+  const pdef = CARS[prefs.car]; player = newRacer(pdef, true, slots[0], 0, colOf(pdef, prefs.color)); racers.push(player);
+  for (let i = 0; i < 3; i++) { const r = newRacer(CARS[(i + (prefs.car + 1)) % CARS.length], false, slots[i + 1], i + 1, aiColor(CARS[(i + (prefs.car + 1)) % CARS.length], colOf(pdef, prefs.color))); r.pace = DIFFS[prefs.diff].pace * (0.95 + i * 0.035); r.name = AI_COLORS[i]; racers.push(r); }
   // 진행 막대 점
   const pr = $('hudProg'); pr.querySelectorAll('u').forEach((u) => u.remove()); racers.slice(1).forEach((r, i) => { const u = document.createElement('u'); u.style.background = AI_COLORS[i]; r.dot = u; pr.appendChild(u); });
   finishOrder = []; raceT = 0; bumps = 0; nOrbs = 0; finishS = co.length - 40; mode = 'count'; cdT = 3.6; cdShown = -1; hud.rank = hud.speed = hud.nitro = -1; hud.time = '';
@@ -305,7 +316,7 @@ function renderGarageInfo() {
   $('carStats').innerHTML = d.stats.map((v, i) => '<span>' + STAT_NAMES[i] + '</span><span class="bar">' + [1, 2, 3, 4, 5].map((k) => '<i class="' + (k <= v ? 'on' : '') + '"></i>').join('') + '</span>').join('');
   $('credit').innerHTML = !d.src ? '카툰 자동차: 옥쌤의 즐거운 교실에서 코드로 만든 모델이에요.' : '차 모델: “' + d.title + '” — <a href="https://sketchfab.com/outpiston" target="_blank" rel="noopener">OUTPISTON</a> · <a href="' + d.src + '" target="_blank" rel="noopener">Sketchfab</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>';
   const chip = (k, v, label, on, extra) => '<button type="button" class="ch-chip' + (on ? ' on' : '') + (extra ? ' ' + extra : '') + '" data-' + k + '="' + v + '">' + label + '</button>';
-  const colorRow = d.colors ? '<div class="g"><label>색깔</label>' + TOY_COLORS.map((c, i) => '<button type="button" class="rc-sw' + (prefs.color === i ? ' on' : '') + '" data-cl="' + i + '" style="background:#' + c[0].toString(16).padStart(6, '0') + '" aria-label="' + c[1] + '"></button>').join('') + '</div>' : '';
+  const colorRow = d.colors ? '<div class="g"><label>색깔</label>' + TOY_COLORS.map((c, i) => '<button type="button" class="rc-sw' + (colOf(d, prefs.color) === i ? ' on' : '') + '" data-cl="' + i + '" style="background:#' + c[0].toString(16).padStart(6, '0') + '" aria-label="' + c[1] + '"></button>').join('') + '</div>' : '';
   $('opts').innerHTML = colorRow + '<div class="g"><label>코스</label>' + COURSES.map((c, i) => chip('co', i, c.emoji + ' ' + c.name, prefs.course === i, save.done[c.id] ? 'done' : '')).join('') + '</div>' +
     '<div class="g"><label>상대</label>' + DIFFS.map((x) => chip('df', x.id, x.name, prefs.diff === x.id)).join('') + '</div>' +
     '<div class="g"><label>핸들 도움</label>' + chip('as', 1, '켜기', !!prefs.assist) + chip('as', 0, '끄기', !prefs.assist) + '</div>';
@@ -348,8 +359,8 @@ window.addEventListener('blur', () => { setL(false); setR(false); setB(false); s
 function resize() {
   const w = window.innerWidth, h = window.innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h;
   if (mode === 'garage' || mode === 'boot') {
-    camera.fov = 34; const vf = THREE.MathUtils.degToRad(camera.fov) / 2, dist = Math.max(7.4, 4.2 / (Math.tan(vf) * camera.aspect));
-    camera.position.set(0, 1.7 + dist * 0.06, dist); camera.lookAt(0, 0.6, 0);
+    camera.fov = 34; const vf = THREE.MathUtils.degToRad(camera.fov) / 2, dist = Math.max(8.6, 4.8 / (Math.tan(vf) * camera.aspect));
+    camera.position.set(0, 1.7 + dist * 0.06, dist); camera.lookAt(0, 0.85, 0);
     const g = $('garage'), panel = g.hidden ? 0 : g.offsetHeight + 12, top = h < 720 ? 100 : 120; camera.setViewOffset(w, h, 0, (panel - top) / 2, w, h);
   } else camera.clearViewOffset();
   camera.updateProjectionMatrix();
