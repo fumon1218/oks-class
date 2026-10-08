@@ -9,7 +9,7 @@
       slots: [
         { name: '전통놀이 마을', sub: '딱지 · 제기 · 연날리기', img: 'hub_bld_trad', ph: '🪁', x: 330, y: 505, w: 390, zone: 'trad', color: '#ffb44f', say: '전통놀이 마을로 가요!' },
         { name: '전략놀이 마을', sub: '체스 · 장기 · 바둑 · 오목 · 오셀로', img: 'hub_bld_strategy', ph: '♞', x: 840, y: 240, w: 330, zone: 'strategy', color: '#6d7bd9', say: '전략놀이 마을로 가요!' },
-        { name: '보드게임 놀이 마을', sub: '다트 · 도시 건설 · 주차 빼기', img: 'hub_bld_board', ph: '🎲', x: 1390, y: 520, w: 390, zone: 'board', color: '#e0508a', say: '보드게임 놀이 마을로 가요!' }
+        { name: '보드게임 놀이 마을', sub: '다트 · 볼링 · 도시 건설', img: 'hub_bld_board', ph: '🎲', x: 1390, y: 520, w: 390, zone: 'board', color: '#e0508a', say: '보드게임 놀이 마을로 가요!' }
       ] },
     trad: { title: '전통놀이 마을', sub: '옛날 놀이를 함께 해요', map: 'zone_trad_map', hello: '전통놀이 마을이에요. 토끼와 제기차기부터 시작해요!', exit: ['🌌', '놀이별 마을', './'],
       slots: [
