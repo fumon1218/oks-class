@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v157';
+const CACHE_NAME = 'oks-class-v160';
 const ASSETS = [
   './',
   './index.html',
@@ -63,6 +63,12 @@ const ASSETS = [
   './playground/darts/index.html',
   './playground/darts/darts.css',
   './playground/darts/darts.js',
+  './playground/bowling/',
+  './playground/bowling/index.html',
+  './playground/bowling/bowling.css',
+  './playground/bowling/bowling.js',
+  './playground/bowling/physics.js',
+  './playground/bowling/score.js',
   './sports/',
   './sports/index.html',
   './sports/sports.css',
@@ -187,9 +193,11 @@ const ASSETS = [
   './playground/chess/assets/board.glb',
   './playground/chess/assets/pieces.glb',
   './playground/darts/assets/dartboard.glb',
+  './playground/bowling/assets/bowling_pin.glb',
   './playground/go/assets/stones.glb',
   './playground/assets/bld_soon.webp',
   './playground/assets/hub_bld_board.webp',
+  './playground/assets/hub_bld_bowling.webp',
   './playground/assets/hub_bld_chess.webp',
   './playground/assets/hub_bld_darts.webp',
   './playground/assets/hub_bld_go.webp',

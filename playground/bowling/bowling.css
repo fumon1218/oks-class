@@ -1,0 +1,26 @@
+body.bowling-page{background:linear-gradient(#1c1840,#2a2250)}
+.bw-sheet{position:fixed;left:0;right:0;top:calc(max(10px,env(safe-area-inset-top)) + 112px);z-index:3;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;padding:0 8px}
+.bw-row{display:flex;align-items:stretch;background:rgba(255,253,246,.94);border-radius:14px;padding:3px;box-shadow:0 4px 12px rgba(0,0,0,.3);border:3px solid transparent;color:#2a2250}
+.bw-row.on{border-color:#ffc93c;background:#fff6d4}
+.bw-nm{display:flex;flex-direction:column;justify-content:center;min-width:46px;padding:0 6px;text-align:center;font-weight:800;font-size:13px;line-height:1.1}
+.bw-nm b{font-size:18px}
+.bw-f{width:34px;border-left:2px solid #d9d2ee;text-align:center;line-height:1.1}
+.bw-f.last{width:50px}
+.bw-m{display:flex;justify-content:flex-end;gap:0;height:19px;font-weight:800;font-size:13px}
+.bw-m i{font-style:normal;min-width:16px;border-left:2px solid #d9d2ee;border-bottom:2px solid #d9d2ee;line-height:17px}.bw-m i:first-child{border-left:0}
+.bw-m i.x{color:#e5483d}
+.bw-f>b{display:block;font-size:15px;line-height:22px;min-height:22px}
+.bw-f.cur{background:#ffe9a8;border-radius:6px}
+.bw-pop{position:fixed;left:50%;top:44%;transform:translate(-50%,-50%);z-index:6;pointer-events:none}
+.bw-pop span{display:block;white-space:nowrap;font-weight:900;font-size:44px;color:#fff;background:rgba(58,42,110,.9);border:4px solid #ffd767;border-radius:999px;padding:6px 28px;animation:bwpop 1.8s ease-out forwards}
+.bw-pop span.big{font-size:60px;border-color:#ff7a6a}
+@keyframes bwpop{0%{opacity:0;scale:.5}12%{opacity:1;scale:1.15}22%{scale:1}80%{opacity:1}100%{opacity:0;margin-top:-60px}}
+.bw-roll{background:#ffe08a;box-shadow:0 0 0 3px #ffc93c,0 4px 12px rgba(0,0,0,.28);font-size:22px}
+.bw-roll[disabled]{box-shadow:0 4px 12px rgba(0,0,0,.28)}
+body.bw-direct .bw-roll{display:none}
+.bw-credit{font-size:13px;opacity:.75}
+.ch-modes.bw-games{grid-template-columns:repeat(2,1fr)}
+@media (max-width:520px){.bw-sheet{top:calc(max(10px,env(safe-area-inset-top)) + 128px)}.bw-f{width:29px}.bw-f.last{width:44px}.bw-m{font-size:12px}.bw-m i{min-width:14px}.bw-nm{min-width:40px;font-size:12px}.bw-pop span{font-size:34px}.bw-pop span.big{font-size:44px}}
+@media (max-height:720px){.bw-sheet{top:calc(max(10px,env(safe-area-inset-top)) + 100px)}}
+@media (prefers-reduced-motion:reduce){.bw-pop span{animation-duration:2.4s}}
+body.bowling-page .ch-msg{width:max-content;max-width:94vw}

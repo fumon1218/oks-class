@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#2a2250">
+<title>3D 볼링 · 놀이별</title><link rel="icon" href="../../icons/ok-face-192.png"><link rel="apple-touch-icon" href="../../icons/ok-face-180.png">
+<link rel="stylesheet" href="../../core/oks-core.css"><link rel="stylesheet" href="../chess/chess.css"><link rel="stylesheet" href="bowling.css"></head>
+<body class="oks chess-page bowling-page">
+<canvas id="gl" aria-label="3D 볼링장"></canvas>
+<header class="ch-top">
+  <a class="ch-btn" id="back" href="../?zone=board">← 놀이별</a>
+  <div class="ch-title"><span id="modeLabel">보드게임</span><b>3D 볼링</b></div>
+  <div class="ch-tools">
+    <button class="ch-btn" id="btnHelp" type="button" aria-label="놀이 방법">❓</button>
+    <button class="ch-btn" id="btnVoice" type="button" aria-label="안내 음성 켜기·끄기">🔊</button>
+    <button class="ch-btn" id="btnMenu" type="button" aria-label="새 놀이 고르기">☰ 새로</button>
+  </div>
+</header>
+<div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">볼링장을 열고 있어요…</span></div>
+<div class="bw-sheet" id="sheet" aria-label="점수판"></div>
+<div class="bw-pop" id="pop" aria-hidden="true"></div>
+<footer class="ch-bottom">
+  <button class="ch-btn big bw-roll" id="btnRoll" type="button">🎳 굴리기!</button>
+  <button class="ch-btn big" id="btnHint" type="button">💡 힌트</button>
+  <button class="ch-btn big" id="btnAim" type="button">🔄 조준 방식</button>
+</footer>
+<div class="ch-loading" id="loading"><div><div class="ch-spin"></div><p>볼링장을 여는 중…</p></div></div>
+<div class="ch-overlay" id="menu" hidden></div>
+<dialog id="helpDialog" class="ch-dialog"><h2>이렇게 놀아요</h2>
+<ol><li><b>조준:</b> 자동 조준은 노란 길잡이가 좌우로 움직여요. 핀 쪽 가운데에 왔을 때 <b>화면이나 굴리기 단추</b>를 눌러요. 직접 누르기는 레인을 누른 채 움직이다가 손을 떼면 굴러가요.</li><li>한 번에 공을 <b>두 번</b> 굴려요. 첫 번째에 핀을 모두 쓰러뜨리면 <b>스트라이크</b>, 두 번째에 모두 쓰러뜨리면 <b>스페어</b>예요.</li><li><b>스트라이크</b>와 <b>스페어</b>는 다음 공의 점수를 덤으로 받아요.</li><li>옆 도랑(거터)에 빠지면 0점이에요. 쉬운 수준에서는 <b>범퍼</b>가 막아 줘요.</li></ol>
+<p class="bw-credit">핀 3D 모델: “Bowling Pin” by MSerdar Tekin (<a href="https://sketchfab.com/3d-models/bowling-pin-028ccb945012460aa9056ffda5b53e20" target="_blank" rel="noopener">Sketchfab</a>), <a href="http://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a></p>
+<form method="dialog"><button class="ch-btn big">알겠어요</button></form></dialog>
+<script src="../../core/oks-core.js"></script><script src="../../core/oks-eco.js"></script>
+<script type="module" src="bowling.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('../../sw.js').catch(function(){});</script>
+</body></html>

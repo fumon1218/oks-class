@@ -134,3 +134,10 @@ GitHub Pages 배포 후 `https://<계정>.github.io/oks-class/` 에서 바로 �
 - **그림 퍼즐 (`games/puzzle/`)**: 교실 그림 26장 중에서 골라 직소 퍼즐(10·20·50·100조각)을 맞춰요. 수준이 높을수록 판 위 연한 그림 힌트가 줄고 붙는 범위가 좁아집니다. 바다 미술관(space)과 미술 감상 차시(06-0x-03-0x)에서 들어갑니다. 그림 목록은 `index.html`의 `IMGS`.
 - **미술 감상 놀이 묶음**: `games/match/`(그림 짝 찾기, 3~10쌍), `games/look/`(그림 속 색 찾기: 그림 픽셀을 세어 가장 많은 색·따뜻한/차가운 색을 묻습니다), `worksheet/puzzle.html`(오려 붙이는 종이 퍼즐 학습지). 세 놀이와 그림 퍼즐은 `games/puzzle/images.js`의 그림 목록을 함께 씁니다. **명화는 `art/masters/`에 파일을 넣고 `masters.js`에 한 줄 적으면 자동으로 섞여 나옵니다**(저작권이 끝난 작품만). 그림 퍼즐은 최근 결과로 조각 수를 추천하고, '대신 놓아 주기'는 도움 기록(hand)으로 남습니다.
 - **미술 표현·체험 놀이**: `games/myface/`(나를 만들어요: 코드로 그린 SVG 부품을 골라 자화상을 조립, 완성하면 작품 전시관 저장소 `oks-class-gallery-v1`에 그림으로 저장), `games/dots/`(점 잇기: 꼭짓점 목록으로 수준별 점 수 조절), `games/senses/`(`?mode=touch` 느낌 짝짓기 · `?mode=sign` 생활 그림문자). 정식 차시 연결은 `play/play.js`의 `EXTRA`, 공방·미술관 링크는 `space/data.js`.
+
+## 놀이별 · 3D 볼링
+- 진입: 놀이별 → 보드게임 놀이 마을 → 3D 볼링. 직접 주소는 `playground/bowling/`입니다. 5프레임(짧게) 또는 10프레임, 혼자 또는 둘이서 번갈아 합니다.
+- 구성: `physics.js`(평면 공·핀 충돌 물리), `score.js`(스트라이크·스페어 점수 계산), `bowling.js`(three.js 화면·입력·메뉴). 레인과 공은 코드로 만들고, 핀만 `assets/bowling_pin.glb`를 씁니다.
+- 수준 1~2는 범퍼 레인, 3 이상은 도랑(거터)이 있고 조준이 빨라집니다. 자동 조준(길잡이가 움직일 때 누름) / 직접 누르기(끌어서 겨냥) 중 고릅니다.
+- 시험: `node scripts/bowling-score-test.mjs`, `node scripts/bowling-physics-test.mjs`. 기록은 `play-bowling`으로 저장됩니다.
+- 출처: 핀 3D 모델 “Bowling Pin” by MSerdar Tekin, CC BY 4.0 (https://sketchfab.com/3d-models/bowling-pin-028ccb945012460aa9056ffda5b53e20). 도움말 창에도 표기했습니다.
