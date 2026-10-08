@@ -143,3 +143,12 @@ GitHub Pages 배포 후 `https://<계정>.github.io/oks-class/` 에서 바로 �
 - 출처: 핀 3D 모델 “Bowling Pin” by MSerdar Tekin, CC BY 4.0 (https://sketchfab.com/3d-models/bowling-pin-028ccb945012460aa9056ffda5b53e20). 도움말 창에도 표기했습니다.
 - 소리: 볼링은 `playground/bowling/sounds.js`가 합성 소리를 내고, `assets/sfx/sfx.json`에 파일명을 적으면 진짜 녹음으로 바꿔 씁니다(지금은 `strike.mp3`). 레인 길이는 9m, 공 조작은 메뉴의 `세기·스핀`에서 켭니다.
 - 체스·바둑·장기·오목은 말·돌을 놓을 때 `playground/pieces-sound.js`(`assets/pieces.mp3`의 "딱" 소리 9개 중 무작위)를 씁니다.
+
+## 놀이별 · 주차장 탈출 (러시아워)
+- 진입: 놀이별 → 보드게임 놀이 마을(6칸 지도) → 주차장 탈출. 직접 주소는 `playground/rushhour/`입니다.
+- 규칙: 6×6 주차장에서 빨간 차를 오른쪽 출구로 내보냅니다. 차는 앞뒤로만 움직이고, 한 대를 몇 칸 옮겨도 한 번으로 셉니다.
+- 조작: 차를 끌어서 옮기거나, 차를 누르면 나오는 초록 동그라미를 누릅니다. 되돌리기·힌트(풀이 프로그램이 다음 한 수를 알려 줌)·다시 하기가 있습니다.
+- 모드: `퍼즐`(최소 횟수에 가까울수록 별 3개), `횟수 도전`(최소 횟수 + 여유 안에 성공). 수준 1~5, 수준마다 문제 6~12개, 진행 기록은 브라우저에 저장됩니다.
+- 구성: `engine.js`(규칙·풀이), `puzzles.js`(만들어진 문제), `rushhour.js`(three.js 화면). 차는 코드로 만든 장난감 자동차입니다.
+- 문제 만들기: `node scripts/rush-gen.mjs` (무작위 배치에서 풀이 프로그램으로 최소 횟수를 구해 수준별로 고름, 약 6분), 검증: `node scripts/rush-test.mjs`.
+- 보드게임 지도는 6칸(다트·볼링·주차장 탈출 + 우주 도시 건설 및 준비 중 2칸)입니다.

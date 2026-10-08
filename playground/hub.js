@@ -9,7 +9,7 @@
       slots: [
         { name: '전통놀이 마을', sub: '딱지 · 제기 · 연날리기', img: 'hub_bld_trad', ph: '🪁', x: 330, y: 505, w: 390, zone: 'trad', color: '#ffb44f', say: '전통놀이 마을로 가요!' },
         { name: '전략놀이 마을', sub: '체스 · 장기 · 바둑 · 오목 · 오셀로', img: 'hub_bld_strategy', ph: '♞', x: 840, y: 240, w: 330, zone: 'strategy', color: '#6d7bd9', say: '전략놀이 마을로 가요!' },
-        { name: '보드게임 놀이 마을', sub: '다트 · 볼링 · 도시 건설', img: 'hub_bld_board', ph: '🎲', x: 1390, y: 520, w: 390, zone: 'board', color: '#e0508a', say: '보드게임 놀이 마을로 가요!' }
+        { name: '보드게임 놀이 마을', sub: '다트 · 볼링 · 주차장 탈출', img: 'hub_bld_board', ph: '🎲', x: 1390, y: 520, w: 390, zone: 'board', color: '#e0508a', say: '보드게임 놀이 마을로 가요!' }
       ] },
     trad: { title: '전통놀이 마을', sub: '옛날 놀이를 함께 해요', map: 'zone_trad_map', hello: '전통놀이 마을이에요. 토끼와 제기차기부터 시작해요!', exit: ['🌌', '놀이별 마을', './'],
       slots: [
@@ -26,10 +26,12 @@
         { name: '3D 오목', sub: '이기는 법 · 막는 법', img: 'hub_bld_omok', ph: '⚪', x: 510, y: 610, w: 360, url: 'omok/', color: '#4aa86a', say: '오목 놀이터로 가요!' },
         { name: '3D 오셀로', sub: '뒤집기 · 구석 전략', img: 'hub_bld_othello', ph: '🔄', x: 1160, y: 610, w: 360, url: 'othello/', color: '#2f8f7a', say: '오셀로 마을로 가요!' }
       ] },
-    board: { title: '보드게임 놀이 마을', sub: '함께 계획하고 문제를 풀어요', map: 'zone_board_map', hello: '보드게임 놀이 마을이에요. 새로 생긴 볼링장에 가 볼까요?', exit: ['🌌', '놀이별 마을', './'],
+    board: { title: '보드게임 놀이 마을', sub: '함께 계획하고 문제를 풀어요', map: 'zone_board_map', hello: '보드게임 놀이 마을이에요. 새로 생긴 주차장에 가 볼까요?', exit: ['🌌', '놀이별 마을', './'],
       slots: [
-        { name: '3D 다트', sub: '숫자 맞히기 · 301 줄이기', img: 'hub_bld_darts', ph: '🎯', x: 315, y: 495, w: 390, url: 'darts/', color: '#e0508a', say: '다트 놀이관으로 가요!' },
-        { name: '우주 도시 건설', soon: 1, x: 850, y: 225, w: 360 }, { name: '3D 볼링', sub: '스트라이크 · 스페어', img: 'hub_bld_bowling', ph: '🎳', x: 1370, y: 505, w: 390, url: 'bowling/', color: '#8a5ae0', say: '볼링장으로 가요!', today: 1 }
+        { name: '3D 다트', sub: '숫자 맞히기 · 301 줄이기', img: 'hub_bld_darts', ph: '🎯', x: 330, y: 215, w: 330, url: 'darts/', color: '#e0508a', say: '다트 놀이관으로 가요!' },
+        { name: '3D 볼링', sub: '스트라이크 · 스페어', img: 'hub_bld_bowling', ph: '🎳', x: 838, y: 205, w: 330, url: 'bowling/', color: '#8a5ae0', say: '볼링장으로 가요!' },
+        { name: '주차장 탈출', sub: '러시아워 · 차 빼기 퍼즐', img: 'hub_bld_parking', ph: '🚗', x: 1345, y: 215, w: 330, url: 'rushhour/', color: '#3d8bff', say: '주차장으로 가요!', today: 1 },
+        { name: '우주 도시 건설', soon: 1, x: 322, y: 615, w: 330 }, { name: '새 놀이 준비 중', soon: 1, x: 838, y: 612, w: 330 }, { name: '새 놀이 준비 중', soon: 1, x: 1360, y: 615, w: 330 }
       ] }
   };
   var zid = (location.search.match(/[?&]zone=(\w+)/) || [])[1]; var Z = ZONES[zid] || ZONES.main; if (!ZONES[zid]) zid = 'main';

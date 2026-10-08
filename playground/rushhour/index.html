@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#7cc4ff">
+<title>주차장 탈출 · 놀이별</title><link rel="icon" href="../../icons/ok-face-192.png"><link rel="apple-touch-icon" href="../../icons/ok-face-180.png">
+<link rel="stylesheet" href="../../core/oks-core.css"><link rel="stylesheet" href="../chess/chess.css"><link rel="stylesheet" href="rushhour.css"></head>
+<body class="oks chess-page rush-page">
+<canvas id="gl" aria-label="3D 주차장"></canvas>
+<header class="ch-top">
+  <a class="ch-btn" id="back" href="../?zone=board">← 놀이별</a>
+  <div class="ch-title"><span id="modeLabel">보드게임</span><b>주차장 탈출</b></div>
+  <div class="ch-tools">
+    <button class="ch-btn" id="btnHelp" type="button" aria-label="놀이 방법">❓</button>
+    <button class="ch-btn" id="btnVoice" type="button" aria-label="안내 음성 켜기·끄기">🔊</button>
+    <button class="ch-btn" id="btnMenu" type="button" aria-label="문제 고르기">☰ 문제</button>
+  </div>
+</header>
+<div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">주차장을 열고 있어요…</span></div>
+<div class="rh-info" id="info" aria-label="움직임 기록"></div>
+<footer class="ch-bottom">
+  <button class="ch-btn big" id="btnUndo" type="button">↩ 되돌리기</button>
+  <button class="ch-btn big" id="btnHint" type="button">💡 힌트</button>
+  <button class="ch-btn big" id="btnReset" type="button">🔄 다시</button>
+</footer>
+<div class="ch-loading" id="loading"><div><div class="ch-spin"></div><p>주차장을 여는 중…</p></div></div>
+<div class="ch-overlay" id="menu" hidden></div>
+<dialog id="helpDialog" class="ch-dialog"><h2>이렇게 놀아요</h2>
+<ol><li><b>빨간 차</b>를 오른쪽 <b>출구</b>로 내보내면 성공이에요.</li><li>차는 <b>앞이나 뒤로만</b> 움직여요. 차를 <b>끌어서</b> 옮기거나, 차를 누르고 나타나는 <b>초록 동그라미</b>를 눌러요.</li><li>다른 차가 막고 있으면 그 차부터 비켜 줘요. 한 대를 몇 칸 옮겨도 <b>한 번</b>으로 세요.</li><li><b>적게 움직일수록</b> 별이 많아요. 막히면 💡 힌트를 눌러요.</li><li><b>횟수 도전</b>은 정해진 횟수 안에 빨간 차를 내보내요.</li></ol>
+<form method="dialog"><button class="ch-btn big">알겠어요</button></form></dialog>
+<script src="../../core/oks-core.js"></script><script src="../../core/oks-eco.js"></script>
+<script type="module" src="rushhour.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('../../sw.js').catch(function(){});</script>
+</body></html>

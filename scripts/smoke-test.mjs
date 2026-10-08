@@ -34,7 +34,7 @@ for (const rel of files.filter(f => f.endsWith('.html'))) {
   }
   assert(!/fumon1218\.github\.io\/jungle-jump\/[^"' ]*\.(webp|png|jpe?g|gif|svg)/.test(src), `다른 저장소 그림을 직접 불러오면 오프라인에서 깨집니다: ${rel}`);
 }
-for (const rel of files.filter(f => f.endsWith('.js') && !f.startsWith('scripts/') && !f.startsWith('vendor/') && f !== 'playground/chess/chess.js' && f !== 'playground/darts/darts.js' && !f.startsWith('playground/bowling/') && f !== 'playground/janggi/janggi.js' && f !== 'playground/omok/omok.js' && f !== 'playground/othello/othello.js' && f !== 'playground/go/go.js' && f !== 'playground/common3d.js')) {
+for (const rel of files.filter(f => f.endsWith('.js') && !f.startsWith('scripts/') && !f.startsWith('vendor/') && f !== 'playground/chess/chess.js' && f !== 'playground/darts/darts.js' && !f.startsWith('playground/bowling/') && !f.startsWith('playground/rushhour/') && f !== 'playground/janggi/janggi.js' && f !== 'playground/omok/omok.js' && f !== 'playground/othello/othello.js' && f !== 'playground/go/go.js' && f !== 'playground/common3d.js')) {
   const src = fs.readFileSync(path.join(root, rel), 'utf8');
   new vm.Script(src, { filename: rel }); scripts++;
   assert(!/fumon1218\.github\.io\/jungle-jump\/[^"' ]*\.(webp|png|jpe?g|gif|svg)/.test(src), `다른 저장소 그림 직접 참조: ${rel}`);
