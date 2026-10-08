@@ -5,6 +5,7 @@ import * as THREE from '../../vendor/three/three.module.js';
 import { GLTFLoader } from '../../vendor/three/addons/loaders/GLTFLoader.js';
 import { makeTrack, makeLoopTrack, LOOP_SHAPES } from './track.js';
 import { buildToyCar, TOY_COLORS } from './toycar.js';
+import { SLOTS, ITEMS, ITEM } from './parts.js';
 
 const O = window.OKS;
 const $ = (id) => document.getElementById(id);
@@ -38,7 +39,7 @@ const DIFFS = [{ id: 0, name: '여유롭게', pace: 0.8 }, { id: 1, name: '보�
 const AI_COLORS = ['#ff7a2e', '#3d8bff', '#39c46a'];
 
 /* ---------- 저장 ---------- */
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return { best: s.best || {}, done: s.done || {}, prefs: Object.assign({ car: 0, course: 0, diff: 1, assist: 1, color: -1, laps: 3, len: 1 }, s.prefs || {}) }; } catch (e) { return { best: {}, done: {}, prefs: { car: 0, course: 0, diff: 1, assist: 1, color: -1, laps: 3, len: 1 } }; } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return { best: s.best || {}, done: s.done || {}, gar: { owned: (s.gar && s.gar.owned) || {}, eq: (s.gar && s.gar.eq) || {} }, prefs: Object.assign({ car: 0, course: 0, diff: 1, assist: 1, color: -1, laps: 3, len: 1 }, s.prefs || {}) }; } catch (e) { return { best: {}, done: {}, gar: { owned: {}, eq: {} }, prefs: { car: 0, course: 0, diff: 1, assist: 1, color: -1, laps: 3, len: 1 } }; } }
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 const save = loadSave();
 const prefs = save.prefs;
@@ -92,16 +93,21 @@ const blobTex = canvasTex(128, 128, (g, w, h) => { const gr = g.createRadialGrad
 const flameMat = new THREE.MeshBasicMaterial({ color: 0xff9a3c, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }), flameMat2 = new THREE.MeshBasicMaterial({ color: 0x8fe6ff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
 const aiColor = (d, pc) => { const c = d.dc || 0; return c === pc ? (c + 5) % TOY_COLORS.length : c; };
 const colOf = (def, c) => (c >= 0 ? c : (def.dc || 0));
-function makeCarObject(def, colorIdx) {
-  let model, wl, len, wid;
-  if (def.build) { const b = buildToyCar(THREE, TOY_COLORS[(colorIdx || 0) % TOY_COLORS.length][0], def.style); model = b.group; wl = b.wheels; len = b.len; wid = b.wid; }
+const neonTex = canvasTex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(255,255,255,.95)'); gr.addColorStop(0.55, 'rgba(255,255,255,.5)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
+function animParts(o, now, dt) { if (!o) return; if (o.rb.length) { const h = (now / 2600) % 1; o.rb.forEach((x) => x.m.color.setHSL(h, x.s, x.l)); } o.spin.forEach((p) => { p.rotation.y += dt * 24; }); }
+function makeCarObject(def, colorIdx, eq) {
+  eq = eq || {}; let model, wl, len, wid;
+  if (def.build) { const b = buildToyCar(THREE, TOY_COLORS[(colorIdx || 0) % TOY_COLORS.length][0], def.style, eq); model = b.group; wl = b.wheels; len = b.len; wid = b.wid; }
   else { const p = protos[def.id]; model = p.holder.clone(true); wl = p.wheels; len = p.len; wid = p.wid; }
   model.rotation.y = def.front < 0 ? Math.PI : 0;
   const root = new THREE.Group(), tilt = new THREE.Group(); root.add(tilt); tilt.add(model);
   const blob = new THREE.Mesh(new THREE.PlaneGeometry(wid * 1.9, len * 1.35), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false })); blob.rotation.x = -Math.PI / 2; blob.position.y = 0.03; tilt.add(blob);
-  const flame = new THREE.Group(); for (const sx of [-0.4, 0.4]) { const g = new THREE.ConeGeometry(0.16, 1.5, 10); g.rotateX(def.front > 0 ? -Math.PI / 2 : Math.PI / 2); const m = new THREE.Mesh(g, flameMat); m.position.set(sx, 0.5, -def.front * (len / 2 + 0.7)); flame.add(m); const g2 = new THREE.ConeGeometry(0.08, 0.9, 8); g2.rotateX(def.front > 0 ? -Math.PI / 2 : Math.PI / 2); const m2 = new THREE.Mesh(g2, flameMat2); m2.position.set(sx, 0.5, -def.front * (len / 2 + 0.45)); flame.add(m2); } flame.visible = false; tilt.add(flame);
+  const rb = (model.userData.rb || []).slice(), spin = model.userData.spin || [], fi = ITEM[eq.flame], fm1 = flameMat.clone(), fm2 = flameMat2.clone();
+  if (fi) { if (fi.color < 0) { rb.push({ m: fm1, s: 1, l: 0.55 }, { m: fm2, s: 1, l: 0.8 }); } else { fm1.color.set(fi.color); fm2.color.set(fi.color).lerp(new THREE.Color(0xffffff), 0.6); } }
+  const ni = ITEM[eq.neon]; if (ni) { const nm = new THREE.MeshBasicMaterial({ map: neonTex, color: ni.color < 0 ? 0xffffff : ni.color, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false }); if (ni.color < 0) rb.push({ m: nm, s: 1, l: 0.55 }); const np = new THREE.Mesh(new THREE.PlaneGeometry(wid * 1.9, len * 1.25), nm); np.rotation.x = -Math.PI / 2; np.position.y = 0.06; tilt.add(np); }
+  const flame = new THREE.Group(); for (const sx of [-0.4, 0.4]) { const g = new THREE.ConeGeometry(0.16, 1.5, 10); g.rotateX(def.front > 0 ? -Math.PI / 2 : Math.PI / 2); const m = new THREE.Mesh(g, fm1); m.position.set(sx, 0.5, -def.front * (len / 2 + 0.7)); flame.add(m); const g2 = new THREE.ConeGeometry(0.08, 0.9, 8); g2.rotateX(def.front > 0 ? -Math.PI / 2 : Math.PI / 2); const m2 = new THREE.Mesh(g2, fm2); m2.position.set(sx, 0.5, -def.front * (len / 2 + 0.45)); flame.add(m2); } flame.visible = false; tilt.add(flame);
   const wheels = wl.map((w) => ({ s: model.getObjectByName(w.s), r: model.getObjectByName(w.r), front: w.front }));
-  return { root, tilt, model, wheels, flame, def, len };
+  return { root, tilt, model, wheels, flame, def, len, rb, spin };
 }
 function animWheels(o, dist, steer) { const a = dist / 0.32 * o.def.front; o.wheels.forEach((w) => { w.r.rotation.x += a; if (w.front) w.s.rotation.y = -steer * 0.42; }); }
 
@@ -114,10 +120,13 @@ const turn = new THREE.Group(); gScene.add(turn);
   const ring = new THREE.Mesh(new THREE.TorusGeometry(3.6, 0.06, 12, 96), new THREE.MeshBasicMaterial({ color: 0xffb347 })); ring.rotation.x = Math.PI / 2; ring.position.y = 0.01; gScene.add(ring);
   const glow = new THREE.Mesh(new THREE.CircleGeometry(7, 48), new THREE.MeshBasicMaterial({ map: canvasTex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(120,170,255,.45)'); gr.addColorStop(1, 'rgba(120,170,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }), transparent: true, depthWrite: false })); glow.rotation.x = -Math.PI / 2; glow.position.y = -0.24; gScene.add(glow);
   const stage = new THREE.Mesh(new THREE.CircleGeometry(30, 48), new THREE.MeshStandardMaterial({ color: 0x1a2038, roughness: 0.9 })); stage.rotation.x = -Math.PI / 2; stage.position.y = -0.25; gScene.add(stage); }
+let tuneSel = null, tuneSlot = 'paint';
+function eqOf(def) { const e = Object.assign({}, save.gar.eq[def.id] || {}); if (tuneSel && tuneSel.carId === def.id) e[tuneSel.slot] = tuneSel.id; return e; }
+function aiEq() { const e = {}; SLOTS.forEach((sl) => { if (Math.random() < 0.4) { const l = ITEMS.filter((i) => i.slot === sl.id); e[sl.id] = l[Math.floor(Math.random() * l.length)].id; } }); return e; }
 let gCar = null, gYaw = 0.6, gSpin = 0.35, gPop = 1, gDrag = null, gIdx = 0;
 function showGarageCar(i) {
   const ni = (i + CARS.length) % CARS.length; if (ni !== prefs.car) prefs.color = -1; gIdx = ni; prefs.car = gIdx; writeSave();
-  if (gCar) { turn.remove(gCar.root); } gCar = makeCarObject(CARS[gIdx], colOf(CARS[gIdx], prefs.color)); turn.add(gCar.root); gPop = 0; renderGarageInfo();
+  if (gCar) { turn.remove(gCar.root); } gCar = makeCarObject(CARS[gIdx], colOf(CARS[gIdx], prefs.color), eqOf(CARS[gIdx])); turn.add(gCar.root); gPop = 0; renderGarageInfo();
 }
 
 /* ---------- 경기 장면 ---------- */
@@ -213,17 +222,17 @@ const msgEl = $('msg'), msgText = $('msgText');
 function say(text, kind, speak) { msgText.textContent = text; msgEl.className = 'ch-msg' + (kind ? ' ' + kind : ''); if (speak !== false) O.say(typeof speak === 'string' ? speak : text); }
 const note = (t) => say(t, null, false);
 
-function newRacer(def, isPlayer, slot, idx, colorIdx) {
-  const o = makeCarObject(def, colorIdx); rScene.add(o.root);
+function newRacer(def, isPlayer, slot, idx, colorIdx, eq) {
+  const o = makeCarObject(def, colorIdx, eq); rScene.add(o.root);
   const r = Object.assign(o, { isPlayer, s: slot.s, d: slot.d, v: 0, dd: 0, u: 0, yaw: 0, nitro: isPlayer ? 0.35 : 0, nOn: false, brake: false, finished: false, fT: 0, wallCd: 0, hitCd: 0, tgtD: slot.d, tgtT: 2 + Math.random() * 2, wob: Math.random() * 6, idx, aiV: 0, travel: 0 });
   return r;
 }
 function startRace() {
-  O.unlock(); runId++; $('garage').hidden = true; $('hud').hidden = false; $('pad').hidden = false; $('count').hidden = false;
+  O.unlock(); runId++; $('tune').hidden = true; tuneSel = null; $('garage').hidden = true; $('hud').hidden = false; $('pad').hidden = false; $('count').hidden = false;
   const co = effCourse(); buildRace(co);
   racers = []; const slots = [{ s: 8, d: 2.6 }, { s: 8, d: -2.6 }, { s: 0, d: 2.6 }, { s: 0, d: -2.6 }];
-  const pdef = CARS[prefs.car]; player = newRacer(pdef, true, slots[0], 0, colOf(pdef, prefs.color)); racers.push(player);
-  for (let i = 0; i < 3; i++) { const r = newRacer(CARS[(i + (prefs.car + 1)) % CARS.length], false, slots[i + 1], i + 1, aiColor(CARS[(i + (prefs.car + 1)) % CARS.length], colOf(pdef, prefs.color))); r.pace = DIFFS[prefs.diff].pace * (0.95 + i * 0.035); r.name = AI_COLORS[i]; racers.push(r); }
+  const pdef = CARS[prefs.car]; player = newRacer(pdef, true, slots[0], 0, colOf(pdef, prefs.color), eqOf(pdef)); racers.push(player);
+  for (let i = 0; i < 3; i++) { const r = newRacer(CARS[(i + (prefs.car + 1)) % CARS.length], false, slots[i + 1], i + 1, aiColor(CARS[(i + (prefs.car + 1)) % CARS.length], colOf(pdef, prefs.color)), aiEq()); r.pace = DIFFS[prefs.diff].pace * (0.95 + i * 0.035); r.name = AI_COLORS[i]; racers.push(r); }
   // 진행 막대 점
   const pr = $('hudProg'); pr.querySelectorAll('u').forEach((u) => u.remove()); racers.slice(1).forEach((r, i) => { const u = document.createElement('u'); u.style.background = AI_COLORS[i]; r.dot = u; pr.appendChild(u); });
   finishOrder = []; raceT = 0; bumps = 0; nOrbs = 0; finishS = co.shape ? 32 + co.laps * co.length : co.length - 40; lapNow = 1; mode = 'count'; cdT = 3.6; cdShown = -1; hud.rank = hud.speed = hud.nitro = -1; hud.time = '';
@@ -294,7 +303,7 @@ function onPlayerFinish() {
   const entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'play', subjectName: '놀이(스피드 레이스)', school: 'elem', topic: '스피드 레이스', level: prefs.diff + 1, engine: 'racing', rounds: 1, mistakes: 0, glow: 0, hand: 0, asked: 0, sec: Math.round(time) };
   const btns = [{ label: '🔁 다시 달리기', color: 'green', onClick: () => startRace() }, { label: '🚗 차를 바꾸기', color: 'orange', onClick: () => openGarage() }];
   if (place === 1 && prefs.course < COURSES.length - 1) btns.splice(1, 0, { label: '➡ 다음 코스 (' + COURSES[prefs.course + 1].name + ')', color: 'blue', onClick: () => { prefs.course++; writeSave(); startRace(); } });
-  setTimeout(() => { if (rid === runId) O.finish({ stats: O.newStats(), entry, stars, title, text, speak, mission: { lesson: 1 }, buttons: btns }); }, 1800);
+  setTimeout(() => { if (rid === runId) O.finish({ stats: O.newStats(), entry, stars, title, text, speak, coins: 4 + (5 - place) * 3 + (course.laps ? (course.laps - 1) * 2 : 0), mission: { lesson: 1 }, buttons: btns }); }, 1800);
 }
 
 /* ---------- 카메라 ---------- */
@@ -365,9 +374,38 @@ function renderGarageInfo() {
   $('opts').querySelectorAll('[data-df]').forEach((b) => { b.onclick = () => { prefs.diff = +b.dataset.df; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
   $('opts').querySelectorAll('[data-as]').forEach((b) => { b.onclick = () => { prefs.assist = +b.dataset.as; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
 }
+/* ---------- 내 차고 꾸미기 (코인으로 사서 달아요) ---------- */
+const coinsNow = () => { try { return O.eco.info().coins; } catch (e) { return 0; } };
+function rebuildGarageCar() { if (gCar) turn.remove(gCar.root); gCar = makeCarObject(CARS[gIdx], colOf(CARS[gIdx], prefs.color), eqOf(CARS[gIdx])); turn.add(gCar.root); gPop = 1; }
+function openTune() {
+  O.unlock(); O.sfx('tick'); tuneSel = null; $('garage').hidden = true; $('tune').hidden = false; renderTune(); resize(); say('코인으로 차를 꾸며요!', null, '코인으로 내 차를 꾸며요! 마음에 드는 걸 눌러 보세요.');
+}
+function closeTune() { O.sfx('tick'); tuneSel = null; rebuildGarageCar(); $('tune').hidden = true; $('garage').hidden = false; renderGarageInfo(); resize(); say('타고 싶은 차를 골라요.', null, false); }
+function renderTune() {
+  const d = CARS[gIdx], slots = SLOTS.filter((x) => d.build || !x.toy); if (!slots.some((x) => x.id === tuneSlot)) tuneSlot = slots[0].id;
+  const eq = save.gar.eq[d.id] || {};
+  $('tuneTitle').textContent = '🛠 ' + d.name + ' 꾸미기';
+  $('tuneTabs').innerHTML = slots.map((x) => '<button type="button" class="rc-tab' + (x.id === tuneSlot ? ' on' : '') + '" data-sl="' + x.id + '"><span>' + x.icon + '</span>' + x.name + (eq[x.id] ? '<i>✓</i>' : '') + '</button>').join('');
+  const list = [{ id: '', icon: '✖️', name: '기본', price: 0 }].concat(ITEMS.filter((i) => i.slot === tuneSlot)), cur = (tuneSel && tuneSel.slot === tuneSlot) ? tuneSel.id : (eq[tuneSlot] || '');
+  $('tuneItems').innerHTML = list.map((i) => { const own = !i.id || save.gar.owned[i.id], on = cur === i.id; return '<button type="button" class="rc-item' + (on ? ' on' : '') + (own ? ' own' : '') + '" data-it="' + i.id + '"><b>' + i.icon + '</b><span>' + i.name + '</span><em>' + (!i.id ? (eq[tuneSlot] ? '벗기' : '지금 모습') : (eq[tuneSlot] === i.id ? '달았어요 ✓' : own ? '내 것' : '🪙 ' + i.price)) + '</em></button>'; }).join('');
+  const sel = tuneSel && tuneSel.slot === tuneSlot && tuneSel.id && !save.gar.owned[tuneSel.id] ? ITEM[tuneSel.id] : null, buy = $('tuneBuy');
+  if (sel) { const ok = coinsNow() >= sel.price; buy.hidden = false; buy.disabled = !ok; buy.textContent = ok ? '🪙 ' + sel.price + ' 코인으로 사기' : '코인이 모자라요 (🪙 ' + coinsNow() + ' / ' + sel.price + ')'; } else buy.hidden = true;
+  $('tuneTabs').querySelectorAll('[data-sl]').forEach((b) => { b.onclick = () => { O.sfx('tick'); tuneSlot = b.dataset.sl; tuneSel = null; rebuildGarageCar(); renderTune(); }; });
+  $('tuneItems').querySelectorAll('[data-it]').forEach((b) => { b.onclick = () => {
+    const id = b.dataset.it, it = ITEM[id], own = !id || save.gar.owned[id];
+    if (own) { save.gar.eq[d.id] = Object.assign({}, save.gar.eq[d.id] || {}); if (id) save.gar.eq[d.id][tuneSlot] = id; else delete save.gar.eq[d.id][tuneSlot]; tuneSel = null; writeSave(); O.sfx('ok'); rebuildGarageCar(); renderTune(); if (it) say(it.name + ' 달았어요!', null, it.name + ' 달았어요!'); }
+    else { tuneSel = { carId: d.id, slot: tuneSlot, id }; O.sfx('tick'); rebuildGarageCar(); renderTune(); say(it.name + ' · 🪙 ' + it.price, null, it.name + '! 마음에 들면 사요.'); }
+  }; });
+}
+$('tuneBuy').onclick = () => {
+  const sel = tuneSel && ITEM[tuneSel.id]; if (!sel || save.gar.owned[sel.id]) return; if (!O.eco || !O.eco.spend(sel.price)) { O.sfx('no'); O.toast && O.toast('코인이 조금 모자라요. 공부하고 경기하면 모여요!'); return; }
+  save.gar.owned[sel.id] = 1; save.gar.eq[tuneSel.carId] = Object.assign({}, save.gar.eq[tuneSel.carId] || {}, { [sel.slot]: sel.id }); tuneSel = null; writeSave(); O.sfx('win'); rebuildGarageCar(); renderTune(); say(sel.name + ' 샀어요! 멋져요!', 'good', sel.name + ' 샀어요! 멋져요!');
+};
+$('tuneBtn').onclick = openTune; $('tuneBack').onclick = closeTune;
+try { O.eco.hud($('tuneHud')); } catch (e) {}
 function openGarage() {
   runId++; mode = 'garage'; stopEngine(); O.hush && O.hush(); $('hud').hidden = true; $('pad').hidden = true; $('count').hidden = true; document.querySelectorAll('.oks-overlay').forEach((x) => x.remove());
-  $('garage').hidden = false; $('btnMenu').textContent = '🏁 달리기'; showGarageCar(prefs.car); resize(); say('타고 싶은 차를 골라요.', null, '타고 싶은 차를 골라요. 화살표를 눌러 바꿀 수 있어요.');
+  $('tune').hidden = true; tuneSel = null; $('garage').hidden = false; $('btnMenu').textContent = '🏁 달리기'; showGarageCar(prefs.car); resize(); say('타고 싶은 차를 골라요.', null, '타고 싶은 차를 골라요. 화살표를 눌러 바꿀 수 있어요.');
 }
 $('carPrev').onclick = () => { O.unlock(); O.sfx('tick'); showGarageCar(gIdx - 1); };
 $('carNext').onclick = () => { O.unlock(); O.sfx('tick'); showGarageCar(gIdx + 1); };
@@ -401,7 +439,7 @@ function resize() {
   if (mode === 'garage' || mode === 'boot') {
     camera.fov = 34; const vf = THREE.MathUtils.degToRad(camera.fov) / 2, dist = Math.max(8.6, 4.8 / (Math.tan(vf) * camera.aspect));
     camera.position.set(0, 1.7 + dist * 0.06, dist); camera.lookAt(0, 0.85, 0);
-    const g = $('garage'), panel = g.hidden ? 0 : g.offsetHeight + 12, top = h < 720 ? 100 : 120; camera.setViewOffset(w, h, 0, (panel - top) / 2, w, h);
+    const g = !$('tune').hidden ? $('tune') : $('garage'), panel = g.hidden ? 0 : g.offsetHeight + 12, top = h < 720 ? 100 : 120; camera.setViewOffset(w, h, 0, (panel - top) / 2, w, h);
   } else camera.clearViewOffset();
   camera.updateProjectionMatrix();
 }
@@ -410,10 +448,10 @@ let last = performance.now();
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   if (mode === 'garage') {
-    if (gCar) { gYaw += gSpin * dt; gCar.root.rotation.y = gYaw; gPop = Math.min(1, gPop + dt * 3.2); const e = 1 - Math.pow(1 - gPop, 3); gCar.root.scale.setScalar(0.7 + 0.3 * e); gCar.root.position.y = (1 - e) * 0.4; animWheels(gCar, 0, 0); }
+    if (gCar) { gYaw += gSpin * dt; gCar.root.rotation.y = gYaw; gPop = Math.min(1, gPop + dt * 3.2); const e = 1 - Math.pow(1 - gPop, 3); gCar.root.scale.setScalar(0.7 + 0.3 * e); gCar.root.position.y = (1 - e) * 0.4; animWheels(gCar, 0, 0); animParts(gCar, now, dt); }
     renderer.render(gScene, camera);
   } else if (rScene) {
-    simulate(dt); updateCamera(dt); updateHud(); engineUpdate();
+    simulate(dt); updateCamera(dt); updateHud(); engineUpdate(); racers.forEach((r) => animParts(r, now, dt));
     orbs.forEach((m) => { if (!m.visible) return; const u = m.userData, a = track.at(u.s); m.position.set(a.x + a.nx * u.d, a.y + 1.3 + Math.sin(now / 300 + u.s) * 0.2, a.z + a.nz * u.d); m.rotation.y = now / 400; });
     renderer.render(rScene, camera);
   }

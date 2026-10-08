@@ -13,6 +13,12 @@
     <button class="ch-btn" id="btnMenu" type="button" aria-label="차고로 가기">🚗 차고</button>
   </div>
 </header>
+<section class="rc-garage rc-tune" id="tune" hidden aria-label="내 차고 꾸미기">
+  <div class="rc-tune-head"><b id="tuneTitle">🛠 꾸미기</b><div id="tuneHud"></div></div>
+  <div class="rc-tabs" id="tuneTabs"></div>
+  <div class="rc-items" id="tuneItems"></div>
+  <div class="rc-tune-act"><button class="ch-go rc-buy" id="tuneBuy" type="button" hidden>사기</button><button class="ch-btn" id="tuneBack" type="button">← 차고로</button></div>
+</section>
 <div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">차고를 열고 있어요…</span></div>
 
 <section class="rc-garage" id="garage" hidden aria-label="차고">
@@ -23,7 +29,7 @@
   </div>
   <div class="rc-stats" id="carStats"></div>
   <div class="rc-opts" id="opts"></div>
-  <button class="ch-go" id="goBtn" type="button">🏁 출발!</button>
+  <div class="rc-gorow"><button class="ch-btn rc-tunebtn" id="tuneBtn" type="button">🛠 꾸미기</button><button class="ch-go" id="goBtn" type="button">🏁 출발!</button></div>
   <p class="rc-tip">차를 끌면 빙글 돌려 볼 수 있어요.</p>
   <p class="rc-credit" id="credit"></p>
 </section>
