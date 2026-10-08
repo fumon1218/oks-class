@@ -49,14 +49,17 @@
     e.style.left = ax / HUB_W * 100 + '%'; e.style.top = ay / HUB_H * 100 + '%'; e.style.width = bw / HUB_W * 100 + '%'; e.style.zIndex = Math.round(ay); e.style.animationDelay = (i * 70) + 'ms'; e.style.setProperty('--bcolor', b.color || '#b9b6d6');
     var imgName = b.soon ? 'bld_soon' : b.img;
     e.innerHTML = '<img class="sh-img" src="assets/' + imgName + '.webp" alt="">' + (b.today ? '<span class="sh-tag">추천!</span>' : '') +
-      '<span class="sh-name"><b>' + O.esc(b.name) + '</b><small>' + (b.soon ? '🔒 곧 만나요' : O.esc(b.sub)) + '</small></span>';
+      '';
+    var lbl = E('div', 'sh-lbl'); lbl.style.left = e.style.left; lbl.style.top = e.style.top; lbl.style.width = e.style.width; lbl.style.setProperty('--bcolor', b.color || '#b9b6d6');
+    lbl.innerHTML = '<span class="sh-name"><b>' + O.esc(b.name) + '</b><small>' + (b.soon ? '🔒 곧 만나요' : O.esc(b.sub)) + '</small></span>';
     var img = e.querySelector('img'); img.onerror = function () { var ph = E('div', 'sh-ph'); ph.innerHTML = '<span></span>'; ph.firstChild.textContent = b.ph || '🏗️'; img.replaceWith(ph); };
     e.onclick = function () {
       if (b.soon) { O.sfx('tick'); talk(b.name + '은(는) 곧 열려요. 조금만 기다려요!'); e.classList.remove('shake'); void e.offsetWidth; e.classList.add('shake'); return; }
       O.sfx('pop'); talk(b.say);
       setTimeout(function () { location.href = b.zone ? '?zone=' + b.zone : b.url; }, 650);
     };
-    map.appendChild(e);
+    lbl.firstChild.onclick = function () { e.click(); };
+    map.appendChild(e); map.appendChild(lbl);
   });
   document.body.innerHTML = ''; document.body.appendChild(root);
   var sc = root.querySelector('.sh-scroll'); sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2;
