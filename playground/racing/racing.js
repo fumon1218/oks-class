@@ -28,9 +28,11 @@ const CARS = [
 ];
 const STAT_NAMES = ['최고 속도', '가속', '핸들', '니트로'];
 const COURSES = [
-  { id: 'meadow', name: '초록 숲길', emoji: '🌲', seed: 11, length: 3200, sky: ['#4aa8ff', '#d9f0ff'], fog: 0xd5ecff, ground: 0x6fbf5a, bank: 0x5aa84a, tree: 'pine', leaf: 0x2f8f4a },
-  { id: 'desert', name: '노을 사막길', emoji: '🌵', seed: 23, length: 3600, sky: ['#ff8f5a', '#ffe6b8'], fog: 0xffdcaa, ground: 0xe6bb78, bank: 0xd2a35f, tree: 'cactus', leaf: 0x4b9a4a },
-  { id: 'snow', name: '눈 덮인 길', emoji: '⛄', seed: 35, length: 3400, sky: ['#8fbbe6', '#f0f7ff'], fog: 0xe8f2fb, ground: 0xf3f8fc, bank: 0xdfe9f3, tree: 'pine', leaf: 0x3d7a68, snow: true },
+  { id: 'meadow', name: '초록 숲길', emoji: '🌲', seed: 11, length: 3200, bg: 'bg_forest', hz: 0.575, sky: ['#4aa8ff', '#bfe6ff'], fog: 0x93d36e, ground: 0x7cc43a, bank: 0x6ab32f, tree: 'round', leaf: 0x3ea94a },
+  { id: 'sakura', name: '벚꽃 경기장', emoji: '🌸', seed: 47, length: 3300, bg: 'bg_cherry', hz: 0.62, sky: ['#5db4ff', '#fce5e9'], fog: 0xfbe0e6, ground: 0xf4c8d6, bank: 0xeab4c6, tree: 'round', leaf: 0xff9fc6, trunk: 0x8a5a44 },
+  { id: 'beach', name: '반짝 바닷길', emoji: '🏖️', seed: 23, length: 3500, bg: 'bg_beach', hz: 0.5, sky: ['#2f9bff', '#9fe4ff'], fog: 0x6fdcf5, ground: 0xf3d9a0, bank: 0xe6c88a, tree: 'palm', leaf: 0x35b45a, trunk: 0xb98a55 },
+  { id: 'skyisle', name: '노을 하늘 섬', emoji: '🏯', seed: 35, length: 3400, bg: 'bg_sky', hz: 0.6, sky: ['#8a7be0', '#ffc2a8'], fog: 0xf9b4b0, ground: 0xe9a2b6, bank: 0xdc8fa8, tree: 'puff', leaf: 0xffeef2 },
+  { id: 'space', name: '별빛 우주길', emoji: '🌙', seed: 59, length: 3600, bg: 'bg_space', hz: 0.56, sky: ['#150a52', '#6a3fd8'], fog: 0x7a52e0, ground: 0x4a34b0, bank: 0x3c2a96, tree: 'star', leaf: 0xffd84a },
 ];
 const DIFFS = [{ id: 0, name: '여유롭게', pace: 0.8 }, { id: 1, name: '보통', pace: 0.9 }, { id: 2, name: '도전!', pace: 0.99 }];
 const AI_COLORS = ['#ff7a2e', '#3d8bff', '#39c46a'];
@@ -143,8 +145,16 @@ function makeGate(tr, s, text) {
   const banner = new THREE.Mesh(new THREE.BoxGeometry(2 * W + 3, 2.1, 0.5), [postM, postM, postM, postM, new THREE.MeshBasicMaterial({ map: canvasTex(512, 96, (c, w, h) => { const q = 24; for (let y = 0; y < 4; y++) for (let x = 0; x < w / q; x++) { c.fillStyle = (x + y) % 2 ? '#222' : '#fff'; c.fillRect(x * q, y * q, q, q); } c.fillStyle = '#e5392d'; c.fillRect(0, 0, 0, 0); }) }), new THREE.MeshBasicMaterial({ map: canvasTex(512, 96, (c, w, h) => { c.fillStyle = '#e5392d'; c.fillRect(0, 0, w, h); c.fillStyle = '#fff'; c.font = '900 64px system-ui,sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, w / 2, h / 2 + 4); }) })]);
   banner.position.set(0, 7.2, 0); g.add(banner); return g;
 }
+let backdrop = null;
+const bgCache = {};
+function makeBackdrop(co) {
+  const ARC = 2.2, RAD = 800, w = RAD * ARC, h = w * 9 / 16, tex = bgCache[co.bg] || (bgCache[co.bg] = new THREE.TextureLoader().load('assets/' + co.bg + '.webp'));
+  tex.colorSpace = THREE.SRGBColorSpace; tex.wrapS = THREE.MirroredRepeatWrapping; tex.repeat.set(Math.PI * 2 / ARC, 1); tex.anisotropy = 4;
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(RAD, RAD, h, 48, 1, true), new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, fog: false, depthWrite: false }));
+  m.position.y = (co.hz - 0.5) * h - 0.36; m.renderOrder = -10; m.frustumCulled = false; m.userData.keep = false; return m;
+}
 function buildRace(co) {
-  disposeScene(rScene); const sc = new THREE.Scene(); rScene = sc; course = co; sc.background = gradTex(co.sky[0], co.sky[1]); sc.fog = new THREE.Fog(co.fog, 90, 560); sc.environment = envMap; sc.environmentIntensity = 0.75;
+  disposeScene(rScene); const sc = new THREE.Scene(); rScene = sc; course = co; sc.background = gradTex(co.sky[0], co.sky[1]); sc.fog = new THREE.Fog(co.fog, 90, 560); backdrop = makeBackdrop(co); sc.add(backdrop); sc.environment = envMap; sc.environmentIntensity = 0.75;
   sc.add(new THREE.HemisphereLight(0xffffff, co.ground, 1.25)); sunL = new THREE.DirectionalLight(0xfff3dd, 2.1); sunL.position.set(-40, 80, 30); sc.add(sunL);
   track = makeTrack(co.seed, co.length); const L = co.length;
   const roadMat = new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.9, side: THREE.DoubleSide }); roadTex.repeat.set(1, 1);
@@ -158,11 +168,18 @@ function buildRace(co) {
   // 나무·선인장 (길에서 떨어진 곳에만)
   const R = rnd0(co.seed * 7 + 1), pts = track.P;
   const items = []; for (let i = 0; i < 1500 && items.length < 650; i++) { const s = R() * L, a = track.at(s), side = R() < 0.5 ? -1 : 1, lat = side * (W + 3.5 + ext(a) + (R() < 0.5 ? R() * 12 : R() * 70)); const x = a.x + a.nx * lat, z = a.z + a.nz * lat; const dmin = (() => { let m = 1e9; for (let j = 0; j < pts.length; j++) { const dx = pts[j][0] - x, dz = pts[j][1] - z, d2 = dx * dx + dz * dz; if (d2 < m) m = d2; } return Math.sqrt(m); })(); if (dmin < W + 4.5) continue; items.push({ x, z, sc: 0.8 + R() * 1.1, ry: R() * 6.28 }); }
-  const parts = co.tree === 'cactus'
-    ? [{ g: new THREE.CylinderGeometry(0.35, 0.42, 4, 8), c: co.leaf, y: 2 }, { g: new THREE.CylinderGeometry(0.22, 0.22, 1.4, 8), c: co.leaf, y: 2.4, x: 0.7 }, { g: new THREE.CylinderGeometry(0.22, 0.22, 1.2, 8), c: co.leaf, y: 1.8, x: -0.7 }]
-    : [{ g: new THREE.CylinderGeometry(0.3, 0.4, 1.8, 7), c: 0x7a5232, y: 0.9 }, { g: new THREE.ConeGeometry(1.9, 3.6, 8), c: co.leaf, y: 3.2 }, { g: new THREE.ConeGeometry(1.4, 3, 8), c: co.leaf, y: 5 }].concat(co.snow ? [{ g: new THREE.ConeGeometry(0.8, 1.4, 8), c: 0xffffff, y: 6.2 }] : []);
+  const sph = (r, sx, sy, sz) => { const g = new THREE.SphereGeometry(r, 12, 9); g.scale(sx, sy, sz); return g; };
+  const parts = co.tree === 'round'
+    ? [{ g: new THREE.CylinderGeometry(0.35, 0.5, 2.6, 7), c: co.trunk || 0x7a5232, y: 1.3 }, { g: sph(2.1, 1, 0.9, 1), c: co.leaf, y: 4.0 }, { g: sph(1.5, 1, 0.9, 1), c: co.leaf, y: 5.3, x: 0.5 }]
+    : co.tree === 'palm'
+      ? [{ g: new THREE.CylinderGeometry(0.22, 0.4, 5.5, 7), c: co.trunk, y: 2.75 }, { g: sph(2.6, 1, 0.22, 1), c: co.leaf, y: 5.6 }, { g: sph(1.7, 1, 0.3, 1), c: 0x2c9a4a, y: 5.9 }]
+      : co.tree === 'puff'
+        ? [{ g: sph(1.7, 1, 0.8, 1), c: co.leaf, y: 1.1 }, { g: sph(1.2, 1, 0.8, 1), c: co.leaf, y: 1.0, x: 1.6 }, { g: sph(1.2, 1, 0.8, 1), c: co.leaf, y: 0.9, x: -1.6 }, { g: sph(1.1, 1, 0.9, 1), c: co.leaf, y: 2.1 }]
+        : co.tree === 'star'
+          ? [{ g: new THREE.CylinderGeometry(0.08, 0.1, 2.4, 6), c: 0xb9a8ff, y: 1.2 }, { g: new THREE.OctahedronGeometry(1.1), c: co.leaf, y: 3.0, e: 0xffb800 }]
+          : [{ g: new THREE.CylinderGeometry(0.3, 0.4, 1.8, 7), c: 0x7a5232, y: 0.9 }, { g: new THREE.ConeGeometry(1.9, 3.6, 8), c: co.leaf, y: 3.2 }, { g: new THREE.ConeGeometry(1.4, 3, 8), c: co.leaf, y: 5 }];
   const tm = new THREE.Matrix4(), pm2 = new THREE.Matrix4(), q = new THREE.Quaternion(), sv = new THREE.Vector3(), pv = new THREE.Vector3();
-  parts.forEach((pt) => { const im = new THREE.InstancedMesh(pt.g, new THREE.MeshStandardMaterial({ color: pt.c, roughness: 0.9 }), items.length); im.userData.keep = false;
+  parts.forEach((pt) => { const im = new THREE.InstancedMesh(pt.g, new THREE.MeshStandardMaterial({ color: pt.c, roughness: 0.9, emissive: pt.e || 0, emissiveIntensity: pt.e ? 0.7 : 0 }), items.length); im.userData.keep = false;
     items.forEach((it, i) => { q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), it.ry); sv.setScalar(it.sc); pv.set(it.x, -0.36, it.z); tm.compose(pv, q, sv); pm2.makeTranslation(pt.x || 0, pt.y, 0); tm.multiply(pm2); im.setMatrixAt(i, tm); }); im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; sc.add(im); });
   gates = [makeGate(track, 14, '출발!'), makeGate(track, L - 40, '결승!')]; gates.forEach((g) => sc.add(g));
   // 파란 구슬(니트로)
@@ -265,7 +282,7 @@ function onPlayerFinish() {
 /* ---------- 카메라 ---------- */
 function camTargets(sCam, dCam) {
   const a = track.at(Math.max(0, sCam - 9.5)), l = track.at(sCam + 12), k = 0.85;
-  const dl = dCam * k; return { px: a.x + a.nx * dl, py: a.y + 3.7, pz: a.z + a.nz * dl, lx: l.x + l.nx * dl * 0.9, ly: l.y + 1.1, lz: l.z + l.nz * dl * 0.9 };
+  const dl = dCam * k; return { px: a.x + a.nx * dl, py: a.y + 3.1, pz: a.z + a.nz * dl, lx: l.x + l.nx * dl * 0.9, ly: l.y + 2.3, lz: l.z + l.nz * dl * 0.9 };
 }
 function snapCamera() {
   const p = player || racers[0]; const t = camTargets(p.s - (mode === 'count' ? 3 : 0), p.d); camPos.set(t.px, t.py, t.pz); camLook.set(t.lx, t.ly, t.lz); camFov = 60;
@@ -277,7 +294,7 @@ function updateCamera(dt) {
   camLook.x += (t.lx - camLook.x) * k; camLook.y += (t.ly - camLook.y) * k; camLook.z += (t.lz - camLook.z) * k;
   const sp = Math.min(1, p.v / (p.def.vmax * 1.1)), fovT = 58 + sp * 12 + (p.nOn ? 9 : 0); camFov += (fovT - camFov) * Math.min(1, dt * 4);
   camera.fov = camFov; camera.updateProjectionMatrix();
-  const sh = shake * 0.25 + (p.nOn ? 0.05 : 0); camera.position.set(camPos.x + (Math.random() - 0.5) * sh, camPos.y + (Math.random() - 0.5) * sh, camPos.z + (Math.random() - 0.5) * sh); camera.lookAt(camLook);
+  const sh = shake * 0.25 + (p.nOn ? 0.05 : 0); camera.position.set(camPos.x + (Math.random() - 0.5) * sh, camPos.y + (Math.random() - 0.5) * sh, camPos.z + (Math.random() - 0.5) * sh); camera.lookAt(camLook); if (backdrop) { backdrop.position.x = camera.position.x; backdrop.position.z = camera.position.z; }
   groundM.position.x = p.root.position.x; groundM.position.z = p.root.position.z;
 }
 
