@@ -38,7 +38,7 @@ const DIFFS = [{ id: 0, name: '여유롭게', pace: 0.8 }, { id: 1, name: '보�
 const AI_COLORS = ['#ff7a2e', '#3d8bff', '#39c46a'];
 
 /* ---------- 저장 ---------- */
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return { best: s.best || {}, done: s.done || {}, prefs: Object.assign({ car: 0, course: 0, diff: 1, assist: 1, color: -1 }, s.prefs || {}) }; } catch (e) { return { best: {}, done: {}, prefs: { car: 0, course: 0, diff: 1, assist: 1, color: -1 } }; } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return { best: s.best || {}, done: s.done || {}, prefs: Object.assign({ car: 0, course: 0, diff: 1, assist: 1, color: -1, laps: 3, len: 1 }, s.prefs || {}) }; } catch (e) { return { best: {}, done: {}, prefs: { car: 0, course: 0, diff: 1, assist: 1, color: -1, laps: 3, len: 1 } }; } }
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 const save = loadSave();
 const prefs = save.prefs;
@@ -220,7 +220,7 @@ function newRacer(def, isPlayer, slot, idx, colorIdx) {
 }
 function startRace() {
   O.unlock(); runId++; $('garage').hidden = true; $('hud').hidden = false; $('pad').hidden = false; $('count').hidden = false;
-  const co = COURSES[prefs.course]; buildRace(co);
+  const co = effCourse(); buildRace(co);
   racers = []; const slots = [{ s: 8, d: 2.6 }, { s: 8, d: -2.6 }, { s: 0, d: 2.6 }, { s: 0, d: -2.6 }];
   const pdef = CARS[prefs.car]; player = newRacer(pdef, true, slots[0], 0, colOf(pdef, prefs.color)); racers.push(player);
   for (let i = 0; i < 3; i++) { const r = newRacer(CARS[(i + (prefs.car + 1)) % CARS.length], false, slots[i + 1], i + 1, aiColor(CARS[(i + (prefs.car + 1)) % CARS.length], colOf(pdef, prefs.color))); r.pace = DIFFS[prefs.diff].pace * (0.95 + i * 0.035); r.name = AI_COLORS[i]; racers.push(r); }
@@ -286,7 +286,7 @@ function simulate(dt) {
 }
 function onPlayerFinish() {
   const place = finishOrder.indexOf(player) + 1, rid = runId, time = player.fT; mode = 'finish'; player.nOn = false;
-  const key = course.id + ':' + player.def.id, old = save.best[key], newBest = !old || time < old; if (newBest) save.best[key] = time; if (place === 1) save.done[course.id] = 1; writeSave();
+  const key = course.key + ':' + player.def.id, old = save.best[key], newBest = !old || time < old; if (newBest) save.best[key] = time; if (place === 1) save.done[course.id] = 1; writeSave();
   const stars = place === 1 ? 3 : place === 2 ? 2 : 1, ord = ['', '1등', '2등', '3등', '4등'][place];
   O.sfx(place === 1 ? 'win' : 'ok'); say(ord + '으로 들어왔어요!', 'good', false);
   const title = place === 1 ? '1등! 최고예요!' : place === 2 ? '2등! 멋져요!' : '결승선 통과!', text = ord + ' · 기록 ' + fmtT(time) + (newBest ? ' (내 최고 기록!)' : '') + ' · 구슬 ' + nOrbs + '개',
@@ -345,19 +345,23 @@ function updateHud(force) {
 }
 
 /* ---------- 차고 ---------- */
-function bestOf(courseId, carId) { return save.best[courseId + ':' + carId]; }
+const LENS = [{ name: '짧은 길', f: 0.7 }, { name: '긴 길', f: 1 }];
+function effCourse() { const c = COURSES[prefs.course], lp = Math.max(1, Math.min(5, prefs.laps | 0 || 3)), ln = prefs.len === 0 ? 0 : 1; return Object.assign({}, c, { length: Math.round(c.length * LENS[ln].f / 4) * 4, laps: lp, key: c.id + (lp === 3 && ln === 1 ? '' : '_' + lp + 'x' + ln) }); }
+function bestOf(courseKey, carId) { return save.best[courseKey + ':' + carId]; }
 function renderGarageInfo() {
   const d = CARS[gIdx]; $('carSub').textContent = d.sub; $('carName').textContent = d.name;
-  const b = bestOf(COURSES[prefs.course].id, d.id); $('carBest').textContent = b ? '🏆 이 코스 최고 기록 ' + fmtT(b) : '아직 달린 기록이 없어요';
+  const b = bestOf(effCourse().key, d.id); $('carBest').textContent = b ? '🏆 이 코스 최고 기록 ' + fmtT(b) : '아직 달린 기록이 없어요';
   $('carStats').innerHTML = d.stats.map((v, i) => '<span>' + STAT_NAMES[i] + '</span><span class="bar">' + [1, 2, 3, 4, 5].map((k) => '<i class="' + (k <= v ? 'on' : '') + '"></i>').join('') + '</span>').join('');
   $('credit').innerHTML = !d.src ? '카툰 자동차: 옥쌤의 즐거운 교실에서 코드로 만든 모델이에요.' : '차 모델: “' + d.title + '” — <a href="https://sketchfab.com/outpiston" target="_blank" rel="noopener">OUTPISTON</a> · <a href="' + d.src + '" target="_blank" rel="noopener">Sketchfab</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>';
   const chip = (k, v, label, on, extra) => '<button type="button" class="ch-chip' + (on ? ' on' : '') + (extra ? ' ' + extra : '') + '" data-' + k + '="' + v + '">' + label + '</button>';
   const colorRow = d.colors ? '<div class="g"><label>색깔</label>' + TOY_COLORS.map((c, i) => '<button type="button" class="rc-sw' + (colOf(d, prefs.color) === i ? ' on' : '') + '" data-cl="' + i + '" style="background:#' + c[0].toString(16).padStart(6, '0') + '" aria-label="' + c[1] + '"></button>').join('') + '</div>' : '';
   $('opts').innerHTML = colorRow + '<div class="g"><label>코스</label>' + COURSES.map((c, i) => chip('co', i, c.emoji + ' ' + c.name, prefs.course === i, save.done[c.id] ? 'done' : '')).join('') + '</div>' +
-    '<div class="g"><label>상대</label>' + DIFFS.map((x) => chip('df', x.id, x.name, prefs.diff === x.id)).join('') + '</div>' +
+    '<div class="g"><label>바퀴</label>' + [1, 2, 3, 4, 5].map((n) => chip('lp', n, n, prefs.laps === n)).join('') + '</div><div class="g"><label>길</label>' + LENS.map((x, i) => chip('ln', i, x.name, prefs.len === i)).join('') + '</div>' + '<div class="g"><label>상대</label>' + DIFFS.map((x) => chip('df', x.id, x.name, prefs.diff === x.id)).join('') + '</div>' +
     '<div class="g"><label>핸들 도움</label>' + chip('as', 1, '켜기', !!prefs.assist) + chip('as', 0, '끄기', !prefs.assist) + '</div>';
   $('opts').querySelectorAll('[data-cl]').forEach((b) => { b.onclick = () => { prefs.color = +b.dataset.cl; writeSave(); O.sfx('tick'); showGarageCar(gIdx); say(TOY_COLORS[prefs.color][1] + ' 차예요!', null, TOY_COLORS[prefs.color][1] + ' 차예요!'); }; });
   $('opts').querySelectorAll('[data-co]').forEach((b) => { b.onclick = () => { prefs.course = +b.dataset.co; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
+  $('opts').querySelectorAll('[data-lp]').forEach((b) => { b.onclick = () => { prefs.laps = +b.dataset.lp; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
+  $('opts').querySelectorAll('[data-ln]').forEach((b) => { b.onclick = () => { prefs.len = +b.dataset.ln; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
   $('opts').querySelectorAll('[data-df]').forEach((b) => { b.onclick = () => { prefs.diff = +b.dataset.df; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
   $('opts').querySelectorAll('[data-as]').forEach((b) => { b.onclick = () => { prefs.assist = +b.dataset.as; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
 }
