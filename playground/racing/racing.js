@@ -4,6 +4,7 @@
 import * as THREE from '../../vendor/three/three.module.js';
 import { GLTFLoader } from '../../vendor/three/addons/loaders/GLTFLoader.js';
 import { makeTrack } from './track.js';
+import { buildToyCar, TOY_COLORS } from './toycar.js';
 
 const O = window.OKS;
 const $ = (id) => document.getElementById(id);
@@ -12,6 +13,7 @@ const W = 8;                       // 길 폭의 절반(m)
 const SAVE_KEY = 'oks_race_v1';
 
 const CARS = [
+  { id: 'toy', build: true, colors: true, name: '꼬마 스포츠카', sub: '카툰 · 웃는 얼굴 친구', title: '', src: '', front: 1, vmax: 60, acc: 26, lat: 12, nmul: 1.3, stats: [3, 5, 4, 4] },
   { id: 'rx7', file: 'assets/rx7.glb', name: '마쓰다 RX-7', sub: '2002 · 일본 스포츠카', title: '2002 Mazda RX-7 Spirit-R', src: 'https://sketchfab.com/3d-models/2002-mazda-rx-7-spirit-r-277e2569280d4c9fa3bc3a85bbc627f1', front: 1, vmax: 56, acc: 24, lat: 12.5, nmul: 1.3, stats: [3, 4, 5, 3] },
   { id: 'm720', file: 'assets/mclaren720s.glb', name: '맥라렌 720S GT3', sub: '2019 · 영국 레이싱카', title: '2019 McLaren 720S GT3', src: 'https://sketchfab.com/3d-models/2019-mclaren-720s-gt3-cdf4ca67a56b497493931e8852e70b05', front: 1, vmax: 70, acc: 19, lat: 10.5, nmul: 1.26, stats: [5, 3, 3, 4] },
 ];
@@ -25,7 +27,7 @@ const DIFFS = [{ id: 0, name: '여유롭게', pace: 0.8 }, { id: 1, name: '보�
 const AI_COLORS = ['#ff7a2e', '#3d8bff', '#39c46a'];
 
 /* ---------- 저장 ---------- */
-function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return { best: s.best || {}, done: s.done || {}, prefs: Object.assign({ car: 0, course: 0, diff: 1, assist: 1 }, s.prefs || {}) }; } catch (e) { return { best: {}, done: {}, prefs: { car: 0, course: 0, diff: 1, assist: 1 } }; } }
+function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return { best: s.best || {}, done: s.done || {}, prefs: Object.assign({ car: 0, course: 0, diff: 1, assist: 1, color: 0 }, s.prefs || {}) }; } catch (e) { return { best: {}, done: {}, prefs: { car: 0, course: 0, diff: 1, assist: 1, color: 0 } }; } }
 function writeSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
 const save = loadSave();
 const prefs = save.prefs;
@@ -72,18 +74,21 @@ function prepareModel(gltf, def) {
   protos[def.id] = { holder, wheels, len: size.z, wid: size.x, hgt: size.y };
 }
 function loadModels(onProg) {
-  const loader = new GLTFLoader(); let done = 0;
-  return Promise.all(CARS.map((def) => new Promise((res, rej) => loader.load(new URL(def.file, import.meta.url).href, (g) => { prepareModel(g, def); onProg(++done / CARS.length); res(); }, undefined, rej))));
+  const loader = new GLTFLoader(); let done = 0; const list = CARS.filter((d) => d.file);
+  return Promise.all(list.map((def) => new Promise((res, rej) => loader.load(new URL(def.file, import.meta.url).href, (g) => { prepareModel(g, def); onProg(++done / list.length); res(); }, undefined, rej))));
 }
 const blobTex = canvasTex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(0,0,0,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
 const flameMat = new THREE.MeshBasicMaterial({ color: 0xff9a3c, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }), flameMat2 = new THREE.MeshBasicMaterial({ color: 0x8fe6ff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
-function makeCarObject(def) {
-  const p = protos[def.id], model = p.holder.clone(true); model.rotation.y = def.front < 0 ? Math.PI : 0;
+function makeCarObject(def, colorIdx) {
+  let model, wl, len, wid;
+  if (def.build) { const b = buildToyCar(THREE, TOY_COLORS[(colorIdx || 0) % TOY_COLORS.length][0]); model = b.group; wl = b.wheels; len = b.len; wid = b.wid; }
+  else { const p = protos[def.id]; model = p.holder.clone(true); wl = p.wheels; len = p.len; wid = p.wid; }
+  model.rotation.y = def.front < 0 ? Math.PI : 0;
   const root = new THREE.Group(), tilt = new THREE.Group(); root.add(tilt); tilt.add(model);
-  const blob = new THREE.Mesh(new THREE.PlaneGeometry(p.wid * 1.9, p.len * 1.35), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false })); blob.rotation.x = -Math.PI / 2; blob.position.y = 0.03; tilt.add(blob);
-  const flame = new THREE.Group(); for (const sx of [-0.4, 0.4]) { const g = new THREE.ConeGeometry(0.16, 1.5, 10); g.rotateX(def.front > 0 ? -Math.PI / 2 : Math.PI / 2); const m = new THREE.Mesh(g, flameMat); m.position.set(sx, 0.5, -def.front * (p.len / 2 + 0.7)); flame.add(m); const g2 = new THREE.ConeGeometry(0.08, 0.9, 8); g2.rotateX(def.front > 0 ? -Math.PI / 2 : Math.PI / 2); const m2 = new THREE.Mesh(g2, flameMat2); m2.position.set(sx, 0.5, -def.front * (p.len / 2 + 0.45)); flame.add(m2); } flame.visible = false; tilt.add(flame);
-  const wheels = p.wheels.map((w) => ({ s: model.getObjectByName(w.s), r: model.getObjectByName(w.r), front: w.front }));
-  return { root, tilt, model, wheels, flame, def, len: p.len };
+  const blob = new THREE.Mesh(new THREE.PlaneGeometry(wid * 1.9, len * 1.35), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false })); blob.rotation.x = -Math.PI / 2; blob.position.y = 0.03; tilt.add(blob);
+  const flame = new THREE.Group(); for (const sx of [-0.4, 0.4]) { const g = new THREE.ConeGeometry(0.16, 1.5, 10); g.rotateX(def.front > 0 ? -Math.PI / 2 : Math.PI / 2); const m = new THREE.Mesh(g, flameMat); m.position.set(sx, 0.5, -def.front * (len / 2 + 0.7)); flame.add(m); const g2 = new THREE.ConeGeometry(0.08, 0.9, 8); g2.rotateX(def.front > 0 ? -Math.PI / 2 : Math.PI / 2); const m2 = new THREE.Mesh(g2, flameMat2); m2.position.set(sx, 0.5, -def.front * (len / 2 + 0.45)); flame.add(m2); } flame.visible = false; tilt.add(flame);
+  const wheels = wl.map((w) => ({ s: model.getObjectByName(w.s), r: model.getObjectByName(w.r), front: w.front }));
+  return { root, tilt, model, wheels, flame, def, len };
 }
 function animWheels(o, dist, steer) { const a = dist / 0.32 * o.def.front; o.wheels.forEach((w) => { w.r.rotation.x += a; if (w.front) w.s.rotation.y = -steer * 0.42; }); }
 
@@ -99,7 +104,7 @@ const turn = new THREE.Group(); gScene.add(turn);
 let gCar = null, gYaw = 0.6, gSpin = 0.35, gPop = 1, gDrag = null, gIdx = 0;
 function showGarageCar(i) {
   gIdx = (i + CARS.length) % CARS.length; prefs.car = gIdx; writeSave();
-  if (gCar) { turn.remove(gCar.root); } gCar = makeCarObject(CARS[gIdx]); turn.add(gCar.root); gPop = 0; renderGarageInfo();
+  if (gCar) { turn.remove(gCar.root); } gCar = makeCarObject(CARS[gIdx], prefs.color); turn.add(gCar.root); gPop = 0; renderGarageInfo();
 }
 
 /* ---------- 경기 장면 ---------- */
@@ -162,8 +167,8 @@ const msgEl = $('msg'), msgText = $('msgText');
 function say(text, kind, speak) { msgText.textContent = text; msgEl.className = 'ch-msg' + (kind ? ' ' + kind : ''); if (speak !== false) O.say(typeof speak === 'string' ? speak : text); }
 const note = (t) => say(t, null, false);
 
-function newRacer(def, isPlayer, slot, idx) {
-  const o = makeCarObject(def); rScene.add(o.root);
+function newRacer(def, isPlayer, slot, idx, colorIdx) {
+  const o = makeCarObject(def, colorIdx); rScene.add(o.root);
   const r = Object.assign(o, { isPlayer, s: slot.s, d: slot.d, v: 0, dd: 0, u: 0, yaw: 0, nitro: isPlayer ? 0.35 : 0, nOn: false, brake: false, finished: false, fT: 0, wallCd: 0, hitCd: 0, tgtD: slot.d, tgtT: 2 + Math.random() * 2, wob: Math.random() * 6, idx, aiV: 0, travel: 0 });
   return r;
 }
@@ -171,8 +176,8 @@ function startRace() {
   O.unlock(); runId++; $('garage').hidden = true; $('hud').hidden = false; $('pad').hidden = false; $('count').hidden = false;
   const co = COURSES[prefs.course]; buildRace(co);
   racers = []; const slots = [{ s: 8, d: 2.6 }, { s: 8, d: -2.6 }, { s: 0, d: 2.6 }, { s: 0, d: -2.6 }];
-  const pdef = CARS[prefs.car]; player = newRacer(pdef, true, slots[0], 0); racers.push(player);
-  for (let i = 0; i < 3; i++) { const r = newRacer(CARS[(i + (prefs.car + 1)) % CARS.length], false, slots[i + 1], i + 1); r.pace = DIFFS[prefs.diff].pace * (0.95 + i * 0.035); r.name = AI_COLORS[i]; racers.push(r); }
+  const pdef = CARS[prefs.car]; player = newRacer(pdef, true, slots[0], 0, prefs.color); racers.push(player);
+  for (let i = 0; i < 3; i++) { const r = newRacer(CARS[(i + (prefs.car + 1)) % CARS.length], false, slots[i + 1], i + 1, (prefs.color + 1 + i * 2) % TOY_COLORS.length); r.pace = DIFFS[prefs.diff].pace * (0.95 + i * 0.035); r.name = AI_COLORS[i]; racers.push(r); }
   // 진행 막대 점
   const pr = $('hudProg'); pr.querySelectorAll('u').forEach((u) => u.remove()); racers.slice(1).forEach((r, i) => { const u = document.createElement('u'); u.style.background = AI_COLORS[i]; r.dot = u; pr.appendChild(u); });
   finishOrder = []; raceT = 0; bumps = 0; nOrbs = 0; finishS = co.length - 40; mode = 'count'; cdT = 3.6; cdShown = -1; hud.rank = hud.speed = hud.nitro = -1; hud.time = '';
@@ -298,11 +303,13 @@ function renderGarageInfo() {
   const d = CARS[gIdx]; $('carSub').textContent = d.sub; $('carName').textContent = d.name;
   const b = bestOf(COURSES[prefs.course].id, d.id); $('carBest').textContent = b ? '🏆 이 코스 최고 기록 ' + fmtT(b) : '아직 달린 기록이 없어요';
   $('carStats').innerHTML = d.stats.map((v, i) => '<span>' + STAT_NAMES[i] + '</span><span class="bar">' + [1, 2, 3, 4, 5].map((k) => '<i class="' + (k <= v ? 'on' : '') + '"></i>').join('') + '</span>').join('');
-  $('credit').innerHTML = '차 모델: “' + d.title + '” — <a href="https://sketchfab.com/outpiston" target="_blank" rel="noopener">OUTPISTON</a> · <a href="' + d.src + '" target="_blank" rel="noopener">Sketchfab</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>';
+  $('credit').innerHTML = !d.src ? '카툰 자동차: 옥쌤의 즐거운 교실에서 코드로 만든 모델이에요.' : '차 모델: “' + d.title + '” — <a href="https://sketchfab.com/outpiston" target="_blank" rel="noopener">OUTPISTON</a> · <a href="' + d.src + '" target="_blank" rel="noopener">Sketchfab</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>';
   const chip = (k, v, label, on, extra) => '<button type="button" class="ch-chip' + (on ? ' on' : '') + (extra ? ' ' + extra : '') + '" data-' + k + '="' + v + '">' + label + '</button>';
-  $('opts').innerHTML = '<div class="g"><label>코스</label>' + COURSES.map((c, i) => chip('co', i, c.emoji + ' ' + c.name, prefs.course === i, save.done[c.id] ? 'done' : '')).join('') + '</div>' +
+  const colorRow = d.colors ? '<div class="g"><label>색깔</label>' + TOY_COLORS.map((c, i) => '<button type="button" class="rc-sw' + (prefs.color === i ? ' on' : '') + '" data-cl="' + i + '" style="background:#' + c[0].toString(16).padStart(6, '0') + '" aria-label="' + c[1] + '"></button>').join('') + '</div>' : '';
+  $('opts').innerHTML = colorRow + '<div class="g"><label>코스</label>' + COURSES.map((c, i) => chip('co', i, c.emoji + ' ' + c.name, prefs.course === i, save.done[c.id] ? 'done' : '')).join('') + '</div>' +
     '<div class="g"><label>상대</label>' + DIFFS.map((x) => chip('df', x.id, x.name, prefs.diff === x.id)).join('') + '</div>' +
     '<div class="g"><label>핸들 도움</label>' + chip('as', 1, '켜기', !!prefs.assist) + chip('as', 0, '끄기', !prefs.assist) + '</div>';
+  $('opts').querySelectorAll('[data-cl]').forEach((b) => { b.onclick = () => { prefs.color = +b.dataset.cl; writeSave(); O.sfx('tick'); showGarageCar(gIdx); say(TOY_COLORS[prefs.color][1] + ' 차예요!', null, TOY_COLORS[prefs.color][1] + ' 차예요!'); }; });
   $('opts').querySelectorAll('[data-co]').forEach((b) => { b.onclick = () => { prefs.course = +b.dataset.co; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
   $('opts').querySelectorAll('[data-df]').forEach((b) => { b.onclick = () => { prefs.diff = +b.dataset.df; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
   $('opts').querySelectorAll('[data-as]').forEach((b) => { b.onclick = () => { prefs.assist = +b.dataset.as; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
