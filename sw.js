@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v149';
+const CACHE_NAME = 'oks-class-v150';
 const ASSETS = [
   './',
   './index.html',
@@ -33,6 +33,12 @@ const ASSETS = [
   './playground/janggi/janggi.js',
   './playground/janggi/engine.js',
   './playground/janggi/ai-worker.js',
+  './playground/common3d.js',
+  './playground/omok/',
+  './playground/omok/index.html',
+  './playground/omok/omok.css',
+  './playground/omok/omok.js',
+  './playground/omok/engine.js',
   './playground/darts/',
   './playground/darts/index.html',
   './playground/darts/darts.css',
@@ -161,6 +167,7 @@ const ASSETS = [
   './playground/chess/assets/board.glb',
   './playground/chess/assets/pieces.glb',
   './playground/darts/assets/dartboard.glb',
+  './playground/go/assets/stones.glb',
   './sports/assets/archery.webp',
   './sports/assets/athletics.webp',
   './sports/assets/athletics/athletics_bg_main.webp',

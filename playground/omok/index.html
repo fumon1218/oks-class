@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#4a3a22">
+<title>3D 오목 · 놀이별</title><link rel="icon" href="../../icons/ok-face-192.png"><link rel="apple-touch-icon" href="../../icons/ok-face-180.png">
+<link rel="stylesheet" href="../../core/oks-core.css"><link rel="stylesheet" href="../chess/chess.css"><link rel="stylesheet" href="omok.css"></head>
+<body class="oks chess-page omok-page">
+<canvas id="gl" aria-label="3D 오목판"></canvas>
+<header class="ch-top">
+  <a class="ch-btn" id="back" href="../">← 놀이별</a>
+  <div class="ch-title"><span id="modeLabel">전략놀이</span><b>3D 오목</b></div>
+  <div class="ch-tools">
+    <button class="ch-btn" id="btnHelp" type="button" aria-label="놀이 방법">❓</button>
+    <button class="ch-btn" id="btnVoice" type="button" aria-label="안내 음성 켜기·끄기">🔊</button>
+    <button class="ch-btn" id="btnMenu" type="button" aria-label="새 놀이 고르기">☰ 새로</button>
+  </div>
+</header>
+<div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">오목판을 펼치는 중이에요…</span></div>
+<footer class="ch-bottom">
+  <button class="ch-btn big" id="btnUndo" type="button">↩ 한 수 물리기</button>
+  <button class="ch-btn big" id="btnHint" type="button">💡 힌트</button>
+  <button class="ch-btn big" id="btnView" type="button">🔄 시점 바꾸기</button>
+  <button class="ch-btn big" id="btnLock" type="button" aria-pressed="false">🔓 화면 돌리기</button>
+  <button class="ch-btn big" id="btnAssist" type="button" aria-pressed="true">🧭 위험 알려주기</button>
+</footer>
+<div class="ch-loading" id="loading"><div><div class="ch-spin"></div><p>3D 오목판을 펼치는 중…</p></div></div>
+<div class="ch-overlay" id="menu" hidden></div>
+<dialog id="helpDialog" class="ch-dialog"><h2>이렇게 놀아요</h2>
+<ol><li><b>줄이 만나는 점을 눌러요.</b> 바둑돌이 그 자리에 놓여요. 검은 돌이 먼저 시작해요.</li><li>가로·세로·대각선으로 <b>같은 색 돌 5개를 이으면</b> 이겨요.</li><li>돌 <b>3개</b>가 양쪽이 열려 있으면 '열린 3', <b>4개</b>가 양쪽이 열리면 '열린 4'예요. 열린 4는 막을 수 없어서 이겨요!</li><li>상대가 4개를 이었으면 반드시 막아야 해요. 🧭 단추를 켜면 위험한 곳을 빨간 동그라미로 알려 줘요.</li><li><b>연습 문제</b>에서 이기는 수와 막는 수를 차근차근 배워 봐요.</li></ol>
+<form method="dialog"><button class="ch-btn big">알겠어요</button></form></dialog>
+<script src="../../core/oks-core.js"></script><script src="../../core/oks-eco.js"></script><script src="engine.js"></script>
+<script type="module" src="omok.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('../../sw.js').catch(function(){});</script>
+</body></html>
