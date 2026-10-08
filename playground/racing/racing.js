@@ -53,9 +53,9 @@ const fmtT = (s) => { const m = Math.floor(s / 60), r = s - m * 60; return m + '
 /* ---------- 렌더러·공통 ---------- */
 const canvas = $('gl');
 let renderer;
-try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }); }
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' }); }
 catch (e) { $('loading').innerHTML = '<div><p>이 기기에서는 3D 화면을 켤 수 없어요.<br>다른 기기에서 열어 주세요.</p><a class="ch-btn" href="../?zone=board">← 놀이별로</a></div>'; throw e; }
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setClearColor(0x000000, 0); renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
 const camera = new THREE.PerspectiveCamera(40, 1, 0.2, 900);
 const rnd0 = (sd) => () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296);
@@ -117,14 +117,23 @@ function makeCarObject(def, colorIdx, eq) {
 function animWheels(o, dist, steer) { const a = dist / 0.32 * o.def.front; o.wheels.forEach((w) => { w.r.rotation.x += a; if (w.front) w.s.rotation.y = -steer * 0.42; }); }
 
 /* ---------- 차고 장면 ---------- */
-const gScene = new THREE.Scene(); gScene.background = gradTex('#2c3f7a', '#121a33'); gScene.environment = envMap; gScene.environmentIntensity = 0.9;
+const gScene = new THREE.Scene(); gScene.environment = envMap; gScene.environmentIntensity = 0.9;
 gScene.add(new THREE.HemisphereLight(0xbfd4ff, 0x20243a, 0.9));
 { const k = new THREE.DirectionalLight(0xfff1dd, 2.4); k.position.set(-4, 7, 5); gScene.add(k); const r1 = new THREE.DirectionalLight(0x6ab0ff, 1.8); r1.position.set(6, 3, -5); gScene.add(r1); const r2 = new THREE.DirectionalLight(0xff9d6a, 1.2); r2.position.set(-6, 2, -4); gScene.add(r2); }
 const turn = new THREE.Group(); gScene.add(turn);
-{ const base = new THREE.Mesh(new THREE.CylinderGeometry(3.6, 3.8, 0.22, 64), new THREE.MeshStandardMaterial({ color: 0x2a3252, roughness: 0.55, metalness: 0.3 })); base.position.y = -0.11; gScene.add(base);
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(3.6, 0.06, 12, 96), new THREE.MeshBasicMaterial({ color: 0xffb347 })); ring.rotation.x = Math.PI / 2; ring.position.y = 0.01; gScene.add(ring);
-  const glow = new THREE.Mesh(new THREE.CircleGeometry(7, 48), new THREE.MeshBasicMaterial({ map: canvasTex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(120,170,255,.45)'); gr.addColorStop(1, 'rgba(120,170,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }), transparent: true, depthWrite: false })); glow.rotation.x = -Math.PI / 2; glow.position.y = -0.24; gScene.add(glow);
-  const stage = new THREE.Mesh(new THREE.CircleGeometry(30, 48), new THREE.MeshStandardMaterial({ color: 0x1a2038, roughness: 0.9 })); stage.rotation.x = -Math.PI / 2; stage.position.y = -0.25; gScene.add(stage); }
+{ const sh = new THREE.Mesh(new THREE.CircleGeometry(3.4, 48), new THREE.MeshBasicMaterial({ map: canvasTex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(10,14,30,.55)'); gr.addColorStop(0.6, 'rgba(10,14,30,.22)'); gr.addColorStop(1, 'rgba(10,14,30,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }), transparent: true, depthWrite: false })); sh.rotation.x = -Math.PI / 2; sh.position.y = 0.01; gScene.add(sh); }
+const SLOT_IMG = { paint: 'spray', decal: 'stickers', wheel: 'wheel', wing: 'wings', top: 'crown', eyes: 'eyes', neon: 'ring', flame: 'rocket' };
+const ITEM_IMG = { p_pearl: 'drop_b', p_matte: 'drop_k', p_chrome: 'drop_s', p_gold: 'bucket_y', p_rainbow: 'rainbow', d_star: 'st_star', d_bolt: 'st_bolt', d_flame: 'st_flame', d_checker: 'st_stripe' };
+const uiImg = (n, cls) => '<img class="ui' + (cls ? ' ' + cls : '') + '" src="assets/ui_' + n + '.webp" alt="" draggable="false">';
+const COIN = uiImg('coin', 'coin');
+function hueOf(c) { const r = (c >> 16 & 255) / 255, g = (c >> 8 & 255) / 255, b = (c & 255) / 255, mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; if (!d) return 0; let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; return (h * 60 + 360) % 360; }
+function itemThumb(i, slot) {
+  if (!i.id) return '<b class="rc-th"><u>✖</u></b>';
+  const own = ITEM_IMG[i.id], name = own || SLOT_IMG[slot]; let st = '', cl = '';
+  if (!own && (slot === 'neon' || slot === 'flame')) { if (i.color === -1 || i.id.endsWith('rainbow')) cl = 'rb'; else if (i.color) st = ' style="filter:hue-rotate(' + Math.round(hueOf(i.color) - (slot === 'neon' ? 215 : 28)) + 'deg) saturate(1.2)"'; }
+  if (!own && i.id.endsWith('rainbow')) cl = 'rb';
+  return '<b class="rc-th">' + uiImg(name, cl).replace('<img ', '<img' + st + ' ') + (own ? '' : '<s>' + i.icon + '</s>') + '</b>';
+}
 let tuneSel = null, tuneSlot = 'paint';
 function eqOf(def) { const e = Object.assign({}, save.gar.eq[def.id] || {}); if (tuneSel && tuneSel.carId === def.id) e[tuneSel.slot] = tuneSel.id; return e; }
 function aiEq() { const e = {}; SLOTS.forEach((sl) => { if (Math.random() < 0.4) { const l = ITEMS.filter((i) => i.slot === sl.id); e[sl.id] = l[Math.floor(Math.random() * l.length)].id; } }); return e; }
@@ -389,12 +398,12 @@ function closeTune() { O.sfx('tick'); tuneSel = null; rebuildGarageCar(); $('tun
 function renderTune() {
   const d = CARS[gIdx], slots = SLOTS.filter((x) => d.build || !x.toy); if (!slots.some((x) => x.id === tuneSlot)) tuneSlot = slots[0].id;
   const eq = save.gar.eq[d.id] || {};
-  $('tuneTitle').textContent = '🛠 ' + d.name + ' 꾸미기';
-  $('tuneTabs').innerHTML = slots.map((x) => '<button type="button" class="rc-tab' + (x.id === tuneSlot ? ' on' : '') + '" data-sl="' + x.id + '"><span>' + x.icon + '</span>' + x.name + (eq[x.id] ? '<i>✓</i>' : '') + '</button>').join('');
+  $('tuneTitle').innerHTML = uiImg('tools') + ' ' + d.name + ' 꾸미기';
+  $('tuneTabs').innerHTML = slots.map((x) => '<button type="button" class="rc-tab' + (x.id === tuneSlot ? ' on' : '') + '" data-sl="' + x.id + '">' + uiImg(SLOT_IMG[x.id]) + '<span>' + x.name + '</span>' + (eq[x.id] ? '<i>✓</i>' : '') + '</button>').join('');
   const list = [{ id: '', icon: '✖️', name: '기본', price: 0 }].concat(ITEMS.filter((i) => i.slot === tuneSlot)), cur = (tuneSel && tuneSel.slot === tuneSlot) ? tuneSel.id : (eq[tuneSlot] || '');
-  $('tuneItems').innerHTML = list.map((i) => { const own = !i.id || save.gar.owned[i.id], on = cur === i.id; return '<button type="button" class="rc-item' + (on ? ' on' : '') + (own ? ' own' : '') + '" data-it="' + i.id + '"><b>' + i.icon + '</b><span>' + i.name + '</span><em>' + (!i.id ? (eq[tuneSlot] ? '벗기' : '지금 모습') : (eq[tuneSlot] === i.id ? '달았어요 ✓' : own ? '내 것' : '🪙 ' + i.price)) + '</em></button>'; }).join('');
+  $('tuneItems').innerHTML = list.map((i) => { const own = !i.id || save.gar.owned[i.id], on = cur === i.id; return '<button type="button" class="rc-item' + (on ? ' on' : '') + (own ? ' own' : '') + '" data-it="' + i.id + '">' + itemThumb(i, tuneSlot) + '<span>' + i.name + '</span><em>' + (!i.id ? (eq[tuneSlot] ? '벗기' : '지금 모습') : (eq[tuneSlot] === i.id ? '달았어요 ✓' : own ? '내 것' : COIN + i.price)) + '</em></button>'; }).join('');
   const sel = tuneSel && tuneSel.slot === tuneSlot && tuneSel.id && !save.gar.owned[tuneSel.id] ? ITEM[tuneSel.id] : null, buy = $('tuneBuy');
-  if (sel) { const ok = coinsNow() >= sel.price; buy.hidden = false; buy.disabled = !ok; buy.textContent = ok ? '🪙 ' + sel.price + ' 코인으로 사기' : '코인이 모자라요 (🪙 ' + coinsNow() + ' / ' + sel.price + ')'; } else buy.hidden = true;
+  if (sel) { const ok = coinsNow() >= sel.price; buy.hidden = false; buy.disabled = !ok; buy.innerHTML = ok ? COIN + ' ' + sel.price + ' 코인으로 사기' : uiImg('lock', 'lk') + ' 코인이 모자라요 (' + coinsNow() + ' / ' + sel.price + ')'; } else buy.hidden = true;
   $('tuneTabs').querySelectorAll('[data-sl]').forEach((b) => { b.onclick = () => { O.sfx('tick'); tuneSlot = b.dataset.sl; tuneSel = null; rebuildGarageCar(); renderTune(); }; });
   $('tuneItems').querySelectorAll('[data-it]').forEach((b) => { b.onclick = () => {
     const id = b.dataset.it, it = ITEM[id], own = !id || save.gar.owned[id];
@@ -439,6 +448,15 @@ window.addEventListener('keyup', (e) => { const f = KEYMAP[e.key]; if (f) f(fals
 window.addEventListener('blur', () => { setL(false); setR(false); setB(false); setN(false); });
 
 /* ---------- 화면 맞춤·반복 ---------- */
+const GBG = { gar1: { w: 1672, h: 941, cx: 0.5, cy: 0.742, pw: 0.7 }, gar2: { w: 1672, h: 941, cx: 0.5, cy: 0.64, pw: 0.66 } };
+function garageBg(w, h) {
+  if (mode !== 'garage' && mode !== 'boot') { canvas.style.backgroundImage = ''; return; }
+  const k = !$('tune').hidden ? 'gar2' : 'gar1', g = GBG[k], v = new THREE.Vector3(0, 0, 0).project(camera), v2 = new THREE.Vector3(3.6, 0, 0).project(camera);
+  const px = (v.x + 1) / 2 * w, py = (1 - v.y) / 2 * h, pr = Math.abs(v2.x - v.x) / 2 * w;
+  let s = Math.max(w / g.w, h / g.h); s = Math.max(s, Math.min(pr * 2 / (g.pw * g.w), s * 1.6));
+  const iw = g.w * s, ih = g.h * s; let ox = px - g.cx * iw, oy = py - g.cy * ih; ox = Math.min(0, Math.max(w - iw, ox)); oy = Math.min(0, Math.max(h - ih, oy));
+  canvas.style.backgroundImage = 'url(assets/' + k + '.webp)'; canvas.style.backgroundRepeat = 'no-repeat'; canvas.style.backgroundSize = iw + 'px ' + ih + 'px'; canvas.style.backgroundPosition = ox + 'px ' + oy + 'px';
+}
 function resize() {
   const w = window.innerWidth, h = window.innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h;
   if (mode === 'garage' || mode === 'boot') {
@@ -446,7 +464,7 @@ function resize() {
     camera.position.set(0, 1.7 + dist * 0.06, dist); camera.lookAt(0, 0.85, 0);
     const g = !$('tune').hidden ? $('tune') : $('garage'), panel = g.hidden ? 0 : g.offsetHeight + 12, top = h < 720 ? 100 : 120; camera.setViewOffset(w, h, 0, (panel - top) / 2, w, h);
   } else camera.clearViewOffset();
-  camera.updateProjectionMatrix();
+  camera.updateProjectionMatrix(); garageBg(w, h);
 }
 window.addEventListener('resize', resize);
 let last = performance.now();
