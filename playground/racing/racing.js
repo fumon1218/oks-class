@@ -28,11 +28,11 @@ const CARS = [
 ];
 const STAT_NAMES = ['최고 속도', '가속', '핸들', '니트로'];
 const COURSES = [
-  { id: 'meadow', name: '초록 숲길', emoji: '🌲', seed: 11, length: 3200, bg: 'bg_forest', hz: 0.575, sky: ['#4aa8ff', '#bfe6ff'], fog: 0x93d36e, ground: 0x7cc43a, bank: 0x6ab32f, tree: 'round', leaf: 0x3ea94a },
-  { id: 'sakura', name: '벚꽃 경기장', emoji: '🌸', seed: 47, length: 3300, bg: 'bg_cherry', hz: 0.62, sky: ['#5db4ff', '#fce5e9'], fog: 0xfbe0e6, ground: 0xf4c8d6, bank: 0xeab4c6, tree: 'round', leaf: 0xff9fc6, trunk: 0x8a5a44 },
-  { id: 'beach', name: '반짝 바닷길', emoji: '🏖️', seed: 23, length: 3500, bg: 'bg_beach', hz: 0.5, sky: ['#2f9bff', '#9fe4ff'], fog: 0x6fdcf5, ground: 0xf3d9a0, bank: 0xe6c88a, tree: 'palm', leaf: 0x35b45a, trunk: 0xb98a55 },
-  { id: 'skyisle', name: '노을 하늘 섬', emoji: '🏯', seed: 35, length: 3400, bg: 'bg_sky', hz: 0.6, sky: ['#8a7be0', '#ffc2a8'], fog: 0xf9b4b0, ground: 0xe9a2b6, bank: 0xdc8fa8, tree: 'puff', leaf: 0xffeef2 },
-  { id: 'space', name: '별빛 우주길', emoji: '🌙', seed: 59, length: 3600, bg: 'bg_space', hz: 0.56, sky: ['#150a52', '#6a3fd8'], fog: 0x7a52e0, ground: 0x4a34b0, bank: 0x3c2a96, tree: 'star', leaf: 0xffd84a },
+  { id: 'meadow', props: [['pine', 320, 9, 5, 45], ['bush', 220, 2.6, 2, 24], ['tires', 70, 1.7, 1.2, 2.5], ['cone', 50, 1.1, 1.2, 2.5], ['barrier', 40, 1.2, 1.2, 2.5]], name: '초록 숲길', emoji: '🌲', seed: 11, length: 3200, bg: 'bg_forest', hz: 0.575, sky: ['#4aa8ff', '#bfe6ff'], fog: 0x93d36e, ground: 0x7cc43a, bank: 0x6ab32f, tree: 'round', leaf: 0x3ea94a },
+  { id: 'sakura', props: [['sakura', 300, 9.5, 5, 45], ['bush', 160, 2.6, 2, 24], ['lamp', 60, 5.5, 1.4, 2.6], ['flag', 60, 4.5, 1.4, 2.6], ['tires', 30, 1.7, 1.2, 2.5]], name: '벚꽃 경기장', emoji: '🌸', seed: 47, length: 3300, bg: 'bg_cherry', hz: 0.62, sky: ['#5db4ff', '#fce5e9'], fog: 0xfbe0e6, ground: 0xf4c8d6, bank: 0xeab4c6, tree: 'round', leaf: 0xff9fc6, trunk: 0x8a5a44 },
+  { id: 'beach', props: [['palm', 280, 9.5, 4, 40], ['bush', 150, 2.6, 2, 30], ['tires', 70, 1.7, 1.2, 2.5], ['cone', 50, 1.1, 1.2, 2.5], ['flag', 30, 4.5, 1.4, 2.6]], name: '반짝 바닷길', emoji: '🏖️', seed: 23, length: 3500, bg: 'bg_beach', hz: 0.5, sky: ['#2f9bff', '#9fe4ff'], fog: 0x6fdcf5, ground: 0xf3d9a0, bank: 0xe6c88a, tree: 'palm', leaf: 0x35b45a, trunk: 0xb98a55 },
+  { id: 'skyisle', props: [['sakura', 160, 9.5, 6, 50], ['lamp', 50, 5.5, 1.4, 2.6], ['flag', 30, 4.5, 1.4, 2.6], ['bush', 100, 2.6, 2, 26]], name: '노을 하늘 섬', emoji: '🏯', seed: 35, length: 3400, bg: 'bg_sky', hz: 0.6, sky: ['#8a7be0', '#ffc2a8'], fog: 0xf9b4b0, ground: 0xe9a2b6, bank: 0xdc8fa8, tree: 'puff', leaf: 0xffeef2 },
+  { id: 'space', props: [['lamp', 70, 5.5, 1.4, 2.6], ['flag', 60, 4.5, 1.4, 2.6], ['cone', 50, 1.1, 1.2, 2.5], ['tires', 30, 1.7, 1.2, 2.5]], name: '별빛 우주길', emoji: '🌙', seed: 59, length: 3600, bg: 'bg_space', hz: 0.56, sky: ['#150a52', '#6a3fd8'], fog: 0x7a52e0, ground: 0x4a34b0, bank: 0x3c2a96, tree: 'star', leaf: 0xffd84a },
 ];
 const DIFFS = [{ id: 0, name: '여유롭게', pace: 0.8 }, { id: 1, name: '보통', pace: 0.9 }, { id: 2, name: '도전!', pace: 0.99 }];
 const AI_COLORS = ['#ff7a2e', '#3d8bff', '#39c46a'];
@@ -145,6 +145,23 @@ function makeGate(tr, s, text) {
   const banner = new THREE.Mesh(new THREE.BoxGeometry(2 * W + 3, 2.1, 0.5), [postM, postM, postM, postM, new THREE.MeshBasicMaterial({ map: canvasTex(512, 96, (c, w, h) => { const q = 24; for (let y = 0; y < 4; y++) for (let x = 0; x < w / q; x++) { c.fillStyle = (x + y) % 2 ? '#222' : '#fff'; c.fillRect(x * q, y * q, q, q); } c.fillStyle = '#e5392d'; c.fillRect(0, 0, 0, 0); }) }), new THREE.MeshBasicMaterial({ map: canvasTex(512, 96, (c, w, h) => { c.fillStyle = '#e5392d'; c.fillRect(0, 0, w, h); c.fillStyle = '#fff'; c.font = '900 64px system-ui,sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle'; c.fillText(text, w / 2, h / 2 + 4); }) })]);
   banner.position.set(0, 7.2, 0); g.add(banner); return g;
 }
+const SP_ASP = { trophy: 1.04, sakura: 1.03, lamp: 0.37, flag: 1.0, bush: 1.16, barrier: 2.09, pine: 0.78, cone: 0.8, palm: 0.94, tires: 0.65, arch: 1.18 };
+const spCache = {};
+function spTex(k) { if (!spCache[k]) { const t = new THREE.TextureLoader().load('assets/sp_' + k + '.webp'); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; spCache[k] = t; } return spCache[k]; }
+function spMat(k) { return new THREE.MeshBasicMaterial({ map: spTex(k), alphaTest: 0.5, side: THREE.DoubleSide }); }
+function spGeo() { const g = new THREE.PlaneGeometry(1, 1); g.translate(0, 0.5, 0); return g; }
+function makeArch(tr, s) {
+  const a = tr.at(s), w = 2 * W + 8, m = new THREE.Mesh(spGeo(), spMat('arch')); m.scale.set(w, w / SP_ASP.arch, 1); m.position.set(a.x, -0.36, a.z); m.rotation.y = Math.atan2(a.tx, a.tz) + Math.PI; m.frustumCulled = false; return m;
+}
+function addProps(sc, co, R, ext) {
+  const L = co.length, pts = track.P, geo = spGeo(), tm = new THREE.Matrix4(), q = new THREE.Quaternion(), sv = new THREE.Vector3(), pv = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
+  const clear = (x, z) => { let m = 1e9; for (let j = 0; j < pts.length; j++) { const dx = pts[j][0] - x, dz = pts[j][1] - z, d2 = dx * dx + dz * dz; if (d2 < m) m = d2; } return Math.sqrt(m) >= W + 2.2; };
+  for (const [k, n, h, o0, o1] of co.props || []) {
+    const list = []; for (let i = 0; i < n * 4 && list.length < n; i++) { const sPos = 30 + R() * (L - 50), a = track.at(sPos), side = R() < 0.5 ? -1 : 1, lat = side * (W + 1.3 + ext(a) + o0 + R() * (o1 - o0)), x = a.x + a.nx * lat, z = a.z + a.nz * lat; if (!clear(x, z)) continue; list.push({ x, z, yaw: Math.atan2(a.tx, a.tz) + Math.PI, sc: 0.8 + R() * 0.45 }); }
+    const im = new THREE.InstancedMesh(geo, spMat(k), list.length); list.forEach((it, i) => { q.setFromAxisAngle(up, it.yaw); sv.set(h * it.sc * SP_ASP[k], h * it.sc, 1); pv.set(it.x, -0.36, it.z); tm.compose(pv, q, sv); im.setMatrixAt(i, tm); }); im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; sc.add(im);
+  }
+  for (const sx of [-1, 1]) { const a = track.at(L - 40), lat = sx * (W + 6), t = new THREE.Mesh(geo, spMat('trophy')); t.scale.set(4 * SP_ASP.trophy, 4, 1); t.position.set(a.x + a.nx * lat, -0.36, a.z + a.nz * lat); t.rotation.y = Math.atan2(a.tx, a.tz) + Math.PI; sc.add(t); }
+}
 let backdrop = null;
 const bgCache = {};
 function makeBackdrop(co) {
@@ -169,6 +186,7 @@ function buildRace(co) {
   const R = rnd0(co.seed * 7 + 1), pts = track.P;
   const items = []; for (let i = 0; i < 1500 && items.length < 650; i++) { const s = R() * L, a = track.at(s), side = R() < 0.5 ? -1 : 1, lat = side * (W + 3.5 + ext(a) + (R() < 0.5 ? R() * 12 : R() * 70)); const x = a.x + a.nx * lat, z = a.z + a.nz * lat; const dmin = (() => { let m = 1e9; for (let j = 0; j < pts.length; j++) { const dx = pts[j][0] - x, dz = pts[j][1] - z, d2 = dx * dx + dz * dz; if (d2 < m) m = d2; } return Math.sqrt(m); })(); if (dmin < W + 4.5) continue; items.push({ x, z, sc: 0.8 + R() * 1.1, ry: R() * 6.28 }); }
   const sph = (r, sx, sy, sz) => { const g = new THREE.SphereGeometry(r, 12, 9); g.scale(sx, sy, sz); return g; };
+  if (co.tree === 'round' || co.tree === 'palm') items.length = 0;
   const parts = co.tree === 'round'
     ? [{ g: new THREE.CylinderGeometry(0.35, 0.5, 2.6, 7), c: co.trunk || 0x7a5232, y: 1.3 }, { g: sph(2.1, 1, 0.9, 1), c: co.leaf, y: 4.0 }, { g: sph(1.5, 1, 0.9, 1), c: co.leaf, y: 5.3, x: 0.5 }]
     : co.tree === 'palm'
@@ -181,7 +199,7 @@ function buildRace(co) {
   const tm = new THREE.Matrix4(), pm2 = new THREE.Matrix4(), q = new THREE.Quaternion(), sv = new THREE.Vector3(), pv = new THREE.Vector3();
   parts.forEach((pt) => { const im = new THREE.InstancedMesh(pt.g, new THREE.MeshStandardMaterial({ color: pt.c, roughness: 0.9, emissive: pt.e || 0, emissiveIntensity: pt.e ? 0.7 : 0 }), items.length); im.userData.keep = false;
     items.forEach((it, i) => { q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), it.ry); sv.setScalar(it.sc); pv.set(it.x, -0.36, it.z); tm.compose(pv, q, sv); pm2.makeTranslation(pt.x || 0, pt.y, 0); tm.multiply(pm2); im.setMatrixAt(i, tm); }); im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; sc.add(im); });
-  gates = [makeGate(track, 14, '출발!'), makeGate(track, L - 40, '결승!')]; gates.forEach((g) => sc.add(g));
+  addProps(sc, co, rnd0(co.seed * 5 + 3), ext); gates = [makeArch(track, 32), makeArch(track, L - 40)]; gates.forEach((g) => sc.add(g));
   // 파란 구슬(니트로)
   orbs = []; const Rr = rnd0(co.seed * 13 + 5), om = new THREE.MeshStandardMaterial({ color: 0x3dc0ff, emissive: 0x1a8cff, emissiveIntensity: 1.2, roughness: 0.2, metalness: 0.2 }), og = new THREE.IcosahedronGeometry(0.7, 1);
   for (let s = 140; s < L - 120;) { const d0 = (Rr() * 2 - 1) * (W - 2.8), n = Rr() < 0.4 ? 3 : 1; for (let k = 0; k < n; k++) { const m = new THREE.Mesh(og, om); m.userData = { s: s + k * 11, d: d0, on: true, k: 1 }; sc.add(m); orbs.push(m); } s += 70 + Rr() * 110 + n * 11; }
