@@ -20,6 +20,17 @@
   var portrait = function () { return innerHeight > innerWidth * 1.1; };
   O.applyBody();
   if (O.eco) O.eco.hud(document.getElementById('ecoHud'));
+  /* 안내 음성 켜고 끄기: 앱 전체(말하는 안내·문제 설명)에 적용되고 기기에 저장돼요 */
+  (function () {
+    var vb = document.getElementById('voiceBtn'); if (!vb) return;
+    function show() { var on = O.settings().voice; vb.innerHTML = (on ? '🔊' : '🔇') + ' <span>안내 음성 ' + (on ? '켬' : '끔') + '</span>'; vb.setAttribute('aria-pressed', on); vb.title = on ? '안내 음성이 켜져 있어요 (누르면 꺼져요)' : '안내 음성이 꺼져 있어요 (누르면 켜져요)'; vb.classList.toggle('off', !on); }
+    vb.onclick = function () {
+      var on = !O.settings().voice; O.saveSetting('voice', on); O.saveSetting('explain', on);
+      if (!on) O.hush(); show(); O.unlock();
+      if (on) O.say('안내 음성을 켰어요.'); else O.sfx('tick');
+    };
+    show();
+  })();
   try { sessionStorage.removeItem('oks_return'); } catch (e) {}
 
   function starById(id) { return SP.STARS.filter(function (s) { return s.id === id; })[0]; }

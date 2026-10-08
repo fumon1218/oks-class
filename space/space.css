@@ -259,3 +259,6 @@ body.sp-zooming .sp-stage{transform-origin:0 0;}
 
 /* 세로 우주 지도도 가로 지도처럼 무대에 같은 우주 배경을 표시합니다. */
 body.portrait.sp-zooming[data-view="map"] .sp-stage{background:#140f33 var(--map-background,none) center/cover no-repeat!important;}
+
+.sp-voice{cursor:pointer;font:inherit;}
+.sp-voice.off{opacity:.8;background:#e9e3f3;}

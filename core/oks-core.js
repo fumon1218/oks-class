@@ -249,7 +249,7 @@
     var exBtn = el('button', 'oks-pill oks-explain', ''); exBtn.type = 'button';
     function exShow() { var on = settings().explain; exBtn.innerHTML = iconHtml('icon_listen.png', on ? '설명 켬' : '설명 끔'); exBtn.setAttribute('aria-pressed', on); exBtn.title = on ? '문제 설명을 읽어 줘요 (누르면 꺼져요)' : '문제 설명을 읽지 않아요 (누르면 켜져요)'; exBtn.classList.toggle('off', !on); }
     exShow();
-    exBtn.onclick = function () { var on = !settings().explain; saveSetting('explain', on); if (!on) hush(); exShow(); toast(on ? '설명을 읽어 줄게요' : '설명을 읽지 않아요. 🔊를 누르면 들을 수 있어요', 1800); };
+    exBtn.onclick = function () { var on = !settings().explain; saveSetting('explain', on); if (on && !settings().voice) saveSetting('voice', true); if (!on) hush(); exShow(); toast(on ? '설명을 읽어 줄게요' : '설명을 읽지 않아요. 🔊를 누르면 들을 수 있어요', 1800); };
     var menu = null, moreBtn = null;
     if (o.compact) {
       /* 학생 화면은 단순하게: 돌아가기 · 제목 · 설명 · 다시 듣기 · 도와줘 · ⋯(코인·수준·진행은 안으로) */
