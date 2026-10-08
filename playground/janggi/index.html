@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#4a3a22">
+<title>3D 장기 · 놀이별</title><link rel="icon" href="../../icons/ok-face-192.png"><link rel="apple-touch-icon" href="../../icons/ok-face-180.png">
+<link rel="stylesheet" href="../../core/oks-core.css"><link rel="stylesheet" href="../chess/chess.css"><link rel="stylesheet" href="janggi.css"></head>
+<body class="oks chess-page janggi-page">
+<canvas id="gl" aria-label="3D 장기판"></canvas>
+<header class="ch-top">
+  <a class="ch-btn" id="back" href="../">← 놀이별</a>
+  <div class="ch-title"><span id="modeLabel">전략놀이</span><b>3D 장기</b></div>
+  <div class="ch-tools">
+    <button class="ch-btn" id="btnHelp" type="button" aria-label="놀이 방법">❓</button>
+    <button class="ch-btn" id="btnVoice" type="button" aria-label="안내 음성 켜기·끄기">🔊</button>
+    <button class="ch-btn" id="btnMenu" type="button" aria-label="새 놀이 고르기">☰ 새로</button>
+  </div>
+</header>
+<div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">장기말을 꺼내는 중이에요…</span></div>
+<div class="ch-captured" id="capW" aria-label="잡힌 초 말"></div><div class="ch-captured b" id="capB" aria-label="잡힌 한 말"></div>
+<footer class="ch-bottom">
+  <button class="ch-btn big" id="btnUndo" type="button">↩ 한 수 물리기</button>
+  <button class="ch-btn big" id="btnHint" type="button">💡 힌트</button>
+  <button class="ch-btn big" id="btnPass" type="button">🙋 한 수 쉬기</button>
+  <button class="ch-btn big" id="btnView" type="button">🔄 시점 바꾸기</button>
+  <button class="ch-btn big" id="btnLock" type="button" aria-pressed="false">🔓 화면 돌리기</button>
+  <button class="ch-btn big" id="btnAssist" type="button" aria-pressed="true">✅ 갈 수 있는 곳 보기</button>
+</footer>
+<div class="ch-loading" id="loading"><div><div class="ch-spin"></div><p>3D 장기판을 펼치는 중…</p></div></div>
+<div class="ch-overlay" id="menu" hidden></div>
+<dialog id="helpDialog" class="ch-dialog"><h2>이렇게 놀아요</h2>
+<ol><li><b>내 말을 눌러요.</b> 갈 수 있는 곳이 초록 점으로 보여요. 빨간 동그라미는 상대 말을 잡는 곳이에요.</li><li><b>가고 싶은 곳을 눌러요.</b> 장기말은 줄이 만나는 점에 놓여요.</li><li>상대 <b>궁</b>이 도망갈 곳 없이 공격받으면(<b>장군</b>인데 피할 수 없으면) 이겨요.</li><li><b>포</b>는 다른 말 하나를 넘어서 가요(포는 못 넘고 못 잡아요). <b>마·상</b>은 앞이 막히면 못 가요. <b>궁·사</b>는 궁성 안에서만 가요.</li><li>두 궁이 마주 보게 되는 수는 둘 수 없어요. 둘 곳이 없으면 <b>한 수 쉬어요</b>.</li></ol>
+<form method="dialog"><button class="ch-btn big">알겠어요</button></form></dialog>
+<script src="../../core/oks-core.js"></script><script src="../../core/oks-eco.js"></script><script src="engine.js"></script>
+<script type="module" src="janggi.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('../../sw.js').catch(function(){});</script>
+</body></html>
