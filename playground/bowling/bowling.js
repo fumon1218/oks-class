@@ -280,7 +280,7 @@ function lanePoint(cx, cy, lift) {
   const p = new THREE.Vector3(); return ray.ray.intersectPlane(gplane, p) ? p : null;
 }
 canvas.addEventListener('pointerdown', (e) => {
-  O.unlock(); if (busy || over || !cfg || phase !== 'aim') return;
+  O.unlock(); snd.prime(); if (busy || over || !cfg || phase !== 'aim') return;
   if (aimMode === 'auto') { rollBall(tx); return; }
   ptr = { id: e.pointerId, lift: e.pointerType === 'touch' ? 60 : 0 }; try { canvas.setPointerCapture(e.pointerId); } catch (er) {}
   movePtr(e);
@@ -328,7 +328,7 @@ function openMenu(fromFinish) {
     el.querySelectorAll('[data-ct]').forEach((b) => { b.onclick = () => { sel.ctrl = b.dataset.ct; render(); }; });
     el.querySelectorAll('[data-lv]').forEach((b) => { b.onclick = () => { sel.level = +b.dataset.lv; render(); }; });
     const cm = $('closeMenu'); if (cm) cm.onclick = () => { el.hidden = true; };
-    $('goBtn').onclick = () => { O.unlock(); Object.assign(prefs, { frames: sel.frames, players: sel.players, aim: sel.aim, ctrl: sel.ctrl }); savePrefs(); el.hidden = true; newGame({ frames: sel.frames, players: sel.players, aim: sel.aim, ctrl: sel.ctrl, level: sel.level }); };
+    $('goBtn').onclick = () => { O.unlock(); snd.prime(); Object.assign(prefs, { frames: sel.frames, players: sel.players, aim: sel.aim, ctrl: sel.ctrl }); savePrefs(); el.hidden = true; newGame({ frames: sel.frames, players: sel.players, aim: sel.aim, ctrl: sel.ctrl, level: sel.level }); };
   }
   render(); O.say('3D 볼링이에요. 하고 싶은 놀이를 골라요.');
 }
