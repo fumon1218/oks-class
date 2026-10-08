@@ -153,3 +153,9 @@ GitHub Pages 배포 후 `https://<계정>.github.io/oks-class/` 에서 바로 �
 - 시점: 빈 곳을 끌면 360도로 돌려 볼 수 있고, 두 손가락(또는 마우스 휠)으로 확대·축소, 🧭 시점 단추로 처음 모습으로 돌아옵니다.
 - 문제 만들기: `SEED=1 WANT=30,30,30,30,30 T1=240000 T2=760000 OUT=a.json node scripts/rush-gen.mjs`를 여러 개 돌린 뒤 `node scripts/rush-merge.mjs a.json b.json`(약 17분, 풀이 프로그램으로 최소 횟수 확인), 검증: `node scripts/rush-test.mjs`.
 - 보드게임 지도는 6칸(다트·볼링·주차장 탈출 + 우주 도시 건설 및 준비 중 2칸)입니다.
+
+## 놀이별 · 스피드 레이스 (자동차 경주)
+- `playground/racing/` — 차고(차 고르기·360° 돌려 보기·능력치)와 3D 경주. 코스 3개(숲길·사막·눈길), 상대 3대, 파란 구슬로 니트로, 핸들 도움.
+- 부딪쳐도 지거나 다치지 않아요(살짝 튕김). 결과는 순위·기록만 보여 줘요.
+- `track.js` 는 코스 길을 만드는 코드(`node scripts/racing-track-test.mjs` 로 확인).
+- **자동차 3D 모델 라이선스**: `assets/rx7.glb`(2002 Mazda RX-7 Spirit-R), `assets/mclaren720s.glb`(2019 McLaren 720S GT3) — 제작 OUTPISTON, [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). **비영리로만** 쓰고, 모델을 고치면 같은 조건으로 공개해야 하며, 출처 표시가 필요해요(게임 차고 화면에 표시). 원본: https://sketchfab.com/outpiston

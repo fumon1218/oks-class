@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#7cc4ff">
+<title>스피드 레이스 · 놀이별</title><link rel="icon" href="../../icons/ok-face-192.png"><link rel="apple-touch-icon" href="../../icons/ok-face-180.png">
+<link rel="stylesheet" href="../../core/oks-core.css"><link rel="stylesheet" href="../chess/chess.css"><link rel="stylesheet" href="racing.css"></head>
+<body class="oks chess-page race-page">
+<canvas id="gl" aria-label="3D 자동차 경주"></canvas>
+<header class="ch-top">
+  <a class="ch-btn" id="back" href="../?zone=board">← 놀이별</a>
+  <div class="ch-title"><span id="modeLabel">보드게임</span><b>스피드 레이스</b></div>
+  <div class="ch-tools">
+    <button class="ch-btn" id="btnHelp" type="button" aria-label="놀이 방법">❓</button>
+    <button class="ch-btn" id="btnVoice" type="button" aria-label="안내 음성 켜기·끄기">🔊</button>
+    <button class="ch-btn" id="btnMenu" type="button" aria-label="차고로 가기">🚗 차고</button>
+  </div>
+</header>
+<div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">차고를 열고 있어요…</span></div>
+
+<section class="rc-garage" id="garage" hidden aria-label="차고">
+  <div class="rc-pick">
+    <button class="rc-arrow" id="carPrev" type="button" aria-label="이전 차">◀</button>
+    <div class="rc-name"><small id="carSub"></small><b id="carName"></b><span id="carBest"></span></div>
+    <button class="rc-arrow" id="carNext" type="button" aria-label="다음 차">▶</button>
+  </div>
+  <div class="rc-stats" id="carStats"></div>
+  <div class="rc-opts" id="opts"></div>
+  <button class="ch-go" id="goBtn" type="button">🏁 출발!</button>
+  <p class="rc-tip">차를 끌면 빙글 돌려 볼 수 있어요.</p>
+  <p class="rc-credit" id="credit"></p>
+</section>
+
+<div class="rc-hud" id="hud" hidden>
+  <div class="rc-rank" id="hudRank"><small>순위</small><b>1</b><span>/ 4</span></div>
+  <div class="rc-speed" id="hudSpeed"><b>0</b><small>km/h</small></div>
+  <div class="rc-prog" id="hudProg" aria-label="달린 거리"><i id="progFill"></i><em id="progMe">🚗</em></div>
+  <div class="rc-nitro" id="hudNitro" aria-label="니트로"><small>🔥 니트로</small><div><i id="nitroFill"></i></div></div>
+  <div class="rc-time" id="hudTime">0:00.0</div>
+</div>
+<div class="rc-count" id="count" hidden></div>
+<footer class="rc-pad" id="pad" hidden>
+  <div class="rc-steer">
+    <button class="rc-btn" id="btnL" type="button" aria-label="왼쪽으로">◀</button>
+    <button class="rc-btn" id="btnR" type="button" aria-label="오른쪽으로">▶</button>
+  </div>
+  <div class="rc-act">
+    <button class="rc-btn brake" id="btnB" type="button" aria-label="천천히">🛑</button>
+    <button class="rc-btn nitro" id="btnN" type="button" aria-label="니트로">🔥</button>
+  </div>
+</footer>
+<div class="ch-loading" id="loading"><div><div class="ch-spin"></div><p id="loadText">차고를 여는 중…</p></div></div>
+<dialog id="helpDialog" class="ch-dialog"><h2>이렇게 놀아요</h2>
+<ol><li>차는 <b>저절로 앞으로</b> 달려요. <b>◀ ▶</b> 버튼(또는 키보드 방향키)으로 방향만 바꿔요.</li><li>길에 떠 있는 <b>파란 구슬</b>을 모으면 <b>🔥 니트로</b>가 차올라요. 🔥 버튼(또는 스페이스 키)을 누르면 번쩍 빨라져요!</li><li>길 밖으로 나가면 살짝 튕겨 나요. 다치지 않아요. 다만 속도가 줄어요.</li><li>다른 차와 부딪쳐도 괜찮아요. 살짝 밀릴 뿐이에요.</li><li>🛑 버튼(또는 ↓ 키)을 누르면 <b>천천히</b> 달려요. 커브에서 써 보세요.</li><li><b>1등</b>으로 결승선을 지나가 봐요!</li></ol>
+<form method="dialog"><button class="ch-btn big">알겠어요</button></form></dialog>
+<script src="../../core/oks-core.js"></script><script src="../../core/oks-eco.js"></script>
+<script type="module" src="racing.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('../../sw.js').catch(function(){});</script>
+</body></html>
