@@ -24,3 +24,8 @@ body.bw-direct .bw-roll{display:none}
 @media (max-height:720px){.bw-sheet{top:calc(max(10px,env(safe-area-inset-top)) + 100px)}}
 @media (prefers-reduced-motion:reduce){.bw-pop span{animation-duration:2.4s}}
 body.bowling-page .ch-msg{width:max-content;max-width:94vw}
+.bw-ctrl{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(74px + env(safe-area-inset-bottom));z-index:5;display:none;gap:14px;background:rgba(255,253,246,.94);color:#2a2250;border-radius:20px;padding:8px 16px;box-shadow:0 4px 12px rgba(0,0,0,.3);width:min(92vw,560px)}
+body.bw-adv .bw-ctrl{display:flex}
+.bw-ctrl label{flex:1;display:flex;flex-direction:column;font-weight:800;font-size:15px;min-width:0}
+.bw-ctrl small{font-weight:600;font-size:11px;opacity:.75}
+.bw-ctrl input{width:100%;height:30px;accent-color:#ff9d2e;margin:2px 0 0}

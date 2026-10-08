@@ -73,7 +73,7 @@ function clearStones() { stones.forEach((m) => stoneLayer.remove(m)); stones.cle
 function dropStone(s, color, animate) {
   const m = makeStone(color), rest = TOP + m.userData.rest; m.position.set(wx(s), rest, wz(s)); stoneLayer.add(m); stones.set(s, m); poke(500);
   if (!animate) return Promise.resolve();
-  m.position.y = rest + 3.2; O.sfx('pop');
+  m.position.y = rest + 3.2; OKS_PIECE.place();
   return tween(380, (p) => { m.position.y = rest + (1 - p) * 3.2; m.scale.set(STONE_D, STONE_D * STONE_Y * (0.7 + 0.3 * p), STONE_D); }, ease.out).then(() => { m.scale.set(STONE_D, STONE_D * STONE_Y, STONE_D); m.position.y = rest; });
 }
 function syncBoard() { clearStones(); for (let s = 0; s < N * N; s++) if (game.board[s]) dropStone(s, game.board[s], false); }

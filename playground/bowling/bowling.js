@@ -3,7 +3,8 @@
    게임: 5프레임(짧게) / 10프레임, 혼자·둘이서, 자동 조준·직접 누르기, 수준 1~5(1~2는 범퍼) */
 import * as THREE from '../../vendor/three/three.module.js';
 import { GLTFLoader } from '../../vendor/three/addons/loaders/GLTFLoader.js';
-import { S, LANE, createWorld, setRack, launch, step, moving, downPins } from './physics.js';
+import { S, LANE, createWorld, setRack, launch, step, moving, downPins, previewPath } from './physics.js';
+import * as snd from './sounds.js';
 import { parseFrames, score, total, standing, isDone, where, markText } from './score.js';
 
 const O = window.OKS;
@@ -23,7 +24,7 @@ catch (e) { $('loading').innerHTML = '<div><p>이 기기에서는 3D 화면을 �
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.1;
-const scene = new THREE.Scene(); scene.background = new THREE.Color(0x231c4d); scene.fog = new THREE.Fog(0x231c4d, 14, 30);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x231c4d); scene.fog = new THREE.Fog(0x231c4d, 18, 40);
 const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 60);
 scene.add(new THREE.HemisphereLight(0xdfe6ff, 0x6a4f9a, 1.5));
 const sun = new THREE.DirectionalLight(0xfff0d8, 2.0); sun.position.set(-1.5, 5, 1); scene.add(sun);
@@ -103,19 +104,20 @@ function buildPins() {
 /* ---------- 조준 표시 ---------- */
 const aimG = new THREE.Group(); aimG.visible = false; scene.add(aimG);
 const aimMat = new THREE.MeshBasicMaterial({ color: 0xffe14d, transparent: true, opacity: 0.55, depthWrite: false, depthTest: false });
-const aimLine = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), aimMat); aimLine.rotation.x = -Math.PI / 2; aimLine.renderOrder = 20; aimG.add(aimLine);
+const aimDots = []; for (let i = 0; i < 40; i++) { const d = new THREE.Mesh(new THREE.CircleGeometry(0.035, 12), aimMat); d.rotation.x = -Math.PI / 2; d.renderOrder = 20; d.visible = false; aimG.add(d); aimDots.push(d); }
 const aimRing = new THREE.Mesh(new THREE.RingGeometry(0.1, 0.15, 32), new THREE.MeshBasicMaterial({ color: 0xff4b4b, depthTest: false, transparent: true })); aimRing.rotation.x = -Math.PI / 2; aimRing.renderOrder = 21; aimG.add(aimRing);
 const aimDot = new THREE.Mesh(new THREE.CircleGeometry(0.035, 16), new THREE.MeshBasicMaterial({ color: 0xff4b4b, depthTest: false })); aimDot.rotation.x = -Math.PI / 2; aimDot.renderOrder = 21; aimG.add(aimDot);
 function placeAim(sx, tx) {
-  const z0 = 0.0, z1 = -L + 0.1, dx = tx - sx, dz = z1 - z0, len = Math.hypot(dx, dz);
-  aimLine.position.set((sx + tx) / 2, 0.015, (z0 + z1) / 2); aimLine.scale.set(0.07, len, 1);
-  aimLine.quaternion.setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)); aimLine.quaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -Math.atan2(dx, -dz)));
-  aimRing.position.set(tx, 0.02, z1); aimDot.position.set(tx, 0.022, z1);
+  const L0 = cfg ? cfg.level - 1 : 2, pts = previewPath(sx, tx, rollSpeed(), ctrl.spin), last = pts[pts.length - 1];
+  aimDots.forEach((d, i) => { const p = pts[i]; if (p && i < pts.length - 1) { d.visible = true; d.position.set(p.x, 0.016, p.z); d.scale.setScalar(0.9 + (i % 2) * 0.1); } else d.visible = false; });
+  aimRing.position.set(last.x, 0.02, last.z); aimDot.position.set(last.x, 0.022, last.z);
 }
 
 /* ---------- 상태 ---------- */
 let cfg = null, G = null, busy = true, over = false, stats = O.newStats(), runId = 0, aimMode = 'auto', aimT = 0, ptr = null;
 let tx = 0, sx = 0, world = null, phase = 'idle', camT = 0;
+const ctrl = { power: 0.6, spin: 0, adv: false };
+const rollSpeed = () => (ctrl.adv ? 3.8 + ctrl.power * 5.2 : BALL_V[(cfg ? cfg.level : 3) - 1]);
 const msgEl = $('msg'), msgText = $('msgText');
 function say(text, kind, speak) { msgText.textContent = text; msgEl.className = 'ch-msg' + (kind ? ' ' + kind : ''); if (speak !== false) O.say(typeof speak === 'string' ? speak : text); }
 const note = (t, k) => say(t, k, false);
@@ -126,6 +128,7 @@ const clampT = (x) => Math.max(-halfW * 1.7, Math.min(halfW * 1.7, x));
 function newGame(c) {
   runId++; $('menu').hidden = true; cfg = Object.assign({}, c); over = false; busy = true; stats = O.newStats(); phase = 'idle';
   aimMode = cfg.aim; document.body.classList.toggle('bw-direct', aimMode === 'direct'); aimT = 0;
+  ctrl.adv = cfg.ctrl === 'adv'; ctrl.spin = 0; ctrl.power = 0.6; document.body.classList.toggle('bw-adv', ctrl.adv); syncCtrl();
   bumpers(cfg.level <= 2);
   G = { cur: 0, players: [] };
   for (let i = 0; i < cfg.players; i++) G.players.push({ rolls: [], strikes: 0, spares: 0, gutters: 0 });
@@ -177,11 +180,12 @@ function rollBall(target, exact) {
   if (busy || over || !cfg) return false;
   busy = true; updateButtons(); aimG.visible = false; phase = 'roll'; camT = 0;
   const L0 = cfg.level - 1, noise = exact ? 0 : (Math.random() + Math.random() + Math.random() - 1.5) / 0.75 * NOISE[L0];
-  world.bumpers = cfg.level <= 2; launch(world, sx, target, BALL_V[L0], noise);
+  world.bumpers = cfg.level <= 2; launch(world, sx, target, rollSpeed(), noise, ctrl.adv ? ctrl.spin : 0); snd.prime(); snd.rollStart(); snd.rollSet(0.6);
   stats.asked++; O.sfx('tick'); world.settleT = 0; world.rid = runId; return true;
 }
 function wait(ms) { return sleep(ms); }
 async function afterRoll() {
+  snd.rollStop();
   const rid = runId, P = G.players[G.cur], N = cfg.frames;
   const down = downPins(world).length;
   const wasFirst = standing(P.rolls, N) === 10, was = where(P.rolls, N).frame;
@@ -190,7 +194,7 @@ async function afterRoll() {
   const left = standing(P.rolls.slice(0, -1), N);
   const clear = down === left;
   let pop = down + '개!', kind = '', speak;
-  if (clear && wasFirst) { P.strikes++; pop = '스트라이크!'; kind = 'big'; speak = '스트라이크! 정말 잘했어요!'; O.sfx('win'); }
+  if (clear && wasFirst) { P.strikes++; pop = '스트라이크!'; kind = 'big'; speak = '스트라이크! 정말 잘했어요!'; O.sfx('win'); snd.crash(10); }
   else if (clear) { P.spares++; pop = '스페어!'; kind = 'big'; speak = '스페어! 대단해요!'; O.sfx('coin'); }
   else if (down === 0) { P.gutters++; stats.mistakes++; pop = gutter ? '거터…' : '0개'; speak = gutter ? '앗, 도랑에 빠졌어요. 괜찮아요!' : '아쉬워요. 다시 해 봐요!'; O.sfx('no'); }
   else { pop = down + '개 쓰러졌어요!'; speak = down + '개 쓰러뜨렸어요!'; O.sfx('pop'); }
@@ -213,7 +217,7 @@ async function afterRoll() {
   world.ball = null; G.cur = nextCur; ballG.visible = true; placeBall(0); phase = 'aim'; camT = 0;
   renderSheet(); await wait(250); if (rid !== runId) return; intro();
 }
-function sweep(all) { world.pins.forEach((p, i) => { if (!p.out && (all || p.st === 'fall' || p.gone)) pinViews[i].sweep = 0.001; }); if (all) pinViews.forEach((v) => { if (v.sweep === 0) v.sweep = 0.001; }); }
+function sweep(all) { snd.sweep(); world.pins.forEach((p, i) => { if (!p.out && (all || p.st === 'fall' || p.gone)) pinViews[i].sweep = 0.001; }); if (all) pinViews.forEach((v) => { if (v.sweep === 0) v.sweep = 0.001; }); }
 function popBanner(t, kind) { const s = document.createElement('span'); s.textContent = t; if (kind === 'big') s.className = 'big'; $('pop').appendChild(s); setTimeout(() => s.remove(), 1900); }
 
 /* ---------- 점수판 ---------- */
@@ -289,6 +293,9 @@ function movePtr(e) {
 canvas.addEventListener('pointermove', (e) => { if (ptr && e.pointerId === ptr.id) movePtr(e); });
 canvas.addEventListener('pointerup', (e) => { if (!ptr || e.pointerId !== ptr.id) return; ptr = null; rollBall(tx); });
 canvas.addEventListener('pointercancel', () => { ptr = null; });
+function syncCtrl() { $('rngPower').value = Math.round(ctrl.power * 100); $('rngSpin').value = Math.round(ctrl.spin * 100); }
+$('rngPower').oninput = (e) => { ctrl.power = e.target.value / 100; };
+$('rngSpin').oninput = (e) => { ctrl.spin = e.target.value / 100; };
 $('btnRoll').onclick = () => { O.unlock(); rollBall(tx); };
 $('btnHint').onclick = hint;
 $('btnAim').onclick = () => { aimMode = aimMode === 'auto' ? 'direct' : 'auto'; cfg.aim = aimMode; prefs.aim = aimMode; savePrefs(); document.body.classList.toggle('bw-direct', aimMode === 'direct'); note(aimMode === 'auto' ? '자동 조준이에요. 길잡이가 핀 쪽 가운데에 오면 눌러요.' : '레인을 누른 채 방향을 잡고 손을 떼면 굴러가요.'); };
@@ -301,25 +308,27 @@ $('btnHelp').onclick = () => { O.unlock(); const d = $('helpDialog'); if (d.show
 })();
 
 /* ---------- 메뉴 ---------- */
-const prefs = (() => { const d = { frames: 5, players: 1, aim: 'auto' }; try { return Object.assign(d, JSON.parse(localStorage.getItem('oks_bowling_prefs_v1') || '{}')); } catch (e) { return d; } })();
+const prefs = (() => { const d = { frames: 5, players: 1, aim: 'auto', ctrl: 'easy' }; try { return Object.assign(d, JSON.parse(localStorage.getItem('oks_bowling_prefs_v1') || '{}')); } catch (e) { return d; } })();
 function savePrefs() { try { localStorage.setItem('oks_bowling_prefs_v1', JSON.stringify(prefs)); } catch (e) {} }
 function openMenu(fromFinish) {
   const el = $('menu'); el.hidden = false; document.querySelectorAll('.oks-overlay').forEach((x) => x.remove());
-  const sel = { frames: prefs.frames, players: prefs.players, aim: prefs.aim, level: O.levelFor(LESSON) };
+  const sel = { frames: prefs.frames, players: prefs.players, aim: prefs.aim, ctrl: prefs.ctrl, level: O.levelFor(LESSON) };
   const chip = (k, v, label, small, on) => '<button type="button" class="ch-chip' + (on ? ' on' : '') + '" data-' + k + '="' + v + '">' + label + (small ? '<small>' + small + '</small>' : '') + '</button>';
   function render() {
     el.innerHTML = '<div class="ch-card"><h1>🎳 3D 볼링</h1><p>공을 굴려 핀을 쓰러뜨려요.</p>' +
       '<div class="ch-row"><label>몇 판 놀까요</label>' + chip('fr', 5, '5프레임', '짧게', sel.frames === 5) + chip('fr', 10, '10프레임', '진짜 볼링', sel.frames === 10) + '</div>' +
       '<div class="ch-row"><label>몇 명이 놀까요</label>' + chip('pl', 1, '👤 혼자', '', sel.players === 1) + chip('pl', 2, '👫 둘이서', '번갈아', sel.players === 2) + '</div>' +
       '<div class="ch-row"><label>조준 방식</label>' + chip('aim', 'auto', '🟡 자동 조준', '움직일 때 눌러요', sel.aim === 'auto') + chip('aim', 'direct', '👆 직접 누르기', '눌러서 겨냥해요', sel.aim === 'direct') + '</div>' +
+      '<div class="ch-row"><label>공 조작</label>' + chip('ct', 'easy', '🟢 쉽게', '방향만 정해요', sel.ctrl === 'easy') + chip('ct', 'adv', '💪 세기·스핀', '힘과 휘기도 정해요', sel.ctrl === 'adv') + '</div>' +
       '<div class="ch-row"><label>수준</label>' + [1, 2, 3, 4, 5].map((l) => chip('lv', l, l, LEVEL_NAME[l], sel.level === l)).join('') + '</div>' +
       '<button type="button" class="ch-go" id="goBtn">시작!</button>' + (G && !fromFinish ? '<div class="ch-row"><button type="button" class="ch-chip" id="closeMenu">닫기</button></div>' : '') + '</div>';
     el.querySelectorAll('[data-fr]').forEach((b) => { b.onclick = () => { sel.frames = +b.dataset.fr; O.unlock(); O.sfx('tick'); render(); }; });
     el.querySelectorAll('[data-pl]').forEach((b) => { b.onclick = () => { sel.players = +b.dataset.pl; render(); }; });
     el.querySelectorAll('[data-aim]').forEach((b) => { b.onclick = () => { sel.aim = b.dataset.aim; render(); }; });
+    el.querySelectorAll('[data-ct]').forEach((b) => { b.onclick = () => { sel.ctrl = b.dataset.ct; render(); }; });
     el.querySelectorAll('[data-lv]').forEach((b) => { b.onclick = () => { sel.level = +b.dataset.lv; render(); }; });
     const cm = $('closeMenu'); if (cm) cm.onclick = () => { el.hidden = true; };
-    $('goBtn').onclick = () => { O.unlock(); Object.assign(prefs, { frames: sel.frames, players: sel.players, aim: sel.aim }); savePrefs(); el.hidden = true; newGame({ frames: sel.frames, players: sel.players, aim: sel.aim, level: sel.level }); };
+    $('goBtn').onclick = () => { O.unlock(); Object.assign(prefs, { frames: sel.frames, players: sel.players, aim: sel.aim, ctrl: sel.ctrl }); savePrefs(); el.hidden = true; newGame({ frames: sel.frames, players: sel.players, aim: sel.aim, ctrl: sel.ctrl, level: sel.level }); };
   }
   render(); O.say('3D 볼링이에요. 하고 싶은 놀이를 골라요.');
 }
@@ -341,6 +350,11 @@ function cameraGoal() {
   return { p: new THREE.Vector3(0, portrait ? 1.9 : 1.45, portrait ? 4.6 : 4.0), l: new THREE.Vector3(0, portrait ? 0.1 : 0.3, -L * 0.6) };
 }
 let lastT = performance.now(), acc = 0;
+function doEvents() {
+  const B = world.ball; let nClack = 0;
+  world.ev.splice(0).forEach((e) => { if (e.k === 'hit') snd.hit(e.v); else if (e.k === 'clack') { if (nClack++ < 3) snd.clack(e.v); } else if (e.k === 'gutter') snd.gutter(); else if (e.k === 'bump') snd.clack(1.5); });
+  if (B && !B.off) { const sp = Math.hypot(B.vx, B.vz) / 8; snd.rollSet(B.z < -L - 0.3 ? sp * 0.35 : sp, !!B.gutter); } else snd.rollStop();
+}
 function stepSim(dt) { const H = 1 / 240, k = window.__bowlTurbo || 1; acc += dt * k; let n = 0; const cap = k > 1 ? 400 : 20; while (acc >= H && n < cap) { step(world, H); acc -= H; n++; } if (n >= cap) acc = 0; }
 function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now;
@@ -350,14 +364,14 @@ function frame(now) {
       const B = world.ball;
       if (B) { ballG.visible = !B.off || B.z > -L - 3; ballG.position.set(B.x, B.y, B.z); ballG.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), B.spin); ballBlob.position.set(B.x, 0.007, B.z); ballBlob.visible = !B.gutter && !B.off; }
       if (B && B.z < -L + 2.4) phase = 'watch';
-      world.ev.splice(0).forEach((e) => { if (e === 'hit') O.sfx('pop'); else if (e === 'clack' && Math.random() < 0.35) O.sfx('tick'); else if (e === 'gutter') O.sfx('water'); });
+      doEvents();
       world.settleT = moving(world) ? 0 : (world.settleT || 0) + dt;
       if ((phase !== 'roll') && world.settleT > 0.6 || (B && B.off && world.settleT > 0.6)) { phase = 'after'; afterRoll(); }
       if (phase === 'roll' && !moving(world)) { phase = 'after'; afterRoll(); }
     } else if (phase === 'watch') {
       stepSim(dt);
       const B = world.ball; if (B) { ballG.visible = !B.off; ballG.position.set(B.x, B.y, B.z); ballG.quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), B.spin); ballBlob.position.set(B.x, 0.007, B.z); ballBlob.visible = !B.gutter && !B.off; }
-      world.ev.splice(0).forEach((e) => { if (e === 'hit') O.sfx('pop'); else if (e === 'clack' && Math.random() < 0.35) O.sfx('tick'); else if (e === 'gutter') O.sfx('water'); });
+      doEvents();
       world.settleT = moving(world) ? 0 : (world.settleT || 0) + dt;
       if (world.settleT > 0.6) { phase = 'after'; afterRoll(); }
     } else if (phase === 'after') stepSim(dt);
@@ -381,7 +395,7 @@ function frame(now) {
 (async function boot() {
   resize();
   try { await loadAssets(); } catch (e) { $('loading').innerHTML = '<div><p>3D 볼링 파일을 불러오지 못했어요.<br>인터넷 연결을 확인하고 다시 열어 주세요.</p><a class="ch-btn" href="../?zone=board">← 놀이별로</a></div>'; throw e; }
-  buildPins(); world = createWorld({}); setRack(world, null); bumpers(true); placeBall(0); phase = 'idle';
+  snd.init(); buildPins(); world = createWorld({}); setRack(world, null); bumpers(true); placeBall(0); phase = 'idle';
   requestAnimationFrame(frame);
   $('loading').classList.add('off'); setTimeout(() => { $('loading').hidden = true; }, 500);
   say('놀이를 골라 주세요.', null, false); openMenu(true);
@@ -390,5 +404,5 @@ function frame(now) {
 /* 시험용 손잡이 */
 window.__bowl = {
   state: () => ({ G, cfg, busy, over, phase, tx }), over: () => over, busy: () => busy, phase: () => phase, start: newGame, roll: (x) => rollBall(x, true), openMenu,
-  world: () => world, rolls: () => G && G.players.map((p) => p.rolls.slice()), cam: () => camera.position.toArray()
+  world: () => world, rolls: () => G && G.players.map((p) => p.rolls.slice()), cam: () => camera.position.toArray(), ctrl, setCtrl: (p, sp) => { ctrl.power = p; ctrl.spin = sp; ctrl.adv = true; }
 };

@@ -156,7 +156,7 @@ async function animateMove(rec) {
   if (rec.captured) { victim = pieces.get(rec.to); pieces.delete(rec.to); }
   const t = Math.abs(rec.piece); pieces.set(rec.to, g);
   await hop(g, rec.to, t === 2 || t === 3 || t === 5 ? 1.7 : 0.8);
-  if (victim) { O.sfx('pop'); await popOut(victim); } else O.sfx('tick');
+  if (victim) { OKS_PIECE.place(); await popOut(victim); } else OKS_PIECE.place();
 }
 
 /* ---------- 카메라 ---------- */
@@ -409,7 +409,7 @@ async function learnMove(m) {
   if (m.captured) { victim = pieces.get(m.to); pieces.delete(m.to); }
   game.board[from] = 0; game.board[m.to] = m.piece; learn.pos = m.to; pieces.set(m.to, g);
   await hop(g, m.to, learn.type === 5 || learn.type === 2 || learn.type === 3 ? 1.7 : 0.8);
-  if (victim) { O.sfx('pop'); await popOut(victim); }
+  if (victim) { OKS_PIECE.place(); await popOut(victim); } else OKS_PIECE.place();
   const star = learn.stars.get(m.to);
   if (star) { learn.stars.delete(m.to); learn.got++; O.sfx('coin'); await tween(300, (p) => { star.scale.setScalar(1 + p * 0.6); star.position.y = 1 + p * 1.6; star.rotation.y += 0.4; }); scene.remove(star); if (learn.queue.length) addStar(learn.queue.shift()); }
   busy = false; updateButtons();

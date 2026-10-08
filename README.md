@@ -141,3 +141,5 @@ GitHub Pages 배포 후 `https://<계정>.github.io/oks-class/` 에서 바로 �
 - 수준 1~2는 범퍼 레인, 3 이상은 도랑(거터)이 있고 조준이 빨라집니다. 자동 조준(길잡이가 움직일 때 누름) / 직접 누르기(끌어서 겨냥) 중 고릅니다.
 - 시험: `node scripts/bowling-score-test.mjs`, `node scripts/bowling-physics-test.mjs`. 기록은 `play-bowling`으로 저장됩니다.
 - 출처: 핀 3D 모델 “Bowling Pin” by MSerdar Tekin, CC BY 4.0 (https://sketchfab.com/3d-models/bowling-pin-028ccb945012460aa9056ffda5b53e20). 도움말 창에도 표기했습니다.
+- 소리: 볼링은 `playground/bowling/sounds.js`가 합성 소리를 내고, `assets/sfx/sfx.json`에 파일명을 적으면 진짜 녹음으로 바꿔 씁니다(지금은 `strike.mp3`). 레인 길이는 9m, 공 조작은 메뉴의 `세기·스핀`에서 켭니다.
+- 체스·바둑·장기·오목은 말·돌을 놓을 때 `playground/pieces-sound.js`(`assets/pieces.mp3`의 "딱" 소리 9개 중 무작위)를 씁니다.

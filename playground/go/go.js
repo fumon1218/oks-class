@@ -103,7 +103,7 @@ function updateScore() {
   $('score').hidden = !(mode === 'play' || mode === 'two' || mode === 'review');
 }
 async function dropStone(s, color) {
-  const m = makeStone(color); m.position.set(wx(s), REST + 3.4, wz(s)); stoneLayer.add(m); stones.set(s, m); O.sfx('pop');
+  const m = makeStone(color); m.position.set(wx(s), REST + 3.4, wz(s)); stoneLayer.add(m); stones.set(s, m); OKS_PIECE.place();
   await tween(300, (p) => { m.position.y = REST + (1 - p) * 3.4; }, ease.out); m.position.y = REST;
 }
 async function removeStones(list) {
