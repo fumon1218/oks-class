@@ -40,6 +40,9 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
 .dt-dot.oks-glow circle{filter:drop-shadow(0 0 10px #ffd54f) drop-shadow(0 0 18px #ff9800);}
 .dt-dot.no{animation:dt-no .4s;} @keyframes dt-no{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 .dt-line{stroke:#3d8bff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none;}
+.dt-guide{stroke:#b0a28a;stroke-width:1.2;stroke-dasharray:2.2 2.6;stroke-linecap:round;fill:none;opacity:.9;pointer-events:none;}
+.dt-rubber{stroke:#ff6fa6;stroke-width:1.8;stroke-linecap:round;pointer-events:none;}
+.dt-stage.draw svg{touch-action:none;}
 .dt-fill{opacity:0;transition:opacity .9s;}
 .dt-fill.on{opacity:1;}
 .oks-start{position:fixed;inset:0;z-index:70;display:flex;align-items:center;justify-content:center;background:rgba(60,20,60,.35);overflow:auto;}
@@ -49,6 +52,9 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
 .st-lv{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:0 0 12px;}
 .st-lv button{border:3px solid #e6d7bb;background:#fff;border-radius:999px;padding:8px 14px;font:inherit;font-size:16px;cursor:pointer;color:var(--ink);}
 .st-lv button.on{background:#ff6fa6;border-color:#ff6fa6;color:#fff;}
+.dt-modes{display:flex;gap:12px;justify-content:center;margin:0 0 12px;flex-wrap:wrap;}
+.dt-modes button{flex:1 1 220px;max-width:270px;border:4px solid #f1e3c8;border-radius:20px;background:#fff;padding:10px;font:inherit;font-size:19px;color:var(--ink);cursor:pointer;}
+.dt-modes button b{display:block;font-size:34px;font-weight:400;} .dt-modes button small{font-size:14px;color:var(--ink-soft);} .dt-modes button.on{border-color:#ff6fa6;background:#fff0f6;}
 .st-go{font-size:24px!important;padding:14px 40px!important;}
 </style>
 </head>
@@ -89,6 +95,8 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
     var q = []; for (var j = 0; j < n; j++) q.push(p[Math.floor(j * p.length / n)]); return q;
   }
   var LV = { 1: { n: 5, rounds: 2 }, 2: { n: 8, rounds: 3 }, 3: { n: 12, rounds: 3 }, 4: { n: 16, rounds: 3 }, 5: { n: 22, rounds: 3 } };
+  var mode = O.qs('mode') === 'draw' ? 'draw' : (O.qs('mode') === 'tap' ? 'tap' : (function () { try { return localStorage.getItem('oks_dots_mode_v1') === 'draw' ? 'draw' : 'tap'; } catch (e) { return 'tap'; } })());
+  var HIT = [10, 9, 8, 7, 6], fails = 0, drag = null, guide = null, rubber = null;
   var stats = null, cfg = null, round = 0, pts = [], idx = 0, dotEls = [], svg = null, linesG = null, shape = null, busy = false, used = [];
 
   function mk(t, a) { var e = document.createElementNS(NS, t); for (var k in a) e.setAttribute(k, a[k]); return e; }
@@ -104,29 +112,70 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
     svg = mk('svg', { viewBox: '-4 -4 108 108', preserveAspectRatio: 'xMidYMid meet' });
     var fill = mk('polygon', { points: pts.map(function (p) { return p.join(','); }).join(' '), fill: shape.c, stroke: '#fff', 'stroke-width': 2, class: 'dt-fill' }); svg.appendChild(fill);
     linesG = mk('g', {}); svg.appendChild(linesG);
+    guide = mk('line', { class: 'dt-guide' }); guide.style.display = 'none'; svg.appendChild(guide); rubber = mk('line', { class: 'dt-rubber' }); rubber.style.display = 'none'; svg.appendChild(rubber);
+    fails = 0; drag = null; stage.classList.toggle('draw', mode === 'draw');
     dotEls = pts.map(function (p, i) {
       var g = mk('g', { class: 'dt-dot' }); g.appendChild(mk('circle', { cx: p[0], cy: p[1], r: 3.8 })); var t = mk('text', { x: p[0], y: p[1], 'font-size': 4.6 }); t.textContent = i + 1; g.appendChild(t);
-      g.style.cursor = 'pointer'; g.addEventListener('pointerdown', function (e) { e.preventDefault(); tap(i); }); svg.appendChild(g); return g;
+      g.style.cursor = 'pointer'; if (mode === 'tap') g.addEventListener('pointerdown', function (e) { e.preventDefault(); tap(i); }); svg.appendChild(g); return g;
     });
     stage.appendChild(svg); stage._fill = fill;
-    sh.ask('1번부터 차례대로 점을 눌러 이어요! (' + (round + 1) + '/' + cfg.rounds + ')'); mark();
-    O.target({ get: function () { return idx < pts.length ? [dotEls[idx]] : []; }, say: '반짝이는 점을 눌러요' }, level);
+    if (mode === 'draw') svg.addEventListener('pointerdown', dDown);
+    sh.ask(mode === 'draw' ? '1번에서 손가락을 대고, 2번까지 쭉 그어요! (' + (round + 1) + '/' + cfg.rounds + ')' : '1번부터 차례대로 점을 눌러 이어요! (' + (round + 1) + '/' + cfg.rounds + ')'); mark(); setT();
   }
-  function mark() { dotEls.forEach(function (g, i) { g.classList.toggle('next', i === idx); g.classList.toggle('done', i < idx); }); }
+  function tgt() { return idx < pts.length ? idx : 0; }                       /* 다음에 이을 점(마지막 점 다음은 1번으로 돌아와요) */
+  function setT() { O.target({ get: function () { return (mode === 'draw' ? idx <= pts.length : idx < pts.length) ? [dotEls[tgt()]] : []; }, say: mode === 'draw' ? '반짝이는 점까지 쭉 그어요' : '반짝이는 점을 눌러요' }, level); }
+  function mark() {
+    var t = tgt(); dotEls.forEach(function (g, i) { g.classList.toggle('next', i === t); g.classList.toggle('done', i < idx); });
+    if (mode === 'draw' && guide) { if (idx >= 1 && idx <= pts.length && (level <= 3 || fails >= 2)) { var a = pts[idx - 1], b = pts[t]; guide.setAttribute('x1', a[0]); guide.setAttribute('y1', a[1]); guide.setAttribute('x2', b[0]); guide.setAttribute('y2', b[1]); guide.style.display = ''; } else guide.style.display = 'none'; }
+    var c = stage.querySelector('.c'); if (c) c.textContent = Math.min(idx, pts.length);
+  }
+  /* ---- 직접 긋기: 손가락(마우스)으로 점에서 점까지 선을 그어요 ---- */
+  function toSvg(e) { var q = svg.createSVGPoint(); q.x = e.clientX; q.y = e.clientY; var m = svg.getScreenCTM(); return m ? q.matrixTransform(m.inverse()) : q; }
+  function dist(p, a) { return Math.hypot(p.x - a[0], p.y - a[1]); }
+  function addLine(a, b) { linesG.appendChild(mk('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: 'dt-line' })); }
+  function setRubber(a, p) { rubber.setAttribute('x1', a[0]); rubber.setAttribute('y1', a[1]); rubber.setAttribute('x2', p.x); rubber.setAttribute('y2', p.y); rubber.style.display = ''; }
+  function dDown(e) {
+    if (busy || drag) return; e.preventDefault(); O.unlock(); var p = toSvg(e), H = HIT[level - 1];
+    if (idx === 0) { if (dist(p, pts[0]) <= H) { reach(0); begin1(e, p); } else { O.say('1번 점에서 시작해요.'); } return; }
+    if (idx <= pts.length && dist(p, pts[idx - 1]) <= H * 1.3) begin1(e, p);
+    else if (idx <= pts.length) { fails++; if (fails === 2) mark(); O.say((idx) + '번 점에 손가락을 대고 ' + (tgt() + 1) + '번까지 그어요.'); }
+  }
+  function begin1(e, p) {
+    drag = { id: e.pointerId }; try { svg.setPointerCapture(e.pointerId); } catch (x) {} O.clearPrompt(); setRubber(pts[Math.max(idx - 1, 0)], p);
+    svg.addEventListener('pointermove', dMove); svg.addEventListener('pointerup', dUp); svg.addEventListener('pointercancel', dUp);
+  }
+  function dMove(e) {
+    if (!drag || e.pointerId !== drag.id || busy) return; var p = toSvg(e); setRubber(pts[idx - 1], p);
+    var t = tgt(); if (dist(p, pts[t]) <= HIT[level - 1]) { reach(t); if (!busy && idx <= pts.length) setRubber(pts[idx - 1], p); }
+  }
+  function dUp(e) {
+    if (!drag || (e && e.pointerId !== drag.id)) return; drag = null; rubber.style.display = 'none';
+    svg.removeEventListener('pointermove', dMove); svg.removeEventListener('pointerup', dUp); svg.removeEventListener('pointercancel', dUp);
+    if (!busy) { fails++; O.sfx('no'); if (fails === 2) { O.say('점에서 점까지 쭉 그어 봐요. 점선을 따라가요.'); } mark(); setT(); }
+  }
+  function reach(t) {
+    if (idx > 0) addLine(pts[idx - 1], pts[t]);
+    idx++; O.sfx('tick'); mark();
+    if (idx === pts.length + 1) { rubber.style.display = 'none'; finishShape(); }
+  }
+  async function finishShape() {
+    busy = true; await O.wait(300); stage._fill.classList.add('on'); O.sfx('ok'); O.praise(); O.say('와, ' + shape.n + josa(shape.n, '이', '가') + ' 나왔어요!'); await O.wait(2300);
+    round++; if (round >= cfg.rounds) return done(); newRound();
+  }
   async function tap(i) {
     if (busy) return; O.unlock();
     if (i < idx) return;
     if (i !== idx) { stats.mistakes++; O.sfx('no'); var g = dotEls[i]; g.classList.add('no'); setTimeout(function () { g.classList.remove('no'); }, 450); O.say((idx + 1) + '번을 눌러요.', { noRepeat: false }); return; }
     O.clearPrompt(); O.sfx('tick');
     if (idx > 0) { var a = pts[idx - 1], b = pts[idx]; linesG.appendChild(mk('line', { x1: a[0], y1: a[1], x2: b[0], y2: b[1], class: 'dt-line' })); }
-    idx++; stage.querySelector('.c').textContent = idx; mark();
-    if (idx === pts.length) { busy = true; var a2 = pts[idx - 1], b2 = pts[0]; linesG.appendChild(mk('line', { x1: a2[0], y1: a2[1], x2: b2[0], y2: b2[1], class: 'dt-line' })); await O.wait(300); stage._fill.classList.add('on'); O.sfx('ok'); O.praise(); O.say('와, ' + shape.n + josa(shape.n, '이', '가') + ' 나왔어요!'); await O.wait(2300); round++; if (round >= cfg.rounds) return done(); newRound(); return; }
-    O.target({ get: function () { return idx < pts.length ? [dotEls[idx]] : []; }, say: '반짝이는 점을 눌러요' }, level);
+    idx++; mark();
+    if (idx === pts.length) { busy = true; addLine(pts[idx - 1], pts[0]); return finishShape(); }
+    setT();
   }
   function done() {
-    var entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'art', school: 'elem', topic: '점 잇기', level: level, engine: 'dots', rounds: cfg.rounds, mistakes: stats.mistakes, glow: stats.glow, hand: stats.hand, asked: stats.asked, sec: Math.round((Date.now() - stats.t0) / 1000) };
+    var entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'art', school: 'elem', topic: mode === 'draw' ? '점 직접 잇기' : '점 잇기', level: level, engine: 'dots', mode: mode, rounds: cfg.rounds, mistakes: stats.mistakes, glow: stats.glow, hand: stats.hand, asked: stats.asked, sec: Math.round((Date.now() - stats.t0) / 1000) };
     var btns = [{ label: '🔁 한 번 더', color: 'green', onClick: function () { location.reload(); } }];
-    if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(LESSON, level + 1); location.href = '?' + (O.qs('lesson') ? 'lesson=' + LESSON + '&' : '') + 'level=' + (level + 1); } });
+    if (level < 5) btns.push({ label: '다음 수준 (' + (level + 1) + ')', color: 'orange', onClick: function () { O.rememberLevel(LESSON, level + 1); location.href = '?mode=' + mode + '&' + (O.qs('lesson') ? 'lesson=' + LESSON + '&' : '') + 'level=' + (level + 1); } });
     btns.push({ label: O.qs('lesson') ? '차시로 돌아가기' : '🏠 돌아가기', color: 'blue', href: BACK });
     O.finish({ stats: stats, entry: entry, title: '그림을 다 완성했어요!', text: '점 잇기 ' + cfg.rounds + '장 · ' + O.LEVELS[level - 1].name, mission: { lesson: 1 }, buttons: btns });
   }
@@ -135,13 +184,14 @@ body.oks::before{background:radial-gradient(ellipse at center,rgba(255,255,255,.
   function startScreen() {
     sh.askEl.style.visibility = 'hidden';
     var ov = E('div', 'oks-start'), lvBtns = O.LEVELS.map(function (L) { return '<button type="button" data-lv="' + L.n + '" class="' + (L.n === level ? 'on' : '') + '" title="' + O.esc(L.desc) + '">' + L.short + ' · 점 ' + LV[L.n].n + '개</button>'; }).join('');
-    ov.innerHTML = '<div class="st-card"><h1>🔢 점 잇기</h1><p>숫자 <b>1, 2, 3…</b> 순서대로 점을 눌러 이어요.<br>다 이으면 무슨 그림이 나올까요?</p><div class="st-lv">' + lvBtns + '</div><button type="button" class="oks-btn green st-go">시작! ▶</button></div>';
+    ov.innerHTML = '<div class="st-card"><h1>🔢 점 잇기</h1><p>숫자 <b>1, 2, 3…</b> 순서대로 점을 이어요.<br>다 이으면 무슨 그림이 나올까요?</p><div class="dt-modes"><button type="button" data-m="tap" class="' + (mode === 'tap' ? 'on' : '') + '"><b>👆</b>눌러서 잇기<br><small>점을 차례로 톡톡 눌러요</small></button><button type="button" data-m="draw" class="' + (mode === 'draw' ? 'on' : '') + '"><b>✏️</b>직접 그어서 잇기<br><small>손가락으로 점에서 점까지 쭉 그어요</small></button></div><div class="st-lv">' + lvBtns + '</div><button type="button" class="oks-btn green st-go">시작! ▶</button></div>';
     document.body.appendChild(ov);
     ov.querySelectorAll('.st-lv button').forEach(function (b) { b.onclick = function () { level = +b.dataset.lv; ov.querySelectorAll('.st-lv button').forEach(function (x) { x.classList.toggle('on', x === b); }); }; });
+    ov.querySelectorAll('.dt-modes button').forEach(function (b) { b.onclick = function () { mode = b.dataset.m; try { localStorage.setItem('oks_dots_mode_v1', mode); } catch (e) {} ov.querySelectorAll('.dt-modes button').forEach(function (x) { x.classList.toggle('on', x === b); }); }; });
     ov.querySelector('.st-go').onclick = function () { O.unlock(); O.hush(); ov.remove(); sh.askEl.style.visibility = ''; begin(); };
   }
   if (O.qs('go')) begin(); else startScreen();
-  window.DOTS = { next: function () { return idx; }, n: function () { return pts.length; }, tap: tap, get round() { return round; }, shape: function () { return shape && shape.n; } };
+  window.DOTS = { get mode() { return mode; }, pts: function () { return pts; }, svg: function () { return svg; }, next: function () { return idx; }, n: function () { return pts.length; }, tap: tap, get round() { return round; }, shape: function () { return shape && shape.n; } };
 })();
 </script>
 </body>
