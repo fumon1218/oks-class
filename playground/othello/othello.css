@@ -1,0 +1,6 @@
+body.othello-page{background:radial-gradient(ellipse at 50% 30%,#3f7a52 0%,#1f4a2c 58%,#10281a 100%)}
+.ot-score{position:fixed;left:max(10px,env(safe-area-inset-left));top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.ot-score span{background:rgba(255,253,246,.94);color:#2b3f5c;border-radius:18px;padding:6px 12px;font-weight:900;font-size:22px;box-shadow:0 4px 10px rgba(0,0,0,.3);min-width:64px;text-align:center}
+.ot-score span.turn{box-shadow:0 0 0 4px #ffc93c,0 4px 10px rgba(0,0,0,.3)}
+@media (max-width:700px){.ot-score span{font-size:17px;padding:4px 8px;min-width:48px}}
+.ch-card .why{font-size:16px;opacity:.85}
