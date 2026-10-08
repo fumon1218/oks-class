@@ -3,7 +3,7 @@
    길은 track.js 가 만든 외길. 차는 '길 위의 위치(s, d)'로 움직여요(아케이드 물리). 다치거나 지는 벌칙 없이 순위만 보여 줘요. */
 import * as THREE from '../../vendor/three/three.module.js';
 import { GLTFLoader } from '../../vendor/three/addons/loaders/GLTFLoader.js';
-import { makeTrack } from './track.js';
+import { makeTrack, makeLoopTrack, LOOP_SHAPES } from './track.js';
 import { buildToyCar, TOY_COLORS } from './toycar.js';
 
 const O = window.OKS;
@@ -28,11 +28,11 @@ const CARS = [
 ];
 const STAT_NAMES = ['최고 속도', '가속', '핸들', '니트로'];
 const COURSES = [
-  { id: 'meadow', props: [['pine', 320, 9, 5, 45], ['bush', 220, 2.6, 2, 24], ['tires', 70, 1.7, 1.2, 2.5], ['cone', 50, 1.1, 1.2, 2.5], ['barrier', 40, 1.2, 1.2, 2.5]], name: '초록 숲길', emoji: '🌲', seed: 11, length: 3200, bg: 'bg_forest', hz: 0.575, sky: ['#4aa8ff', '#bfe6ff'], fog: 0x93d36e, ground: 0x7cc43a, bank: 0x6ab32f, tree: 'round', leaf: 0x3ea94a },
-  { id: 'sakura', props: [['sakura', 300, 9.5, 5, 45], ['bush', 160, 2.6, 2, 24], ['lamp', 60, 5.5, 1.4, 2.6], ['flag', 60, 4.5, 1.4, 2.6], ['tires', 30, 1.7, 1.2, 2.5]], name: '벚꽃 경기장', emoji: '🌸', seed: 47, length: 3300, bg: 'bg_cherry', hz: 0.62, sky: ['#5db4ff', '#fce5e9'], fog: 0xfbe0e6, ground: 0xf4c8d6, bank: 0xeab4c6, tree: 'round', leaf: 0xff9fc6, trunk: 0x8a5a44 },
-  { id: 'beach', props: [['palm', 280, 9.5, 4, 40], ['bush', 150, 2.6, 2, 30], ['tires', 70, 1.7, 1.2, 2.5], ['cone', 50, 1.1, 1.2, 2.5], ['flag', 30, 4.5, 1.4, 2.6]], name: '반짝 바닷길', emoji: '🏖️', seed: 23, length: 3500, bg: 'bg_beach', hz: 0.5, sky: ['#2f9bff', '#9fe4ff'], fog: 0x6fdcf5, ground: 0xf3d9a0, bank: 0xe6c88a, tree: 'palm', leaf: 0x35b45a, trunk: 0xb98a55 },
-  { id: 'skyisle', props: [['sakura', 160, 9.5, 6, 50], ['lamp', 50, 5.5, 1.4, 2.6], ['flag', 30, 4.5, 1.4, 2.6], ['bush', 100, 2.6, 2, 26]], name: '노을 하늘 섬', emoji: '🏯', seed: 35, length: 3400, bg: 'bg_sky', hz: 0.6, sky: ['#8a7be0', '#ffc2a8'], fog: 0xf9b4b0, ground: 0xe9a2b6, bank: 0xdc8fa8, tree: 'puff', leaf: 0xffeef2 },
-  { id: 'space', props: [['lamp', 70, 5.5, 1.4, 2.6], ['flag', 60, 4.5, 1.4, 2.6], ['cone', 50, 1.1, 1.2, 2.5], ['tires', 30, 1.7, 1.2, 2.5]], name: '별빛 우주길', emoji: '🌙', seed: 59, length: 3600, bg: 'bg_space', hz: 0.56, sky: ['#150a52', '#6a3fd8'], fog: 0x7a52e0, ground: 0x4a34b0, bank: 0x3c2a96, tree: 'star', leaf: 0xffd84a },
+  { id: 'meadow', props: [['pine', 320, 9, 5, 45], ['bush', 220, 2.6, 2, 24], ['tires', 70, 1.7, 1.2, 2.5], ['cone', 50, 1.1, 1.2, 2.5], ['barrier', 40, 1.2, 1.2, 2.5]], name: '초록 숲길', emoji: '🌲', seed: 11, length: 1050, laps: 3, shape: 'meadow', bg: 'bg_forest', hz: 0.575, sky: ['#4aa8ff', '#bfe6ff'], fog: 0x93d36e, ground: 0x7cc43a, bank: 0x6ab32f, tree: 'round', leaf: 0x3ea94a },
+  { id: 'sakura', props: [['sakura', 300, 9.5, 5, 45], ['bush', 160, 2.6, 2, 24], ['lamp', 60, 5.5, 1.4, 2.6], ['flag', 60, 4.5, 1.4, 2.6], ['tires', 30, 1.7, 1.2, 2.5]], name: '벚꽃 경기장', emoji: '🌸', seed: 47, length: 1150, laps: 3, shape: 'sakura', bg: 'bg_cherry', hz: 0.62, sky: ['#5db4ff', '#fce5e9'], fog: 0xfbe0e6, ground: 0xf4c8d6, bank: 0xeab4c6, tree: 'round', leaf: 0xff9fc6, trunk: 0x8a5a44 },
+  { id: 'beach', props: [['palm', 280, 9.5, 4, 40], ['bush', 150, 2.6, 2, 30], ['tires', 70, 1.7, 1.2, 2.5], ['cone', 50, 1.1, 1.2, 2.5], ['flag', 30, 4.5, 1.4, 2.6]], name: '반짝 바닷길', emoji: '🏖️', seed: 23, length: 1200, laps: 3, shape: 'beach', bg: 'bg_beach', hz: 0.5, sky: ['#2f9bff', '#9fe4ff'], fog: 0x6fdcf5, ground: 0xf3d9a0, bank: 0xe6c88a, tree: 'palm', leaf: 0x35b45a, trunk: 0xb98a55 },
+  { id: 'skyisle', props: [['sakura', 160, 9.5, 6, 50], ['lamp', 50, 5.5, 1.4, 2.6], ['flag', 30, 4.5, 1.4, 2.6], ['bush', 100, 2.6, 2, 26]], name: '노을 하늘 섬', emoji: '🏯', seed: 35, length: 1150, laps: 3, shape: 'skyisle', bg: 'bg_sky', hz: 0.6, sky: ['#8a7be0', '#ffc2a8'], fog: 0xf9b4b0, ground: 0xe9a2b6, bank: 0xdc8fa8, tree: 'puff', leaf: 0xffeef2 },
+  { id: 'space', props: [['lamp', 70, 5.5, 1.4, 2.6], ['flag', 60, 4.5, 1.4, 2.6], ['cone', 50, 1.1, 1.2, 2.5], ['tires', 30, 1.7, 1.2, 2.5]], name: '별빛 우주길', emoji: '🌙', seed: 59, length: 1250, laps: 3, shape: 'space', bg: 'bg_space', hz: 0.56, sky: ['#150a52', '#6a3fd8'], fog: 0x7a52e0, ground: 0x4a34b0, bank: 0x3c2a96, tree: 'star', leaf: 0xffd84a },
 ];
 const DIFFS = [{ id: 0, name: '여유롭게', pace: 0.8 }, { id: 1, name: '보통', pace: 0.9 }, { id: 2, name: '도전!', pace: 0.99 }];
 const AI_COLORS = ['#ff7a2e', '#3d8bff', '#39c46a'];
@@ -121,11 +121,11 @@ function showGarageCar(i) {
 }
 
 /* ---------- 경기 장면 ---------- */
-let rScene = null, track = null, course = null, orbs = [], gates = [], groundM = null, sunL = null;
+let lapNow = 1, rScene = null, track = null, course = null, orbs = [], gates = [], groundM = null, sunL = null;
 function disposeScene(sc) { if (!sc) return; sc.traverse((o) => { if (o.geometry && !o.userData.keep) o.geometry.dispose(); }); }
 function ribbon(tr, s0, s1, step, secFn, mat, vscale) {
-  const pos = [], uv = [], idx = [], nR = Math.floor((s1 - s0) / step) + 1; let cols = 0;
-  for (let r = 0; r < nR; r++) { const s = s0 + r * step, a = tr.at(s), sec = secFn(a); cols = sec.length; sec.forEach((q) => { pos.push(a.x + a.nx * q[0], a.y + q[1], a.z + a.nz * q[0]); uv.push(q[2] === undefined ? 0 : q[2], s / vscale); }); }
+  const pos = [], uv = [], idx = [], nR = Math.ceil((s1 - s0) / step) + 1, stp = (s1 - s0) / (nR - 1); let cols = 0;
+  for (let r = 0; r < nR; r++) { const s = s0 + r * stp, a = tr.at(s), sec = secFn(a); cols = sec.length; sec.forEach((q) => { pos.push(a.x + a.nx * q[0], a.y + q[1], a.z + a.nz * q[0]); uv.push(q[2] === undefined ? 0 : q[2], s / vscale); }); }
   for (let r = 0; r < nR - 1; r++) for (let i = 0; i < cols - 1; i++) { const a = r * cols + i, b = a + 1, c = a + cols, d = c + 1; idx.push(a, c, b, b, c, d); }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals();
   return new THREE.Mesh(g, mat);
@@ -157,10 +157,10 @@ function addProps(sc, co, R, ext) {
   const L = co.length, pts = track.P, geo = spGeo(), tm = new THREE.Matrix4(), q = new THREE.Quaternion(), sv = new THREE.Vector3(), pv = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0);
   const clear = (x, z) => { let m = 1e9; for (let j = 0; j < pts.length; j++) { const dx = pts[j][0] - x, dz = pts[j][1] - z, d2 = dx * dx + dz * dz; if (d2 < m) m = d2; } return Math.sqrt(m) >= W + 2.2; };
   for (const [k, n, h, o0, o1] of co.props || []) {
-    const list = []; for (let i = 0; i < n * 4 && list.length < n; i++) { const sPos = 30 + R() * (L - 50), a = track.at(sPos), side = R() < 0.5 ? -1 : 1, lat = side * (W + 1.3 + ext(a) + o0 + R() * (o1 - o0)), x = a.x + a.nx * lat, z = a.z + a.nz * lat; if (!clear(x, z)) continue; list.push({ x, z, yaw: Math.atan2(a.tx, a.tz) + Math.PI, sc: 0.8 + R() * 0.45 }); }
+    const list = []; for (let i = 0; i < n * 4 && list.length < n; i++) { const sPos = co.shape ? R() * L : 30 + R() * (L - 50), a = track.at(sPos), side = R() < 0.5 ? -1 : 1, lat = side * (W + 1.3 + ext(a) + o0 + R() * (o1 - o0)), x = a.x + a.nx * lat, z = a.z + a.nz * lat; if (!clear(x, z)) continue; list.push({ x, z, yaw: Math.atan2(a.tx, a.tz) + Math.PI, sc: 0.8 + R() * 0.45 }); }
     const im = new THREE.InstancedMesh(geo, spMat(k), list.length); list.forEach((it, i) => { q.setFromAxisAngle(up, it.yaw); sv.set(h * it.sc * SP_ASP[k], h * it.sc, 1); pv.set(it.x, -0.36, it.z); tm.compose(pv, q, sv); im.setMatrixAt(i, tm); }); im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; sc.add(im);
   }
-  for (const sx of [-1, 1]) { const a = track.at(L - 40), lat = sx * (W + 6), t = new THREE.Mesh(geo, spMat('trophy')); t.scale.set(4 * SP_ASP.trophy, 4, 1); t.position.set(a.x + a.nx * lat, -0.36, a.z + a.nz * lat); t.rotation.y = Math.atan2(a.tx, a.tz) + Math.PI; sc.add(t); }
+  for (const sx of [-1, 1]) { const a = track.at(co.shape ? 32 : L - 40), lat = sx * (W + 6), t = new THREE.Mesh(geo, spMat('trophy')); t.scale.set(4 * SP_ASP.trophy, 4, 1); t.position.set(a.x + a.nx * lat, -0.36, a.z + a.nz * lat); t.rotation.y = Math.atan2(a.tx, a.tz) + Math.PI; sc.add(t); }
 }
 let backdrop = null;
 const bgCache = {};
@@ -173,14 +173,14 @@ function makeBackdrop(co) {
 function buildRace(co) {
   disposeScene(rScene); const sc = new THREE.Scene(); rScene = sc; course = co; sc.background = gradTex(co.sky[0], co.sky[1]); sc.fog = new THREE.Fog(co.fog, 90, 560); backdrop = makeBackdrop(co); sc.add(backdrop); sc.environment = envMap; sc.environmentIntensity = 0.75;
   sc.add(new THREE.HemisphereLight(0xffffff, co.ground, 1.25)); sunL = new THREE.DirectionalLight(0xfff3dd, 2.1); sunL.position.set(-40, 80, 30); sc.add(sunL);
-  track = makeTrack(co.seed, co.length); const L = co.length;
+  track = co.shape ? makeLoopTrack(co.seed, LOOP_SHAPES[co.shape], co.length) : makeTrack(co.seed, co.length); const L = co.length, endS = co.shape ? L : L - 0.5;
   const roadMat = new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.9, side: THREE.DoubleSide }); roadTex.repeat.set(1, 1);
-  const road = ribbon(track, 0, L - 0.5, 3, () => [[-W, 0.0, 0], [W, 0.0, 1]], roadMat, 16); sc.add(road);
+  const road = ribbon(track, 0, endS, 3, () => [[-W, 0.0, 0], [W, 0.0, 1]], roadMat, 16); sc.add(road);
   const cm = new THREE.MeshStandardMaterial({ map: curbTex, roughness: 0.7, side: THREE.DoubleSide });
-  sc.add(ribbon(track, 0, L - 0.5, 3, () => [[W, 0.04, 0], [W + 1.3, 0.04, 1]], cm, 3), ribbon(track, 0, L - 0.5, 3, () => [[-W - 1.3, 0.04, 0], [-W, 0.04, 1]], cm, 3));
+  sc.add(ribbon(track, 0, endS, 3, () => [[W, 0.04, 0], [W + 1.3, 0.04, 1]], cm, 3), ribbon(track, 0, endS, 3, () => [[-W - 1.3, 0.04, 0], [-W, 0.04, 1]], cm, 3));
   const bm = new THREE.MeshStandardMaterial({ color: co.bank, roughness: 1, side: THREE.DoubleSide });
   const ext = (a) => Math.max(2, (a.y + 0.35) * 1.8);
-  sc.add(ribbon(track, 0, L - 0.5, 3, (a) => [[W + 1.3, 0.02, 0], [W + 1.3 + ext(a), -a.y - 0.35, 1]], bm, 8), ribbon(track, 0, L - 0.5, 3, (a) => [[-W - 1.3 - ext(a), -a.y - 0.35, 0], [-W - 1.3, 0.02, 1]], bm, 8));
+  sc.add(ribbon(track, 0, endS, 3, (a) => [[W + 1.3, 0.02, 0], [W + 1.3 + ext(a), -a.y - 0.35, 1]], bm, 8), ribbon(track, 0, endS, 3, (a) => [[-W - 1.3 - ext(a), -a.y - 0.35, 0], [-W - 1.3, 0.02, 1]], bm, 8));
   groundM = new THREE.Mesh(new THREE.PlaneGeometry(1400, 1400), new THREE.MeshStandardMaterial({ color: co.ground, roughness: 1 })); groundM.rotation.x = -Math.PI / 2; groundM.position.y = -0.36; sc.add(groundM);
   // 나무·선인장 (길에서 떨어진 곳에만)
   const R = rnd0(co.seed * 7 + 1), pts = track.P;
@@ -199,10 +199,10 @@ function buildRace(co) {
   const tm = new THREE.Matrix4(), pm2 = new THREE.Matrix4(), q = new THREE.Quaternion(), sv = new THREE.Vector3(), pv = new THREE.Vector3();
   parts.forEach((pt) => { const im = new THREE.InstancedMesh(pt.g, new THREE.MeshStandardMaterial({ color: pt.c, roughness: 0.9, emissive: pt.e || 0, emissiveIntensity: pt.e ? 0.7 : 0 }), items.length); im.userData.keep = false;
     items.forEach((it, i) => { q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), it.ry); sv.setScalar(it.sc); pv.set(it.x, -0.36, it.z); tm.compose(pv, q, sv); pm2.makeTranslation(pt.x || 0, pt.y, 0); tm.multiply(pm2); im.setMatrixAt(i, tm); }); im.instanceMatrix.needsUpdate = true; im.frustumCulled = false; sc.add(im); });
-  addProps(sc, co, rnd0(co.seed * 5 + 3), ext); gates = [makeArch(track, 32), makeArch(track, L - 40)]; gates.forEach((g) => sc.add(g));
+  addProps(sc, co, rnd0(co.seed * 5 + 3), ext); gates = co.shape ? [makeArch(track, 32)] : [makeArch(track, 32), makeArch(track, L - 40)]; gates.forEach((g) => sc.add(g));
   // 파란 구슬(니트로)
   orbs = []; const Rr = rnd0(co.seed * 13 + 5), om = new THREE.MeshStandardMaterial({ color: 0x3dc0ff, emissive: 0x1a8cff, emissiveIntensity: 1.2, roughness: 0.2, metalness: 0.2 }), og = new THREE.IcosahedronGeometry(0.7, 1);
-  for (let s = 140; s < L - 120;) { const d0 = (Rr() * 2 - 1) * (W - 2.8), n = Rr() < 0.4 ? 3 : 1; for (let k = 0; k < n; k++) { const m = new THREE.Mesh(og, om); m.userData = { s: s + k * 11, d: d0, on: true, k: 1 }; sc.add(m); orbs.push(m); } s += 70 + Rr() * 110 + n * 11; }
+  for (let s = 140; s < L - (co.shape ? 60 : 120);) { const d0 = (Rr() * 2 - 1) * (W - 2.8), n = Rr() < 0.4 ? 3 : 1; for (let k = 0; k < n; k++) { const m = new THREE.Mesh(og, om); m.userData = { s: s + k * 11, d: d0, on: true, k: 1 }; sc.add(m); orbs.push(m); } s += 70 + Rr() * 110 + n * 11; }
 }
 
 /* ---------- 달리는 차들 ---------- */
@@ -226,7 +226,7 @@ function startRace() {
   for (let i = 0; i < 3; i++) { const r = newRacer(CARS[(i + (prefs.car + 1)) % CARS.length], false, slots[i + 1], i + 1, aiColor(CARS[(i + (prefs.car + 1)) % CARS.length], colOf(pdef, prefs.color))); r.pace = DIFFS[prefs.diff].pace * (0.95 + i * 0.035); r.name = AI_COLORS[i]; racers.push(r); }
   // 진행 막대 점
   const pr = $('hudProg'); pr.querySelectorAll('u').forEach((u) => u.remove()); racers.slice(1).forEach((r, i) => { const u = document.createElement('u'); u.style.background = AI_COLORS[i]; r.dot = u; pr.appendChild(u); });
-  finishOrder = []; raceT = 0; bumps = 0; nOrbs = 0; finishS = co.length - 40; mode = 'count'; cdT = 3.6; cdShown = -1; hud.rank = hud.speed = hud.nitro = -1; hud.time = '';
+  finishOrder = []; raceT = 0; bumps = 0; nOrbs = 0; finishS = co.shape ? 32 + co.laps * co.length : co.length - 40; lapNow = 1; mode = 'count'; cdT = 3.6; cdShown = -1; hud.rank = hud.speed = hud.nitro = -1; hud.time = '';
   racers.forEach((r) => placeCar(r, 0.016, true)); camPos.set(0, 0, 0); snapCamera(); $('btnMenu').textContent = '🚗 차고';
   say('준비! 방향 버튼으로 달려요.', null, '준비하세요!'); startEngine(); simulate(0); updateHud(true);
 }
@@ -248,7 +248,7 @@ function stepRacer(r, dt) {
   r.wallCd -= dt; r.hitCd -= dt; const lim = W - 1.15;
   if (Math.abs(r.d) > lim) { const sg = Math.sign(r.d); r.d = sg * lim; if (sg * r.dd > 0) { r.dd = -sg * Math.abs(r.dd) * 0.3 - sg * 1.2; if (r.wallCd <= 0) { r.wallCd = 0.45; r.v *= 0.9; if (r.isPlayer) { bumps++; shake = 0.5; O.sfx('pop'); } } } }
   if (r.s >= finishS && !r.finished) { r.finished = true; r.fT = raceT; finishOrder.push(r); if (r.isPlayer) onPlayerFinish(); }
-  if (r.s > course.length - 3) { r.s = course.length - 3; r.v = Math.min(r.v, 3); }
+  { const endC = course.shape ? finishS + 90 : course.length - 3; if (r.s > endC) { r.s = endC; r.v = Math.min(r.v, 3); } }
 }
 function placeCar(r, dt, snap) {
   const a = track.at(r.s), x = a.x + a.nx * r.d, z = a.z + a.nz * r.d;
@@ -279,7 +279,7 @@ function simulate(dt) {
   } else if (mode === 'race' || mode === 'finish') {
     if (mode === 'race') raceT += dt;
     racers.forEach((r) => stepRacer(r, dt)); collide();
-    if (player) orbs.forEach((m) => { const u = m.userData; if (u.on && Math.abs(u.s - player.s) < 2.6 && Math.abs(u.d - player.d) < 2.1) { u.on = false; m.visible = false; player.nitro = Math.min(1, player.nitro + 0.26); nOrbs++; O.sfx('coin'); } });
+    if (player) orbs.forEach((m) => { const u = m.userData; const lp = course.shape ? course.length : 1e9, rel = ((player.s - u.s) % lp + lp * 1.5) % lp - lp / 2; if (!u.on && Math.abs(rel) > 40 && course.shape) { u.on = true; m.visible = true; } if (u.on && Math.abs(rel) < 2.6 && Math.abs(u.d - player.d) < 2.1) { u.on = false; m.visible = false; player.nitro = Math.min(1, player.nitro + 0.26); nOrbs++; O.sfx('coin'); } });
   }
   racers.forEach((r) => placeCar(r, dt));
   shake = Math.max(0, shake - dt * 2);
@@ -337,7 +337,8 @@ function updateHud(force) {
   if (!player) return; const rk = ranks(), place = rk.indexOf(player) + 1;
   if (place !== hud.rank || force) { hud.rank = place; $('hudRank').innerHTML = '<small>순위</small><b>' + place + '</b><span>/ ' + racers.length + '</span>'; }
   const sp = Math.round(player.v * 3.6); if (sp !== hud.speed || force) { hud.speed = sp; $('hudSpeed').innerHTML = '<b>' + sp + '</b><small>km/h</small>'; }
-  const tt = fmtT(mode === 'finish' ? player.fT : raceT); if (tt !== hud.time) { hud.time = tt; $('hudTime').textContent = tt; }
+  const lapC = course.shape ? Math.max(1, Math.min(course.laps, Math.floor((player.s - 32) / course.length) + 1)) : 0, tt = fmtT(mode === 'finish' ? player.fT : raceT) + (lapC ? '  🏁 ' + lapC + '/' + course.laps : ''); if (tt !== hud.time) { hud.time = tt; $('hudTime').textContent = tt; }
+  if (lapC && lapC !== lapNow && mode === 'race') { lapNow = lapC; say(lapC === course.laps ? '마지막 바퀴예요! 힘내요!' : lapC + '바퀴째! 잘 달려요!', 'good', lapC === course.laps ? '마지막 바퀴예요! 힘내요!' : lapC + '바퀴째예요!'); }
   const nv = Math.round(player.nitro * 100); if (nv !== hud.nitro) { hud.nitro = nv; $('nitroFill').style.width = nv + '%'; $('hudNitro').classList.toggle('full', nv >= 99); $('btnN').disabled = nv < 2; }
   const pw = $('hudProg').clientWidth, f = (r) => Math.min(1, r.s / finishS) * 100 + '%';
   $('progFill').style.width = f(player); $('progMe').style.left = f(player); racers.forEach((r) => { if (r.dot) r.dot.style.left = f(r); });
