@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#4a3a22">
+<title>3D 바둑 · 놀이별</title><link rel="icon" href="../../icons/ok-face-192.png"><link rel="apple-touch-icon" href="../../icons/ok-face-180.png">
+<link rel="stylesheet" href="../../core/oks-core.css"><link rel="stylesheet" href="../chess/chess.css"><link rel="stylesheet" href="go.css"></head>
+<body class="oks chess-page go-page">
+<canvas id="gl" aria-label="3D 바둑판"></canvas>
+<header class="ch-top">
+  <a class="ch-btn" id="back" href="../">← 놀이별</a>
+  <div class="ch-title"><span id="modeLabel">전략놀이</span><b>3D 바둑</b></div>
+  <div class="ch-tools">
+    <button class="ch-btn" id="btnHelp" type="button" aria-label="놀이 방법">❓</button>
+    <button class="ch-btn" id="btnVoice" type="button" aria-label="안내 음성 켜기·끄기">🔊</button>
+    <button class="ch-btn" id="btnMenu" type="button" aria-label="새 놀이 고르기">☰ 새로</button>
+  </div>
+</header>
+<div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">바둑판을 펼치는 중이에요…</span></div>
+<div class="ot-score" id="score" aria-live="polite" hidden><span class="b" id="scB">⚫ 0</span><span class="w" id="scW">⚪ 0</span><small>따낸 돌</small></div>
+<div class="go-quiz" id="quiz" hidden></div>
+<footer class="ch-bottom">
+  <button class="ch-btn big go" id="btnNext" type="button" hidden>▶ 다음</button>
+  <button class="ch-btn big" id="btnRetry" type="button" hidden>↺ 처음 모양</button>
+  <button class="ch-btn big" id="btnUndo" type="button">↩ 한 수 물리기</button>
+  <button class="ch-btn big" id="btnPass" type="button">🙋 한 수 쉬기</button>
+  <button class="ch-btn big" id="btnHint" type="button">💡 힌트</button>
+  <button class="ch-btn big" id="btnTerr" type="button" aria-pressed="false">🧮 집 보기</button>
+  <button class="ch-btn big" id="btnList" type="button" hidden>☰ 수업 목록</button>
+  <button class="ch-btn big" id="btnView" type="button">🔄 시점 바꾸기</button>
+  <button class="ch-btn big" id="btnLock" type="button" aria-pressed="false">🔓 화면 돌리기</button>
+  <button class="ch-btn big" id="btnAssist" type="button" aria-pressed="true">🧭 알려주기</button>
+</footer>
+<div class="ch-loading" id="loading"><div><div class="ch-spin"></div><p>3D 바둑판을 펼치는 중…</p></div></div>
+<div class="ch-overlay" id="menu" hidden></div>
+<dialog id="helpDialog" class="ch-dialog"><h2>이렇게 놀아요</h2>
+<ol><li><b>줄이 만나는 점을 눌러요.</b> 흑이 먼저, 흑과 백이 번갈아 한 수씩 두어요.</li><li>돌의 <b>활로</b>(상하좌우 빈 점)가 모두 막히면 그 돌은 <b>따내요</b>. 활로가 하나뿐이면 <b>단수</b>예요.</li><li>둘 곳이 없거나 더 둘 필요가 없으면 <b>한 수 쉬기</b>. 둘이 연달아 쉬면 끝나고 <b>집</b>을 세요. 집이 많은 쪽이 이겨요(백에게 덤 6.5집).</li><li>🧮 <b>집 보기</b>로 지금 누가 앞서는지 알아볼 수 있어요. 💡 힌트는 컴퓨터가 추천해요.</li><li><b>바둑 배우기</b>에서 입문부터 고급까지 문제를 풀며 차근차근 배워요.</li></ol>
+<form method="dialog"><button class="ch-btn big">알겠어요</button></form></dialog>
+<script src="../../core/oks-core.js"></script><script src="../../core/oks-eco.js"></script><script src="engine.js"></script><script src="lessons-solved.js"></script><script src="lessons.js"></script><script src="lessons-l1.js"></script><script src="lessons-l2.js"></script><script src="lessons-l3.js"></script><script src="lessons-l4.js"></script><script src="lessons-eval.js"></script>
+<script type="module" src="go.js"></script>
+<script>if('serviceWorker' in navigator)navigator.serviceWorker.register('../../sw.js').catch(function(){});</script>
+</body></html>

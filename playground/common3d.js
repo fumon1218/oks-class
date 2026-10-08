@@ -61,6 +61,10 @@ export function createStage(opt) {
     await tween(900, (p) => { camera.position.copy(camPos(a0 + d * p, p0 + (p1 - p0) * p, r0 + (r - r0) * p)); camera.lookAt(controls.target); });
     controls.update(); camBusy = false;
   }
+  function setExtent(v) {   // 판 크기가 바뀌면 카메라 거리·그림자 범위도 맞춰요
+    opt.extent = v; opt.minDist = v * 1.45; scene.fog.near = v * 4; scene.fog.far = v * 8; camera.far = v * 14; camera.updateProjectionMatrix();
+    const e = v * 0.9; Object.assign(sun.shadow.camera, { left: -e, right: e, top: e, bottom: -e, far: v * 5 }); sun.shadow.camera.updateProjectionMatrix(); applyCameraLimits(); poke();
+  }
   function resize() { poke(); const w = window.innerWidth, h = window.innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; applyViewOffset(); camera.updateProjectionMatrix(); applyCameraLimits(); }
   window.addEventListener('resize', resize);
 
@@ -103,7 +107,7 @@ export function createStage(opt) {
   function hideLoading() { $('loading').classList.add('off'); setTimeout(() => { $('loading').hidden = true; }, 500); }
   function failLoading(txt) { $('loading').innerHTML = '<div><p>' + txt + '<br>인터넷 연결을 확인하고 다시 열어 주세요.</p><a class="ch-btn" href="../">← 놀이별로</a></div>'; }
 
-  return { THREE, O, $, canvas, renderer, scene, camera, controls, sun, calm, poke, tween, sleep, ease, say, note, setView, resize, fitDistance, rayAt, planePoint, screenOf, onTap, wireButtons, hideLoading, failLoading,
+  return { THREE, O, $, canvas, renderer, scene, camera, controls, sun, calm, poke, tween, sleep, ease, say, note, setView, setExtent, resize, fitDistance, rayAt, planePoint, screenOf, onTap, wireButtons, hideLoading, failLoading,
     onFrame: (fn) => frameHooks.push(fn), setAlive: (fn) => { alive = fn; }, start: () => { resize(); requestAnimationFrame(frame); }, get tweenCount() { return tweens.length; } };
 }
 

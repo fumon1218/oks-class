@@ -1,0 +1,20 @@
+body.go-page{background:radial-gradient(ellipse at 50% 30%,#7a6340 0%,#4b3b27 58%,#241a0e 100%)}
+.ot-score{position:fixed;left:max(10px,env(safe-area-inset-left));top:50%;transform:translateY(-50%);z-index:3;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.ot-score[hidden]{display:none}
+.ot-score span{background:rgba(255,253,246,.94);color:#2b3f5c;border-radius:18px;padding:6px 12px;font-weight:900;font-size:22px;box-shadow:0 4px 10px rgba(0,0,0,.3);min-width:64px;text-align:center}
+.ot-score span.turn{box-shadow:0 0 0 4px #ffc93c,0 4px 10px rgba(0,0,0,.3)}
+.ot-score small{color:#fff;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.6);font-size:13px}
+@media (max-width:700px){.ot-score span{font-size:17px;padding:4px 8px;min-width:48px}}
+.go-quiz{position:fixed;left:0;right:0;bottom:calc(var(--bot,86px) + 4px);z-index:6;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;padding:0 14px;pointer-events:none}
+.go-quiz[hidden]{display:none}.go-quiz>*{pointer-events:auto}
+.go-quiz .ch-btn.bad{background:#ffd9d3;opacity:.7}
+.ch-btn.go{background:#2f966f;color:#fff}
+.ch-card .why{font-size:16px;opacity:.85}
+.go-map{max-height:92vh;overflow:auto;text-align:left}.go-map h2,.go-map>p{text-align:center}
+.go-lv h3{margin:14px 0 6px;font-size:21px}.go-lv h3 small{font-size:14px;opacity:.7;font-weight:600}.go-lv h3 i{font-style:normal}
+.go-lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.go-lesson{appearance:none;border:3px solid #e8dcc4;background:#fff;border-radius:18px;padding:10px 8px;font:inherit;color:#2b3f5c;cursor:pointer;text-align:center}
+.go-lesson i{font-style:normal;font-size:30px;display:block}.go-lesson b{display:block;font-size:17px;margin:2px 0}.go-lesson span{font-size:13px;opacity:.8}
+.go-lesson.done{background:#effbea;border-color:#9bd89a}.go-lesson.next{border-color:#ff9d2e;background:#fff2d9;box-shadow:0 0 0 3px #ffd98a}
+.ch-btn[hidden]{display:none}
+@media (max-width:520px){.go-page .ch-top{gap:6px;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}.go-page .ch-btn{white-space:nowrap;padding:8px 10px;font-size:14px;min-height:42px}.go-page .ch-tools{display:flex;gap:6px}.go-page .ch-title{min-width:0;flex:1 1 auto}.go-page .ch-title span{font-size:11px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.go-page .ch-title b{font-size:18px}}
