@@ -23,6 +23,8 @@ if (mode === 'selfplay') {
 }
 
 /* ---------- SGF 읽기 ---------- */
+// 한자·가나 이름은 한글로 바꿔 보여 줘요(필요한 선수만 여기에 더해요)
+const KO_NAMES = { '丁浩': '딩하오', '辜梓豪': '구쯔하오', '本木克弥': '모토키 가쓰야', '이다아츠시': '이다 아쓰시', '리친청': '리친청', '양딩신': '양딩신' };
 function parseSgf(txt) {
   const n = +((txt.match(/SZ\[(\d+)\]/) || [])[1] || 19), prop = (k) => ((txt.match(new RegExp('(?:^|[^A-Z])' + k + '\\[([^\\]]*)\\]')) || [])[1] || '').trim();
   const pt = (s) => (s && s.length >= 2 ? [s.charCodeAt(0) - 97, s.charCodeAt(1) - 97] : null);
@@ -98,7 +100,7 @@ if (mode === 'build') {
   for (const f of files) { const j = JSON.parse(fs.readFileSync(path.join(data, f), 'utf8')); const moves = j.moves.filter((s) => s >= 0).map((s, i) => ({ c: i % 2 === 0 ? 'B' : 'W', x: s % j.n, y: (s / j.n) | 0 })); if (moves.length < 24) continue;
     lessons.push(buildLesson({ n: j.n, setup: { B: [], W: [] }, moves, comments: [] }, 'r' + no, 100 + no, '컴퓨터끼리 둔 9줄 대국을', '복기 ' + no + ' · 컴퓨터 대국', '9줄 대국 따라 두기', '컴퓨터(4단계)끼리 둔 9줄 대국이에요. 한 수씩 따라 둬 보고, 따내기·단수가 나오는 장면을 눈여겨봐요.')); no++; }
   const sd = path.join(data, 'sgf'); if (fs.existsSync(sd)) for (const f of fs.readdirSync(sd).filter((x) => /\.sgf$/i.test(x)).sort()) {
-    const sg = parseSgf(fs.readFileSync(path.join(sd, f), 'utf8')); if (sg.moves.length < 12) continue; const who = sg.meta.PB && sg.meta.PW ? sg.meta.PB + ' 대 ' + sg.meta.PW : (sg.meta.GN || f.replace(/\.sgf$/i, ''));
+    const sg = parseSgf(fs.readFileSync(path.join(sd, f), 'utf8')); if (sg.moves.length < 12) continue; const ko = (t) => Object.keys(KO_NAMES).reduce((q, k) => q.split(k).join(KO_NAMES[k]), t), who = sg.meta.PB && sg.meta.PW ? ko(sg.meta.PB) + ' 대 ' + ko(sg.meta.PW) : (sg.meta.GN || f.replace(/\.sgf$/i, ''));
     lessons.push(buildLesson(sg, 'r' + no, 100 + no, '기보를', '복기 ' + no + ' · ' + who.slice(0, 18), (sg.meta.DT || sg.meta.EV || 'SGF 기보 따라 두기').slice(0, 24), '기보를 한 수씩 따라 둬 보는 수업이에요. ' + (sg.meta.RE ? '결과: ' + sg.meta.RE + '. ' : '') + '설명은 판의 변화(따냄·단수 등)를 엔진이 확인해서 붙였어요.')); no++; }
   let js = '/* 바둑 배우기 — 복기 수업(기보 따라 두기). scripts/go-replay-gen.mjs 가 만든 파일이에요(직접 고치지 마세요). */\n(function (root) {\n  \'use strict\';\n  var L = root.OKS_GO_LESSONS || require(\'./lessons.js\'), add = L.add;\n';
   lessons.forEach((l) => { js += '  add(' + JSON.stringify(l) + ');\n'; }); js += '})(typeof window !== \'undefined\' ? window : globalThis);\n';
