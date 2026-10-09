@@ -163,3 +163,6 @@ img.ui.rb{animation:rcrb 3s linear infinite}@keyframes rcrb{to{filter:hue-rotate
 .gp-cc.on::after{display:none}
 .gp-cc.done:not(.on)::after{z-index:3;right:12%;top:11%}
 }
+
+.rc-drift{position:fixed;left:50%;transform:translateX(-50%);bottom:30%;padding:5px 16px;border-radius:999px;font-weight:900;font-size:clamp(14px,2vw,20px);color:#fff;background:rgba(40,80,200,.85);box-shadow:0 3px 10px rgba(0,0,0,.35);pointer-events:none;z-index:6;letter-spacing:2px}
+.rc-drift[data-lv="1"]{background:rgba(255,140,20,.92)}.rc-drift[data-lv="2"]{background:rgba(255,70,120,.92)}.rc-drift[data-lv="3"]{background:linear-gradient(90deg,#ff4d6d,#ffd60a,#4cd964,#3aa6ff,#9b6bff)}

@@ -51,7 +51,7 @@ export function makeLoopTrack(seed, ctrl, lap, smooth) {
   const T = [], K = [], ph = []; for (let i = 0; i < n; i++) { const a = P[(i + n - 1) % n], b = P[i + 1]; const tx = b[0] - a[0], tz = b[1] - a[1], l = Math.hypot(tx, tz); T.push([tx / l, tz / l]); ph.push(Math.atan2(tx, -tz)); }
   T.push(T[0].slice()); for (let i = 0; i < n; i++) { let d = ph[(i + 1) % n] - ph[i]; d = Math.atan2(Math.sin(d), Math.cos(d)); K.push(d / DS); } K.push(K[0]);
   // 오르막·내리막: 한 바퀴에 정확히 맞아떨어지는 물결이라 이어지는 곳이 매끈해요
-  const Y = [], m1 = 2 + Math.floor(rnd() * 2), m2 = 5 + Math.floor(rnd() * 3), a1 = 1.1 + rnd() * 1.1, a2 = 2 + rnd() * 1.4, p1 = rnd() * 6, p2 = rnd() * 6;
+  const Y = [], m1 = 2 + Math.floor(rnd() * 2), m2 = 5 + Math.floor(rnd() * 3), a1 = 1.7 + rnd() * 1.4, a2 = 3.2 + rnd() * 1.8, p1 = rnd() * 6, p2 = rnd() * 6;
   for (let i = 0; i <= n; i++) { const u = (i / n) * Math.PI * 2; Y.push((Math.sin(u * m1 + p1) + 1) * a2 + (Math.sin(u * m2 + p2) + 1) * a1); }
   const at = (s) => { s = ((s % lap) + lap) % lap; const f = s / DS; let i = Math.floor(f); if (i >= n) i = n - 1; const t = f - i, A = P[i], B = P[i + 1], tA = T[i], tB = T[i + 1];
     let tx = tA[0] + (tB[0] - tA[0]) * t, tz = tA[1] + (tB[1] - tA[1]) * t; const l = Math.hypot(tx, tz) || 1; tx /= l; tz /= l;

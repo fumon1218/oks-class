@@ -50,6 +50,7 @@
   <canvas class="rc-mini" id="miniMap" width="300" height="300" aria-label="미니맵"></canvas>
   <div class="rc-prog" id="hudProg" aria-label="달린 거리"><i id="progFill"></i><em id="progMe">🚗</em></div>
   <div class="rc-nitro" id="hudNitro" aria-label="니트로"><small>🔥 니트로</small><div><i id="nitroFill"></i></div></div>
+  <div class="rc-drift" id="hudDrift" hidden></div>
   <div class="rc-time" id="hudTime">0:00.0</div>
   <div class="rc-coins" id="hudCoins"></div>
 </div>
@@ -62,13 +63,13 @@
   <div class="rc-act">
     <button class="rc-btn item" id="btnI" type="button" aria-label="아이템 칸 1" disabled></button>
     <button class="rc-btn item item2" id="btnI2" type="button" aria-label="아이템 칸 2" disabled></button>
-    <button class="rc-btn brake" id="btnB" type="button" aria-label="천천히">🛑</button>
+    <button class="rc-btn brake" id="btnB" type="button" aria-label="천천히, 방향과 함께 누르면 드리프트">🛑</button>
     <button class="rc-btn nitro" id="btnN" type="button" aria-label="니트로">🔥</button>
   </div>
 </footer>
 <div class="ch-loading" id="loading"><div><div class="ch-spin"></div><p id="loadText">차고를 여는 중…</p></div></div>
 <dialog id="helpDialog" class="ch-dialog"><h2>이렇게 놀아요</h2>
-<ol><li>차는 <b>저절로 앞으로</b> 달려요. <b>◀ ▶</b> 버튼(또는 키보드 방향키)으로 방향만 바꿔요.</li><li>길에 떠 있는 <b>파란 구슬</b>을 모으면 <b>🔥 니트로</b>가 차올라요. 🔥 버튼(또는 스페이스 키)을 누르면 번쩍 빨라져요!</li><li>길 밖으로 나가면 살짝 튕겨 나요. 다치지 않아요. 다만 속도가 줄어요.</li><li>다른 차와 부딪쳐도 괜찮아요. 살짝 밀릴 뿐이에요.</li><li>🛑 버튼(또는 ↓ 키)을 누르면 <b>천천히</b> 달려요. 커브에서 써 보세요.</li><li><b>1등</b>으로 결승선을 지나가 봐요!</li></ol>
+<ol><li>차는 <b>저절로 앞으로</b> 달려요. <b>◀ ▶</b> 버튼(또는 키보드 방향키)으로 방향만 바꿔요.</li><li>길에 떠 있는 <b>파란 구슬</b>을 모으면 <b>🔥 니트로</b>가 차올라요. 🔥 버튼(또는 스페이스 키)을 누르면 번쩍 빨라져요!</li><li>길 밖으로 나가면 살짝 튕겨 나요. 다치지 않아요. 다만 속도가 줄어요.</li><li>다른 차와 부딪쳐도 괜찮아요. 살짝 밀릴 뿐이에요.</li><li>🛑 버튼(또는 ↓ 키)을 누르면 <b>천천히</b> 달려요.</li><li>빨리 달리다가 <b>🛑을 누른 채 ◀ 또는 ▶</b>를 누르면 <b>드리프트</b>! 미끄러지는 동안 🔥 니트로가 차오르고, 놓으면 <b>터보</b>가 나가요. 오래 할수록 더 빨라져요.</li><li>노란 <b>점프대</b>로 달리면 휙 날아올라요. 길 가장자리의 큰 점프대는 <b>지름길</b>이에요!</li><li><b>1등</b>으로 결승선을 지나가 봐요!</li></ol>
 <form method="dialog"><button class="ch-btn big">알겠어요</button></form></dialog>
 <script src="../../core/oks-core.js"></script><script src="../../core/oks-eco.js"></script>
 <script type="module" src="racing.js"></script>
