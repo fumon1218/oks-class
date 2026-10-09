@@ -239,7 +239,7 @@ const note = (t) => say(t, null, false);
 
 function newRacer(def, isPlayer, slot, idx, colorIdx, eq) {
   const o = makeCarObject(def, colorIdx, eq); rScene.add(o.root);
-  const r = Object.assign(o, { isPlayer, s: slot.s, d: slot.d, v: 0, dd: 0, u: 0, yaw: 0, nitro: isPlayer ? 0.35 : 0, nOn: false, brake: false, finished: false, fT: 0, wallCd: 0, hitCd: 0, slowT: 0, slowF: 1, spinT: 0, spinDur: 1, boostT: 0, magT: 0, shield: 0, hzCd: 0, tgtD: slot.d, tgtT: 2 + Math.random() * 2, wob: Math.random() * 6, idx, aiV: 0, travel: 0 });
+  const r = Object.assign(o, { isPlayer, s: slot.s, d: slot.d, v: 0, dd: 0, u: 0, yaw: 0, nitro: isPlayer ? 0.35 : 0, nOn: false, brake: false, finished: false, fT: 0, wallCd: 0, hitCd: 0, slowT: 0, slowF: 1, spinT: 0, spinDur: 1, boostT: 0, magT: 0, flyT: 0, bigT: 0, fy: 0, bs: 1, shield: 0, hzCd: 0, tgtD: slot.d, tgtT: 2 + Math.random() * 2, wob: Math.random() * 6, idx, aiV: 0, travel: 0 });
   return r;
 }
 function startRace() {
@@ -263,8 +263,8 @@ function stepRacer(r, dt) {
     inp = Math.max(-1, Math.min(1, (r.d - r.tgtD) * 0.32)); r.brake = false;
     r.wob += dt * 0.4; let rb = 1; const gap = player.s - r.s; if (gap > 220) rb = 1.1; else if (gap < -260) rb = 0.88; r.aiV = player.def.vmax * r.pace * rb * (1 + Math.sin(r.wob) * 0.035);
   }
-  r.slowT -= dt; r.boostT -= dt; r.spinT -= dt; r.magT -= dt; if (r.spinT > 0) inp *= 0.3;
-  const base = r.isPlayer ? def.vmax : r.aiV, boost = r.nOn ? 1 : 0, top = base * (1 + (def.nmul - 1) * boost) * (r.slowT > 0 ? r.slowF : 1) * (r.boostT > 0 ? 1.3 : 1); let tgt = r.brake ? base * 0.42 : top; if (r.finished) tgt = 0;
+  r.slowT -= dt; r.boostT -= dt; r.spinT -= dt; r.magT -= dt; r.flyT -= dt; r.bigT -= dt; if (r.spinT > 0) inp *= 0.3;
+  const base = r.isPlayer ? def.vmax : r.aiV, boost = r.nOn ? 1 : 0, top = base * (1 + (def.nmul - 1) * boost) * (r.slowT > 0 ? r.slowF : 1) * (r.boostT > 0 ? 1.3 : 1) * (r.flyT > 0 ? 1.12 : 1) * (r.bigT > 0 ? 1.08 : 1); let tgt = r.brake ? base * 0.42 : top; if (r.finished) tgt = 0;
   if (r.v < tgt) r.v += def.acc * (boost || r.boostT > 0 ? 2.2 : 1) * Math.max(0.05, 1 - r.v / (top * 1.12)) * dt; else r.v = Math.max(tgt, r.v - (r.brake || r.finished ? 28 : 10) * dt);
   r.u += (inp - r.u) * Math.min(1, dt * 10);
   const grip = def.lat * (0.4 + 0.6 * Math.min(1, r.v / 22)), assist = r.isPlayer ? (prefs.assist ? 0.4 : 1) : 0.4;
@@ -279,10 +279,10 @@ function placeCar(r, dt, snap) {
   const a = track.at(r.s), x = a.x + a.nx * r.d, z = a.z + a.nz * r.d;
   const fx = a.tx * Math.max(r.v, 1) + a.nx * r.dd, fz = a.tz * Math.max(r.v, 1) + a.nz * r.dd, want = Math.atan2(fx, fz);
   let df = want - r.yaw; df = Math.atan2(Math.sin(df), Math.cos(df)); r.yaw = snap ? want : r.yaw + df * Math.min(1, dt * 12);
-  r.root.position.set(x, a.y, z); r.root.rotation.y = r.yaw + (r.spinT > 0 ? (1 - r.spinT / r.spinDur) * Math.PI * 2 : 0);
+  const fyT = r.flyT > 0 ? 3.2 : 0; r.fy += (fyT - r.fy) * Math.min(1, dt * 6); const bsT = r.bigT > 0 ? 1.6 : 1; r.bs += (bsT - r.bs) * Math.min(1, dt * 6); r.root.scale.setScalar(r.bs); r.root.position.set(x, a.y + r.fy, z); r.root.rotation.y = r.yaw + (r.spinT > 0 ? (1 - r.spinT / r.spinDur) * Math.PI * 2 : 0);
   const pitchT = -Math.atan(a.slope); r.tilt.rotation.x += (pitchT - r.tilt.rotation.x) * Math.min(1, dt * 8);
   r.tilt.rotation.z += (-r.u * 0.045 * Math.min(1, r.v / r.def.vmax) - r.tilt.rotation.z) * Math.min(1, dt * 6);
-  animWheels(r, r.v * dt, r.u); const fl = r.nOn || r.boostT > 0; r.flame.visible = fl; if (fl) r.flame.scale.set(1, 1, 0.8 + Math.random() * 0.5);
+  animWheels(r, r.v * dt, r.u); const fl = r.nOn || r.boostT > 0 || r.flyT > 0; r.flame.visible = fl; if (fl) r.flame.scale.set(1, 1, 0.8 + Math.random() * 0.5);
 }
 function collide() {
   for (let i = 0; i < racers.length; i++) for (let j = i + 1; j < racers.length; j++) {
@@ -335,18 +335,21 @@ const HZ = {
   blocks: { asp: 0.747, h: 3.3, vf: 0.55, say: '와르르! 블록을 부쉈어요' },
   ball: { asp: 0.909, h: 2.7, vf: 0.6, say: '통통! 공을 쳤어요' },
   cone: { asp: 0.909, h: 2.2, vf: 0.7, say: '콩! 고깔을 쳤어요' },
+  pad: { asp: 1.3, w: 6, flat: 1, say: '' },
 };
 const HZ_W = { puddle: 2, oil: 1.2, mud: 1.2, banana: 1.5, rock: 1.5, blocks: 1.2, ball: 1.2, cone: 1.5 }, HZ_SKIP = { snow: ['mud'], volcano: ['puddle'], candy: ['rock'], space: ['mud', 'puddle'] };
 const FX_ASP = { burst: 0.95, dust: 1.22, splash: 0.88, dizzy: 1.19, bubble: 1, coins: 1.0 };
 const ITM = {
   shield: { n: '거품 방패', say: '거품 방패! 한 번은 막아 줘요' }, rocket: { n: '로켓 부스트', say: '로켓! 슝~' }, magnet: { n: '자석', say: '자석! 구슬이 달려와요' },
   oil: { n: '기름병', say: '기름병! 뒤에 뿌려요' }, bomb: { n: '비눗방울 폭탄', say: '비눗방울! 앞 차를 맞혀요' }, coinrain: { n: '코인 비', say: '코인 비! 와르르' },
+  wings: { n: '날개', say: '날개! 훨훨 날아요' }, giant: { n: '거대 물약', say: '거대 물약! 쿵쿵 부숴요' }, rainbow: { n: '무지개 발판', say: '무지개 발판! 앞에 깔아요' }, mystery: { n: '깜짝 선물', say: '깜짝 선물! 뭐가 나올까?' },
 };
-const ITM_W = [{ shield: 3, magnet: 2, oil: 3, coinrain: 2, rocket: 0.5, bomb: 0.3 }, { shield: 2, magnet: 2, oil: 2, coinrain: 2, rocket: 2, bomb: 2 }, { shield: 1.5, magnet: 1.5, oil: 0.5, coinrain: 1.5, rocket: 4, bomb: 3 }];
+const ITM_W = [{ shield: 3, magnet: 2, oil: 3, coinrain: 2, rocket: 0.5, bomb: 0.3, wings: 0.6, giant: 0.3, rainbow: 2, mystery: 2 }, { shield: 2, magnet: 2, oil: 2, coinrain: 2, rocket: 2, bomb: 2, wings: 1.5, giant: 1.2, rainbow: 1.5, mystery: 2 }, { shield: 1.5, magnet: 1.5, oil: 0.5, coinrain: 1.5, rocket: 4, bomb: 3, wings: 3, giant: 2.5, rainbow: 1, mystery: 2 }];
 function pickW(w) { const ks = Object.keys(w), tot = ks.reduce((a, k) => a + w[k], 0); let x = Math.random() * tot; for (const k of ks) { x -= w[k]; if (x <= 0) return k; } return ks[0]; }
+function padTex() { if (padTex.t) return padTex.t; const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d'); const cols = ['#ff4d6d', '#ff9f1c', '#ffd60a', '#4cd964', '#3aa6ff', '#9b6bff']; g.fillStyle = '#fff'; g.fillRect(0, 0, 256, 256); for (let i = 0; i < 6; i++) { g.fillStyle = cols[i]; g.fillRect(i * 42.6, 0, 43, 256); } g.fillStyle = 'rgba(255,255,255,.85)'; for (let k = 0; k < 3; k++) { const y = 30 + k * 80; g.beginPath(); g.moveTo(128, y); g.lineTo(220, y + 56); g.lineTo(190, y + 56); g.lineTo(128, y + 20); g.lineTo(66, y + 56); g.lineTo(36, y + 56); g.closePath(); g.fill(); } const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; padTex.t = t; return t; }
 function addHz(sc, type, s, d, perm, extra) {
   const H = HZ[type], a = track.at(s); let m;
-  if (H.flat) { const w = H.w, dep = w / H.asp; m = new THREE.Mesh(new THREE.PlaneGeometry(w, dep), new THREE.MeshBasicMaterial({ map: txc('hz_' + type), transparent: true, alphaTest: 0.25, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); m.geometry.userData.keep = false; m.rotation.order = 'YXZ'; m.rotation.x = -Math.PI / 2; m.rotation.y = Math.atan2(a.tx, a.tz); m.position.set(a.x + a.nx * d, a.y + 0.07, a.z + a.nz * d); m.userData = { type, s, d, on: true, rs: dep * 0.38, rd: w * 0.42, flat: 1 }; }
+  if (H.flat) { const w = H.w, dep = w / H.asp; m = new THREE.Mesh(new THREE.PlaneGeometry(w, dep), new THREE.MeshBasicMaterial({ map: type === 'pad' ? padTex() : txc('hz_' + type), transparent: true, alphaTest: 0.25, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); m.geometry.userData.keep = false; m.rotation.order = 'YXZ'; m.rotation.x = -Math.PI / 2; m.rotation.y = Math.atan2(a.tx, a.tz); m.position.set(a.x + a.nx * d, a.y + 0.07, a.z + a.nz * d); m.userData = { type, s, d, on: true, rs: dep * 0.38, rd: w * 0.42, flat: 1 }; }
   else { m = new THREE.Sprite(new THREE.SpriteMaterial({ map: txc('hz_' + type), transparent: true, alphaTest: 0.3 })); m.center.set(0.5, 0.02); m.scale.set(H.h * H.asp, H.h, 1); m.position.set(a.x + a.nx * d, a.y, a.z + a.nz * d); m.userData = { type, s, d, on: true, rs: 1.6, rd: 1.7 }; }
   Object.assign(m.userData, extra || {}); m.userData.perm = !!perm; sc.add(m); hzs.push(m); return m;
 }
@@ -368,7 +371,9 @@ function setSpin(r, dur) { r.spinT = dur; r.spinDur = dur; }
 function hitMsg(r, t) { if (r.isPlayer) { note(t); O.sfx('pop'); shake = Math.max(shake, 0.4); } }
 function hzHit(r, m, u) {
   const H = HZ[u.type]; if (u.owner === r && raceT - u.born < 1.4) return;
-  const pw = r.boostT > 0, p = m.position;
+  if (u.type === 'pad') { if (r.hzCd > 0) return; r.hzCd = 1.2; r.boostT = Math.max(r.boostT, 2.2); fxAt(r, 'burst', 3, 0.5); if (r.isPlayer) { note('무지개 발판! 슝~'); O.sfx('ok'); shake = 0.3; } return; }
+  if (r.flyT > 0) return;
+  const pw = r.boostT > 0 || r.bigT > 0, p = m.position;
   if (H.flat) {
     if (r.hzCd > 0) return; r.hzCd = 0.8;
     if (r.shield) { r.shield = 0; fxAt(r, 'burst', 3, 0.5); if (r.isPlayer) { note('방패가 막아 줬어요!'); O.sfx('ok'); } return; }
@@ -403,10 +408,14 @@ function giveItem() {
 function setItemUi(name, spin) { const b = $('btnI'); b.innerHTML = name ? '<img src="assets/it_' + name + '.webp" alt="" draggable="false">' : ''; b.classList.toggle('has', !!name && !spin); b.classList.toggle('roll', !!spin); b.disabled = !name || !!spin; b.setAttribute('aria-label', name && !spin ? ITM[name].n + ' 쓰기' : '아이템 칸'); }
 function updateItemUI() { setItemUi(heldItem); }
 function useItem() {
-  if (mode !== 'race' || !heldItem || rolling || !player) return; const it = heldItem; heldItem = ''; updateItemUI(); O.sfx('ok');
+  if (mode !== 'race' || !heldItem || rolling || !player) return; let it = heldItem; heldItem = ''; updateItemUI(); O.sfx('ok');
+  if (it === 'mystery') { it = ['rocket', 'wings', 'giant', 'coinrain', 'shield', 'magnet', 'rainbow'][Math.floor(Math.random() * 7)]; say('나온 건… ' + ITM[it].n + '!', 'good', ITM[it].n + '!'); }
   if (it === 'shield') { player.shield = 1; note('방패를 썼어요!'); }
   else if (it === 'rocket') { player.boostT = 2.8; fxAt(player, 'burst', 3, 0.5); note('로켓 부스트!'); shake = 0.5; }
   else if (it === 'magnet') { player.magT = 7; note('자석! 구슬이 달려와요'); }
+  else if (it === 'wings') { player.flyT = 4; fxAt(player, 'burst', 3, 0.5); note('날개! 장애물을 넘어요'); }
+  else if (it === 'giant') { player.bigT = 6; fxAt(player, 'burst', 4, 0.6); note('거대화! 다 부숴요'); shake = 0.5; }
+  else if (it === 'rainbow') { addHz(rScene, 'pad', player.s + 30, player.d, false, { owner: player, born: raceT, life: 25 }); note('무지개 발판을 깔았어요!'); }
   else if (it === 'oil') { addHz(rScene, 'oil', player.s - 9, player.d, false, { owner: player, born: raceT, life: 14 }); note('기름을 뿌렸어요!'); }
   else if (it === 'coinrain') { raceCoins += 6; fxAt(player, 'coins', 5, 1.2, 1.5, 3); O.sfx('coin'); note('코인 +6!'); }
   else if (it === 'bomb') {
@@ -422,6 +431,7 @@ function updateProjs(dt) {
 function animWorld(now, dt) {
   const bs = 1 + Math.sin(now / 260) * 0.06; boxes.forEach((m) => { if (!m.visible) return; const u = m.userData; m.position.y = u.base + Math.sin(now / 340 + u.ph) * 0.28; m.material.rotation = Math.sin(now / 420 + u.ph) * 0.14; m.scale.set(3.1 * bs, 3.1 * bs, 1); });
   for (let i = fxs.length - 1; i >= 0; i--) { const s = fxs[i], u = s.userData; u.t += dt; const p = u.t / u.life; if (p >= 1) { rScene.remove(s); s.material.dispose(); fxs.splice(i, 1); continue; } const e = 1 - Math.pow(1 - p, 3), sz = u.size * (0.55 + 0.75 * e); s.scale.set(sz * u.asp, sz, 1); s.position.y += u.rise * dt; s.material.opacity = Math.max(0, 1 - p * p * p); }
+  racers.forEach((r) => { if (r.flyT > 0 || r.fy > 0.2) { if (!r.wgSp) { r.wgSp = new THREE.Sprite(new THREE.SpriteMaterial({ map: txc('it_wings'), transparent: true, depthWrite: false })); r.wgSp.position.set(0, 1.5, 0); r.root.add(r.wgSp); } const f = 1 + Math.sin(now / 70) * 0.12; r.wgSp.scale.set(5.4 * f, 5.4 * 0.925 / f * 1.0, 1); r.wgSp.visible = true; } else if (r.wgSp) r.wgSp.visible = false; });
   racers.forEach((r) => { if (r.shield) { if (!r.shSp) { r.shSp = new THREE.Sprite(new THREE.SpriteMaterial({ map: txc('fx_bubble'), transparent: true, depthWrite: false, opacity: 0.7 })); r.shSp.position.set(0, 1.2, 0); r.root.add(r.shSp); } const q = 5 + Math.sin(now / 200) * 0.25; r.shSp.scale.set(q, q, 1); r.shSp.visible = true; } else if (r.shSp) r.shSp.visible = false; });
 }
 
