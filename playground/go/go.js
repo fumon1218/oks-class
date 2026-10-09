@@ -307,7 +307,7 @@ const plBase = (p) => PL.plan.slice(0, p).reduce((a, b) => a + b, 0);
 const plPos = () => plBase(lessonStep.page) + PL.k;
 function nextLabel() { return lessonStep.page + 1 >= lesson.pages.length ? (lesson.items.length ? '▶ 문제 풀기' : '▶ 마치기') : '▶ 다음'; }
 function plUpdate() {
-  const g = plPos(); $('plPlayImg').src = PL.playing ? 'assets/pl_pause.webp' : 'assets/pl_play.webp'; $('plPlay').classList.toggle('on', PL.playing); $('plSeek').style.setProperty('--p', (PL.total ? g / PL.total * 100 : 0) + '%'); $('plPlay').setAttribute('aria-label', PL.playing ? '일시정지' : '재생'); $('plSeek').max = PL.total; $('plSeek').value = g;
+  const g = plPos(); $('plPlay').disabled = PL.playing; $('plPause').disabled = !PL.playing; $('plSeek').style.setProperty('--p', (PL.total ? g / PL.total * 100 : 0) + '%'); $('plSeek').max = PL.total; $('plSeek').value = g;
   $('plPos').textContent = g + ' / ' + PL.total + '수 · ' + (lessonStep.page + 1) + '/' + lesson.pages.length + '쪽'; $('plSpeedTx').textContent = '×' + PL.speed; $('plSpeed').setAttribute('aria-label', '속도 ' + PL.speed + '배');
   $('plBack').disabled = $('plBack10').disabled = $('plStop').disabled = g <= 0; $('plFwd').disabled = $('plFwd10').disabled = g >= PL.total;
 }
@@ -345,7 +345,7 @@ async function plFwd1() {
   const tok = PL.tok; await plStepOnce(tok);
 }
 { const ft = document.querySelector('.ch-bottom'), setBot = () => document.documentElement.style.setProperty('--bot', (ft.offsetHeight + 4) + 'px'); setBot(); if (window.ResizeObserver) new ResizeObserver(setBot).observe(ft); window.addEventListener('resize', setBot); }
-$('plPlay').onclick = plToggle; $('plStop').onclick = () => plSeek(0); $('plBack').onclick = () => plSeek(plPos() - 1); $('plBack10').onclick = () => plSeek(plPos() - 10); $('plFwd').onclick = plFwd1; $('plFwd10').onclick = () => plSeek(plPos() + 10);
+$('plPlay').onclick = () => { O.unlock(); plPlay(); }; $('plPause').onclick = async () => { await plHalt(); plUpdate(); }; $('plRestart').onclick = async () => { await plSeek(0); O.unlock(); plPlay(true); }; $('plStop').onclick = () => plSeek(0); $('plBack').onclick = () => plSeek(plPos() - 1); $('plBack10').onclick = () => plSeek(plPos() - 10); $('plFwd').onclick = plFwd1; $('plFwd10').onclick = () => plSeek(plPos() + 10);
 $('plSpeed').onclick = () => { PL.speed = PL_SPEEDS[(PL_SPEEDS.indexOf(PL.speed) + 1) % PL_SPEEDS.length]; plUpdate(); };
 $('plSeek').oninput = (e) => { plSeek(+e.target.value); };
 document.addEventListener('keydown', (e) => { if ($('player').hidden || e.target.tagName === 'INPUT' && e.target.type !== 'range') return; if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); plToggle(); } else if (e.key === 'ArrowRight') { e.preventDefault(); plFwd1(); } else if (e.key === 'ArrowLeft') { e.preventDefault(); plSeek(plPos() - 1); } });
