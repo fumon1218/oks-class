@@ -19,9 +19,21 @@ body.go-page{background:radial-gradient(ellipse at 50% 30%,#7a6340 0%,#4b3b27 58
 .ch-btn[hidden]{display:none}
 @media (max-width:520px){.go-page .ch-top{gap:6px;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}.go-page .ch-btn{white-space:nowrap;padding:8px 10px;font-size:14px;min-height:42px}.go-page .ch-tools{display:flex;gap:6px}.go-page .ch-title{min-width:0;flex:1 1 auto}.go-page .ch-title span{font-size:11px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.go-page .ch-title b{font-size:18px}}
 
-.go-player{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--bot,86px) + 8px);z-index:7;width:min(560px,calc(100% - 16px));background:rgba(255,250,240,.96);border-radius:20px;padding:8px 10px;box-shadow:0 4px 18px rgba(0,0,0,.28);display:grid;gap:6px}
-.go-player[hidden]{display:none}.go-player .pl-row{display:flex;gap:6px;justify-content:center;align-items:center}
-.go-player button{appearance:none;border:2px solid #e8dcc4;background:#fff;color:#2b3f5c;border-radius:14px;min-width:44px;height:44px;font:inherit;font-size:19px;line-height:1;cursor:pointer;padding:0 6px}
-.go-player button:disabled{opacity:.4}.go-player .pl-play{background:#2f966f;border-color:#2f966f;color:#fff;min-width:62px;font-size:22px}.go-player .pl-speed{font-size:15px;font-weight:700;min-width:52px}
-.go-player input[type=range]{flex:1 1 auto;min-width:0;accent-color:#2f966f;height:28px}.go-player small{font-size:12px;color:#5b6b82;white-space:nowrap}
-@media (max-width:420px){.go-player button{min-width:40px;height:42px;font-size:17px}.go-player .pl-play{min-width:54px}.go-player small{font-size:11px}}
+/* 재생 막대: 나무 명패 + 젤리 버튼 + 바둑돌 손잡이 */
+.go-player{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--bot,86px) + 8px);z-index:7;width:min(560px,calc(100% - 12px));aspect-ratio:4.3/1;min-height:98px;box-sizing:border-box;padding:9px 11.5% 8px;background:url(assets/pl_panel.webp) center/100% 100% no-repeat;display:grid;grid-template-rows:1fr auto;gap:2px;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}
+.go-player[hidden]{display:none}
+.go-player .pl-row{display:grid;grid-template-columns:1fr 1fr 1fr 1.28fr 1fr 1fr 1fr;gap:3px;align-items:center;justify-items:center;min-height:0}
+.go-player button{appearance:none;border:0;background:none;padding:0;margin:0;cursor:pointer;width:100%;max-width:54px;aspect-ratio:1;position:relative;-webkit-tap-highlight-color:transparent;transition:transform .08s,filter .15s}
+.go-player button img{width:100%;height:100%;display:block;pointer-events:none;user-select:none}
+.go-player .pl-play{max-width:68px}.go-player button:active:not(:disabled){transform:scale(.9)}
+.go-player button:disabled{opacity:.42;filter:grayscale(.7);cursor:default}
+.go-player .pl-speed b{position:absolute;right:-2px;bottom:-3px;font-size:12px;line-height:1;background:#1e2f55;color:#fff;border-radius:9px;padding:2px 5px;font-weight:800}
+.go-player .pl-bot{display:flex;align-items:center;gap:8px}
+.go-player input[type=range]{--p:0%;flex:1 1 auto;min-width:0;height:26px;margin:0;background:none;-webkit-appearance:none;appearance:none;touch-action:none}
+.go-player input[type=range]::-webkit-slider-runnable-track{height:15px;border-radius:9px;border:2px solid #1e2f55;background:linear-gradient(#c88a4a,#a86a30) ,linear-gradient(#7be34a,#35b01f);background:linear-gradient(to right,#4fcf2b 0,#35b01f var(--p),#b9793a var(--p),#9a5f2c 100%);box-shadow:inset 0 2px 3px rgba(255,255,255,.45),inset 0 -2px 3px rgba(0,0,0,.25)}
+.go-player input[type=range]::-moz-range-track{height:11px;border-radius:9px;border:2px solid #1e2f55;background:#9a5f2c}
+.go-player input[type=range]::-moz-range-progress{height:11px;border-radius:9px;background:#35b01f}
+.go-player input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;margin-top:-9px;border:0;background:url(assets/pl_knob.webp) center/contain no-repeat;filter:drop-shadow(0 2px 2px rgba(0,0,0,.45))}
+.go-player input[type=range]::-moz-range-thumb{width:30px;height:30px;border:0;border-radius:50%;background:url(assets/pl_knob.webp) center/contain no-repeat}
+.go-player small{font-size:12px;font-weight:800;color:#4a2a10;text-shadow:0 1px 0 rgba(255,235,200,.7);white-space:nowrap}
+@media (max-width:420px){.go-player small{font-size:11px}.go-player .pl-speed b{font-size:10px}}
