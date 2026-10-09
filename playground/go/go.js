@@ -192,6 +192,7 @@ function updateButtons() {
   const play = mode === 'play' || mode === 'two', learn = mode === 'learn';
   $('btnUndo').hidden = !play; $('btnPass').hidden = !play; $('btnTerr').hidden = !play; $('btnAssist').hidden = !play;
   $('btnNext').hidden = !(learn && stepPhase === 'page'); $('btnRetry').hidden = !(learn && stepPhase === 'item'); $('btnList').hidden = !learn; $('btnHint').hidden = !(play || (learn && stepPhase === 'item'));
+  { const showBar = learn && stepPhase === 'page' && PL.total > 0; $('player').hidden = !showBar; if (!showBar && PL.playing) { PL.playing = false; PL.tok++; } }
   $('btnUndo').disabled = busy || over || scoring || !play || !game.stack.length;
   $('btnPass').disabled = busy || over || scoring || !isHumanTurn(); $('btnHint').disabled = over || busy || (play && (scoring || !isHumanTurn()));
   $('btnTerr').disabled = busy || over;
@@ -282,7 +283,7 @@ function openCurriculum() {
 let lessonStep = { page: 0, item: 0, mistakes: 0, asked: 0, phase: 'page' }, scriptRun = 0;
 function startLesson(id) {
   resetState(); startWorker(); mode = 'learn'; lesson = L.LESSONS.find((l) => l.id === id); if (!lesson) return; $('menu').hidden = true; $('modeLabel').textContent = L.LEVELS[lesson.lv - 1].name + ' · ' + lesson.title;
-  lessonStep = { page: 0, item: 0, mistakes: 0, asked: 0, phase: 'page' }; stats = O.newStats(); S.setView(0, false, 0.62); showPage();
+  lessonStep = { page: 0, item: 0, mistakes: 0, asked: 0, phase: 'page' }; stats = O.newStats(); S.setView(0, false, 0.62); planLesson(); showPage();
 }
 function loadPosition(n, g) { game = g; newBoard(n, g); clearMarks(); }
 function applyShow(show) {
@@ -293,15 +294,64 @@ function applyShow(show) {
 async function showPage() {
   const pg = lesson.pages[lessonStep.page]; if (!pg) return startItems(); stepPhase = 'page'; P = null; const rid = ++scriptRun; hideQuiz();
   const pp = L.preparePage(pg); loadPosition(pp.n, pp.game); applyShow(pp.show); updateButtons();
-  say(pp.text, null, pp.speak || pp.text); $('btnNext').textContent = lessonStep.page + 1 >= lesson.pages.length ? (lesson.items.length ? '▶ 문제 풀기' : '▶ 마치기') : '▶ 다음';
-  if (pp.script && pp.script.length) { busy = true; updateButtons(); await sleep(900); for (let i = 0; i < pp.script.length; i++) { if (rid !== scriptRun) return; const st = pp.script[i];
-      let rec = null; if (st.pass) rec = game.pass(); else rec = game.play(st.s % N, (st.s / N) | 0); if (rec && !rec.pass) await animateRec(rec); if (st.show) applyShow(st.show); if (st.text) { say(st.text, null, st.text); } await sleep(st.wait || 1500); }
-    if (rid === scriptRun) { busy = false; updateButtons(); } }
+  say(pp.text, null, pp.speak || pp.text); $('btnNext').textContent = nextLabel();
+  PL.tok++; PL.playing = false; PL.pp = pp; PL.k = 0; PL.rid = rid; plUpdate();
+  if (pp.script && pp.script.length && !isReplayLesson()) plPlay(true);
 }
+/* ---------- 재생 막대(복기·시범 수업): 재생·일시정지·정지·한 수 되돌리기·빠르게 감기 ---------- */
+const PL = { playing: false, speed: 1, k: 0, pp: null, plan: [], total: 0, tok: 0, anim: null, rid: 0 };
+const PL_SPEEDS = [0.5, 1, 2, 4];
+const isReplayLesson = () => !!lesson && /^r\d+$/.test(lesson.id);
+function planLesson() { PL.plan = lesson.pages.map((pg) => (L.preparePage(pg).script || []).length); PL.total = PL.plan.reduce((a, b) => a + b, 0); PL.playing = false; PL.tok++; PL.pp = null; PL.k = 0; }
+const plBase = (p) => PL.plan.slice(0, p).reduce((a, b) => a + b, 0);
+const plPos = () => plBase(lessonStep.page) + PL.k;
+function nextLabel() { return lessonStep.page + 1 >= lesson.pages.length ? (lesson.items.length ? '▶ 문제 풀기' : '▶ 마치기') : '▶ 다음'; }
+function plUpdate() {
+  const g = plPos(); $('plPlay').textContent = PL.playing ? '⏸' : '▶'; $('plPlay').setAttribute('aria-label', PL.playing ? '일시정지' : '재생'); $('plSeek').max = PL.total; $('plSeek').value = g;
+  $('plPos').textContent = g + ' / ' + PL.total + '수 · ' + (lessonStep.page + 1) + '/' + lesson.pages.length + '쪽'; $('plSpeed').textContent = '×' + PL.speed; $('plSpeed').setAttribute('aria-label', '속도 ' + PL.speed + '배');
+  $('plBack').disabled = $('plBack10').disabled = $('plStop').disabled = g <= 0; $('plFwd').disabled = $('plFwd10').disabled = g >= PL.total;
+}
+async function plHalt() { PL.tok++; PL.playing = false; plUpdate(); try { O.hush && O.hush(); } catch (e) {} if (PL.anim) { try { await PL.anim; } catch (e) {} } }
+function plLoad(p, k) { // p쪽의 k번째 수까지(애니메이션 없이) 보여 줘요
+  const rid = ++scriptRun; lessonStep.page = p; const pp = L.preparePage(lesson.pages[p]), sc = pp.script || [];
+  for (let i = 0; i < k; i++) { const st = sc[i]; if (st.pass) pp.game.pass(); else pp.game.play(st.s % pp.n, (st.s / pp.n) | 0); }
+  loadPosition(pp.n, pp.game); let show = pp.show, text = pp.text; for (let i = 0; i < k; i++) { if (sc[i].show) show = sc[i].show; if (sc[i].text) text = sc[i].text; }
+  applyShow(show); if (k && !sc[k - 1].pass) { marks.last.clear(); marks.last.add(sc[k - 1].s); refreshMarkers(); }
+  say(text, null, false); $('btnNext').textContent = nextLabel(); PL.pp = pp; PL.k = k; PL.rid = rid; plUpdate();
+}
+async function plStepOnce(tok) { // 한 수 두기(애니메이션)
+  const pp = PL.pp, st = pp.script[PL.k]; PL.anim = (async () => { const rec = st.pass ? pp.game.pass() : pp.game.play(st.s % pp.n, (st.s / pp.n) | 0); if (rec && !rec.pass) await animateRec(rec); if (tok !== PL.tok && tok !== -1) return; if (st.show) applyShow(st.show); if (st.text) say(st.text, null, PL.speed <= 1 ? st.text : false); })();
+  await PL.anim; PL.k++; plUpdate(); return st;
+}
+async function plPlay(first) {
+  if (PL.playing) return; if (PL.total <= 0) return; if (plPos() >= PL.total) plLoad(0, 0);
+  PL.playing = true; const tok = ++PL.tok; plUpdate(); if (first || PL.k === 0) { await sleep(900 / PL.speed); if (tok !== PL.tok) return; }
+  while (PL.playing && tok === PL.tok) {
+    const sc = PL.pp.script || [];
+    if (PL.k >= sc.length) {
+      if (!isReplayLesson() || lessonStep.page + 1 >= lesson.pages.length) break;
+      await sleep(700 / PL.speed); if (tok !== PL.tok) return; plLoad(lessonStep.page + 1, 0); await sleep(700 / PL.speed); if (tok !== PL.tok) return; continue;
+    }
+    const st = await plStepOnce(tok); if (tok !== PL.tok) return; await sleep(Math.max(250, (st.wait || 1500) * (isReplayLesson() ? 0.6 : 1)) / PL.speed); if (tok !== PL.tok) return;
+  }
+  if (tok === PL.tok) { PL.playing = false; plUpdate(); }
+}
+async function plToggle() { O.unlock(); if (PL.playing) { await plHalt(); plUpdate(); } else plPlay(); }
+async function plSeek(g) { // 전체 g번째 수까지
+  await plHalt(); g = Math.max(0, Math.min(PL.total, g)); let p = 0; while (p < PL.plan.length - 1 && g > plBase(p) + PL.plan[p]) p++; plLoad(p, g - plBase(p));
+}
+async function plFwd1() {
+  await plHalt(); if (plPos() >= PL.total) return; const sc = PL.pp.script || []; if (PL.k >= sc.length) { let p = lessonStep.page + 1; plLoad(p, 0); if (!(PL.pp.script || []).length) return; }
+  const tok = PL.tok; await plStepOnce(tok);
+}
+$('plPlay').onclick = plToggle; $('plStop').onclick = () => plSeek(0); $('plBack').onclick = () => plSeek(plPos() - 1); $('plBack10').onclick = () => plSeek(plPos() - 10); $('plFwd').onclick = plFwd1; $('plFwd10').onclick = () => plSeek(plPos() + 10);
+$('plSpeed').onclick = () => { PL.speed = PL_SPEEDS[(PL_SPEEDS.indexOf(PL.speed) + 1) % PL_SPEEDS.length]; plUpdate(); };
+$('plSeek').oninput = (e) => { plSeek(+e.target.value); };
+document.addEventListener('keydown', (e) => { if ($('player').hidden || e.target.tagName === 'INPUT' && e.target.type !== 'range') return; if (e.key === ' ' && e.target.tagName !== 'BUTTON') { e.preventDefault(); plToggle(); } else if (e.key === 'ArrowRight') { e.preventDefault(); plFwd1(); } else if (e.key === 'ArrowLeft') { e.preventDefault(); plSeek(plPos() - 1); } });
 function nextPage() {
   if (stepPhase !== 'page' || busy) return; O.unlock(); lessonStep.page++; if (lessonStep.page >= lesson.pages.length) return startItems(); showPage();
 }
-function startItems() { lessonStep.phase = 'item'; lessonStep.item = 0; scriptRun++; busy = false; if (!lesson.items.length) return lessonDone(); showItem(); }
+function startItems() { PL.tok++; PL.playing = false; lessonStep.phase = 'item'; lessonStep.item = 0; scriptRun++; busy = false; if (!lesson.items.length) return lessonDone(); showItem(); }
 function showItem() {
   const it = lesson.items[lessonStep.item]; stepPhase = 'item'; hideQuiz(); scriptRun++; busy = false; P = L.prepare(it); P.mist = 0; loadPosition(P.n, P.game); applyShow(P.show);
   $('modeLabel').textContent = L.LEVELS[lesson.lv - 1].name + ' · ' + lesson.title + ' (' + (lessonStep.item + 1) + '/' + lesson.items.length + ')'; updateButtons();
