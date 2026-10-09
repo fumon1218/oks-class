@@ -24,6 +24,7 @@ const CARS = [
   { id: 'toy_cloud', build: 'toy', style: 'cloud', dc: 7, colors: true, name: '클라우드', sub: '카툰 · 구름 지붕 · 핸들이 좋아요', title: '', src: '', front: 1, vmax: 56, acc: 23, lat: 13, nmul: 1.3, stats: [3, 4, 5, 4] },
   { id: 'toy_knight', build: 'toy', style: 'knight', dc: 8, colors: true, name: '나이트', sub: '카툰 · 기사 투구 · 든든해요', title: '', src: '', front: 1, vmax: 62, acc: 20, lat: 11, nmul: 1.3, stats: [4, 3, 3, 4] },
   { id: 'toy_comet', build: 'toy', style: 'comet', dc: 9, colors: true, name: '코멧', sub: '카툰 · 혜성 꼬리 · 만능이에요', title: '', src: '', front: 1, vmax: 68, acc: 27, lat: 12, nmul: 1.3, stats: [5, 5, 4, 4] },
+  { id: 'toy_red1', file: 'assets/toy_red1.glb', split: { fz: 0.327, rz: -0.31, y: 0.14, r: 0.17, ix: 0.215 }, scale: 4, wr: 0.56, name: '레드 원', sub: '3D 장난감 · 1번 레이서 · 반짝 광택', title: '', src: '', front: 1, vmax: 62, acc: 24, lat: 12, nmul: 1.3, stats: [4, 4, 4, 4] },
   { id: 'rx7', file: 'assets/rx7.glb', name: '마쓰다 RX-7', sub: '2002 · 일본 스포츠카', title: '2002 Mazda RX-7 Spirit-R', src: 'https://sketchfab.com/3d-models/2002-mazda-rx-7-spirit-r-277e2569280d4c9fa3bc3a85bbc627f1', front: 1, vmax: 56, acc: 24, lat: 12.5, nmul: 1.3, stats: [3, 4, 5, 3] },
   { id: 'm720', file: 'assets/mclaren720s.glb', name: '맥라렌 720S GT3', sub: '2019 · 영국 레이싱카', title: '2019 McLaren 720S GT3', src: 'https://sketchfab.com/3d-models/2019-mclaren-720s-gt3-cdf4ca67a56b497493931e8852e70b05', front: 1, vmax: 70, acc: 19, lat: 10.5, nmul: 1.26, stats: [5, 3, 3, 4] },
 ];
@@ -74,7 +75,25 @@ const envMap = (() => {
 
 /* ---------- 자동차 모델 ---------- */
 const protos = {};
+function splitWheels(root, def) {
+  let mesh = null; root.traverse((o) => { if (o.isMesh && !mesh) mesh = o; }); if (!mesh) return null;
+  const g = mesh.geometry, idx = g.index.array, pos = g.attributes.position, sp = def.split, par = mesh.parent, tri = idx.length / 3;
+  const cs = [[1, 1], [-1, 1], [1, -1], [-1, -1]].map(([sx, sz]) => ({ sx, cz: sz > 0 ? sp.fz : sp.rz, tris: [] })), body = [];
+  for (let t = 0; t < tri; t++) {
+    let x = 0, y = 0, z = 0; for (let k = 0; k < 3; k++) { const v = idx[t * 3 + k]; x += pos.getX(v); y += pos.getY(v); z += pos.getZ(v); } x /= 3; y /= 3; z /= 3;
+    let hit = null; if (Math.abs(x) > sp.ix) for (const c of cs) if (x * c.sx > 0 && Math.hypot(y - sp.y, z - c.cz) < sp.r) { hit = c; break; }
+    if (hit) hit.tris.push(t); else body.push(t);
+  }
+  const sub = (list, ox, oy, oz) => { const ng = new THREE.BufferGeometry(), n = list.length * 3; for (const name of ['position', 'normal', 'uv']) { const a = g.attributes[name]; if (!a) continue; const sz = a.itemSize, arr = new Float32Array(n * sz); list.forEach((t, i) => { for (let k = 0; k < 3; k++) { const v = idx[t * 3 + k]; for (let q = 0; q < sz; q++) arr[(i * 3 + k) * sz + q] = a.array[v * sz + q] - (name === 'position' ? [ox, oy, oz][q] : 0); } }); ng.setAttribute(name, new THREE.BufferAttribute(arr, sz)); } return ng; };
+  const bm = new THREE.Mesh(sub(body, 0, 0, 0), mesh.material); bm.name = 'body'; par.add(bm); const wheels = [];
+  cs.forEach((c, k) => {
+    const cx = c.sx * (sp.ix + 0.085), steer = new THREE.Group(), spin = new THREE.Group(); steer.name = 'wh' + k + '_s'; spin.name = 'wh' + k + '_r'; steer.position.set(cx, sp.y, c.cz);
+    const wm = new THREE.Mesh(sub(c.tris, cx, sp.y, c.cz), mesh.material); spin.add(wm); steer.add(spin); par.add(steer); wheels.push({ s: steer.name, r: spin.name, front: c.cz * def.front > 0 });
+  });
+  par.remove(mesh); return wheels;
+}
 function prepareModel(gltf, def) {
+  if (def.scale) gltf.scene.scale.setScalar(def.scale); const sw = def.split ? splitWheels(gltf.scene, def) : null;
   const holder = new THREE.Group(); holder.add(gltf.scene); holder.updateMatrixWorld(true);
   let box = new THREE.Box3().setFromObject(holder), c = box.getCenter(new THREE.Vector3());
   gltf.scene.position.set(-c.x, -box.min.y, -c.z); holder.updateMatrixWorld(true);
@@ -88,7 +107,7 @@ function prepareModel(gltf, def) {
     info.forEach((i) => { if (i.used) return; const near = i.c.distanceTo(t.c) < 0.45 && Math.max(i.s.x, i.s.y, i.s.z) < 0.75; const isW = i.n.includes('tyre') ? i === t : (i.n.includes('wheel') || i.n.includes('rotor') || i.n.includes('misc')); if (near && isW) { i.used = true; spin.attach(i.m); } });
     wheels.push({ s: steer.name, r: spin.name, front: t.c.z * def.front > 0 });
   });
-  protos[def.id] = { holder, wheels, len: size.z, wid: size.x, hgt: size.y };
+  protos[def.id] = { holder, wheels: sw || wheels, len: size.z, wid: size.x, hgt: size.y };
 }
 function loadModels(onProg) {
   const loader = new GLTFLoader(); let done = 0; const list = CARS.filter((d) => d.file);
@@ -114,7 +133,7 @@ function makeCarObject(def, colorIdx, eq) {
   const wheels = wl.map((w) => ({ s: model.getObjectByName(w.s), r: model.getObjectByName(w.r), front: w.front }));
   return { root, tilt, model, wheels, flame, def, len, rb, spin };
 }
-function animWheels(o, dist, steer) { const a = dist / 0.32 * o.def.front; o.wheels.forEach((w) => { w.r.rotation.x += a; if (w.front) w.s.rotation.y = -steer * 0.42; }); }
+function animWheels(o, dist, steer) { const a = dist / (o.def.wr || 0.32) * o.def.front; o.wheels.forEach((w) => { w.r.rotation.x += a; if (w.front) w.s.rotation.y = -steer * 0.42; }); }
 
 /* ---------- 차고 장면 ---------- */
 const gScene = new THREE.Scene(); gScene.environment = envMap; gScene.environmentIntensity = 0.9;
@@ -492,7 +511,7 @@ function renderGarageInfo() {
   const b = bestOf(effCourse().key, d.id); $('carBest').textContent = b ? '🏆 이 코스 최고 기록 ' + fmtT(b) : '아직 달린 기록이 없어요';
   const SI = ['speed', 'accel', 'steer', 'nitro'];
   $('carStats').innerHTML = d.stats.map((v, i) => '<div class="gp-st"><img class="ui" src="assets/ui_c_' + SI[i] + '.webp" alt=""><span>' + STAT_NAMES[i] + '</span><span class="bar">' + [1, 2, 3, 4, 5].map((k) => '<i class="' + (k <= v ? 'on' : '') + '"></i>').join('') + '</span></div>').join('');
-  $('credit').innerHTML = !d.src ? '카툰 자동차: 옥쌤의 즐거운 교실에서 코드로 만든 모델이에요.' : '차 모델: “' + d.title + '” — <a href="https://sketchfab.com/outpiston" target="_blank" rel="noopener">OUTPISTON</a> · <a href="' + d.src + '" target="_blank" rel="noopener">Sketchfab</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>';
+  $('credit').innerHTML = !d.src ? (d.file ? '3D 장난감 자동차: 옥쌤의 즐거운 교실에서 AI로 만든 모델이에요.' : '카툰 자동차: 옥쌤의 즐거운 교실에서 코드로 만든 모델이에요.') : '차 모델: “' + d.title + '” — <a href="https://sketchfab.com/outpiston" target="_blank" rel="noopener">OUTPISTON</a> · <a href="' + d.src + '" target="_blank" rel="noopener">Sketchfab</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>';
   const chip = (k, v, label, on) => '<button type="button" class="gp-chip' + (on ? ' on' : '') + '" data-' + k + '="' + v + '">' + label + '</button>';
   $('colorRow').innerHTML = d.colors ? TOY_COLORS.map((c, i) => '<button type="button" class="rc-sw' + (colOf(d, prefs.color) === i ? ' on' : '') + '" data-cl="' + i + '" style="background:#' + c[0].toString(16).padStart(6, '0') + '" aria-label="' + c[1] + '"></button>').join('') : '<p class="gp-note">이 차는 원래 색 그대로예요.</p>';
   document.querySelectorAll('.gp-qb button').forEach((q) => { q.disabled = !d.build; });
