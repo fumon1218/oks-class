@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v181';
+const CACHE_NAME = 'oks-class-v182';
 const ASSETS = [
   './',
   './index.html',
@@ -257,11 +257,29 @@ const ASSETS = [
   './playground/racing/assets/sp_spine.webp',
   './playground/racing/assets/sp_tires.webp',
   './playground/racing/assets/sp_trophy.webp',
+  './playground/racing/assets/th_aurora.webp',
+  './playground/racing/assets/th_beach.webp',
+  './playground/racing/assets/th_candy.webp',
+  './playground/racing/assets/th_canyon.webp',
+  './playground/racing/assets/th_cherry.webp',
+  './playground/racing/assets/th_forest.webp',
+  './playground/racing/assets/th_sky.webp',
+  './playground/racing/assets/th_snow.webp',
+  './playground/racing/assets/th_space.webp',
+  './playground/racing/assets/th_volcano.webp',
   './playground/racing/assets/ui_bag.webp',
   './playground/racing/assets/ui_bucket_b.webp',
   './playground/racing/assets/ui_bucket_g.webp',
   './playground/racing/assets/ui_bucket_r.webp',
   './playground/racing/assets/ui_bucket_y.webp',
+  './playground/racing/assets/ui_c_accel.webp',
+  './playground/racing/assets/ui_c_check.webp',
+  './playground/racing/assets/ui_c_nitro.webp',
+  './playground/racing/assets/ui_c_people.webp',
+  './playground/racing/assets/ui_c_road.webp',
+  './playground/racing/assets/ui_c_speed.webp',
+  './playground/racing/assets/ui_c_spray.webp',
+  './playground/racing/assets/ui_c_steer.webp',
   './playground/racing/assets/ui_cars.webp',
   './playground/racing/assets/ui_check.webp',
   './playground/racing/assets/ui_coin.webp',

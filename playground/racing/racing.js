@@ -374,25 +374,30 @@ function bestOf(courseKey, carId) { return save.best[courseKey + ':' + carId]; }
 function renderGarageInfo() {
   const d = CARS[gIdx]; $('carSub').textContent = d.sub; $('carName').textContent = d.name;
   const b = bestOf(effCourse().key, d.id); $('carBest').textContent = b ? '🏆 이 코스 최고 기록 ' + fmtT(b) : '아직 달린 기록이 없어요';
-  $('carStats').innerHTML = d.stats.map((v, i) => '<span>' + STAT_NAMES[i] + '</span><span class="bar">' + [1, 2, 3, 4, 5].map((k) => '<i class="' + (k <= v ? 'on' : '') + '"></i>').join('') + '</span>').join('');
+  const SI = ['speed', 'accel', 'steer', 'nitro'];
+  $('carStats').innerHTML = d.stats.map((v, i) => '<div class="gp-st"><img class="ui" src="assets/ui_c_' + SI[i] + '.webp" alt=""><span>' + STAT_NAMES[i] + '</span><span class="bar">' + [1, 2, 3, 4, 5].map((k) => '<i class="' + (k <= v ? 'on' : '') + '"></i>').join('') + '</span></div>').join('');
   $('credit').innerHTML = !d.src ? '카툰 자동차: 옥쌤의 즐거운 교실에서 코드로 만든 모델이에요.' : '차 모델: “' + d.title + '” — <a href="https://sketchfab.com/outpiston" target="_blank" rel="noopener">OUTPISTON</a> · <a href="' + d.src + '" target="_blank" rel="noopener">Sketchfab</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>';
-  const chip = (k, v, label, on, extra) => '<button type="button" class="ch-chip' + (on ? ' on' : '') + (extra ? ' ' + extra : '') + '" data-' + k + '="' + v + '">' + label + '</button>';
-  const colorRow = d.colors ? '<div class="g"><label>색깔</label>' + TOY_COLORS.map((c, i) => '<button type="button" class="rc-sw' + (colOf(d, prefs.color) === i ? ' on' : '') + '" data-cl="' + i + '" style="background:#' + c[0].toString(16).padStart(6, '0') + '" aria-label="' + c[1] + '"></button>').join('') + '</div>' : '';
-  $('opts').innerHTML = colorRow + '<div class="g gco"><label>코스</label>' + COURSES.map((c, i) => chip('co', i, c.emoji + ' ' + c.name, prefs.course === i, save.done[c.id] ? 'done' : '')).join('') + '</div>' +
-    '<div class="g"><label>바퀴</label>' + [1, 2, 3, 4, 5].map((n) => chip('lp', n, n, prefs.laps === n)).join('') + '</div><div class="g"><label>길</label>' + LENS.map((x, i) => chip('ln', i, x.name, prefs.len === i)).join('') + '</div>' + '<div class="g"><label>상대</label>' + DIFFS.map((x) => chip('df', x.id, x.name, prefs.diff === x.id)).join('') + '</div>' +
-    '<div class="g"><label>핸들 도움</label>' + chip('as', 1, '켜기', !!prefs.assist) + chip('as', 0, '끄기', !prefs.assist) + '</div>';
-  $('opts').querySelectorAll('[data-cl]').forEach((b) => { b.onclick = () => { prefs.color = +b.dataset.cl; writeSave(); O.sfx('tick'); showGarageCar(gIdx); say(TOY_COLORS[prefs.color][1] + ' 차예요!', null, TOY_COLORS[prefs.color][1] + ' 차예요!'); }; });
-  $('opts').querySelectorAll('[data-co]').forEach((b) => { b.onclick = () => { prefs.course = +b.dataset.co; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
-  $('opts').querySelectorAll('[data-lp]').forEach((b) => { b.onclick = () => { prefs.laps = +b.dataset.lp; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
-  $('opts').querySelectorAll('[data-ln]').forEach((b) => { b.onclick = () => { prefs.len = +b.dataset.ln; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
-  $('opts').querySelectorAll('[data-df]').forEach((b) => { b.onclick = () => { prefs.diff = +b.dataset.df; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
-  $('opts').querySelectorAll('[data-as]').forEach((b) => { b.onclick = () => { prefs.assist = +b.dataset.as; writeSave(); O.sfx('tick'); renderGarageInfo(); }; });
+  const chip = (k, v, label, on) => '<button type="button" class="gp-chip' + (on ? ' on' : '') + '" data-' + k + '="' + v + '">' + label + '</button>';
+  $('colorRow').innerHTML = d.colors ? TOY_COLORS.map((c, i) => '<button type="button" class="rc-sw' + (colOf(d, prefs.color) === i ? ' on' : '') + '" data-cl="' + i + '" style="background:#' + c[0].toString(16).padStart(6, '0') + '" aria-label="' + c[1] + '"></button>').join('') : '<p class="gp-note">이 차는 원래 색 그대로예요.</p>';
+  document.querySelectorAll('.gp-qb button').forEach((q) => { q.disabled = !d.build; });
+  $('courseRow').innerHTML = COURSES.map((c, i) => '<button type="button" class="gp-cc' + (prefs.course === i ? ' on' : '') + (save.done[c.id] ? ' done' : '') + '" data-co="' + i + '"><img src="assets/th_' + c.bg.slice(3) + '.webp" alt="" draggable="false"><span>' + c.emoji + ' ' + c.name + '</span></button>').join('');
+  const grp = (icon, label, inner) => '<div class="gp-g"><label><img class="ui" src="assets/ui_' + icon + '.webp" alt="">' + label + '</label><div>' + inner + '</div></div>';
+  $('opts').innerHTML = grp('flag', '바퀴 수', [1, 2, 3, 4, 5].map((n) => chip('lp', n, n, prefs.laps === n)).join('')) + grp('c_road', '길이', LENS.map((x, i) => chip('ln', i, x.name, prefs.len === i)).join('')) + grp('c_people', '상대', DIFFS.map((x) => chip('df', x.id, x.name, prefs.diff === x.id)).join('')) + grp('c_steer', '핸들 도움', chip('as', 1, '켜기', !!prefs.assist) + chip('as', 0, '끄기', !prefs.assist));
+  const on = (sel, fn) => document.querySelectorAll(sel).forEach((b) => { b.onclick = () => fn(b); });
+  on('#colorRow [data-cl]', (b) => { prefs.color = +b.dataset.cl; writeSave(); O.sfx('tick'); showGarageCar(gIdx); say(TOY_COLORS[prefs.color][1] + ' 차예요!', null, TOY_COLORS[prefs.color][1] + ' 차예요!'); });
+  on('#courseRow [data-co]', (b) => { prefs.course = +b.dataset.co; writeSave(); O.sfx('tick'); renderGarageInfo(); });
+  on('#opts [data-lp]', (b) => { prefs.laps = +b.dataset.lp; writeSave(); O.sfx('tick'); renderGarageInfo(); });
+  on('#opts [data-ln]', (b) => { prefs.len = +b.dataset.ln; writeSave(); O.sfx('tick'); renderGarageInfo(); });
+  on('#opts [data-df]', (b) => { prefs.diff = +b.dataset.df; writeSave(); O.sfx('tick'); renderGarageInfo(); });
+  on('#opts [data-as]', (b) => { prefs.assist = +b.dataset.as; writeSave(); O.sfx('tick'); renderGarageInfo(); });
+  on('.gp-qb [data-q]', (b) => openTune(b.dataset.q));
+  const sel = $('courseRow').querySelector('.on'); if (sel && $('courseRow').scrollTo) { const row = $('courseRow'); row.scrollTo({ left: sel.offsetLeft - (row.clientWidth - sel.offsetWidth) / 2, behavior: 'auto' }); }
 }
 /* ---------- 내 차고 꾸미기 (코인으로 사서 달아요) ---------- */
 const coinsNow = () => { try { return O.eco.info().coins; } catch (e) { return 0; } };
 function rebuildGarageCar() { if (gCar) turn.remove(gCar.root); gCar = makeCarObject(CARS[gIdx], colOf(CARS[gIdx], prefs.color), eqOf(CARS[gIdx])); turn.add(gCar.root); gPop = 1; }
-function openTune() {
-  O.unlock(); O.sfx('tick'); tuneSel = null; $('garage').hidden = true; $('tune').hidden = false; renderTune(); resize(); say('코인으로 차를 꾸며요!', null, '코인으로 내 차를 꾸며요! 마음에 드는 걸 눌러 보세요.');
+function openTune(slot) {
+  if (typeof slot === 'string' && SLOTS.some((x) => x.id === slot)) tuneSlot = slot; O.unlock(); O.sfx('tick'); tuneSel = null; $('garage').hidden = true; $('tune').hidden = false; renderTune(); resize(); say('코인으로 차를 꾸며요!', null, '코인으로 내 차를 꾸며요! 마음에 드는 걸 눌러 보세요.');
 }
 function closeTune() { O.sfx('tick'); tuneSel = null; rebuildGarageCar(); $('tune').hidden = true; $('garage').hidden = false; renderGarageInfo(); resize(); say('타고 싶은 차를 골라요.', null, false); }
 function renderTune() {
@@ -460,9 +465,12 @@ function garageBg(w, h) {
 function resize() {
   const w = window.innerWidth, h = window.innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h;
   if (mode === 'garage' || mode === 'boot') {
-    camera.fov = 34; const vf = THREE.MathUtils.degToRad(camera.fov) / 2, dist = Math.max(8.6, 4.8 / (Math.tan(vf) * camera.aspect));
+    camera.fov = 34; const vf = THREE.MathUtils.degToRad(camera.fov) / 2, dist = Math.max(8.6, 4.8 / (Math.tan(vf) * camera.aspect)) * ($('tune').hidden ? (w >= 900 && h > 620 ? 1.45 : 1.2) : 1);
     camera.position.set(0, 1.7 + dist * 0.06, dist); camera.lookAt(0, 0.85, 0);
-    const g = !$('tune').hidden ? $('tune') : $('garage'), panel = g.hidden ? 0 : g.offsetHeight + 12, top = h < 720 ? 100 : 120; camera.setViewOffset(w, h, 0, (panel - top) / 2, w, h);
+    let panel = 0, top = h < 720 ? 100 : 120;
+    if (!$('tune').hidden) panel = $('tune').offsetHeight + 12;
+    else if (!$('garage').hidden) { const bt = $('garage').querySelector('.gp-bot'), md = $('garage').querySelector('.gp-mid'), tp = $('garage').querySelector('.gp-top'), stacked = getComputedStyle(md).position !== 'absolute' && getComputedStyle(md).display !== 'none'; panel = bt.offsetHeight + (stacked ? md.offsetHeight : 0) + 8; top = 56 + tp.offsetHeight; }
+    camera.setViewOffset(w, h, 0, (panel - top) / 2, w, h);
   } else camera.clearViewOffset();
   camera.updateProjectionMatrix(); garageBg(w, h);
 }

@@ -21,17 +21,25 @@
 </section>
 <div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">차고를 열고 있어요…</span></div>
 
-<section class="rc-garage" id="garage" hidden aria-label="차고">
-  <div class="rc-pick">
-    <button class="rc-arrow" id="carPrev" type="button" aria-label="이전 차">◀</button>
-    <div class="rc-name"><small id="carSub"></small><b id="carName"></b><span id="carBest"></span></div>
-    <button class="rc-arrow" id="carNext" type="button" aria-label="다음 차">▶</button>
+<section class="gp" id="garage" hidden aria-label="차고">
+  <div class="gp-top">
+    <button class="gp-arrow" id="carPrev" type="button" aria-label="이전 차"><i></i></button>
+    <div class="gp-title"><img class="ui fl" src="assets/ui_flag.webp" alt=""><div class="gp-tt"><small id="carSub"></small><b id="carName"></b><span id="carBest"></span></div><img class="ui fl r" src="assets/ui_flag.webp" alt=""></div>
+    <button class="gp-arrow nx" id="carNext" type="button" aria-label="다음 차"><i></i></button>
   </div>
-  <div class="rc-stats" id="carStats"></div>
-  <div class="rc-opts" id="opts"></div>
-  <div class="rc-gorow"><button class="ch-btn rc-tunebtn" id="tuneBtn" type="button"><img class="ui" src="assets/ui_tools.webp" alt=""> 꾸미기</button><button class="ch-go" id="goBtn" type="button"><img class="ui" src="assets/ui_flag.webp" alt=""> 출발!</button></div>
-  <p class="rc-tip">차를 끌면 빙글 돌려 볼 수 있어요.</p>
-  <p class="rc-credit" id="credit"></p>
+  <div class="gp-mid">
+    <div class="gp-card gp-stats"><h3 class="gp-tag"><img class="ui" src="assets/ui_wheel.webp" alt="">성능</h3><div id="carStats"></div></div>
+    <div class="gp-card gp-colors"><h3 class="gp-tag"><img class="ui" src="assets/ui_spray.webp" alt="">색깔 선택</h3><div id="colorRow" class="gp-sw"></div>
+      <div class="gp-qb"><button type="button" data-q="wheel"><img class="ui" src="assets/ui_wheel.webp" alt=""><span>바퀴</span></button><button type="button" data-q="paint"><img class="ui" src="assets/ui_bucket_r.webp" alt=""><span>도색</span></button><button type="button" data-q="decal"><img class="ui" src="assets/ui_stickers.webp" alt=""><span>스티커</span></button></div></div>
+  </div>
+  <div class="gp-bot">
+    <div class="gp-row">
+      <div class="gp-card gp-course"><h3 class="gp-tag"><img class="ui" src="assets/ui_flag.webp" alt="">코스 선택</h3><div id="courseRow" class="gp-courses"></div></div>
+      <div class="gp-card gp-opts" id="opts"></div>
+    </div>
+    <div class="gp-go"><button class="gp-btn tune" id="tuneBtn" type="button"><img class="ui" src="assets/ui_tools.webp" alt=""> 꾸미기</button><button class="gp-btn go" id="goBtn" type="button"><img class="ui" src="assets/ui_flag.webp" alt=""> 출발! <em>»</em></button></div>
+    <p class="rc-credit" id="credit"></p>
+  </div>
 </section>
 
 <div class="rc-hud" id="hud" hidden>
