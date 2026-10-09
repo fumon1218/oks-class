@@ -110,5 +110,13 @@ if (mode === 'build') {
     lessons.push(buildLesson(sg, 'r' + no, 100 + no, '기보를', '복기 ' + no + ' · ' + who.slice(0, 18), (sg.meta.DT || sg.meta.EV || 'SGF 기보 따라 두기').slice(0, 24), '기보를 한 수씩 따라 둬 보는 수업이에요. ' + (sg.meta.RE ? '결과: ' + sg.meta.RE + '. ' : '') + '설명은 판의 변화(따냄·단수 등)를 엔진이 확인해서 붙였어요.')); no++; }
   let js = '/* 바둑 배우기 — 복기 수업(기보 따라 두기). scripts/go-replay-gen.mjs 가 만든 파일이에요(직접 고치지 마세요). */\n(function (root) {\n  \'use strict\';\n  var L = root.OKS_GO_LESSONS || require(\'./lessons.js\'), add = L.add;\n';
   lessons.forEach((l) => { js += '  add(' + JSON.stringify(l) + ');\n'; }); js += '})(typeof window !== \'undefined\' ? window : globalThis);\n';
+  { // 전체 기보 라이브러리(기보 보기·다음 수 맞히기용): 수순은 'x,y' 좌표를 두 글자(a~s)로, 패스는 '--'
+    const games = []; if (fs.existsSync(sd)) for (const f of fs.readdirSync(sd).filter((x) => /\.sgf$/i.test(x)).sort()) {
+      const sg = parseSgf(fs.readFileSync(path.join(sd, f), 'utf8')); if (sg.moves.length < 12 || sg.n !== 19 || (sg.setup.B.length + sg.setup.W.length)) continue;
+      const ko = (t) => Object.keys(KO_NAMES).reduce((q, k) => q.split(k).join(KO_NAMES[k]), t);
+      games.push({ id: 'g' + (games.length + 1), b: ko(sg.meta.PB || '흑'), w: ko(sg.meta.PW || '백'), dt: sg.meta.DT || '', re: sg.meta.RE || '', mv: sg.moves.map((m) => (m.x == null || m.x < 0 ? '--' : String.fromCharCode(97 + m.x) + String.fromCharCode(97 + m.y))).join('') });
+    }
+    fs.writeFileSync(path.join(dir, 'games.js'), '/* 기보 라이브러리 — scripts/go-replay-gen.mjs 가 만든 파일이에요(직접 고치지 마세요). */\nwindow.OKS_GO_GAMES = ' + JSON.stringify(games) + ';\n'); console.log('기보', games.length, '개');
+  }
   fs.writeFileSync(path.join(dir, 'lessons-replay.js'), js); console.log('복기 수업', lessons.length, '개 (문제 ' + lessons.reduce((s, l) => s + l.items.length, 0) + '개)');
 }

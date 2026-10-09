@@ -191,7 +191,7 @@ function doUndo() {
 function updateButtons() {
   const play = mode === 'play' || mode === 'two', learn = mode === 'learn';
   $('btnUndo').hidden = !play; $('btnPass').hidden = !play; $('btnTerr').hidden = !play; $('btnAssist').hidden = !play;
-  $('btnNext').hidden = !(learn && stepPhase === 'page'); $('btnRetry').hidden = !(learn && stepPhase === 'item'); $('btnList').hidden = !learn; $('btnHint').hidden = !(play || (learn && stepPhase === 'item'));
+  $('btnNext').hidden = !(learn && stepPhase === 'page' && !(lesson && lesson.kibo)); $('btnRetry').hidden = !(learn && stepPhase === 'item'); $('btnList').hidden = !learn; $('btnHint').hidden = !(play || (learn && stepPhase === 'item'));
   { const showBar = learn && stepPhase === 'page' && PL.total > 0; $('player').hidden = !showBar; if (!showBar && PL.playing) { PL.playing = false; PL.tok++; } }
   $('btnUndo').disabled = busy || over || scoring || !play || !game.stack.length;
   $('btnPass').disabled = busy || over || scoring || !isHumanTurn(); $('btnHint').disabled = over || busy || (play && (scoring || !isHumanTurn()));
@@ -281,8 +281,8 @@ function openCurriculum() {
 
 /* ---------- 배우기: 수업 진행 ---------- */
 let lessonStep = { page: 0, item: 0, mistakes: 0, asked: 0, phase: 'page' }, scriptRun = 0;
-function startLesson(id) {
-  resetState(); startWorker(); mode = 'learn'; lesson = L.LESSONS.find((l) => l.id === id); if (!lesson) return; $('menu').hidden = true; $('modeLabel').textContent = L.LEVELS[lesson.lv - 1].name + ' · ' + lesson.title;
+function startLesson(id, obj) {
+  resetState(); startWorker(); mode = 'learn'; lesson = obj || L.LESSONS.find((l) => l.id === id); if (!lesson) return; $('menu').hidden = true; $('modeLabel').textContent = L.LEVELS[lesson.lv - 1].name + ' · ' + lesson.title;
   lessonStep = { page: 0, item: 0, mistakes: 0, asked: 0, phase: 'page' }; stats = O.newStats(); S.setView(0, false, 0.62); planLesson(); showPage();
 }
 function loadPosition(n, g) { game = g; newBoard(n, g); clearMarks(); }
@@ -301,7 +301,7 @@ async function showPage() {
 /* ---------- 재생 막대(복기·시범 수업): 재생·일시정지·정지·한 수 되돌리기·빠르게 감기 ---------- */
 const PL = { playing: false, speed: 1, k: 0, pp: null, plan: [], total: 0, tok: 0, anim: null, rid: 0 };
 const PL_SPEEDS = [0.5, 1, 2, 4];
-const isReplayLesson = () => !!lesson && /^r\d+$/.test(lesson.id);
+const isReplayLesson = () => !!lesson && (lesson.kibo || /^r\d+$/.test(lesson.id));
 function planLesson() { PL.plan = lesson.pages.map((pg) => (L.preparePage(pg).script || []).length); PL.total = PL.plan.reduce((a, b) => a + b, 0); PL.playing = false; PL.tok++; PL.pp = null; PL.k = 0; }
 const plBase = (p) => PL.plan.slice(0, p).reduce((a, b) => a + b, 0);
 const plPos = () => plBase(lessonStep.page) + PL.k;
@@ -316,11 +316,11 @@ function plLoad(p, k) { // p쪽의 k번째 수까지(애니메이션 없이) 보
   const rid = ++scriptRun; lessonStep.page = p; const pp = L.preparePage(lesson.pages[p]), sc = pp.script || [];
   for (let i = 0; i < k; i++) { const st = sc[i]; if (st.pass) pp.game.pass(); else pp.game.play(st.s % pp.n, (st.s / pp.n) | 0); }
   loadPosition(pp.n, pp.game); let show = pp.show, text = pp.text; for (let i = 0; i < k; i++) { if (sc[i].show) show = sc[i].show; if (sc[i].text) text = sc[i].text; }
-  applyShow(show); if (k && !sc[k - 1].pass) { marks.last.clear(); marks.last.add(sc[k - 1].s); refreshMarkers(); }
+  applyShow(show); if (k && !sc[k - 1].pass) { marks.last.clear(); marks.last.add(sc[k - 1].s); refreshMarkers(); } if (lesson.kibo) kiboLabels(pp, k);
   say(text, null, false); $('btnNext').textContent = nextLabel(); PL.pp = pp; PL.k = k; PL.rid = rid; plUpdate();
 }
 async function plStepOnce(tok) { // 한 수 두기(애니메이션)
-  const pp = PL.pp, st = pp.script[PL.k]; PL.anim = (async () => { const rec = st.pass ? pp.game.pass() : pp.game.play(st.s % pp.n, (st.s / pp.n) | 0); if (rec && !rec.pass) await animateRec(rec); if (tok !== PL.tok && tok !== -1) return; if (st.show) applyShow(st.show); if (st.text) say(st.text, null, PL.speed <= 1 ? st.text : false); })();
+  const pp = PL.pp, st = pp.script[PL.k]; PL.anim = (async () => { const rec = st.pass ? pp.game.pass() : pp.game.play(st.s % pp.n, (st.s / pp.n) | 0); if (rec && !rec.pass) await animateRec(rec); if (tok !== PL.tok && tok !== -1) return; if (st.show) applyShow(st.show); if (lesson.kibo) kiboLabels(pp, PL.k + 1); if (st.text) say(st.text, null, !lesson.kibo && PL.speed <= 1 ? st.text : false); })();
   await PL.anim; PL.k++; plUpdate(); return st;
 }
 async function plPlay(first) {
@@ -422,9 +422,10 @@ function openMenu(fromFinish) {
   const sel = { mode: prefs.mode === 'learn' ? 'learn' : prefs.mode, n: prefs.n, color: prefs.color, handicap: prefs.handicap, playLv: O.levelFor(LESSON) };
   const chip = (cls, val, label, small, on) => '<button type="button" class="ch-chip' + (on ? ' on' : '') + '" data-' + cls + '="' + val + '">' + label + (small ? '<small>' + small + '</small>' : '') + '</button>';
   function render() {
-    const modes = [['learn', '🎓', '바둑 배우기', '입문부터 고급까지'], ['play', '🤖', '컴퓨터와 대국', '9·13·19줄'], ['two', '👫', '둘이서 대국', '친구와 번갈아']];
+    const modes = [['learn', '🎓', '바둑 배우기', '입문부터 고급까지'], ['play', '🤖', '컴퓨터와 대국', '9·13·19줄'], ['two', '👫', '둘이서 대국', '친구와 번갈아'], ['kibo', '📜', '기보·맞히기', '프로 대국 보기']];
     const doneN = L.LESSONS.filter((l) => progress[l.id]).length; let opt = '';
     if (sel.mode === 'learn') opt = '<p class="why">입문 → 초급 → 중급 → 고급, 전체 ' + L.LESSONS.length + '개 수업 중 <b>' + doneN + '개</b>를 마쳤어요. 규칙, 단수·따내기, 사활, 축·장문, 포석, 끝내기, 형세 판단까지 하나씩 풀면서 익혀요.</p>';
+    else if (sel.mode === 'kibo') opt = '<p class="why">프로 대국을 처음부터 끝까지 보거나, <b>다음 수를 맞혀</b> 보면서 눈을 길러요. 내가 가진 SGF 파일도 불러올 수 있어요.</p>';
     else {
       const mh = E.maxHandicap(sel.n); if (sel.handicap > mh) sel.handicap = mh;
       opt = '<div class="ch-row"><label>판 크기</label>' + [9, 13, 19].map((n) => chip('n', n, n + '줄', n === 9 ? '처음이라면' : n === 13 ? '중간' : '정식', sel.n === n)).join('') + '</div>';
@@ -434,7 +435,7 @@ function openMenu(fromFinish) {
     }
     el.innerHTML = '<div class="ch-card"><h1>⚫⚪ 3D 바둑</h1><p>집을 더 많이 차지하면 이기는 바둑이에요.</p><div class="ch-modes">' +
       modes.map((m) => '<button type="button" class="ch-mode' + (sel.mode === m[0] ? ' on' : '') + '" data-mode="' + m[0] + '"><i>' + m[1] + '</i><b>' + m[2] + '</b><span>' + m[3] + '</span></button>').join('') + '</div>' + opt +
-      '<button type="button" class="ch-go" id="goBtn">' + (sel.mode === 'learn' ? '수업 고르기' : '시작!') + '</button>' + (mode && !fromFinish ? '<div class="ch-row"><button type="button" class="ch-chip" id="closeMenu">닫기</button></div>' : '') + '</div>';
+      '<button type="button" class="ch-go" id="goBtn">' + (sel.mode === 'learn' ? '수업 고르기' : sel.mode === 'kibo' ? '기보 고르기' : '시작!') + '</button>' + (mode && !fromFinish ? '<div class="ch-row"><button type="button" class="ch-chip" id="closeMenu">닫기</button></div>' : '') + '</div>';
     el.querySelectorAll('[data-mode]').forEach((b) => { b.onclick = () => { sel.mode = b.dataset.mode; O.unlock(); O.sfx('tick'); render(); }; });
     el.querySelectorAll('[data-n]').forEach((b) => { b.onclick = () => { sel.n = +b.dataset.n; render(); }; });
     el.querySelectorAll('[data-plv]').forEach((b) => { b.onclick = () => { sel.playLv = +b.dataset.plv; render(); }; });
@@ -443,9 +444,90 @@ function openMenu(fromFinish) {
     const cm = $('closeMenu'); if (cm) cm.onclick = () => { el.hidden = true; };
     $('goBtn').onclick = () => { O.unlock(); Object.assign(prefs, { mode: sel.mode, n: sel.n, color: sel.color, handicap: sel.handicap }); savePrefs();
       if (sel.mode === 'learn') openCurriculum();
+      else if (sel.mode === 'kibo') openKibo();
       else { el.hidden = true; const hc = sel.mode === 'play' ? sel.handicap : 0; startGame({ mode: sel.mode, n: sel.n, level: sel.playLv, color: sel.mode === 'play' ? (hc && sel.color < 0 ? -1 : sel.color) : 1, handicap: hc }); } };
   }
   render(); O.say('3D 바둑이에요. 하고 싶은 놀이를 골라요.');
+}
+
+/* ---------- 기보 보기 · 다음 수 맞히기 ---------- */
+const KG_KEY = 'oks_go_sgf_v1', KG_SCORE = 'oks_go_guess_v1';
+const loadUserGames = () => { try { return JSON.parse(localStorage.getItem(KG_KEY) || '[]'); } catch (e) { return []; } };
+const saveUserGames = (a) => { try { localStorage.setItem(KG_KEY, JSON.stringify(a)); } catch (e) { note('저장 공간이 부족해요.'); } };
+const guessScore = () => { try { return Object.assign({ asked: 0, right: 0 }, JSON.parse(localStorage.getItem(KG_SCORE) || '{}')); } catch (e) { return { asked: 0, right: 0 }; } };
+const allGames = () => (window.OKS_GO_GAMES || []).concat(loadUserGames());
+const reText = (re) => { if (!re) return ''; const m = /^([BW])\+(.*)$/i.exec(re); if (!m) return re; const w = m[1].toUpperCase() === 'B' ? '흑' : '백', r = m[2]; return w + (/^R/i.test(r) ? ' 불계승' : /^T/i.test(r) ? ' 시간승' : /^[\d.]+$/.test(r) ? ' ' + r + '집 승' : ' 승'); };
+const gTitle = (g) => g.b + ' 대 ' + g.w;
+const decodeMv = (g) => { const out = []; for (let i = 0; i + 1 < g.mv.length; i += 2) { const a = g.mv.slice(i, i + 2); out.push(a === '--' ? { pass: true } : { x: a.charCodeAt(0) - 97, y: a.charCodeAt(1) - 97 }); } return out; };
+const hasSetup = (g) => !!(g.setup && (g.setup.B.length || g.setup.W.length));
+function kiboLabels(pp, k) {
+  labelData.length = 0;
+  for (let i = Math.max(0, k - 6); i < k; i++) { const st = pp.script[i]; if (!st || st.pass) continue; const c = pp.game.get(st.s); if (!c) continue; labelData.push({ s: st.s, t: String(i + 1), color: c > 0 ? '#ffffff' : '#111111', big: i === k - 1 }); }
+  refreshMarkers();
+}
+function openKibo() {
+  scriptRun++; PL.tok++; PL.playing = false; const el = $('menu'); el.hidden = false; document.querySelectorAll('.oks-overlay').forEach((x) => x.remove()); hideQuiz(); $('player').hidden = true;
+  const gs = allGames(), sc = guessScore();
+  el.innerHTML = '<div class="ch-card"><h1>📜 기보 · 맞히기</h1><p class="why">프로 대국을 한 수씩 보거나, 다음 수를 맞혀 봐요. 입문이라면 <b>🎯 맞히기</b>로 앞부분 60수부터 해 봐요.' + (sc.asked ? '<br>지금까지 <b>' + sc.asked + '번 중 ' + sc.right + '번</b> 맞혔어요.' : '') + '</p><div class="kibo-list">' +
+    gs.map((g) => '<div class="kibo-item"><div><b>' + gTitle(g) + '</b><small>' + [g.dt, reText(g.re), decodeMv(g).length + '수', g.n && g.n !== 19 ? g.n + '줄' : '', g.id[0] === 'u' ? '내 기보' : ''].filter(Boolean).join(' · ') + '</small></div><span><button type="button" class="ch-chip" data-v="' + g.id + '">▶ 보기</button>' +
+      (hasSetup(g) ? '' : '<button type="button" class="ch-chip" data-g="' + g.id + '">🎯 맞히기</button>') + (g.id[0] === 'u' ? '<button type="button" class="ch-chip" data-d="' + g.id + '" aria-label="지우기">🗑</button>' : '') + '</span></div>').join('') +
+    '</div><div class="ch-row"><button type="button" class="ch-chip" id="kiboImp">📂 내 SGF 불러오기</button><input type="file" id="kiboFile" accept=".sgf,.SGF,text/plain" multiple hidden><button type="button" class="ch-chip" id="kiboBack">← 처음으로</button></div></div>';
+  const byId = (id) => allGames().find((g) => g.id === id);
+  el.querySelectorAll('[data-v]').forEach((b) => { b.onclick = () => { O.unlock(); startKibo(byId(b.dataset.v)); }; });
+  el.querySelectorAll('[data-g]').forEach((b) => { b.onclick = () => { O.unlock(); startGuess(byId(b.dataset.g)); }; });
+  el.querySelectorAll('[data-d]').forEach((b) => { b.onclick = () => { saveUserGames(loadUserGames().filter((g) => g.id !== b.dataset.d)); openKibo(); }; });
+  $('kiboBack').onclick = () => openMenu(!mode); $('kiboImp').onclick = () => $('kiboFile').click();
+  $('kiboFile').onchange = async (e) => {
+    const fs = [...e.target.files]; if (!fs.length) return; const cur = loadUserGames(); let ok = 0;
+    for (const f of fs) { try { const g = window.OKS_SGF.parse(await f.text()); if (!g) continue; const key = g.mv + g.b + g.w; if (allGames().some((q) => q.mv === g.mv && q.b === g.b && q.w === g.w) || cur.some((q) => q.mv + q.b + q.w === key)) continue; g.id = 'u' + Date.now().toString(36) + ok; cur.push(g); ok++; } catch (er) {} }
+    if (ok) saveUserGames(cur); openKibo(); note(ok ? ok + '개를 불러왔어요.' : 'SGF 기보를 읽지 못했어요(이미 있거나 형식이 달라요).');
+  };
+  O.say('보고 싶은 기보를 골라요.');
+}
+function startKibo(g) {
+  const n = g.n || 19, mv = decodeMv(g), fc = g.fc === 'W' ? 1 : 0, nm = (i) => ((i + fc) % 2 === 0 ? '흑' : '백');
+  const grid = []; for (let y = 0; y < n; y++) grid.push(new Array(n).fill('.')); if (g.setup) { g.setup.B.forEach((p) => { grid[p[1]][p[0]] = 'X'; }); g.setup.W.forEach((p) => { grid[p[1]][p[0]] = 'O'; }); }
+  const script = mv.map((m, i) => (m.pass ? { pass: true, text: (i + 1) + '수 · ' + nm(i) + ' 패스', wait: 700 } : [m.x, m.y, (i + 1) + '수 · ' + nm(i), 900]));
+  const page = { n, rows: grid.map((r) => r.join('')), turn: fc ? 'O' : 'X', text: gTitle(g) + (g.dt ? ' (' + g.dt + ')' : '') + (g.re ? ' · ' + reText(g.re) : '') + '. ▶ 를 눌러 처음부터 보거나, 아래 막대를 끌어서 원하는 수로 가요.', script };
+  startLesson('kibo', { id: 'kibo', kibo: true, lv: 3, title: gTitle(g), pages: [page], items: [] });
+}
+let G = null;
+function startGuess(g) {
+  resetState(); startWorker(); mode = 'guess'; $('menu').hidden = true; $('modeLabel').textContent = '다음 수 맞히기 · ' + gTitle(g); const mv = decodeMv(g), n = g.n || 19;
+  newBoard(n); S.setView(0, false, 0.62); G = { g, mv, i: 0, tries: 0, pts: 0, right: 0, asked: 0, max: Math.min(60, mv.length), busy: true, from: 2 };
+  updateButtons(); guessNext(true);
+}
+function guessPanel(buttons) {
+  const q = $('quiz'); q.hidden = false; q.style.bottom = (document.querySelector('.ch-bottom').getBoundingClientRect().height + 10) + 'px'; q.innerHTML = buttons.map((b, i) => '<button type="button" class="ch-btn big' + (b.cls ? ' ' + b.cls : '') + '" data-i="' + i + '">' + b.t + '</button>').join('');
+  q.querySelectorAll('button').forEach((el) => { el.onclick = () => { O.unlock(); buttons[+el.dataset.i].f(); }; });
+}
+async function guessNext(first) {
+  if (!G) return; const rid = runId;
+  while (G.i < G.from && G.i < G.mv.length) { const m = G.mv[G.i]; const rec = m.pass ? game.pass() : game.play(m.x, m.y); if (rec && !rec.pass) await animateRec(rec); if (rid !== runId) return; G.i++; }
+  if (G.i >= G.max) return guessEnd();
+  G.tries = 0; G.busy = false; clearMarks(); const m = G.mv[G.i]; if (m.pass) { game.pass(); G.i++; return guessNext(); }
+  const c = game.turn; say(G.i + 1 + '수째 · ' + colName(c) + ' 차례. 프로는 어디에 뒀을까요? 판을 눌러 봐요.', null, first ? '프로는 어디에 뒀을까요? 판을 눌러 봐요.' : false);
+  guessPanel([{ t: '🤔 모르겠어요', f: () => guessReveal(false) }, { t: '✋ 그만하기', f: guessEnd }]);
+}
+async function guessTap(s) {
+  if (!G || G.busy || game.get(s)) return; const m = G.mv[G.i]; if (!m || m.pass) return; const a = m.y * N + m.x, d = Math.max(Math.abs((s % N) - m.x), Math.abs(((s / N) | 0) - m.y));
+  O.unlock(); G.busy = true; const sc = guessScore();
+  if (s === a) { sc.asked++; sc.right++; G.asked++; G.right++; G.pts += G.tries ? 1 : 2; try { localStorage.setItem(KG_SCORE, JSON.stringify(sc)); } catch (e) {} O.sfx('coin'); say(G.tries ? '맞았어요! 프로와 같은 수예요.' : '정답! 프로와 똑같은 수예요! 🎉', 'good', false); return guessPlay(); }
+  if (G.tries === 0) { G.tries = 1; clearMarks(); marks.dot.add(s); refreshMarkers(); say(d <= 2 ? '아깝다! 아주 가까워요. 한 번만 더 생각해 봐요.' : '음, 다른 곳이에요. 한 번 더 생각해 봐요.', null, false); await sleep(900); marks.dot.clear(); refreshMarkers(); G.busy = false; return; }
+  guessReveal(true, d);
+}
+async function guessReveal(tried) {
+  if (!G) return; const rid = runId, m = G.mv[G.i], sc = guessScore(); G.busy = true; sc.asked++; G.asked++; try { localStorage.setItem(KG_SCORE, JSON.stringify(sc)); } catch (e) {}
+  clearMarks(); marks.ring.add(m.y * N + m.x); refreshMarkers(); say('프로는 여기에 뒀어요. ' + (tried ? '다음엔 꼭 맞혀요!' : '잘 봐 두어요.'), null, false); hideQuiz(); await sleep(1600); if (rid !== runId) return; guessPlay();
+}
+async function guessPlay() {
+  const rid = runId; hideQuiz(); await sleep(500); if (rid !== runId || !G) return; const m = G.mv[G.i], rec = game.play(m.x, m.y); if (rec) await animateRec(rec); if (rid !== runId) return;
+  clearMarks(); if (rec) { marks.last.add(m.y * N + m.x); refreshMarkers(); } G.i++; guessNext();
+}
+function guessEnd() {
+  if (!G) return; const g = G.g, a = G.asked, r = G.right; hideQuiz(); clearMarks(); const pct = a ? Math.round(r / a * 100) : 0;
+  say(a ? a + '번 중 ' + r + '번 맞혔어요! (' + pct + '%, ' + G.pts + '점) ' + (pct >= 40 ? '눈이 좋아요!' : '프로의 수를 많이 봤으니 곧 늘어요.') : '다음에 또 해 봐요.', pct >= 40 ? 'good' : null, false); G.busy = true;
+  guessPanel([{ t: '🔁 한 번 더', f: () => startGuess(g) }, { t: '📜 기보 목록', cls: 'go', f: () => { G = null; openKibo(); } }]);
 }
 
 /* ---------- 입력 ---------- */
@@ -453,9 +535,9 @@ function cellAt(clientX, clientY) {
   const p = S.planePoint(clientX, clientY, REST); if (!p) return -1; const gx = Math.round(p.x / SP + (N - 1) / 2), gy = Math.round(p.z / SP + (N - 1) / 2); if (gx < 0 || gy < 0 || gx >= N || gy >= N) return -1;
   if (Math.hypot(p.x - (gx - (N - 1) / 2) * SP, p.z - (gy - (N - 1) / 2) * SP) > SP * 0.7) return -1; return gy * N + gx;
 }
-S.onTap((x, y) => { const s = cellAt(x, y); if (s < 0) return; if (mode === 'learn') lessonTap(s); else if (mode === 'play' || mode === 'two') humanTap(s); });
+S.onTap((x, y) => { const s = cellAt(x, y); if (s < 0) return; if (mode === 'learn') lessonTap(s); else if (mode === 'guess') guessTap(s); else if (mode === 'play' || mode === 'two') humanTap(s); });
 S.wireButtons({ menu: () => openMenu(false) });
-$('btnUndo').onclick = doUndo; $('btnHint').onclick = doHint; $('btnPass').onclick = doPass; $('btnTerr').onclick = toggleTerr; $('btnNext').onclick = nextPage; $('btnRetry').onclick = retryItem; $('btnList').onclick = () => { scriptRun++; openCurriculum(); };
+$('btnUndo').onclick = doUndo; $('btnHint').onclick = doHint; $('btnPass').onclick = doPass; $('btnTerr').onclick = toggleTerr; $('btnNext').onclick = nextPage; $('btnRetry').onclick = retryItem; $('btnList').onclick = () => { scriptRun++; if (lesson && lesson.kibo) openKibo(); else openCurriculum(); };
 $('btnAssist').onclick = (e) => { assistOn = !assistOn; e.currentTarget.setAttribute('aria-pressed', assistOn); e.currentTarget.textContent = assistOn ? '🧭 알려주기' : '⬜ 알려주기 끔'; if (mode === 'play' || mode === 'two') coach(); };
 S.setAlive(() => marks.ring.size || marks.danger.size || marks.safe.size || marks.atari.size || marks.warn.size);
 S.onFrame((dt, t) => { const k = 1 + Math.sin(t * 5) * 0.1; markPool.forEach((m) => { if (m.visible && m.userData.pulse) m.scale.setScalar(m.userData.base * k); }); });
@@ -468,6 +550,6 @@ S.onFrame((dt, t) => { const k = 1 + Math.sin(t * 5) * 0.1; markPool.forEach((m)
 /* 시험용 손잡이 */
 window.__go = {
   game: () => game, mode: () => mode, over: () => over, busy: () => busy, scoring: () => scoring, prep: () => P, lesson: () => lesson, step: () => lessonStep, stoneCount: () => stones.size, n: () => N, dead: () => [...deadSet],
-  tap: (s) => (mode === 'learn' ? lessonTap(s) : humanTap(s)), answer: lessonAnswer, start: startGame, startLesson, openMenu, openCurriculum, nextPage, marks, finishScoring, progress,
+  tap: (s) => (mode === 'learn' ? lessonTap(s) : mode === 'guess' ? guessTap(s) : humanTap(s)), guessState: () => G, answer: lessonAnswer, start: startGame, startLesson, openMenu, openCurriculum, nextPage, marks, finishScoring, progress,
   screen(s) { return S.screenOf(new THREE.Vector3(wx(s), REST, wz(s))); }
 };

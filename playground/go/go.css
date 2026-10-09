@@ -39,3 +39,5 @@ body.go-page{background:radial-gradient(ellipse at 50% 30%,#7a6340 0%,#4b3b27 58
 .go-player input[type=range]::-moz-range-thumb{width:26px;height:26px;border:0;border-radius:50%;background:url(assets/pl_knob.webp) center/contain no-repeat}
 .go-player small{font-size:12px;font-weight:800;color:#4a2a10;text-shadow:0 1px 0 rgba(255,235,200,.7);white-space:nowrap}
 @media (max-width:420px){.go-player small{font-size:11px}}
+
+.kibo-list{max-height:48vh;overflow:auto;margin:8px 0;display:flex;flex-direction:column;gap:6px;text-align:left}.kibo-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(255,255,255,.55);border-radius:12px;padding:6px 10px}.kibo-item b{display:block;font-size:16px}.kibo-item small{display:block;font-size:12px;opacity:.75}.kibo-item span{display:flex;gap:4px;flex-shrink:0}.kibo-item .ch-chip{padding:6px 10px;min-width:0}
