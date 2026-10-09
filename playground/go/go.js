@@ -315,7 +315,7 @@ async function showPage() {
 /* ---------- 재생 막대(복기·시범 수업): 재생·일시정지·정지·한 수 되돌리기·빠르게 감기 ---------- */
 const PL = { playing: false, speed: 1, k: 0, pp: null, plan: [], total: 0, tok: 0, anim: null, rid: 0 };
 const PL_SPEEDS = [0.5, 1, 2, 4];
-const isReplayLesson = () => !!lesson && (lesson.kibo || /^r\d+$/.test(lesson.id));
+const isReplayLesson = () => !!lesson && (lesson.kibo || lesson.replay || /^r\d+$/.test(lesson.id));
 function planLesson() { PL.plan = lesson.pages.map((pg) => (L.preparePage(pg).script || []).length); PL.total = PL.plan.reduce((a, b) => a + b, 0); PL.playing = false; PL.tok++; PL.pp = null; PL.k = 0; }
 const plBase = (p) => PL.plan.slice(0, p).reduce((a, b) => a + b, 0);
 const plPos = () => plBase(lessonStep.page) + PL.k;
