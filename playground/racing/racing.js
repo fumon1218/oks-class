@@ -341,7 +341,7 @@ const note = (t) => say(t, null, false);
 
 function newRacer(def, isPlayer, slot, idx, colorIdx, eq) {
   const o = makeCarObject(def, colorIdx, eq); rScene.add(o.root);
-  const r = Object.assign(o, { isPlayer, s: slot.s, d: slot.d, v: 0, dd: 0, u: 0, yaw: 0, nitro: isPlayer ? 0.35 : 0, nOn: false, brake: false, finished: false, fT: 0, wallCd: 0, hitCd: 0, slowT: 0, slowF: 1, spinT: 0, spinDur: 1, boostT: 0, magT: 0, flyT: 0, bigT: 0, fy: 0, jy: 0, jv: 0, airT: 0, sup: 0, dr: 0, drT: 0, drLv: 0, drA: 0, drFx: 0, bs: 1, shield: 0, hzCd: 0, tgtD: slot.d, tgtT: 2 + Math.random() * 2, wob: Math.random() * 6, idx, aiV: 0, travel: 0 });
+  const r = Object.assign(o, { isPlayer, s: slot.s, d: slot.d, v: 0, dd: 0, u: 0, yaw: 0, nitro: isPlayer ? 0.35 : 0, nOn: false, brake: false, finished: false, fT: 0, wallCd: 0, hitCd: 0, slowT: 0, slowF: 1, spinT: 0, spinDur: 1, boostT: 0, magT: 0, flyT: 0, bigT: 0, hold: null, holdT: 0, fy: 0, jy: 0, jv: 0, airT: 0, sup: 0, dr: 0, drT: 0, drLv: 0, drA: 0, drFx: 0, bs: 1, shield: 0, hzCd: 0, tgtD: slot.d, tgtT: 2 + Math.random() * 2, wob: Math.random() * 6, idx, aiV: 0, travel: 0 });
   return r;
 }
 function startRace() {
@@ -367,7 +367,7 @@ function stepRacer(r, dt) {
     inp = Math.max(-1, Math.min(1, (r.d - r.tgtD) * 0.32)); r.brake = false;
     r.wob += dt * 0.4; let rb = 1; const gap = player.s - r.s; if (gap > 220) rb = 1.1; else if (gap < -260) rb = 0.88; r.aiV = player.def.vmax * r.pace * rb * (1 + Math.sin(r.wob) * 0.035);
   }
-  r.slowT -= dt; r.boostT -= dt; r.spinT -= dt; r.magT -= dt; r.flyT -= dt; r.bigT -= dt; if (r.spinT > 0) inp *= 0.3;
+  if (!r.isPlayer) aiUseItem(r, dt); r.slowT -= dt; r.boostT -= dt; r.spinT -= dt; r.magT -= dt; r.flyT -= dt; r.bigT -= dt; if (r.spinT > 0) inp *= 0.3;
   const prevS = r.s, air = r.jy > 0.03;
   if (r.isPlayer) { // 드리프트: 🛑을 누른 채 방향을 돌리면 미끄러져요
     const inpRaw = inp, canD = keys.B && r.v > def.vmax * 0.42 && !air && r.spinT <= 0 && !r.finished && mode === 'race';
@@ -512,7 +512,7 @@ function hzHit(r, m, u) {
 }
 function boxHit(r, m, u) {
   u.on = false; m.visible = false; const p = m.position; fx('burst', p.x, p.y, p.z, 5, 0.7, 1); fx('burst', p.x, p.y, p.z, 3.2, 0.5, 0.4);
-  if (r.isPlayer) { snd('box', 0.9, 1, 'coin'); giveItem(); } else r.boostT = Math.max(r.boostT, 1.6);
+  if (r.isPlayer) { snd('box', 0.9, 1, 'coin'); giveItem(); } else { r.boostT = Math.max(r.boostT, 1.0); if (!r.hold) { r.hold = aiPick(r); r.holdT = 1.2 + Math.random() * 2.6; } }
 }
 function hitCheck(dt) {
   const lp = course.shape ? course.length : 1e9, ph = (list, fn) => list.slice().forEach((m) => { const u = m.userData; if (!u.on) return; if (u.life && raceT - u.born > u.life) { hzs.splice(hzs.indexOf(m), 1); rScene.remove(m); return; } racers.forEach((r) => { if (r.finished || !u.on) return; const rel = ((r.s - u.s) % lp + lp * 1.5) % lp - lp / 2; if (Math.abs(rel) < u.rs && Math.abs(r.d - u.d) < u.rd) fn(r, m, u); }); });
@@ -528,6 +528,24 @@ function giveItem() {
 function paintSlot(b, name, spin, n) { b.innerHTML = name ? '<img src="assets/it_' + name + '.webp" alt="" draggable="false">' : ''; b.classList.toggle('has', !!name && !spin); b.classList.toggle('roll', !!spin); b.disabled = !name || !!spin; b.setAttribute('aria-label', name && !spin ? ITM[name].n + ' 쓰기' : '아이템 칸 ' + n); }
 function setItemUi(spin) { const sp = (k) => !!spin && held.length === k; paintSlot($('btnI'), held[0] || (sp(0) ? spin : ''), sp(0), 1); paintSlot($('btnI2'), held[1] || (sp(1) ? spin : ''), sp(1), 2); }
 function updateItemUI() { setItemUi(); }
+
+/* ---------- 상대 차의 아이템 ---------- */
+function aiPick(r) {
+  const rk = ranks().indexOf(r), back = rk >= 4, att = prefs.diff > 0, w = { shield: 3, rocket: back ? 4 : 1.5, wings: back ? 2.5 : 1, giant: back ? 2 : 0.6 };
+  if (att) { w.bomb = (back ? 3 : 1.2) * (prefs.diff === 2 ? 1.4 : 0.8); w.oil = rk <= 2 ? 2.5 : 0.8; }
+  return pickW(w);
+}
+function aiUseItem(r, dt) {
+  if (!r.hold || r.finished || mode !== 'race') return; r.holdT -= dt; if (r.holdT > 0) return;
+  const it = r.hold, a = track.at(r.s); let used = true;
+  if (it === 'shield') { r.shield = 1; }
+  else if (it === 'rocket') { if (Math.abs(a.k) < 0.004) { r.boostT = Math.max(r.boostT, 2.6); fxAt(r, 'burst', 3, 0.5); } else used = false; }
+  else if (it === 'wings') { r.flyT = 3.5; fxAt(r, 'burst', 3, 0.5); }
+  else if (it === 'giant') { r.bigT = 5; fxAt(r, 'burst', 4, 0.6); }
+  else if (it === 'bomb') { const t = racers.filter((o) => o !== r && !o.finished && o.s > r.s + 15 && o.s - r.s < 230).sort((x, y) => x.s - y.s)[0]; if (t && !(t.isPlayer && prefs.diff === 1 && Math.random() < 0.5)) { const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: txc('it_bomb'), transparent: true, depthWrite: false })); sp.scale.set(1.9 * 0.656, 1.9, 1); rScene.add(sp); projs.push({ sp, from: r, to: t, t: 0, dur: Math.max(0.5, Math.min(1.2, (t.s - r.s) / 70)) }); } else used = !!(!t && r.holdT < -6); }
+  else if (it === 'oil') { const t = racers.find((o) => o !== r && !o.finished && o.s < r.s && r.s - o.s < 40 && Math.abs(o.d - r.d) < 5); if (t) addHz(rScene, 'oil', r.s - 9, r.d, false, { owner: r, born: raceT, life: 14 }); else used = r.holdT < -6; }
+  if (used) { r.hold = null; r.holdT = 0; }
+}
 function useItem(k) {
   k = k || 0; if (mode !== 'race' || !held[k] || !player) return; let it = held[k]; held.splice(k, 1); updateItemUI(); snd('use', 0.9, 1, 'ok');
   if (it === 'mystery') { snd('funny', 0.7); it = ['rocket', 'wings', 'giant', 'coinrain', 'shield', 'magnet', 'rainbow'][Math.floor(Math.random() * 7)]; say('나온 건… ' + ITM[it].n + '!', 'good', ITM[it].n + '!'); }
