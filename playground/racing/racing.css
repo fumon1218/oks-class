@@ -141,3 +141,14 @@ img.ui.rb{animation:rcrb 3s linear infinite}@keyframes rcrb{to{filter:hue-rotate
 @media (max-height:540px){.gp-title em{display:none}}
 .gp .rc-credit{position:relative;z-index:2;opacity:1;color:#26324a;background:rgba(255,255,255,.82);border-radius:8px;padding:1px 8px;align-self:center;max-width:min(92vw,900px);text-align:center}
 .gp-lamp.r{right:24%}
+
+/* 새 버튼 그림 */
+.gp-btn.tune{background:url(assets/gar_btn_tune.webp) center/100% 100% no-repeat;box-shadow:none;color:#fff;text-shadow:0 2px 0 #b34a00,0 0 6px rgba(150,60,0,.6);width:clamp(150px,17vw,230px);min-width:0;aspect-ratio:640/171;padding:0 0 0 22%;font-size:clamp(15px,1.6vw,21px)}
+.gp-btn.tune img.ui{display:none}
+.gp-btn.go{background:url(assets/gar_btn_go.webp) center/100% 100% no-repeat;box-shadow:none;width:clamp(190px,22vw,300px);min-width:0;aspect-ratio:720/210;padding:0 16% 0 18%;font-size:clamp(20px,2.4vw,32px);text-shadow:0 2px 0 rgba(0,70,20,.6)}
+.gp-btn.go img.ui,.gp-btn.go em{display:none}
+@media (max-height:540px){.gp-btn.go{width:170px;font-size:20px}.gp-btn.tune{width:130px;font-size:14px}}
+
+.gp-btn.tune,.gp-btn.go{white-space:nowrap;line-height:1}.gp-btn.tune{padding:0 6% 0 32%}.gp-btn.go{padding:0 22% 0 24%}
+.gp-btn.tune,.gp-btn.go{box-sizing:border-box}
+.gp-btn.tune{padding:0 .4em 0 3.6em}.gp-btn.go{padding:0 2.4em 0 2.2em}
