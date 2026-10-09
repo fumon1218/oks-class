@@ -122,3 +122,22 @@ img.ui.rb{animation:rcrb 3s linear infinite}@keyframes rcrb{to{filter:hue-rotate
 @media (max-height:720px){.rc-mini{top:calc(max(10px,env(safe-area-inset-top)) + 168px);width:128px;height:128px}}
 @media (max-height:720px) and (max-width:520px){.rc-mini{width:96px;height:96px}}
 @media (max-height:520px){.rc-mini{right:calc(max(12px,env(safe-area-inset-right)) + 112px);top:calc(max(10px,env(safe-area-inset-top)) + 100px);width:92px;height:92px;border-radius:14px}}
+
+/* ---- 차고 새 단장: 이미지 간판·화살표·받침대 ---- */
+.gp-arrow{background:none;box-shadow:none;border-radius:0;width:clamp(54px,6.4vw,92px);height:clamp(54px,6.4vw,92px);filter:drop-shadow(0 6px 6px rgba(60,30,0,.35))}.gp-arrow img{width:100%;height:100%;display:block;pointer-events:none}.gp-arrow:active{transform:translateY(3px) scale(.97);box-shadow:none}
+.gp-title{position:relative;display:block;flex:none;width:clamp(260px,30vw,520px);aspect-ratio:1000/301;background:url(assets/gar_title.webp) center/100% 100% no-repeat;border:0;border-radius:0;box-shadow:none;padding:0;min-width:0;filter:drop-shadow(0 6px 8px rgba(0,0,0,.3));container-type:inline-size}
+.gp-title small,.gp-title b,.gp-title span{position:absolute;left:0;right:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 12%}
+.gp-title small{top:4%;font-size:3.6cqw;font-weight:900;color:#8a6a3a;line-height:1.5}
+.gp-title b{top:23%;font-size:10cqw;line-height:1.25;color:#e03a24;font-weight:900;-webkit-text-stroke:0;text-shadow:0 2px 0 #fff,0 3px 5px rgba(120,40,0,.35);letter-spacing:.02em}
+.gp-title span{top:67%;font-size:3.4cqw;font-weight:900;color:#8a5a00;line-height:1.6}
+.gp-lamp{position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 40px);width:clamp(54px,6vw,100px);filter:drop-shadow(0 8px 14px rgba(255,190,60,.55));pointer-events:none;z-index:0}.gp-lamp.l{left:15%}.gp-lamp.r{right:15%}
+.gp-deco{position:absolute;bottom:0;pointer-events:none;z-index:0}.gp-deco img{display:block;pointer-events:none}
+.gp-deco.l{left:1%;width:clamp(150px,17vw,280px)}.gp-deco.l .box{width:100%;margin-bottom:-14%}.gp-deco.l .helmet{width:38%;margin:0 0 -6% 28%;position:relative;z-index:1}
+.gp-deco.r{right:1%;width:clamp(100px,11vw,190px)}.gp-deco.r img{width:100%;margin-bottom:-8%}
+@media (max-width:1100px),(max-height:700px){.gp-deco,.gp-lamp{display:none}}
+@media (max-height:540px){.gp-title small,.gp-title span{display:none}.gp-title{width:200px}.gp-title b{top:26%}}
+.gp-title em{position:absolute;left:-10%;right:-10%;top:100%;margin-top:-1%;text-align:center;font-style:normal;font-weight:900;font-size:clamp(12px,1.1vw,16px);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.7),0 0 6px rgba(0,0,0,.4);white-space:nowrap}
+.gp-lamp{top:-18px;width:clamp(54px,5.4vw,96px)}.gp-lamp.l{left:12%}.gp-lamp.r{right:13%}
+@media (max-height:540px){.gp-title em{display:none}}
+.gp .rc-credit{position:relative;z-index:2;opacity:1;color:#26324a;background:rgba(255,255,255,.82);border-radius:8px;padding:1px 8px;align-self:center;max-width:min(92vw,900px);text-align:center}
+.gp-lamp.r{right:24%}

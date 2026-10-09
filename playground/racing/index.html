@@ -22,10 +22,12 @@
 <div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">차고를 열고 있어요…</span></div>
 
 <section class="gp" id="garage" hidden aria-label="차고">
+  <img class="gp-lamp l" src="assets/gar_lamp.webp" alt="" draggable="false"><img class="gp-lamp r" src="assets/gar_lamp.webp" alt="" draggable="false">
+  <div class="gp-deco l"><img class="box" src="assets/gar_toolbox.webp" alt="" draggable="false"></div><div class="gp-deco r"><img src="assets/gar_tires.webp" alt="" draggable="false"></div>
   <div class="gp-top">
-    <button class="gp-arrow" id="carPrev" type="button" aria-label="이전 차"><i></i></button>
-    <div class="gp-title"><img class="ui fl" src="assets/ui_flag.webp" alt=""><div class="gp-tt"><small id="carSub"></small><b id="carName"></b><span id="carBest"></span></div><img class="ui fl r" src="assets/ui_flag.webp" alt=""></div>
-    <button class="gp-arrow nx" id="carNext" type="button" aria-label="다음 차"><i></i></button>
+    <button class="gp-arrow" id="carPrev" type="button" aria-label="이전 차"><img src="assets/gar_arrow_l.webp" alt="" draggable="false"></button>
+    <div class="gp-title"><small id="carSub"></small><b id="carName"></b><span id="carBest"></span><em id="carDesc"></em></div>
+    <button class="gp-arrow nx" id="carNext" type="button" aria-label="다음 차"><img src="assets/gar_arrow_r.webp" alt="" draggable="false"></button>
   </div>
   <div class="gp-mid">
     <div class="gp-card gp-stats"><h3 class="gp-tag"><img class="ui" src="assets/ui_wheel.webp" alt="">성능</h3><div id="carStats"></div></div>

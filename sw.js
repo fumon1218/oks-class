@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v211';
+const CACHE_NAME = 'oks-class-v212';
 const ASSETS = [
   './',
   './index.html',
@@ -249,6 +249,14 @@ const ASSETS = [
   './playground/racing/assets/fx_splash.webp',
   './playground/racing/assets/gar1.webp',
   './playground/racing/assets/gar2.webp',
+  './playground/racing/assets/gar_arrow_l.webp',
+  './playground/racing/assets/gar_arrow_r.webp',
+  './playground/racing/assets/gar_helmet.webp',
+  './playground/racing/assets/gar_lamp.webp',
+  './playground/racing/assets/gar_podium.webp',
+  './playground/racing/assets/gar_tires.webp',
+  './playground/racing/assets/gar_title.webp',
+  './playground/racing/assets/gar_toolbox.webp',
   './playground/racing/assets/hz_ball.webp',
   './playground/racing/assets/hz_banana.webp',
   './playground/racing/assets/hz_blocks.webp',

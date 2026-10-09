@@ -169,6 +169,12 @@ gScene.add(new THREE.HemisphereLight(0xbfd4ff, 0x20243a, 0.9));
 { const k = new THREE.DirectionalLight(0xfff1dd, 2.4); k.position.set(-4, 7, 5); gScene.add(k); const r1 = new THREE.DirectionalLight(0x6ab0ff, 1.8); r1.position.set(6, 3, -5); gScene.add(r1); const r2 = new THREE.DirectionalLight(0xff9d6a, 1.2); r2.position.set(-6, 2, -4); gScene.add(r2); }
 const turn = new THREE.Group(); gScene.add(turn);
 { const sh = new THREE.Mesh(new THREE.CircleGeometry(3.4, 48), new THREE.MeshBasicMaterial({ map: canvasTex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(10,14,30,.55)'); gr.addColorStop(0.6, 'rgba(10,14,30,.22)'); gr.addColorStop(1, 'rgba(10,14,30,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }), transparent: true, depthWrite: false })); sh.rotation.x = -Math.PI / 2; sh.position.y = 0.01; gScene.add(sh); }
+/* 받침대(포디움): 차 뒤쪽에 그림판을 세워 놓고, 차가 받침대 위에 서 있는 것처럼 보이게 해요 */
+const podium = (() => { const t = new THREE.TextureLoader().load('assets/gar_podium.webp'); t.colorSpace = THREE.SRGBColorSpace; const m = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false })); m.renderOrder = -1; gScene.add(m); return m; })();
+function placePodium() {
+  const o = new THREE.Vector3(0, 0, 0), cp = camera.position, d = cp.distanceTo(o), back = 3.2, dir = o.clone().sub(cp).normalize(), up = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion), f = (d + back) / d, Wd = 7.6 * f, Hd = Wd * 295 / 1100;
+  podium.scale.set(Wd, Hd, 1); podium.position.copy(o).addScaledVector(dir, back).addScaledVector(up, -0.17 * Hd + 0.12 * f);
+}
 const SLOT_IMG = { paint: 'spray', decal: 'stickers', wheel: 'wheel', wing: 'wings', top: 'crown', eyes: 'eyes', neon: 'ring', flame: 'rocket' };
 const ITEM_IMG = { p_pearl: 'drop_b', p_matte: 'drop_k', p_chrome: 'drop_s', p_gold: 'bucket_y', p_rainbow: 'rainbow', d_star: 'st_star', d_bolt: 'st_bolt', d_flame: 'st_flame', d_checker: 'st_stripe' };
 const uiImg = (n, cls) => '<img class="ui' + (cls ? ' ' + cls : '') + '" src="assets/ui_' + n + '.webp" alt="" draggable="false">';
@@ -579,8 +585,8 @@ const LENS = [{ name: '짧은 길', f: 0.7 }, { name: '긴 길', f: 1 }];
 function effCourse() { const c = COURSES[prefs.course], lp = Math.max(1, Math.min(5, prefs.laps | 0 || 3)), ln = prefs.len === 0 ? 0 : 1; return Object.assign({}, c, { length: Math.round(c.length * LENS[ln].f / 4) * 4, laps: lp, key: c.id + (lp === 3 && ln === 1 ? '' : '_' + lp + 'x' + ln) }); }
 function bestOf(courseKey, carId) { return save.best[courseKey + ':' + carId]; }
 function renderGarageInfo() {
-  const d = CARS[gIdx]; $('carSub').textContent = d.sub; $('carName').textContent = d.name;
-  const b = bestOf(effCourse().key, d.id); $('carBest').textContent = b ? '🏆 이 코스 최고 기록 ' + fmtT(b) : '아직 달린 기록이 없어요';
+  const d = CARS[gIdx]; { const sp = d.sub.split(' · '); $('carSub').textContent = sp[0]; $('carDesc').textContent = sp.slice(1).join(' · '); } $('carName').textContent = d.name;
+  const b = bestOf(effCourse().key, d.id); $('carBest').textContent = b ? '🏆 최고 ' + fmtT(b) : '아직 기록이 없어요';
   const SI = ['speed', 'accel', 'steer', 'nitro'];
   $('carStats').innerHTML = d.stats.map((v, i) => '<div class="gp-st"><img class="ui" src="assets/ui_c_' + SI[i] + '.webp" alt=""><span>' + STAT_NAMES[i] + '</span><span class="bar">' + [1, 2, 3, 4, 5].map((k) => '<i class="' + (k <= v ? 'on' : '') + '"></i>').join('') + '</span></div>').join('');
   const cr = (c) => '“' + c[0] + '” — ' + c[1] + ' · <a href="' + c[2] + '" target="_blank" rel="noopener">Sketchfab</a> · ' + c[3];
@@ -683,7 +689,7 @@ function resize() {
     else if (!$('garage').hidden) { const bt = $('garage').querySelector('.gp-bot'), md = $('garage').querySelector('.gp-mid'), tp = $('garage').querySelector('.gp-top'), stacked = getComputedStyle(md).position !== 'absolute' && getComputedStyle(md).display !== 'none'; panel = bt.offsetHeight + (stacked ? md.offsetHeight : 0) + 8; top = 56 + tp.offsetHeight; }
     camera.setViewOffset(w, h, 0, (panel - top) / 2, w, h);
   } else camera.clearViewOffset();
-  camera.updateProjectionMatrix(); garageBg(w, h);
+  camera.updateProjectionMatrix(); garageBg(w, h); if (mode === 'garage' || mode === 'boot') { camera.updateMatrixWorld(true); placePodium(); }
 }
 window.addEventListener('resize', resize);
 let last = performance.now();
