@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v188';
+const CACHE_NAME = 'oks-class-v189';
 const ASSETS = [
   './',
   './index.html',
@@ -255,6 +255,20 @@ const ASSETS = [
   './playground/racing/assets/it_rocket.webp',
   './playground/racing/assets/it_shield.webp',
   './playground/racing/assets/it_wings.webp',
+  './playground/racing/assets/sfx/bonus.mp3',
+  './playground/racing/assets/sfx/boom.mp3',
+  './playground/racing/assets/sfx/boost.mp3',
+  './playground/racing/assets/sfx/box.mp3',
+  './playground/racing/assets/sfx/engine.mp3',
+  './playground/racing/assets/sfx/funny.mp3',
+  './playground/racing/assets/sfx/giant.mp3',
+  './playground/racing/assets/sfx/go.mp3',
+  './playground/racing/assets/sfx/got.mp3',
+  './playground/racing/assets/sfx/nitro.mp3',
+  './playground/racing/assets/sfx/orb.mp3',
+  './playground/racing/assets/sfx/use.mp3',
+  './playground/racing/assets/sfx/win.mp3',
+  './playground/racing/assets/sfx/wings.mp3',
   './playground/racing/assets/sp_aarch.webp',
   './playground/racing/assets/sp_acry.webp',
   './playground/racing/assets/sp_aorb.webp',
