@@ -25,6 +25,7 @@ const CARS = [
   { id: 'toy_knight', build: 'toy', style: 'knight', dc: 8, colors: true, name: '나이트', sub: '카툰 · 기사 투구 · 든든해요', title: '', src: '', front: 1, vmax: 62, acc: 20, lat: 11, nmul: 1.3, stats: [4, 3, 3, 4] },
   { id: 'toy_comet', build: 'toy', style: 'comet', dc: 9, colors: true, name: '코멧', sub: '카툰 · 혜성 꼬리 · 만능이에요', title: '', src: '', front: 1, vmax: 68, acc: 27, lat: 12, nmul: 1.3, stats: [5, 5, 4, 4] },
   { id: 'toy_red1', file: 'assets/toy_red1.glb', split: { fz: 0.327, rz: -0.31, y: 0.14, r: 0.17, ix: 0.215 }, scale: 4, wr: 0.56, name: '레드 원', sub: '3D 장난감 · 1번 레이서 · 반짝 광택', title: '', src: '', front: 1, vmax: 62, acc: 24, lat: 12, nmul: 1.3, stats: [4, 4, 4, 4] },
+  { id: 'toy_red2', file: 'assets/toy_red2.glb', split: { fz: 0.285, rz: -0.335, y: 0.12, r: 0.135, ix: 0.2 }, scale: 4, wr: 0.5, name: '레드 포뮬러', sub: '3D 장난감 · 날렵한 오픈휠 · 가장 빨라요', title: '', src: '', front: 1, vmax: 68, acc: 24, lat: 10.5, nmul: 1.3, stats: [5, 4, 3, 4] },
   { id: 'rx7', file: 'assets/rx7.glb', name: '마쓰다 RX-7', sub: '2002 · 일본 스포츠카', title: '2002 Mazda RX-7 Spirit-R', src: 'https://sketchfab.com/3d-models/2002-mazda-rx-7-spirit-r-277e2569280d4c9fa3bc3a85bbc627f1', front: 1, vmax: 56, acc: 24, lat: 12.5, nmul: 1.3, stats: [3, 4, 5, 3] },
   { id: 'm720', file: 'assets/mclaren720s.glb', name: '맥라렌 720S GT3', sub: '2019 · 영국 레이싱카', title: '2019 McLaren 720S GT3', src: 'https://sketchfab.com/3d-models/2019-mclaren-720s-gt3-cdf4ca67a56b497493931e8852e70b05', front: 1, vmax: 70, acc: 19, lat: 10.5, nmul: 1.26, stats: [5, 3, 3, 4] },
 ];
