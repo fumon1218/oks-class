@@ -28,11 +28,17 @@ const KO_NAMES = { '丁浩': '딩하오', '辜梓豪': '구쯔하오', '本木�
 function parseSgf(txt) {
   const n = +((txt.match(/SZ\[(\d+)\]/) || [])[1] || 19), prop = (k) => ((txt.match(new RegExp('(?:^|[^A-Z])' + k + '\\[([^\\]]*)\\]')) || [])[1] || '').trim();
   const pt = (s) => (s && s.length >= 2 ? [s.charCodeAt(0) - 97, s.charCodeAt(1) - 97] : null);
-  const main = txt.replace(/\([^;]*$/, ''); // 첫 가지만
+  
   const setup = { B: [], W: [] }; const am = txt.split(';')[1] || ''; for (const [key, c] of [['AB', 'B'], ['AW', 'W']]) { const m = am.match(new RegExp(key + '((?:\\[[a-z]{2}\\])+)')); if (m) (m[1].match(/\[([a-z]{2})\]/g) || []).forEach((q) => setup[c].push(pt(q.slice(1, 3)))); }
-  const moves = [], comments = []; const re = /;([BW])\[([a-z]{0,2})\]((?:[A-Z]+\[[^\]]*\])*)/g; let m;
-  const body = txt.slice(txt.indexOf(';', txt.indexOf(';') + 1)); // 루트 다음부터
-  while ((m = re.exec(body))) { const p = pt(m[2]); if (!p || p[0] >= n) { moves.push({ c: m[1], pass: true }); } else moves.push({ c: m[1], x: p[0], y: p[1] }); const cm = (m[3].match(/C\[([^\]]*)\]/) || [])[1]; comments.push(cm || ''); }
+  const moves = [], comments = [];
+  // 가지(변화도)가 있는 기보도 첫 줄기(본 기보)만 따라가요
+  let i = txt.indexOf('(') + 1, first = true; const walk = (keep) => { let seenChild = false;
+    while (i < txt.length && txt[i] !== ')') {
+      if (txt[i] === ';') { i++; let props = ''; while (i < txt.length && /[A-Z]/.test(txt[i])) { let k = ''; while (/[A-Z]/.test(txt[i])) k += txt[i++]; let vals = []; while (txt[i] === '[') { let v = ''; i++; while (i < txt.length && txt[i] !== ']') { if (txt[i] === '\\') i++; v += txt[i++]; } i++; vals.push(v); while (/\s/.test(txt[i] || '')) i++; } props += k + '=' + vals[0] + '\u0001'; if ((k === 'B' || k === 'W') && keep && !first) { /* 아래에서 처리 */ } if (keep && (k === 'B' || k === 'W')) { const q = pt(vals[0]); if (!q || q[0] >= n) moves.push({ c: k, pass: true }); else moves.push({ c: k, x: q[0], y: q[1] }); comments.push(''); } else if (keep && k === 'C' && comments.length) comments[comments.length - 1] = vals[0]; } first = false; }
+      else if (txt[i] === '(') { i++; const k = keep && !seenChild; seenChild = true; walk(k); }
+      else i++; }
+    i++; };
+  walk(true);
   return { n, setup, moves, comments, meta: { PB: prop('PB'), PW: prop('PW'), GN: prop('GN'), DT: prop('DT'), EV: prop('EV'), RE: prop('RE') } };
 }
 
