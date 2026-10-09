@@ -103,3 +103,12 @@ img.ui.rb{animation:rcrb 3s linear infinite}@keyframes rcrb{to{filter:hue-rotate
 @media (max-width:899px){.gp-opts{grid-template-columns:1fr 1fr}.gp-st{grid-template-columns:24px 1fr}}
 @media (max-height:540px){.gp-mid{display:none}.gp-title img.fl{display:none}.gp-tt small,.gp-tt span{display:none}.gp-tt b{font-size:22px}.gp-card{padding:18px 8px 6px}.gp-cc img{display:none}.gp-cc{width:auto;padding:4px 10px}.gp-opts{grid-template-columns:repeat(4,auto)}.gp-btn.go{font-size:22px;padding:6px 36px}.gp-btn.tune{font-size:16px;padding:6px 20px}}
 @media (max-height:540px){.gp{padding-top:calc(max(6px,env(safe-area-inset-top)) + 46px)}.gp-row{flex-direction:row;gap:8px}.gp-course{flex:1 1 50%}.gp-opts{flex:1 1 50%;grid-template-columns:1fr 1fr;gap:2px 8px;padding:8px 8px 4px}.gp-g label{font-size:11px;margin-bottom:0}.gp-chip{font-size:12px;padding:1px 7px;min-width:26px}.gp-tag{font-size:12px;top:-12px;padding:2px 10px 2px 8px}.gp-cc{font-size:11px;padding:2px 8px}.gp-go{gap:14px}.gp-title{padding:2px 12px 3px;min-width:0}.gp-arrow{width:42px;height:42px}.gp-arrow i{border-width:8px 12px 8px 0}.gp-arrow.nx i{border-width:8px 0 8px 12px}.gp-bot{gap:6px;margin-top:auto}}
+
+/* 아이템 칸 · 코인 */
+.rc-btn.item{width:96px;height:96px;padding:0;background:radial-gradient(circle at 35% 30%,#ffffff,#e8f1ff);border:5px dashed #9fb4d6;display:grid;place-items:center;box-shadow:0 6px 0 rgba(0,0,0,.2),0 8px 18px rgba(0,0,0,.3)}
+.rc-btn.item img{width:76%;height:76%;object-fit:contain;pointer-events:none}.rc-btn.item[disabled]{opacity:1;cursor:default}.rc-btn.item:not(.has):not(.roll){opacity:.55}
+.rc-btn.item.has{border:5px solid #ffc83d;background:radial-gradient(circle at 35% 30%,#fff9d6,#ffe07a);animation:rcitem .7s ease-in-out infinite alternate}.rc-btn.item.roll{border-style:solid;border-color:#7fb4ff}
+@keyframes rcitem{to{transform:scale(1.1)}}
+.rc-coins{position:absolute;left:max(12px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 218px);background:rgba(255,253,246,.92);color:#8a4b00;border-radius:16px;padding:2px 12px 2px 8px;font-weight:900;font-size:20px;box-shadow:0 3px 8px rgba(0,0,0,.2)}.rc-coins img.ui{height:22px;vertical-align:-4px;margin-right:4px}
+@media (max-width:520px){.rc-btn.item{width:76px;height:76px}.rc-coins{top:calc(max(10px,env(safe-area-inset-top)) + 196px);font-size:16px}}
+@media (max-height:720px){.rc-coins{top:calc(max(10px,env(safe-area-inset-top)) + 180px)}}

@@ -226,19 +226,20 @@ function buildRace(co) {
   // 파란 구슬(니트로)
   orbs = []; const Rr = rnd0(co.seed * 13 + 5), om = new THREE.MeshStandardMaterial({ color: 0x3dc0ff, emissive: 0x1a8cff, emissiveIntensity: 1.2, roughness: 0.2, metalness: 0.2 }), og = new THREE.IcosahedronGeometry(0.7, 1);
   for (let s = 140; s < L - (co.shape ? 60 : 120);) { const d0 = (Rr() * 2 - 1) * (W - 2.8), n = Rr() < 0.4 ? 3 : 1; for (let k = 0; k < n; k++) { const m = new THREE.Mesh(og, om); m.userData = { s: s + k * 11, d: d0, on: true, k: 1 }; sc.add(m); orbs.push(m); } s += 70 + Rr() * 110 + n * 11; }
+  spawnHazards(sc, co, L);
 }
 
 /* ---------- 달리는 차들 ---------- */
 let racers = [], player = null, mode = 'boot', raceT = 0, cdT = 0, cdShown = -1, finishOrder = [], camPos = new THREE.Vector3(), camLook = new THREE.Vector3(), camFov = 60, shake = 0, runId = 0, bumps = 0, nOrbs = 0, resultTimer = 0, finishS = 0;
 const keys = { L: false, R: false, B: false, N: false };
-const hud = { rank: -1, speed: -1, time: '', nitro: -1 };
+const hud = { rank: -1, speed: -1, time: '', nitro: -1, coins: -1 };
 const msgEl = $('msg'), msgText = $('msgText');
 function say(text, kind, speak) { msgText.textContent = text; msgEl.className = 'ch-msg' + (kind ? ' ' + kind : ''); if (speak !== false) O.say(typeof speak === 'string' ? speak : text); }
 const note = (t) => say(t, null, false);
 
 function newRacer(def, isPlayer, slot, idx, colorIdx, eq) {
   const o = makeCarObject(def, colorIdx, eq); rScene.add(o.root);
-  const r = Object.assign(o, { isPlayer, s: slot.s, d: slot.d, v: 0, dd: 0, u: 0, yaw: 0, nitro: isPlayer ? 0.35 : 0, nOn: false, brake: false, finished: false, fT: 0, wallCd: 0, hitCd: 0, tgtD: slot.d, tgtT: 2 + Math.random() * 2, wob: Math.random() * 6, idx, aiV: 0, travel: 0 });
+  const r = Object.assign(o, { isPlayer, s: slot.s, d: slot.d, v: 0, dd: 0, u: 0, yaw: 0, nitro: isPlayer ? 0.35 : 0, nOn: false, brake: false, finished: false, fT: 0, wallCd: 0, hitCd: 0, slowT: 0, slowF: 1, spinT: 0, spinDur: 1, boostT: 0, magT: 0, shield: 0, hzCd: 0, tgtD: slot.d, tgtT: 2 + Math.random() * 2, wob: Math.random() * 6, idx, aiV: 0, travel: 0 });
   return r;
 }
 function startRace() {
@@ -249,7 +250,7 @@ function startRace() {
   for (let i = 0; i < 3; i++) { const r = newRacer(CARS[(i + (prefs.car + 1)) % CARS.length], false, slots[i + 1], i + 1, aiColor(CARS[(i + (prefs.car + 1)) % CARS.length], colOf(pdef, prefs.color)), aiEq()); r.pace = DIFFS[prefs.diff].pace * (0.95 + i * 0.035); r.name = AI_COLORS[i]; racers.push(r); }
   // 진행 막대 점
   const pr = $('hudProg'); pr.querySelectorAll('u').forEach((u) => u.remove()); racers.slice(1).forEach((r, i) => { const u = document.createElement('u'); u.style.background = AI_COLORS[i]; r.dot = u; pr.appendChild(u); });
-  finishOrder = []; raceT = 0; bumps = 0; nOrbs = 0; finishS = co.shape ? 32 + co.laps * co.length : co.length - 40; lapNow = 1; mode = 'count'; cdT = 3.6; cdShown = -1; hud.rank = hud.speed = hud.nitro = -1; hud.time = '';
+  finishOrder = []; raceT = 0; bumps = 0; nOrbs = 0; raceCoins = 0; heldItem = ''; rolling = false; fxs.length = 0; projs.length = 0; hud.coins = -1; updateItemUI(); finishS = co.shape ? 32 + co.laps * co.length : co.length - 40; lapNow = 1; mode = 'count'; cdT = 3.6; cdShown = -1; hud.rank = hud.speed = hud.nitro = -1; hud.time = '';
   racers.forEach((r) => placeCar(r, 0.016, true)); camPos.set(0, 0, 0); snapCamera(); $('btnMenu').textContent = '🚗 차고';
   say('준비! 방향 버튼으로 달려요.', null, '준비하세요!'); startEngine(); simulate(0); updateHud(true);
 }
@@ -262,8 +263,9 @@ function stepRacer(r, dt) {
     inp = Math.max(-1, Math.min(1, (r.d - r.tgtD) * 0.32)); r.brake = false;
     r.wob += dt * 0.4; let rb = 1; const gap = player.s - r.s; if (gap > 220) rb = 1.1; else if (gap < -260) rb = 0.88; r.aiV = player.def.vmax * r.pace * rb * (1 + Math.sin(r.wob) * 0.035);
   }
-  const base = r.isPlayer ? def.vmax : r.aiV, boost = r.nOn ? 1 : 0, top = base * (1 + (def.nmul - 1) * boost); let tgt = r.brake ? base * 0.42 : top; if (r.finished) tgt = 0;
-  if (r.v < tgt) r.v += def.acc * (boost ? 2.2 : 1) * Math.max(0.05, 1 - r.v / (top * 1.12)) * dt; else r.v = Math.max(tgt, r.v - (r.brake || r.finished ? 28 : 10) * dt);
+  r.slowT -= dt; r.boostT -= dt; r.spinT -= dt; r.magT -= dt; if (r.spinT > 0) inp *= 0.3;
+  const base = r.isPlayer ? def.vmax : r.aiV, boost = r.nOn ? 1 : 0, top = base * (1 + (def.nmul - 1) * boost) * (r.slowT > 0 ? r.slowF : 1) * (r.boostT > 0 ? 1.3 : 1); let tgt = r.brake ? base * 0.42 : top; if (r.finished) tgt = 0;
+  if (r.v < tgt) r.v += def.acc * (boost || r.boostT > 0 ? 2.2 : 1) * Math.max(0.05, 1 - r.v / (top * 1.12)) * dt; else r.v = Math.max(tgt, r.v - (r.brake || r.finished ? 28 : 10) * dt);
   r.u += (inp - r.u) * Math.min(1, dt * 10);
   const grip = def.lat * (0.4 + 0.6 * Math.min(1, r.v / 22)), assist = r.isPlayer ? (prefs.assist ? 0.4 : 1) : 0.4;
   let ddT = -r.u * grip + a.k * r.v * r.v * 0.045 * assist; if (r.isPlayer && prefs.assist && Math.abs(inp) < 0.1) ddT += -r.d * 0.7;
@@ -277,10 +279,10 @@ function placeCar(r, dt, snap) {
   const a = track.at(r.s), x = a.x + a.nx * r.d, z = a.z + a.nz * r.d;
   const fx = a.tx * Math.max(r.v, 1) + a.nx * r.dd, fz = a.tz * Math.max(r.v, 1) + a.nz * r.dd, want = Math.atan2(fx, fz);
   let df = want - r.yaw; df = Math.atan2(Math.sin(df), Math.cos(df)); r.yaw = snap ? want : r.yaw + df * Math.min(1, dt * 12);
-  r.root.position.set(x, a.y, z); r.root.rotation.y = r.yaw;
+  r.root.position.set(x, a.y, z); r.root.rotation.y = r.yaw + (r.spinT > 0 ? (1 - r.spinT / r.spinDur) * Math.PI * 2 : 0);
   const pitchT = -Math.atan(a.slope); r.tilt.rotation.x += (pitchT - r.tilt.rotation.x) * Math.min(1, dt * 8);
   r.tilt.rotation.z += (-r.u * 0.045 * Math.min(1, r.v / r.def.vmax) - r.tilt.rotation.z) * Math.min(1, dt * 6);
-  animWheels(r, r.v * dt, r.u); r.flame.visible = r.nOn; if (r.nOn) r.flame.scale.set(1, 1, 0.8 + Math.random() * 0.5);
+  animWheels(r, r.v * dt, r.u); const fl = r.nOn || r.boostT > 0; r.flame.visible = fl; if (fl) r.flame.scale.set(1, 1, 0.8 + Math.random() * 0.5);
 }
 function collide() {
   for (let i = 0; i < racers.length; i++) for (let j = i + 1; j < racers.length; j++) {
@@ -301,8 +303,8 @@ function simulate(dt) {
     if (cdT <= 0 && mode === 'count') { mode = 'race'; }
   } else if (mode === 'race' || mode === 'finish') {
     if (mode === 'race') raceT += dt;
-    racers.forEach((r) => stepRacer(r, dt)); collide();
-    if (player) orbs.forEach((m) => { const u = m.userData; const lp = course.shape ? course.length : 1e9, rel = ((player.s - u.s) % lp + lp * 1.5) % lp - lp / 2; if (!u.on && Math.abs(rel) > 40 && course.shape) { u.on = true; m.visible = true; } if (u.on && Math.abs(rel) < 2.6 && Math.abs(u.d - player.d) < 2.1) { u.on = false; m.visible = false; player.nitro = Math.min(1, player.nitro + 0.26); nOrbs++; O.sfx('coin'); } });
+    racers.forEach((r) => stepRacer(r, dt)); collide(); hitCheck(dt); updateProjs(dt);
+    if (player) orbs.forEach((m) => { const u = m.userData; const lp = course.shape ? course.length : 1e9, rel = ((player.s - u.s) % lp + lp * 1.5) % lp - lp / 2; if (!u.on && Math.abs(rel) > 40 && course.shape) { u.on = true; m.visible = true; } if (u.on && Math.abs(rel) < 2.6 + (player.magT > 0 ? 14 : 0) && Math.abs(u.d - player.d) < 2.1 + (player.magT > 0 ? W : 0)) { u.on = false; m.visible = false; player.nitro = Math.min(1, player.nitro + 0.26); nOrbs++; O.sfx('coin'); } });
   }
   racers.forEach((r) => placeCar(r, dt));
   shake = Math.max(0, shake - dt * 2);
@@ -312,12 +314,115 @@ function onPlayerFinish() {
   const key = course.key + ':' + player.def.id, old = save.best[key], newBest = !old || time < old; if (newBest) save.best[key] = time; if (place === 1) save.done[course.id] = 1; writeSave();
   const stars = place === 1 ? 3 : place === 2 ? 2 : 1, ord = ['', '1등', '2등', '3등', '4등'][place];
   O.sfx(place === 1 ? 'win' : 'ok'); say(ord + '으로 들어왔어요!', 'good', false);
-  const title = place === 1 ? '1등! 최고예요!' : place === 2 ? '2등! 멋져요!' : '결승선 통과!', text = ord + ' · 기록 ' + fmtT(time) + (newBest ? ' (내 최고 기록!)' : '') + ' · 구슬 ' + nOrbs + '개',
+  const title = place === 1 ? '1등! 최고예요!' : place === 2 ? '2등! 멋져요!' : '결승선 통과!', text = ord + ' · 기록 ' + fmtT(time) + (newBest ? ' (내 최고 기록!)' : '') + ' · 구슬 ' + nOrbs + '개' + (raceCoins ? ' · 주운 코인 ' + raceCoins + '개' : ''),
     speak = place === 1 ? '와! 일 등이에요! 정말 잘 달렸어요!' : place === 2 ? '이 등이에요! 멋지게 달렸어요!' : '결승선을 통과했어요! 끝까지 잘 달렸어요!';
   const entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'play', subjectName: '놀이(스피드 레이스)', school: 'elem', topic: '스피드 레이스', level: prefs.diff + 1, engine: 'racing', rounds: 1, mistakes: 0, glow: 0, hand: 0, asked: 0, sec: Math.round(time) };
   const btns = [{ label: '🔁 다시 달리기', color: 'green', onClick: () => startRace() }, { label: '🚗 차를 바꾸기', color: 'orange', onClick: () => openGarage() }];
   if (place === 1 && prefs.course < COURSES.length - 1) btns.splice(1, 0, { label: '➡ 다음 코스 (' + COURSES[prefs.course + 1].name + ')', color: 'blue', onClick: () => { prefs.course++; writeSave(); startRace(); } });
-  setTimeout(() => { if (rid === runId) O.finish({ stats: O.newStats(), entry, stars, title, text, speak, coins: 4 + (5 - place) * 3 + (course.laps ? (course.laps - 1) * 2 : 0), mission: { lesson: 1 }, buttons: btns }); }, 1800);
+  setTimeout(() => { if (rid === runId) O.finish({ stats: O.newStats(), entry, stars, title, text, speak, coins: 4 + (5 - place) * 3 + (course.laps ? (course.laps - 1) * 2 : 0) + raceCoins, mission: { lesson: 1 }, buttons: btns }); }, 1800);
+}
+
+/* ---------- 장애물 · 아이템 상자 · 아이템 ---------- */
+let hzs = [], boxes = [], fxs = [], projs = [], raceCoins = 0, heldItem = '', rolling = false;
+const txCache = {};
+function txc(n) { if (!txCache[n]) { const t = new THREE.TextureLoader().load('assets/' + n + '.webp'); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; txCache[n] = t; } return txCache[n]; }
+const HZ = {
+  puddle: { asp: 1.046, w: 6, flat: 1, slow: [0.72, 1.4], say: '물웅덩이! 미끌미끌' },
+  oil: { asp: 1.135, w: 5.6, flat: 1, spin: 1.1, slow: [0.8, 0.8], say: '기름이에요! 빙글빙글' },
+  mud: { asp: 0.875, w: 5, flat: 1, slow: [0.6, 1.7], say: '진흙이에요! 느려져요' },
+  banana: { asp: 0.925, h: 2.1, spin: 1.0, vf: 0.85, say: '바나나 껍질! 빙글' },
+  rock: { asp: 0.947, h: 2.7, vf: 0.55, say: '쿵! 바위를 부쉈어요' },
+  blocks: { asp: 0.747, h: 3.3, vf: 0.55, say: '와르르! 블록을 부쉈어요' },
+  ball: { asp: 0.909, h: 2.7, vf: 0.6, say: '통통! 공을 쳤어요' },
+  cone: { asp: 0.909, h: 2.2, vf: 0.7, say: '콩! 고깔을 쳤어요' },
+};
+const HZ_W = { puddle: 2, oil: 1.2, mud: 1.2, banana: 1.5, rock: 1.5, blocks: 1.2, ball: 1.2, cone: 1.5 }, HZ_SKIP = { snow: ['mud'], volcano: ['puddle'], candy: ['rock'], space: ['mud', 'puddle'] };
+const FX_ASP = { burst: 0.95, dust: 1.22, splash: 0.88, dizzy: 1.19, bubble: 1, coins: 1.0 };
+const ITM = {
+  shield: { n: '거품 방패', say: '거품 방패! 한 번은 막아 줘요' }, rocket: { n: '로켓 부스트', say: '로켓! 슝~' }, magnet: { n: '자석', say: '자석! 구슬이 달려와요' },
+  oil: { n: '기름병', say: '기름병! 뒤에 뿌려요' }, bomb: { n: '비눗방울 폭탄', say: '비눗방울! 앞 차를 맞혀요' }, coinrain: { n: '코인 비', say: '코인 비! 와르르' },
+};
+const ITM_W = [{ shield: 3, magnet: 2, oil: 3, coinrain: 2, rocket: 0.5, bomb: 0.3 }, { shield: 2, magnet: 2, oil: 2, coinrain: 2, rocket: 2, bomb: 2 }, { shield: 1.5, magnet: 1.5, oil: 0.5, coinrain: 1.5, rocket: 4, bomb: 3 }];
+function pickW(w) { const ks = Object.keys(w), tot = ks.reduce((a, k) => a + w[k], 0); let x = Math.random() * tot; for (const k of ks) { x -= w[k]; if (x <= 0) return k; } return ks[0]; }
+function addHz(sc, type, s, d, perm, extra) {
+  const H = HZ[type], a = track.at(s); let m;
+  if (H.flat) { const w = H.w, dep = w / H.asp; m = new THREE.Mesh(new THREE.PlaneGeometry(w, dep), new THREE.MeshBasicMaterial({ map: txc('hz_' + type), transparent: true, alphaTest: 0.25, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); m.geometry.userData.keep = false; m.rotation.order = 'YXZ'; m.rotation.x = -Math.PI / 2; m.rotation.y = Math.atan2(a.tx, a.tz); m.position.set(a.x + a.nx * d, a.y + 0.07, a.z + a.nz * d); m.userData = { type, s, d, on: true, rs: dep * 0.38, rd: w * 0.42, flat: 1 }; }
+  else { m = new THREE.Sprite(new THREE.SpriteMaterial({ map: txc('hz_' + type), transparent: true, alphaTest: 0.3 })); m.center.set(0.5, 0.02); m.scale.set(H.h * H.asp, H.h, 1); m.position.set(a.x + a.nx * d, a.y, a.z + a.nz * d); m.userData = { type, s, d, on: true, rs: 1.6, rd: 1.7 }; }
+  Object.assign(m.userData, extra || {}); m.userData.perm = !!perm; sc.add(m); hzs.push(m); return m;
+}
+function spawnHazards(sc, co, L) {
+  hzs = []; boxes = []; const Rh = rnd0(co.seed * 17 + 9), skip = HZ_SKIP[co.id] || [], w = {}; Object.keys(HZ_W).forEach((k) => { if (!skip.includes(k)) w[k] = HZ_W[k]; });
+  const rows = []; for (let s = 210; s < L - 90; s += 185 + Rh() * 70) rows.push(s);
+  rows.forEach((s) => { for (const dd of [-4.6, 0, 4.6]) { const a = track.at(s), m = new THREE.Sprite(new THREE.SpriteMaterial({ map: txc('bx_box'), transparent: true, alphaTest: 0.3 })); m.scale.set(3.1, 3.1, 1); m.userData = { s, d: dd, on: true, rs: 2.4, rd: 2.3, base: a.y + 1.9, ph: Rh() * 6 }; m.position.set(a.x + a.nx * dd, m.userData.base, a.z + a.nz * dd); sc.add(m); boxes.push(m); } });
+  for (let s = 150 + Rh() * 60; s < L - 80; s += 70 + Rh() * 90) {
+    if (rows.some((r) => Math.abs(r - s) < 22)) { s += 26; }
+    let k = pickW(Object.fromEntries(Object.keys(w).map((q) => [q, w[q] * (0.6 + Rh())]))), d = (Rh() * 2 - 1) * (W - 2.8), n = (!HZ[k].flat && Rh() < 0.3) ? 2 : 1;
+    for (let i = 0; i < n; i++) addHz(sc, k, s + i * 8, Math.max(-W + 2.4, Math.min(W - 2.4, d + (i ? (Rh() < 0.5 ? -3.6 : 3.6) : 0))), true);
+  }
+}
+function fx(kind, x, y, z, size, life, rise) {
+  if (!rScene) return; const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: txc('fx_' + kind), transparent: true, depthWrite: false })); sp.position.set(x, y, z); sp.scale.set(size * FX_ASP[kind], size, 1); sp.userData = { t: 0, life, size, rise: rise || 0, asp: FX_ASP[kind] }; rScene.add(sp); fxs.push(sp);
+}
+const fxAt = (r, kind, size, life, rise, dy) => fx(kind, r.root.position.x, r.root.position.y + (dy === undefined ? 1.4 : dy), r.root.position.z, size, life, rise);
+function setSpin(r, dur) { r.spinT = dur; r.spinDur = dur; }
+function hitMsg(r, t) { if (r.isPlayer) { note(t); O.sfx('pop'); shake = Math.max(shake, 0.4); } }
+function hzHit(r, m, u) {
+  const H = HZ[u.type]; if (u.owner === r && raceT - u.born < 1.4) return;
+  const pw = r.boostT > 0, p = m.position;
+  if (H.flat) {
+    if (r.hzCd > 0) return; r.hzCd = 0.8;
+    if (r.shield) { r.shield = 0; fxAt(r, 'burst', 3, 0.5); if (r.isPlayer) { note('방패가 막아 줬어요!'); O.sfx('ok'); } return; }
+    if (pw) return;
+    if (H.slow) { r.slowT = H.slow[1]; r.slowF = H.slow[0]; r.v *= Math.min(1, H.slow[0] + 0.12); }
+    if (H.spin) { setSpin(r, H.spin); fxAt(r, 'dizzy', 2.6, H.spin, 0, 2.6); }
+    fxAt(r, u.type === 'puddle' ? 'splash' : 'dust', 3, 0.6, 1, 0.9); hitMsg(r, H.say); return;
+  }
+  u.on = false; m.visible = false;
+  if (r.shield) { r.shield = 0; fx('burst', p.x, p.y + 1.2, p.z, 3.4, 0.5); if (r.isPlayer) { note('방패가 막아 줬어요!'); O.sfx('ok'); } }
+  else if (!pw) { r.v *= H.vf; if (H.spin) { setSpin(r, H.spin); fxAt(r, 'dizzy', 2.6, H.spin, 0, 2.6); } else { r.slowT = 0.7; r.slowF = 0.72; } hitMsg(r, H.say); }
+  else if (r.isPlayer) { note('와! 쾅! 부쉈어요!'); O.sfx('coin'); }
+  fx('dust', p.x, p.y + 1, p.z, 3.2, 0.6, 1.2); fx('burst', p.x, p.y + 1.4, p.z, 2.6, 0.5, 1);
+  if (r.isPlayer && !H.spin) { raceCoins++; if (!heldItem && !rolling && Math.random() < 0.35) giveItem(); }
+  if (u.owner) { hzs.splice(hzs.indexOf(m), 1); rScene.remove(m); }
+}
+function boxHit(r, m, u) {
+  u.on = false; m.visible = false; const p = m.position; fx('burst', p.x, p.y, p.z, 5, 0.7, 1); fx('burst', p.x, p.y, p.z, 3.2, 0.5, 0.4);
+  if (r.isPlayer) { O.sfx('coin'); giveItem(); } else r.boostT = Math.max(r.boostT, 1.6);
+}
+function hitCheck(dt) {
+  const lp = course.shape ? course.length : 1e9, ph = (list, fn) => list.slice().forEach((m) => { const u = m.userData; if (!u.on) return; if (u.life && raceT - u.born > u.life) { hzs.splice(hzs.indexOf(m), 1); rScene.remove(m); return; } racers.forEach((r) => { if (r.finished || !u.on) return; const rel = ((r.s - u.s) % lp + lp * 1.5) % lp - lp / 2; if (Math.abs(rel) < u.rs && Math.abs(r.d - u.d) < u.rd) fn(r, m, u); }); });
+  racers.forEach((r) => { r.hzCd -= dt; }); ph(hzs, hzHit); ph(boxes, boxHit);
+  if (course.shape && player) [...hzs, ...boxes].forEach((m) => { const u = m.userData; if (!u.on && !u.owner) { const rel = ((player.s - u.s) % lp + lp * 1.5) % lp - lp / 2; if (Math.abs(rel) > 70) { u.on = true; m.visible = true; } } });
+}
+function giveItem() {
+  if (!player) return; if (heldItem || rolling) { raceCoins += 2; player.nitro = Math.min(1, player.nitro + 0.12); note('코인 +2'); return; }
+  const place = Math.min(3, ranks().indexOf(player) + 1) - 1, pick = pickW(ITM_W[Math.max(0, place)]), rid = runId; rolling = true; let n = 0; const names = Object.keys(ITM);
+  const tick = () => { if (rid !== runId || mode === 'garage') { rolling = false; return; } n++; if (n < 9) { setItemUi(names[n % names.length], true); O.sfx('tick'); setTimeout(tick, 70 + n * 12); } else { rolling = false; heldItem = pick; setItemUi(pick); O.sfx('ok'); say(ITM[pick].say, 'good', ITM[pick].n + '!'); } };
+  tick();
+}
+function setItemUi(name, spin) { const b = $('btnI'); b.innerHTML = name ? '<img src="assets/it_' + name + '.webp" alt="" draggable="false">' : ''; b.classList.toggle('has', !!name && !spin); b.classList.toggle('roll', !!spin); b.disabled = !name || !!spin; b.setAttribute('aria-label', name && !spin ? ITM[name].n + ' 쓰기' : '아이템 칸'); }
+function updateItemUI() { setItemUi(heldItem); }
+function useItem() {
+  if (mode !== 'race' || !heldItem || rolling || !player) return; const it = heldItem; heldItem = ''; updateItemUI(); O.sfx('ok');
+  if (it === 'shield') { player.shield = 1; note('방패를 썼어요!'); }
+  else if (it === 'rocket') { player.boostT = 2.8; fxAt(player, 'burst', 3, 0.5); note('로켓 부스트!'); shake = 0.5; }
+  else if (it === 'magnet') { player.magT = 7; note('자석! 구슬이 달려와요'); }
+  else if (it === 'oil') { addHz(rScene, 'oil', player.s - 9, player.d, false, { owner: player, born: raceT, life: 14 }); note('기름을 뿌렸어요!'); }
+  else if (it === 'coinrain') { raceCoins += 6; fxAt(player, 'coins', 5, 1.2, 1.5, 3); O.sfx('coin'); note('코인 +6!'); }
+  else if (it === 'bomb') {
+    const t = racers.filter((o) => o !== player && !o.finished && o.s > player.s && o.s - player.s < 320).sort((a, b) => a.s - b.s)[0];
+    if (!t) { player.nitro = Math.min(1, player.nitro + 0.3); note('앞에 차가 없어서 니트로로 바뀌었어요'); return; }
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: txc('it_bomb'), transparent: true, depthWrite: false })); sp.scale.set(1.9 * 0.656, 1.9, 1); rScene.add(sp); projs.push({ sp, from: player, to: t, t: 0, dur: Math.max(0.5, Math.min(1.2, (t.s - player.s) / 70)) }); note('비눗방울 발사!');
+  }
+}
+function updateProjs(dt) {
+  for (let i = projs.length - 1; i >= 0; i--) { const q = projs[i]; q.t += dt; const k = Math.min(1, q.t / q.dur), a = q.from.root.position, b = q.to.root.position; q.sp.position.set(a.x + (b.x - a.x) * k, a.y + 1.5 + Math.sin(k * Math.PI) * 2.2 + (b.y - a.y) * k, a.z + (b.z - a.z) * k);
+    if (k >= 1) { rScene.remove(q.sp); projs.splice(i, 1); const t = q.to; if (t.shield) { t.shield = 0; fxAt(t, 'burst', 3, 0.5); } else { t.slowT = 2.4; t.slowF = 0.55; t.v *= 0.6; fxAt(t, 'splash', 3.6, 0.7, 1, 1.2); } if (t.isPlayer) { note('비눗방울에 맞았어요!'); O.sfx('pop'); shake = 0.4; } } }
+}
+function animWorld(now, dt) {
+  const bs = 1 + Math.sin(now / 260) * 0.06; boxes.forEach((m) => { if (!m.visible) return; const u = m.userData; m.position.y = u.base + Math.sin(now / 340 + u.ph) * 0.28; m.material.rotation = Math.sin(now / 420 + u.ph) * 0.14; m.scale.set(3.1 * bs, 3.1 * bs, 1); });
+  for (let i = fxs.length - 1; i >= 0; i--) { const s = fxs[i], u = s.userData; u.t += dt; const p = u.t / u.life; if (p >= 1) { rScene.remove(s); s.material.dispose(); fxs.splice(i, 1); continue; } const e = 1 - Math.pow(1 - p, 3), sz = u.size * (0.55 + 0.75 * e); s.scale.set(sz * u.asp, sz, 1); s.position.y += u.rise * dt; s.material.opacity = Math.max(0, 1 - p * p * p); }
+  racers.forEach((r) => { if (r.shield) { if (!r.shSp) { r.shSp = new THREE.Sprite(new THREE.SpriteMaterial({ map: txc('fx_bubble'), transparent: true, depthWrite: false, opacity: 0.7 })); r.shSp.position.set(0, 1.2, 0); r.root.add(r.shSp); } const q = 5 + Math.sin(now / 200) * 0.25; r.shSp.scale.set(q, q, 1); r.shSp.visible = true; } else if (r.shSp) r.shSp.visible = false; });
 }
 
 /* ---------- 카메라 ---------- */
@@ -333,7 +438,7 @@ function updateCamera(dt) {
   const t = camTargets(p.s + (mode === 'count' ? -4 + Math.min(1, (3.6 - cdT) / 3.6) * 4 : 0), p.d);
   camPos.x += (t.px - camPos.x) * k; camPos.y += (t.py - camPos.y) * k; camPos.z += (t.pz - camPos.z) * k;
   camLook.x += (t.lx - camLook.x) * k; camLook.y += (t.ly - camLook.y) * k; camLook.z += (t.lz - camLook.z) * k;
-  const sp = Math.min(1, p.v / (p.def.vmax * 1.1)), fovT = 58 + sp * 12 + (p.nOn ? 9 : 0); camFov += (fovT - camFov) * Math.min(1, dt * 4);
+  const sp = Math.min(1, p.v / (p.def.vmax * 1.1)), fovT = 58 + sp * 12 + (p.nOn || p.boostT > 0 ? 9 : 0); camFov += (fovT - camFov) * Math.min(1, dt * 4);
   camera.fov = camFov; camera.updateProjectionMatrix();
   const sh = shake * 0.25 + (p.nOn ? 0.05 : 0); camera.position.set(camPos.x + (Math.random() - 0.5) * sh, camPos.y + (Math.random() - 0.5) * sh, camPos.z + (Math.random() - 0.5) * sh); camera.lookAt(camLook); if (backdrop) { backdrop.position.x = camera.position.x; backdrop.position.z = camera.position.z; }
   groundM.position.x = p.root.position.x; groundM.position.z = p.root.position.z;
@@ -362,6 +467,7 @@ function updateHud(force) {
   const sp = Math.round(player.v * 3.6); if (sp !== hud.speed || force) { hud.speed = sp; $('hudSpeed').innerHTML = '<b>' + sp + '</b><small>km/h</small>'; }
   const lapC = course.shape ? Math.max(1, Math.min(course.laps, Math.floor((player.s - 32) / course.length) + 1)) : 0, tt = fmtT(mode === 'finish' ? player.fT : raceT) + (lapC ? '  🏁 ' + lapC + '/' + course.laps : ''); if (tt !== hud.time) { hud.time = tt; $('hudTime').textContent = tt; }
   if (lapC && lapC !== lapNow && mode === 'race') { lapNow = lapC; say(lapC === course.laps ? '마지막 바퀴예요! 힘내요!' : lapC + '바퀴째! 잘 달려요!', 'good', lapC === course.laps ? '마지막 바퀴예요! 힘내요!' : lapC + '바퀴째예요!'); }
+  if (hud.coins !== raceCoins) { hud.coins = raceCoins; $('hudCoins').innerHTML = '<img class="ui coin" src="assets/ui_coin.webp" alt="">' + raceCoins; }
   const nv = Math.round(player.nitro * 100); if (nv !== hud.nitro) { hud.nitro = nv; $('nitroFill').style.width = nv + '%'; $('hudNitro').classList.toggle('full', nv >= 99); $('btnN').disabled = nv < 2; }
   const pw = $('hudProg').clientWidth, f = (r) => Math.min(1, r.s / finishS) * 100 + '%';
   $('progFill').style.width = f(player); $('progMe').style.left = f(player); racers.forEach((r) => { if (r.dot) r.dot.style.left = f(r); });
@@ -446,9 +552,10 @@ function bindBtn(id, key) {
   b.addEventListener('contextmenu', (e) => e.preventDefault());
   return set;
 }
+$('btnI').onclick = () => useItem();
 const setL = bindBtn('btnL', 'L'), setR = bindBtn('btnR', 'R'), setB = bindBtn('btnB', 'B'), setN = bindBtn('btnN', 'N');
 const KEYMAP = { ArrowLeft: setL, a: setL, A: setL, ArrowRight: setR, d: setR, D: setR, ArrowDown: setB, s: setB, S: setB, ' ': setN, ArrowUp: setN, w: setN, W: setN, Shift: setN };
-window.addEventListener('keydown', (e) => { if (e.repeat) return; if (mode === 'garage') { if (e.key === 'ArrowLeft') $('carPrev').click(); else if (e.key === 'ArrowRight') $('carNext').click(); else if (e.key === 'Enter') startRace(); return; } const f = KEYMAP[e.key]; if (f) { e.preventDefault(); f(true); } });
+window.addEventListener('keydown', (e) => { if (e.repeat) return; if (mode === 'garage') { if (e.key === 'ArrowLeft') $('carPrev').click(); else if (e.key === 'ArrowRight') $('carNext').click(); else if (e.key === 'Enter') startRace(); return; } if (e.key === 'e' || e.key === 'E' || e.key === 'Enter' || e.key === 'x' || e.key === 'X') { e.preventDefault(); useItem(); return; } const f = KEYMAP[e.key]; if (f) { e.preventDefault(); f(true); } });
 window.addEventListener('keyup', (e) => { const f = KEYMAP[e.key]; if (f) f(false); });
 window.addEventListener('blur', () => { setL(false); setR(false); setB(false); setN(false); });
 
@@ -482,7 +589,7 @@ function frame(now) {
     if (gCar) { gYaw += gSpin * dt; gCar.root.rotation.y = gYaw; gPop = Math.min(1, gPop + dt * 3.2); const e = 1 - Math.pow(1 - gPop, 3); gCar.root.scale.setScalar(0.7 + 0.3 * e); gCar.root.position.y = (1 - e) * 0.4; animWheels(gCar, 0, 0); animParts(gCar, now, dt); }
     renderer.render(gScene, camera);
   } else if (rScene) {
-    simulate(dt); updateCamera(dt); updateHud(); engineUpdate(); racers.forEach((r) => animParts(r, now, dt));
+    simulate(dt); updateCamera(dt); updateHud(); engineUpdate(); racers.forEach((r) => animParts(r, now, dt)); animWorld(now, dt);
     orbs.forEach((m) => { if (!m.visible) return; const u = m.userData, a = track.at(u.s); m.position.set(a.x + a.nx * u.d, a.y + 1.3 + Math.sin(now / 300 + u.s) * 0.2, a.z + a.nz * u.d); m.rotation.y = now / 400; });
     renderer.render(rScene, camera);
   }
@@ -490,7 +597,7 @@ function frame(now) {
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) { stopEngine(); } else if (mode === 'race' || mode === 'count') startEngine(); });
 
-window.__race = { get mode() { return mode; }, get racers() { return racers; }, get player() { return player; }, get track() { return track; }, keys, step(n, dt) { for (let i = 0; i < n; i++) simulate(dt || 0.033); updateHud(); }, snap: () => { snapCamera(); updateCamera(1); }, start: startRace, garage: openGarage, prefs, protos, W };
+window.__race = { get mode() { return mode; }, get item() { return heldItem; }, get coins() { return raceCoins; }, get hzs() { return hzs; }, get boxes() { return boxes; }, give(n) { heldItem = n; updateItemUI(); }, use: () => useItem(), get racers() { return racers; }, get player() { return player; }, get track() { return track; }, keys, step(n, dt) { for (let i = 0; i < n; i++) simulate(dt || 0.033); updateHud(); }, snap: () => { snapCamera(); updateCamera(1); }, start: startRace, garage: openGarage, prefs, protos, W };
 
 (async function boot() {
   resize(); requestAnimationFrame(frame);
