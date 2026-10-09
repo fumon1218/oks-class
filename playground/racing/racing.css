@@ -115,3 +115,10 @@ img.ui.rb{animation:rcrb 3s linear infinite}@keyframes rcrb{to{filter:hue-rotate
 .gp-rims{grid-column:1/-1;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:4px}
 
 .rc-btn.item2{width:70px;height:70px;align-self:flex-end}@media (max-width:520px){.rc-btn.item2{width:58px;height:58px}}
+
+.rc-mini{position:absolute;right:max(12px,env(safe-area-inset-right));top:calc(max(10px,env(safe-area-inset-top)) + 182px);width:150px;height:150px;border-radius:22px;background:radial-gradient(circle at 30% 25%,rgba(70,100,150,.78),rgba(22,34,60,.82));border:3px solid rgba(255,255,255,.85);box-shadow:0 4px 12px rgba(0,0,0,.3);pointer-events:none}
+.rc-prog{display:none}
+@media (max-width:520px){.rc-mini{width:104px;height:104px;border-radius:16px;top:calc(max(10px,env(safe-area-inset-top)) + 168px)}}
+@media (max-height:720px){.rc-mini{top:calc(max(10px,env(safe-area-inset-top)) + 168px);width:128px;height:128px}}
+@media (max-height:720px) and (max-width:520px){.rc-mini{width:96px;height:96px}}
+@media (max-height:520px){.rc-mini{right:calc(max(12px,env(safe-area-inset-right)) + 112px);top:calc(max(10px,env(safe-area-inset-top)) + 100px);width:92px;height:92px;border-radius:14px}}

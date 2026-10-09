@@ -300,7 +300,7 @@ function startRace() {
   // 진행 막대 점
   const pr = $('hudProg'); pr.querySelectorAll('u').forEach((u) => u.remove()); racers.slice(1).forEach((r, i) => { const u = document.createElement('u'); u.style.background = AI_COLORS[i]; r.dot = u; pr.appendChild(u); });
   finishOrder = []; raceT = 0; bumps = 0; nOrbs = 0; raceCoins = 0; held = []; rolling = false; fxs.length = 0; projs.length = 0; hud.coins = -1; updateItemUI(); finishS = co.shape ? 32 + co.laps * co.length : co.length - 40; lapNow = 1; mode = 'count'; cdT = 3.6; cdShown = -1; hud.rank = hud.speed = hud.nitro = -1; hud.time = '';
-  racers.forEach((r) => placeCar(r, 0.016, true)); camPos.set(0, 0, 0); snapCamera(); $('btnMenu').textContent = '🚗 차고';
+  buildMini(); racers.forEach((r) => placeCar(r, 0.016, true)); camPos.set(0, 0, 0); snapCamera(); $('btnMenu').textContent = '🚗 차고';
   say('준비! 방향 버튼으로 달려요.', null, '준비하세요!'); startEngine(); simulate(0); updateHud(true);
 }
 function stepRacer(r, dt) {
@@ -540,6 +540,27 @@ function engineUpdate() {
 }
 
 /* ---------- HUD ---------- */
+/* ---------- 미니맵 (마리오 카트처럼 길 모양 위에 차 위치를 보여 줘요) ---------- */
+const mini = { base: null, b: null };
+function miniXY(x, z) { const b = mini.b; return [b.ox + (x - b.x0) * b.k, b.oy + (z - b.z0) * b.k]; }
+function buildMini() {
+  const cv = $('miniMap'), W2 = cv.width, pad = 26, P = track.P, pts = P.map((q) => q);
+  let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9; pts.forEach((q) => { x0 = Math.min(x0, q[0]); x1 = Math.max(x1, q[0]); z0 = Math.min(z0, q[1]); z1 = Math.max(z1, q[1]); });
+  const k = (W2 - pad * 2) / Math.max(x1 - x0, z1 - z0, 1); mini.b = { x0, z0, k, ox: (W2 - (x1 - x0) * k) / 2, oy: (W2 - (z1 - z0) * k) / 2 };
+  const c = document.createElement('canvas'); c.width = c.height = W2; const g = c.getContext('2d'); g.lineCap = g.lineJoin = 'round';
+  const path = () => { g.beginPath(); pts.forEach((q, i) => { const [a, b] = miniXY(q[0], q[1]); i ? g.lineTo(a, b) : g.moveTo(a, b); }); if (track.loop) g.closePath(); };
+  path(); g.strokeStyle = 'rgba(10,20,40,.9)'; g.lineWidth = 27; g.stroke();
+  path(); g.strokeStyle = '#ffffff'; g.lineWidth = 21; g.stroke();
+  path(); g.strokeStyle = '#8f9bb0'; g.lineWidth = 15; g.stroke();
+  [32, finishS && !course.shape ? finishS : -1].forEach((s2, i) => { if (s2 < 0) return; const a = track.at(s2), [mx, my] = miniXY(a.x, a.z), ang = Math.atan2(a.tz, a.tx); g.save(); g.translate(mx, my); g.rotate(ang); for (let q = 0; q < 4; q++) { g.fillStyle = q % 2 ? '#fff' : '#111'; g.fillRect(-3, -10 + q * 5, 6, 5); } g.restore(); });
+  mini.base = c;
+}
+function drawMini() {
+  const cv = $('miniMap'); if (!mini.base || !player) return; const g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height); g.drawImage(mini.base, 0, 0);
+  const dot = (r, col, big) => { const a = track.at(r.s), pos = r.root.position, [mx, my] = miniXY(pos.x, pos.z); g.save(); g.translate(mx, my); g.lineWidth = big ? 4 : 3; g.strokeStyle = '#fff'; g.fillStyle = col;
+    if (big) { g.rotate(Math.atan2(a.tz, a.tx)); g.beginPath(); g.moveTo(15, 0); g.lineTo(-10, -11); g.lineTo(-5, 0); g.lineTo(-10, 11); g.closePath(); g.stroke(); g.fill(); } else { g.beginPath(); g.arc(0, 0, 8, 0, 7); g.stroke(); g.fill(); } g.restore(); };
+  racers.forEach((r) => { if (!r.isPlayer) dot(r, r.name || '#999', false); }); dot(player, '#ffd23c', true);
+}
 function updateHud(force) {
   if (!player) return; const rk = ranks(), place = rk.indexOf(player) + 1;
   if (place !== hud.rank || force) { hud.rank = place; $('hudRank').innerHTML = '<small>순위</small><b>' + place + '</b><span>/ ' + racers.length + '</span>'; }
@@ -549,6 +570,7 @@ function updateHud(force) {
   if (hud.coins !== raceCoins) { hud.coins = raceCoins; $('hudCoins').innerHTML = '<img class="ui coin" src="assets/ui_coin.webp" alt="">' + raceCoins; }
   const nv = Math.round(player.nitro * 100); if (nv !== hud.nitro) { hud.nitro = nv; $('nitroFill').style.width = nv + '%'; $('hudNitro').classList.toggle('full', nv >= 99); $('btnN').disabled = nv < 2; }
   const pw = $('hudProg').clientWidth, f = (r) => Math.min(1, r.s / finishS) * 100 + '%';
+  drawMini();
   $('progFill').style.width = f(player); $('progMe').style.left = f(player); racers.forEach((r) => { if (r.dot) r.dot.style.left = f(r); });
 }
 
