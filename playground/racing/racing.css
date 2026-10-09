@@ -152,3 +152,14 @@ img.ui.rb{animation:rcrb 3s linear infinite}@keyframes rcrb{to{filter:hue-rotate
 .gp-btn.tune,.gp-btn.go{white-space:nowrap;line-height:1}.gp-btn.tune{padding:0 6% 0 32%}.gp-btn.go{padding:0 22% 0 24%}
 .gp-btn.tune,.gp-btn.go{box-sizing:border-box}
 .gp-btn.tune{padding:0 .4em 0 3.6em}.gp-btn.go{padding:0 2.4em 0 2.2em}
+/* 코스 카드 틀 */
+@media (min-height:541px){
+.gp-cc{width:clamp(92px,8.4vw,112px);aspect-ratio:400/455;border:0;border-radius:0;background:none;box-shadow:none;padding:0;overflow:visible;transition:transform .12s}
+.gp-cc::before{content:"";position:absolute;inset:0;background:url(assets/gar_cc_off.webp) center/100% 100% no-repeat;z-index:2;pointer-events:none}
+.gp-cc.on::before{background-image:url(assets/gar_cc_on.webp)}
+.gp-cc.on{transform:scale(1.06);box-shadow:none}
+.gp-cc img{position:absolute;left:11%;top:9%;width:77%;height:61%;aspect-ratio:auto;object-fit:cover;z-index:1;border-radius:8px}
+.gp-cc span{position:absolute;z-index:3;left:12%;right:12%;bottom:8%;height:14%;padding:0;display:flex;align-items:center;justify-content:center;font-size:clamp(10px,.95vw,12px)}
+.gp-cc.on::after{display:none}
+.gp-cc.done:not(.on)::after{z-index:3;right:12%;top:11%}
+}
