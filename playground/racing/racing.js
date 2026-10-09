@@ -28,7 +28,17 @@ const CARS = [
   { id: 'toy_red2', file: 'assets/toy_red2.glb', split: { fz: 0.285, rz: -0.335, y: 0.12, r: 0.135, ix: 0.2 }, scale: 4, wr: 0.5, name: '레드 포뮬러', sub: '3D 장난감 · 날렵한 오픈휠 · 가장 빨라요', title: '', src: '', front: 1, vmax: 68, acc: 24, lat: 10.5, nmul: 1.3, stats: [5, 4, 3, 4] },
   { id: 'rx7', file: 'assets/rx7.glb', name: '마쓰다 RX-7', sub: '2002 · 일본 스포츠카', title: '2002 Mazda RX-7 Spirit-R', src: 'https://sketchfab.com/3d-models/2002-mazda-rx-7-spirit-r-277e2569280d4c9fa3bc3a85bbc627f1', front: 1, vmax: 56, acc: 24, lat: 12.5, nmul: 1.3, stats: [3, 4, 5, 3] },
   { id: 'm720', file: 'assets/mclaren720s.glb', name: '맥라렌 720S GT3', sub: '2019 · 영국 레이싱카', title: '2019 McLaren 720S GT3', src: 'https://sketchfab.com/3d-models/2019-mclaren-720s-gt3-cdf4ca67a56b497493931e8852e70b05', front: 1, vmax: 70, acc: 19, lat: 10.5, nmul: 1.26, stats: [5, 3, 3, 4] },
+  { id: 'carrera', file: 'assets/car_carrera.glb', paint: 'Material.001', colors: true, dc: 6, wr: 0.338, name: '카레라 쿠페', sub: '클래식 · 뒤쪽 꼬리날개 · 균형형', credit: ['CARRERA.MAX (Original Porker 2)', 'Geedtopia', 'https://sketchfab.com/3d-models/carreramax-original-porker-2-3a932ae988154bd480b0e8b38a7efd6c', 'CC BY-NC 4.0'], front: 1, vmax: 62, acc: 23, lat: 12.5, nmul: 1.3, stats: [4, 4, 4, 4] },
+  { id: 'chevy57', file: 'assets/car_chevy.glb', paint: 'Material.001', colors: true, dc: 7, wr: 0.302, name: '클래식 쿠페 57', sub: '1957 · 꼬리 날개가 멋진 옛날 차 · 든든해요', credit: ['CHEVY.MAX (Unused)', 'Geedtopia', 'https://sketchfab.com/3d-models/chevymax-unused-6dacdbb7581e4858a1f16adad6861664', 'CC BY-NC 4.0'], front: 1, vmax: 56, acc: 21, lat: 11, nmul: 1.3, stats: [3, 3, 4, 4] },
+  { id: 'niva', file: 'assets/car_niva.glb', kit: { R: 0.36, fz: 1.22, rz: -1.11, hx: 0.7, w: 0.62 }, paint: 'Scene_-_Root', colors: true, dc: 0, wr: 0.36, name: '니바 짱짱', sub: '네모 SUV · 휠을 골라 끼워요 · 숲길 친구', credit: ['caisse Niva', 'Configcars / maxipub', 'https://sketchfab.com/3d-models/caisse-niva-14a2140480a74d39b0446950ea56764f', 'CC BY 4.0'], front: 1, vmax: 54, acc: 24, lat: 13, nmul: 1.3, stats: [3, 4, 5, 3] },
+  { id: 'pickup', file: 'assets/car_pickup.glb', kit: { R: 0.44, fz: 1.84, rz: -1.39, hx: 0.8, w: 0.62 }, paint: 'White', colors: true, dc: 3, wr: 0.44, name: '픽업 트럭', sub: '큰 바퀴 · 휠을 골라 끼워요 · 튼튼해요', credit: ['Generic American C/K \'72', 'Jorma Rysky', 'https://sketchfab.com/3d-models/generic-american-ck-72-ae3b6fe3863f4bb498cef95945584aaa', 'CC BY 4.0'], front: 1, vmax: 54, acc: 22, lat: 11.5, nmul: 1.3, stats: [3, 3, 4, 4] },
 ];
+const RIMS = [
+  { id: 'borbet', name: '보르베트', file: 'assets/wh_borbet.glb', credit: ['Borbet A Car Rim', 'st.Angelo', 'https://sketchfab.com/3d-models/borbet-a-car-rim-a1fda98175ab4f64a1fd6a98c4db78fa', 'CC BY 4.0'] },
+  { id: 'f52', name: '터보맥', file: 'assets/wh_fifteen52.glb', credit: ['fifteen52 Turbomac', 'Wilbruh', 'https://sketchfab.com/3d-models/fifteen52-turbomac-2d3bbbfddba9411da26606646cfc9fec', 'CC BY-NC 4.0'] },
+  { id: 'off', name: '오프로드', file: 'assets/wh_offroad.glb', credit: ['FREE - Wheel OffRoad1', 'Unity Fan youtube channel', 'https://sketchfab.com/3d-models/free-wheel-offroad1-614207108ccd4f8dbb9a30f11191176d', 'CC BY 4.0'] },
+];
+const rprotos = [];
 const STAT_NAMES = ['최고 속도', '가속', '핸들', '니트로'];
 const COURSES = [
   { id: 'meadow', props: [['pine', 320, 9, 5, 45], ['bush', 220, 2.6, 2, 24], ['tires', 70, 1.7, 1.2, 2.5], ['cone', 50, 1.1, 1.2, 2.5], ['barrier', 40, 1.2, 1.2, 2.5]], name: '초록 숲길', emoji: '🌲', seed: 11, length: 1050, laps: 3, shape: 'meadow', bg: 'bg_forest', hz: 0.575, sky: ['#4aa8ff', '#bfe6ff'], fog: 0x93d36e, ground: 0x7cc43a, bank: 0x6ab32f, tree: 'round', leaf: 0x3ea94a },
@@ -97,12 +107,13 @@ function prepareModel(gltf, def) {
   if (def.scale) gltf.scene.scale.setScalar(def.scale); const sw = def.split ? splitWheels(gltf.scene, def) : null;
   const holder = new THREE.Group(); holder.add(gltf.scene); holder.updateMatrixWorld(true);
   let box = new THREE.Box3().setFromObject(holder), c = box.getCenter(new THREE.Vector3());
-  gltf.scene.position.set(-c.x, -box.min.y, -c.z); holder.updateMatrixWorld(true);
+  gltf.scene.position.set(-c.x, def.kit ? 0 : -box.min.y, -c.z); holder.updateMatrixWorld(true);
   box = new THREE.Box3().setFromObject(holder); const size = box.getSize(new THREE.Vector3());
   const meshes = []; holder.traverse((o) => { if (o.isMesh) { meshes.push(o); (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => { if (m.transmission > 0) { m.transmission = 0; m.transparent = true; m.opacity = 0.42; m.depthWrite = false; m.roughness = 0.08; } m.envMapIntensity = 1; }); } });
   const matName = (o) => ((Array.isArray(o.material) ? o.material[0] : o.material).name || '').toLowerCase();
   const info = meshes.map((m) => { const b = new THREE.Box3().setFromObject(m); return { m, b, c: b.getCenter(new THREE.Vector3()), s: b.getSize(new THREE.Vector3()), n: matName(m) }; });
-  const tyres = info.filter((i) => i.n.includes('tyre')); const wheels = [];
+  const named = []; holder.traverse((o) => { if (/^wh\d+_s$/.test(o.name)) named.push(o); });
+  const tyres = named.length ? [] : info.filter((i) => i.n.includes('tyre')); const wheels = named.map((o) => ({ s: o.name, r: o.name.replace('_s', '_r'), front: o.position.z * def.front > 0 }));
   tyres.forEach((t, k) => {
     const steer = new THREE.Group(), spin = new THREE.Group(); steer.name = 'wh' + k + '_s'; spin.name = 'wh' + k + '_r'; steer.position.copy(t.c); holder.add(steer); steer.add(spin); steer.updateMatrixWorld(true);
     info.forEach((i) => { if (i.used) return; const near = i.c.distanceTo(t.c) < 0.45 && Math.max(i.s.x, i.s.y, i.s.z) < 0.75; const isW = i.n.includes('tyre') ? i === t : (i.n.includes('wheel') || i.n.includes('rotor') || i.n.includes('misc')); if (near && isW) { i.used = true; spin.attach(i.m); } });
@@ -111,8 +122,9 @@ function prepareModel(gltf, def) {
   protos[def.id] = { holder, wheels: sw || wheels, len: size.z, wid: size.x, hgt: size.y };
 }
 function loadModels(onProg) {
-  const loader = new GLTFLoader(); let done = 0; const list = CARS.filter((d) => d.file);
-  return Promise.all(list.map((def) => new Promise((res, rej) => loader.load(new URL(def.file, import.meta.url).href, (g) => { prepareModel(g, def); onProg(++done / list.length); res(); }, undefined, rej))));
+  const loader = new GLTFLoader(); let done = 0; const list = CARS.filter((d) => d.file), tot = list.length + RIMS.length;
+  const rims = RIMS.map((r, k) => new Promise((res, rej) => loader.load(new URL(r.file, import.meta.url).href, (g) => { rprotos[k] = g.scene; onProg(++done / tot); res(); }, undefined, rej)));
+  return Promise.all(rims.concat(list.map((def) => new Promise((res, rej) => loader.load(new URL(def.file, import.meta.url).href, (g) => { prepareModel(g, def); onProg(++done / tot); res(); }, undefined, rej)))));
 }
 const blobTex = canvasTex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(0,0,0,.55)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
 const flameMat = new THREE.MeshBasicMaterial({ color: 0xff9a3c, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }), flameMat2 = new THREE.MeshBasicMaterial({ color: 0x8fe6ff, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
@@ -120,10 +132,24 @@ const aiColor = (d, pc) => { const c = d.dc || 0; return c === pc ? (c + 5) % TO
 const colOf = (def, c) => (c >= 0 ? c : (def.dc || 0));
 const neonTex = canvasTex(128, 128, (g, w, h) => { const gr = g.createRadialGradient(w / 2, h / 2, 4, w / 2, h / 2, w / 2); gr.addColorStop(0, 'rgba(255,255,255,.95)'); gr.addColorStop(0.55, 'rgba(255,255,255,.5)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, h); });
 function animParts(o, now, dt) { if (!o) return; if (o.rb.length) { const h = (now / 2600) % 1; o.rb.forEach((x) => x.m.color.setHSL(h, x.s, x.l)); } o.spin.forEach((p) => { p.rotation.y += dt * 24; }); }
+const rimIdx = (def, eq) => { const k = eq && eq.rim != null ? eq.rim : (prefs.rims || {})[def.id]; return k >= 0 && k < RIMS.length ? k : 0; };
+function paintBody(model, def, ci) {
+  const col = TOY_COLORS[((ci >= 0 ? ci : def.dc) || 0) % TOY_COLORS.length][0];
+  model.traverse((o) => { if (!o.isMesh) return; const f = (m) => { if (m.name !== def.paint) return m; const n = m.clone(); n.color.setHex(col); n.roughness = Math.min(n.roughness, 0.32); n.metalness = Math.max(n.metalness, 0.2); return n; }; o.material = Array.isArray(o.material) ? o.material.map(f) : f(o.material); });
+}
+function addKitWheels(model, def, ri) {
+  const k = def.kit, out = []; let n = 0;
+  [[1, k.fz], [-1, k.fz], [1, k.rz], [-1, k.rz]].forEach(([sx, z]) => {
+    const steer = new THREE.Group(), spin = new THREE.Group(), face = new THREE.Group(), w = rprotos[ri].clone(true);
+    steer.name = 'wh' + n + '_s'; spin.name = 'wh' + n + '_r'; steer.position.set(sx * k.hx, k.R, z); face.rotation.y = sx > 0 ? 0 : Math.PI; w.scale.set(k.R * k.w, k.R, k.R);
+    face.add(w); spin.add(face); steer.add(spin); model.add(steer); out.push({ s: steer.name, r: spin.name, front: z * def.front > 0 }); n++;
+  });
+  return out;
+}
 function makeCarObject(def, colorIdx, eq) {
   eq = eq || {}; let model, wl, len, wid;
   if (def.build) { const b = buildToyCar(THREE, TOY_COLORS[(colorIdx || 0) % TOY_COLORS.length][0], def.style, eq); model = b.group; wl = b.wheels; len = b.len; wid = b.wid; }
-  else { const p = protos[def.id]; model = p.holder.clone(true); wl = p.wheels; len = p.len; wid = p.wid; }
+  else { const p = protos[def.id]; model = p.holder.clone(true); wl = p.wheels; len = p.len; wid = p.wid; if (def.paint) paintBody(model, def, colorIdx); if (def.kit) wl = wl.concat(addKitWheels(model, def, rimIdx(def, eq))); }
   model.rotation.y = def.front < 0 ? Math.PI : 0;
   const root = new THREE.Group(), tilt = new THREE.Group(); root.add(tilt); tilt.add(model);
   const blob = new THREE.Mesh(new THREE.PlaneGeometry(wid * 1.9, len * 1.35), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false })); blob.rotation.x = -Math.PI / 2; blob.position.y = 0.03; tilt.add(blob);
@@ -155,8 +181,8 @@ function itemThumb(i, slot) {
   return '<b class="rc-th">' + uiImg(name, cl).replace('<img ', '<img' + st + ' ') + (own ? '' : '<s>' + i.icon + '</s>') + '</b>';
 }
 let tuneSel = null, tuneSlot = 'paint';
-function eqOf(def) { const e = Object.assign({}, save.gar.eq[def.id] || {}); if (tuneSel && tuneSel.carId === def.id) e[tuneSel.slot] = tuneSel.id; return e; }
-function aiEq() { const e = {}; SLOTS.forEach((sl) => { if (Math.random() < 0.4) { const l = ITEMS.filter((i) => i.slot === sl.id); e[sl.id] = l[Math.floor(Math.random() * l.length)].id; } }); return e; }
+function eqOf(def) { const e = Object.assign({}, save.gar.eq[def.id] || {}); if (def.kit) e.rim = rimIdx(def, null); if (tuneSel && tuneSel.carId === def.id) e[tuneSel.slot] = tuneSel.id; return e; }
+function aiEq() { const e = { rim: Math.floor(Math.random() * RIMS.length) }; SLOTS.forEach((sl) => { if (Math.random() < 0.4) { const l = ITEMS.filter((i) => i.slot === sl.id); e[sl.id] = l[Math.floor(Math.random() * l.length)].id; } }); return e; }
 let gCar = null, gYaw = 0.6, gSpin = 0.35, gPop = 1, gDrag = null, gIdx = 0;
 function showGarageCar(i) {
   const ni = (i + CARS.length) % CARS.length; if (ni !== prefs.car) prefs.color = -1; gIdx = ni; prefs.car = gIdx; writeSave();
@@ -531,14 +557,17 @@ function renderGarageInfo() {
   const b = bestOf(effCourse().key, d.id); $('carBest').textContent = b ? '🏆 이 코스 최고 기록 ' + fmtT(b) : '아직 달린 기록이 없어요';
   const SI = ['speed', 'accel', 'steer', 'nitro'];
   $('carStats').innerHTML = d.stats.map((v, i) => '<div class="gp-st"><img class="ui" src="assets/ui_c_' + SI[i] + '.webp" alt=""><span>' + STAT_NAMES[i] + '</span><span class="bar">' + [1, 2, 3, 4, 5].map((k) => '<i class="' + (k <= v ? 'on' : '') + '"></i>').join('') + '</span></div>').join('');
-  $('credit').innerHTML = !d.src ? (d.file ? '3D 장난감 자동차: 옥쌤의 즐거운 교실에서 AI로 만든 모델이에요.' : '카툰 자동차: 옥쌤의 즐거운 교실에서 코드로 만든 모델이에요.') : '차 모델: “' + d.title + '” — <a href="https://sketchfab.com/outpiston" target="_blank" rel="noopener">OUTPISTON</a> · <a href="' + d.src + '" target="_blank" rel="noopener">Sketchfab</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>';
+  const cr = (c) => '“' + c[0] + '” — ' + c[1] + ' · <a href="' + c[2] + '" target="_blank" rel="noopener">Sketchfab</a> · ' + c[3];
+  $('credit').innerHTML = d.credit ? '차 모델: ' + cr(d.credit) + ' (색칠·바퀴 분리·크기 맞춤 등 손질)' + (d.kit ? '<br>휠: ' + cr(RIMS[rimIdx(d, null)].credit) + ' (타이어 추가·크기 맞춤)' : '') : !d.src ? (d.file ? '3D 장난감 자동차: 옥쌤의 즐거운 교실에서 AI로 만든 모델이에요.' : '카툰 자동차: 옥쌤의 즐거운 교실에서 코드로 만든 모델이에요.') : '차 모델: “' + d.title + '” — <a href="https://sketchfab.com/outpiston" target="_blank" rel="noopener">OUTPISTON</a> · <a href="' + d.src + '" target="_blank" rel="noopener">Sketchfab</a> · <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a>';
   const chip = (k, v, label, on) => '<button type="button" class="gp-chip' + (on ? ' on' : '') + '" data-' + k + '="' + v + '">' + label + '</button>';
   $('colorRow').innerHTML = d.colors ? TOY_COLORS.map((c, i) => '<button type="button" class="rc-sw' + (colOf(d, prefs.color) === i ? ' on' : '') + '" data-cl="' + i + '" style="background:#' + c[0].toString(16).padStart(6, '0') + '" aria-label="' + c[1] + '"></button>').join('') : '<p class="gp-note">이 차는 원래 색 그대로예요.</p>';
+  if (d.kit) $('colorRow').insertAdjacentHTML('beforeend', '<div class="gp-rims">' + RIMS.map((r, i) => '<button type="button" class="gp-chip' + (rimIdx(d, null) === i ? ' on' : '') + '" data-rim="' + i + '">🛞 ' + r.name + '</button>').join('') + '</div>');
   document.querySelectorAll('.gp-qb button').forEach((q) => { q.disabled = !d.build; });
   $('courseRow').innerHTML = COURSES.map((c, i) => '<button type="button" class="gp-cc' + (prefs.course === i ? ' on' : '') + (save.done[c.id] ? ' done' : '') + '" data-co="' + i + '"><img src="assets/th_' + c.bg.slice(3) + '.webp" alt="" draggable="false"><span>' + c.emoji + ' ' + c.name + '</span></button>').join('');
   const grp = (icon, label, inner) => '<div class="gp-g"><label><img class="ui" src="assets/ui_' + icon + '.webp" alt="">' + label + '</label><div>' + inner + '</div></div>';
   $('opts').innerHTML = grp('flag', '바퀴 수', [1, 2, 3, 4, 5].map((n) => chip('lp', n, n, prefs.laps === n)).join('')) + grp('c_road', '길이', LENS.map((x, i) => chip('ln', i, x.name, prefs.len === i)).join('')) + grp('c_people', '상대', DIFFS.map((x) => chip('df', x.id, x.name, prefs.diff === x.id)).join('')) + grp('c_steer', '핸들 도움', chip('as', 1, '켜기', !!prefs.assist) + chip('as', 0, '끄기', !prefs.assist));
   const on = (sel, fn) => document.querySelectorAll(sel).forEach((b) => { b.onclick = () => fn(b); });
+  on('#colorRow [data-rim]', (b) => { prefs.rims = prefs.rims || {}; prefs.rims[d.id] = +b.dataset.rim; writeSave(); O.sfx('tick'); rebuildGarageCar(); renderGarageInfo(); say(RIMS[+b.dataset.rim].name + ' 휠이에요!', null, RIMS[+b.dataset.rim].name + ' 휠을 끼웠어요!'); });
   on('#colorRow [data-cl]', (b) => { prefs.color = +b.dataset.cl; writeSave(); O.sfx('tick'); showGarageCar(gIdx); say(TOY_COLORS[prefs.color][1] + ' 차예요!', null, TOY_COLORS[prefs.color][1] + ' 차예요!'); });
   on('#courseRow [data-co]', (b) => { prefs.course = +b.dataset.co; writeSave(); O.sfx('tick'); renderGarageInfo(); });
   on('#opts [data-lp]', (b) => { prefs.laps = +b.dataset.lp; writeSave(); O.sfx('tick'); renderGarageInfo(); });

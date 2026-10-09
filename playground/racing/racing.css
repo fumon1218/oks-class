@@ -112,3 +112,4 @@ img.ui.rb{animation:rcrb 3s linear infinite}@keyframes rcrb{to{filter:hue-rotate
 .rc-coins{position:absolute;left:max(12px,env(safe-area-inset-left));top:calc(max(10px,env(safe-area-inset-top)) + 218px);background:rgba(255,253,246,.92);color:#8a4b00;border-radius:16px;padding:2px 12px 2px 8px;font-weight:900;font-size:20px;box-shadow:0 3px 8px rgba(0,0,0,.2)}.rc-coins img.ui{height:22px;vertical-align:-4px;margin-right:4px}
 @media (max-width:520px){.rc-btn.item{width:76px;height:76px}.rc-coins{top:calc(max(10px,env(safe-area-inset-top)) + 196px);font-size:16px}}
 @media (max-height:720px){.rc-coins{top:calc(max(10px,env(safe-area-inset-top)) + 180px)}}
+.gp-rims{grid-column:1/-1;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:4px}
