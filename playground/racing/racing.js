@@ -263,7 +263,7 @@ function newRacer(def, isPlayer, slot, idx, colorIdx, eq) {
   return r;
 }
 function startRace() {
-  O.unlock(); runId++; $('tune').hidden = true; tuneSel = null; $('garage').hidden = true; $('hud').hidden = false; $('pad').hidden = false; $('count').hidden = false;
+  O.unlock(); loadSfx(); runId++; $('tune').hidden = true; tuneSel = null; $('garage').hidden = true; $('hud').hidden = false; $('pad').hidden = false; $('count').hidden = false;
   const co = effCourse(); buildRace(co);
   racers = []; const slots = [{ s: 8, d: 2.6 }, { s: 8, d: -2.6 }, { s: 0, d: 2.6 }, { s: 0, d: -2.6 }];
   const pdef = CARS[prefs.car]; player = newRacer(pdef, true, slots[0], 0, colOf(pdef, prefs.color), eqOf(pdef)); racers.push(player);
@@ -276,7 +276,7 @@ function startRace() {
 }
 function stepRacer(r, dt) {
   const a = track.at(r.s), def = r.def; let inp = 0;
-  if (r.isPlayer) { inp = (keys.R ? 1 : 0) - (keys.L ? 1 : 0); r.brake = keys.B; r.nOn = keys.N && r.nitro > 0.02 && !r.finished; if (r.nOn) { r.nitro = Math.max(0, r.nitro - dt * 0.36); } }
+  if (r.isPlayer) { inp = (keys.R ? 1 : 0) - (keys.L ? 1 : 0); r.brake = keys.B; const wasN = r.nOn; r.nOn = keys.N && r.nitro > 0.02 && !r.finished; if (r.nOn && !wasN && mode === 'race') snd('nitro', 0.6); if (r.nOn) { r.nitro = Math.max(0, r.nitro - dt * 0.36); } }
   else {
     r.tgtT -= dt; if (r.tgtT <= 0) { r.tgtT = 2.5 + Math.random() * 3.5; r.tgtD = (Math.random() * 2 - 1) * (W - 3); }
     racers.forEach((o) => { if (o !== r && o.s > r.s && o.s - r.s < 24 && Math.abs(o.d - r.d) < 2.8) r.tgtD = Math.max(-W + 2.6, Math.min(W - 2.6, r.d + (r.d >= o.d ? 3.4 : -3.4))); });
@@ -319,12 +319,12 @@ function simulate(dt) {
   if (!track) return;
   if (mode === 'count') {
     cdT -= dt; const n = Math.ceil(cdT - 0.6); const el = $('count');
-    if (n !== lastCd) { lastCd = n; if (n >= 1 && n <= 3) { el.textContent = n; el.hidden = false; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); O.sfx('tick'); } else if (n <= 0 && cdT > 0) { el.textContent = '출발!'; el.hidden = false; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); O.sfx('coin'); mode = 'race'; raceT = 0; note('달려요! ◀ ▶ 로 방향을 바꿔요.'); setTimeout(() => { if (mode === 'race') el.hidden = true; }, 900); } }
+    if (n !== lastCd) { lastCd = n; if (n >= 1 && n <= 3) { el.textContent = n; el.hidden = false; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); O.sfx('tick'); } else if (n <= 0 && cdT > 0) { el.textContent = '출발!'; el.hidden = false; el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); snd('go', 0.8, 1, 'coin'); mode = 'race'; raceT = 0; note('달려요! ◀ ▶ 로 방향을 바꿔요.'); setTimeout(() => { if (mode === 'race') el.hidden = true; }, 900); } }
     if (cdT <= 0 && mode === 'count') { mode = 'race'; }
   } else if (mode === 'race' || mode === 'finish') {
     if (mode === 'race') raceT += dt;
     racers.forEach((r) => stepRacer(r, dt)); collide(); hitCheck(dt); updateProjs(dt);
-    if (player) orbs.forEach((m) => { const u = m.userData; const lp = course.shape ? course.length : 1e9, rel = ((player.s - u.s) % lp + lp * 1.5) % lp - lp / 2; if (!u.on && Math.abs(rel) > 40 && course.shape) { u.on = true; m.visible = true; } if (u.on && Math.abs(rel) < 2.6 + (player.magT > 0 ? 14 : 0) && Math.abs(u.d - player.d) < 2.1 + (player.magT > 0 ? W : 0)) { u.on = false; m.visible = false; player.nitro = Math.min(1, player.nitro + 0.26); nOrbs++; O.sfx('coin'); } });
+    if (player) orbs.forEach((m) => { const u = m.userData; const lp = course.shape ? course.length : 1e9, rel = ((player.s - u.s) % lp + lp * 1.5) % lp - lp / 2; if (!u.on && Math.abs(rel) > 40 && course.shape) { u.on = true; m.visible = true; } if (u.on && Math.abs(rel) < 2.6 + (player.magT > 0 ? 14 : 0) && Math.abs(u.d - player.d) < 2.1 + (player.magT > 0 ? W : 0)) { u.on = false; m.visible = false; player.nitro = Math.min(1, player.nitro + 0.26); nOrbs++; snd('orb', 0.45, 1, 'coin'); } });
   }
   racers.forEach((r) => placeCar(r, dt));
   shake = Math.max(0, shake - dt * 2);
@@ -333,7 +333,7 @@ function onPlayerFinish() {
   const place = finishOrder.indexOf(player) + 1, rid = runId, time = player.fT; mode = 'finish'; player.nOn = false;
   const key = course.key + ':' + player.def.id, old = save.best[key], newBest = !old || time < old; if (newBest) save.best[key] = time; if (place === 1) save.done[course.id] = 1; writeSave();
   const stars = place === 1 ? 3 : place === 2 ? 2 : 1, ord = ['', '1등', '2등', '3등', '4등'][place];
-  O.sfx(place === 1 ? 'win' : 'ok'); say(ord + '으로 들어왔어요!', 'good', false);
+  snd(place <= 2 ? 'win' : 'bonus', 0.9, 1, place === 1 ? 'win' : 'ok'); say(ord + '으로 들어왔어요!', 'good', false);
   const title = place === 1 ? '1등! 최고예요!' : place === 2 ? '2등! 멋져요!' : '결승선 통과!', text = ord + ' · 기록 ' + fmtT(time) + (newBest ? ' (내 최고 기록!)' : '') + ' · 구슬 ' + nOrbs + '개' + (raceCoins ? ' · 주운 코인 ' + raceCoins + '개' : ''),
     speak = place === 1 ? '와! 일 등이에요! 정말 잘 달렸어요!' : place === 2 ? '이 등이에요! 멋지게 달렸어요!' : '결승선을 통과했어요! 끝까지 잘 달렸어요!';
   const entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'play', subjectName: '놀이(스피드 레이스)', school: 'elem', topic: '스피드 레이스', level: prefs.diff + 1, engine: 'racing', rounds: 1, mistakes: 0, glow: 0, hand: 0, asked: 0, sec: Math.round(time) };
@@ -391,28 +391,28 @@ function setSpin(r, dur) { r.spinT = dur; r.spinDur = dur; }
 function hitMsg(r, t) { if (r.isPlayer) { note(t); O.sfx('pop'); shake = Math.max(shake, 0.4); } }
 function hzHit(r, m, u) {
   const H = HZ[u.type]; if (u.owner === r && raceT - u.born < 1.4) return;
-  if (u.type === 'pad') { if (r.hzCd > 0) return; r.hzCd = 1.2; r.boostT = Math.max(r.boostT, 2.2); fxAt(r, 'burst', 3, 0.5); if (r.isPlayer) { note('무지개 발판! 슝~'); O.sfx('ok'); shake = 0.3; } return; }
+  if (u.type === 'pad') { if (r.hzCd > 0) return; r.hzCd = 1.2; r.boostT = Math.max(r.boostT, 2.2); fxAt(r, 'burst', 3, 0.5); if (r.isPlayer) { note('무지개 발판! 슝~'); snd('boost', 0.9, 1, 'ok'); shake = 0.3; } return; }
   if (r.flyT > 0) return;
   const pw = r.boostT > 0 || r.bigT > 0, p = m.position;
   if (H.flat) {
     if (r.hzCd > 0) return; r.hzCd = 0.8;
-    if (r.shield) { r.shield = 0; fxAt(r, 'burst', 3, 0.5); if (r.isPlayer) { note('방패가 막아 줬어요!'); O.sfx('ok'); } return; }
+    if (r.shield) { r.shield = 0; fxAt(r, 'burst', 3, 0.5); if (r.isPlayer) { note('방패가 막아 줬어요!'); snd('use', 0.9, 0.8, 'ok'); } return; }
     if (pw) return;
     if (H.slow) { r.slowT = H.slow[1]; r.slowF = H.slow[0]; r.v *= Math.min(1, H.slow[0] + 0.12); }
-    if (H.spin) { setSpin(r, H.spin); fxAt(r, 'dizzy', 2.6, H.spin, 0, 2.6); }
+    if (H.spin) { setSpin(r, H.spin); fxAt(r, 'dizzy', 2.6, H.spin, 0, 2.6); if (r.isPlayer) snd('funny', 0.7); }
     fxAt(r, u.type === 'puddle' ? 'splash' : 'dust', 3, 0.6, 1, 0.9); hitMsg(r, H.say); return;
   }
   u.on = false; m.visible = false;
-  if (r.shield) { r.shield = 0; fx('burst', p.x, p.y + 1.2, p.z, 3.4, 0.5); if (r.isPlayer) { note('방패가 막아 줬어요!'); O.sfx('ok'); } }
-  else if (!pw) { r.v *= H.vf; if (H.spin) { setSpin(r, H.spin); fxAt(r, 'dizzy', 2.6, H.spin, 0, 2.6); } else { r.slowT = 0.7; r.slowF = 0.72; } hitMsg(r, H.say); }
-  else if (r.isPlayer) { note('와! 쾅! 부쉈어요!'); O.sfx('coin'); }
+  if (r.shield) { r.shield = 0; fx('burst', p.x, p.y + 1.2, p.z, 3.4, 0.5); if (r.isPlayer) { note('방패가 막아 줬어요!'); snd('use', 0.9, 0.8, 'ok'); } }
+  else if (!pw) { r.v *= H.vf; if (H.spin) { setSpin(r, H.spin); fxAt(r, 'dizzy', 2.6, H.spin, 0, 2.6); if (r.isPlayer) snd('funny', 0.7); } else { r.slowT = 0.7; r.slowF = 0.72; } hitMsg(r, H.say); }
+  else if (r.isPlayer) { note('와! 쾅! 부쉈어요!'); snd('boom', 0.55, 1.1, 'coin'); }
   fx('dust', p.x, p.y + 1, p.z, 3.2, 0.6, 1.2); fx('burst', p.x, p.y + 1.4, p.z, 2.6, 0.5, 1);
   if (r.isPlayer && !H.spin) { raceCoins++; if (!heldItem && !rolling && Math.random() < 0.35) giveItem(); }
   if (u.owner) { hzs.splice(hzs.indexOf(m), 1); rScene.remove(m); }
 }
 function boxHit(r, m, u) {
   u.on = false; m.visible = false; const p = m.position; fx('burst', p.x, p.y, p.z, 5, 0.7, 1); fx('burst', p.x, p.y, p.z, 3.2, 0.5, 0.4);
-  if (r.isPlayer) { O.sfx('coin'); giveItem(); } else r.boostT = Math.max(r.boostT, 1.6);
+  if (r.isPlayer) { snd('box', 0.9, 1, 'coin'); giveItem(); } else r.boostT = Math.max(r.boostT, 1.6);
 }
 function hitCheck(dt) {
   const lp = course.shape ? course.length : 1e9, ph = (list, fn) => list.slice().forEach((m) => { const u = m.userData; if (!u.on) return; if (u.life && raceT - u.born > u.life) { hzs.splice(hzs.indexOf(m), 1); rScene.remove(m); return; } racers.forEach((r) => { if (r.finished || !u.on) return; const rel = ((r.s - u.s) % lp + lp * 1.5) % lp - lp / 2; if (Math.abs(rel) < u.rs && Math.abs(r.d - u.d) < u.rd) fn(r, m, u); }); });
@@ -422,22 +422,22 @@ function hitCheck(dt) {
 function giveItem() {
   if (!player) return; if (heldItem || rolling) { raceCoins += 2; player.nitro = Math.min(1, player.nitro + 0.12); note('코인 +2'); return; }
   const place = Math.min(3, ranks().indexOf(player) + 1) - 1, pick = pickW(ITM_W[Math.max(0, place)]), rid = runId; rolling = true; let n = 0; const names = Object.keys(ITM);
-  const tick = () => { if (rid !== runId || mode === 'garage') { rolling = false; return; } n++; if (n < 9) { setItemUi(names[n % names.length], true); O.sfx('tick'); setTimeout(tick, 70 + n * 12); } else { rolling = false; heldItem = pick; setItemUi(pick); O.sfx('ok'); say(ITM[pick].say, 'good', ITM[pick].n + '!'); } };
+  const tick = () => { if (rid !== runId || mode === 'garage') { rolling = false; return; } n++; if (n < 9) { setItemUi(names[n % names.length], true); O.sfx('tick'); setTimeout(tick, 70 + n * 12); } else { rolling = false; heldItem = pick; setItemUi(pick); snd('got', 0.8, 1, 'ok'); say(ITM[pick].say, 'good', ITM[pick].n + '!'); } };
   tick();
 }
 function setItemUi(name, spin) { const b = $('btnI'); b.innerHTML = name ? '<img src="assets/it_' + name + '.webp" alt="" draggable="false">' : ''; b.classList.toggle('has', !!name && !spin); b.classList.toggle('roll', !!spin); b.disabled = !name || !!spin; b.setAttribute('aria-label', name && !spin ? ITM[name].n + ' 쓰기' : '아이템 칸'); }
 function updateItemUI() { setItemUi(heldItem); }
 function useItem() {
-  if (mode !== 'race' || !heldItem || rolling || !player) return; let it = heldItem; heldItem = ''; updateItemUI(); O.sfx('ok');
-  if (it === 'mystery') { it = ['rocket', 'wings', 'giant', 'coinrain', 'shield', 'magnet', 'rainbow'][Math.floor(Math.random() * 7)]; say('나온 건… ' + ITM[it].n + '!', 'good', ITM[it].n + '!'); }
+  if (mode !== 'race' || !heldItem || rolling || !player) return; let it = heldItem; heldItem = ''; updateItemUI(); snd('use', 0.9, 1, 'ok');
+  if (it === 'mystery') { snd('funny', 0.7); it = ['rocket', 'wings', 'giant', 'coinrain', 'shield', 'magnet', 'rainbow'][Math.floor(Math.random() * 7)]; say('나온 건… ' + ITM[it].n + '!', 'good', ITM[it].n + '!'); }
   if (it === 'shield') { player.shield = 1; note('방패를 썼어요!'); }
-  else if (it === 'rocket') { player.boostT = 2.8; fxAt(player, 'burst', 3, 0.5); note('로켓 부스트!'); shake = 0.5; }
+  else if (it === 'rocket') { player.boostT = 2.8; snd('boost', 0.9); fxAt(player, 'burst', 3, 0.5); note('로켓 부스트!'); shake = 0.5; }
   else if (it === 'magnet') { player.magT = 7; note('자석! 구슬이 달려와요'); }
-  else if (it === 'wings') { player.flyT = 4; fxAt(player, 'burst', 3, 0.5); note('날개! 장애물을 넘어요'); }
-  else if (it === 'giant') { player.bigT = 6; fxAt(player, 'burst', 4, 0.6); note('거대화! 다 부숴요'); shake = 0.5; }
+  else if (it === 'wings') { player.flyT = 4; snd('wings', 0.9); fxAt(player, 'burst', 3, 0.5); note('날개! 장애물을 넘어요'); }
+  else if (it === 'giant') { player.bigT = 6; snd('giant', 0.9); fxAt(player, 'burst', 4, 0.6); note('거대화! 다 부숴요'); shake = 0.5; }
   else if (it === 'rainbow') { addHz(rScene, 'pad', player.s + 30, player.d, false, { owner: player, born: raceT, life: 25 }); note('무지개 발판을 깔았어요!'); }
   else if (it === 'oil') { addHz(rScene, 'oil', player.s - 9, player.d, false, { owner: player, born: raceT, life: 14 }); note('기름을 뿌렸어요!'); }
-  else if (it === 'coinrain') { raceCoins += 6; fxAt(player, 'coins', 5, 1.2, 1.5, 3); O.sfx('coin'); note('코인 +6!'); }
+  else if (it === 'coinrain') { raceCoins += 6; fxAt(player, 'coins', 5, 1.2, 1.5, 3); snd('bonus', 0.9, 1, 'coin'); note('코인 +6!'); }
   else if (it === 'bomb') {
     const t = racers.filter((o) => o !== player && !o.finished && o.s > player.s && o.s - player.s < 320).sort((a, b) => a.s - b.s)[0];
     if (!t) { player.nitro = Math.min(1, player.nitro + 0.3); note('앞에 차가 없어서 니트로로 바뀌었어요'); return; }
@@ -446,7 +446,7 @@ function useItem() {
 }
 function updateProjs(dt) {
   for (let i = projs.length - 1; i >= 0; i--) { const q = projs[i]; q.t += dt; const k = Math.min(1, q.t / q.dur), a = q.from.root.position, b = q.to.root.position; q.sp.position.set(a.x + (b.x - a.x) * k, a.y + 1.5 + Math.sin(k * Math.PI) * 2.2 + (b.y - a.y) * k, a.z + (b.z - a.z) * k);
-    if (k >= 1) { rScene.remove(q.sp); projs.splice(i, 1); const t = q.to; if (t.shield) { t.shield = 0; fxAt(t, 'burst', 3, 0.5); } else { t.slowT = 2.4; t.slowF = 0.55; t.v *= 0.6; fxAt(t, 'splash', 3.6, 0.7, 1, 1.2); } if (t.isPlayer) { note('비눗방울에 맞았어요!'); O.sfx('pop'); shake = 0.4; } } }
+    if (k >= 1) { rScene.remove(q.sp); projs.splice(i, 1); const t = q.to; if (t.shield) { t.shield = 0; fxAt(t, 'burst', 3, 0.5); } else { t.slowT = 2.4; t.slowF = 0.55; t.v *= 0.6; fxAt(t, 'splash', 3.6, 0.7, 1, 1.2); } if (t.isPlayer) { note('비눗방울에 맞았어요!'); snd('boom', 0.7, 1.15, 'pop'); shake = 0.4; } } }
 }
 function animWorld(now, dt) {
   const bs = 1 + Math.sin(now / 260) * 0.06; boxes.forEach((m) => { if (!m.visible) return; const u = m.userData; m.position.y = u.base + Math.sin(now / 340 + u.ph) * 0.28; m.material.rotation = Math.sin(now / 420 + u.ph) * 0.14; m.scale.set(3.1 * bs, 3.1 * bs, 1); });
@@ -474,18 +474,37 @@ function updateCamera(dt) {
   groundM.position.x = p.root.position.x; groundM.position.z = p.root.position.z;
 }
 
+/* ---------- 효과음 파일(assets/sfx) — 없거나 못 불러오면 합성음으로 대신해요 ---------- */
+const SFX = {}; let sfxLoading = false;
+const SFX_NAMES = ['box', 'orb', 'got', 'use', 'boost', 'wings', 'giant', 'bonus', 'win', 'boom', 'funny', 'go', 'nitro', 'engine'];
+function soundOn() { try { return O.settings().sound !== false; } catch (e) { return true; } }
+function loadSfx() {
+  if (sfxLoading) return; sfxLoading = true; let ac = null; try { ac = O.unlock(); } catch (e) {} if (!ac || !ac.decodeAudioData) { sfxLoading = false; return; }
+  SFX_NAMES.forEach((n) => { fetch(new URL('assets/sfx/' + n + '.mp3', import.meta.url).href).then((r) => r.arrayBuffer()).then((a) => new Promise((ok, no) => ac.decodeAudioData(a, ok, no))).then((b) => { SFX[n] = b; if (n === 'engine' && (mode === 'count' || mode === 'race')) startEngine(); }).catch(() => {}); });
+}
+const sfxLast = {};
+function snd(name, vol, rate, fb) {
+  if (!soundOn()) return; const b = SFX[name], ac = b && (() => { try { return O.unlock(); } catch (e) { return null; } })();
+  if (!b || !ac) { if (fb) O.sfx(fb); return; }
+  const t = ac.currentTime; if (sfxLast[name] > t - 0.06) return; sfxLast[name] = t;
+  const s = ac.createBufferSource(), g = ac.createGain(); s.buffer = b; s.playbackRate.value = rate || 1; g.gain.value = vol == null ? 1 : vol; s.connect(g); g.connect(ac.destination); s.start();
+}
+
 /* ---------- 소리(엔진) ---------- */
 let eng = null;
 function startEngine() {
   stopEngine(); let on = true; try { on = O.settings().sound !== false; } catch (e) {} if (!on) return;
   try {
-    const ac = O.unlock(); if (!ac || !ac.createOscillator) return; const o1 = ac.createOscillator(), o2 = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain();
+    const ac = O.unlock(); if (!ac || !ac.createOscillator) return;
+    if (SFX.engine) { const src = ac.createBufferSource(), g = ac.createGain(); src.buffer = SFX.engine; src.loop = true; g.gain.value = 0; src.connect(g); g.connect(ac.destination); src.start(0, Math.random() * 3); eng = { ac, src, g, file: 1 }; return; }
+    const o1 = ac.createOscillator(), o2 = ac.createOscillator(), f = ac.createBiquadFilter(), g = ac.createGain();
     o1.type = 'sawtooth'; o2.type = 'square'; f.type = 'lowpass'; f.frequency.value = 500; g.gain.value = 0.0; o1.connect(f); o2.connect(f); f.connect(g); g.connect(ac.destination); o1.start(); o2.start(); eng = { ac, o1, o2, f, g };
   } catch (e) { eng = null; }
 }
-function stopEngine() { if (!eng) return; try { eng.g.gain.setTargetAtTime(0, eng.ac.currentTime, 0.05); eng.o1.stop(eng.ac.currentTime + 0.2); eng.o2.stop(eng.ac.currentTime + 0.2); } catch (e) {} eng = null; }
+function stopEngine() { if (!eng) return; try { eng.g.gain.setTargetAtTime(0, eng.ac.currentTime, 0.05); if (eng.file) { eng.src.stop(eng.ac.currentTime + 0.2); eng = null; return; } eng.o1.stop(eng.ac.currentTime + 0.2); eng.o2.stop(eng.ac.currentTime + 0.2); } catch (e) {} eng = null; }
 function engineUpdate() {
   if (!eng || !player) return; const sp = Math.min(1.3, player.v / player.def.vmax), t = eng.ac.currentTime;
+  if (eng.file) { eng.src.playbackRate.setTargetAtTime(0.62 + sp * 0.7 + (player.nOn ? 0.15 : 0), t, 0.1); eng.g.gain.setTargetAtTime(mode === 'race' || mode === 'finish' ? 0.55 + sp * 0.35 : 0.15, t, 0.1); return; }
   eng.o1.frequency.setTargetAtTime(48 + sp * 120 + (player.nOn ? 30 : 0), t, 0.08); eng.o2.frequency.setTargetAtTime(24 + sp * 60, t, 0.08); eng.f.frequency.setTargetAtTime(380 + sp * 900, t, 0.1);
   eng.g.gain.setTargetAtTime(mode === 'race' || mode === 'finish' ? 0.035 + sp * 0.03 : 0.012, t, 0.1);
 }
@@ -627,7 +646,7 @@ function frame(now) {
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) { stopEngine(); } else if (mode === 'race' || mode === 'count') startEngine(); });
 
-window.__race = { get mode() { return mode; }, get item() { return heldItem; }, get coins() { return raceCoins; }, get hzs() { return hzs; }, get boxes() { return boxes; }, give(n) { heldItem = n; updateItemUI(); }, use: () => useItem(), get racers() { return racers; }, get player() { return player; }, get track() { return track; }, keys, step(n, dt) { for (let i = 0; i < n; i++) simulate(dt || 0.033); updateHud(); }, snap: () => { snapCamera(); updateCamera(1); }, start: startRace, garage: openGarage, prefs, protos, W };
+window.__race = { SFX, get mode() { return mode; }, get item() { return heldItem; }, get coins() { return raceCoins; }, get hzs() { return hzs; }, get boxes() { return boxes; }, give(n) { heldItem = n; updateItemUI(); }, use: () => useItem(), get racers() { return racers; }, get player() { return player; }, get track() { return track; }, keys, step(n, dt) { for (let i = 0; i < n; i++) simulate(dt || 0.033); updateHud(); }, snap: () => { snapCamera(); updateCamera(1); }, start: startRace, garage: openGarage, prefs, protos, W };
 
 (async function boot() {
   resize(); requestAnimationFrame(frame);
