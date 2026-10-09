@@ -266,6 +266,18 @@ function startGame(c) {
 const PROG_KEY = 'oks_go_prog_v1';
 const progress = (() => { try { return JSON.parse(localStorage.getItem(PROG_KEY) || '{}'); } catch (e) { return {}; } })();
 const saveProg = () => { try { localStorage.setItem(PROG_KEY, JSON.stringify(progress)); } catch (e) {} };
+/* ---------- 오답노트: 틀린 문제를 모아 두었다가 1일 → 3일 → 7일 뒤에 다시 풀어요(3번 연속 깨끗이 풀면 졸업) ---------- */
+const WR_KEY = 'oks_go_wrong_v1', DAY = 864e5, WR_GAP = [0, DAY, 3 * DAY, 7 * DAY];
+const loadWrong = () => { try { return JSON.parse(localStorage.getItem(WR_KEY) || '{}'); } catch (e) { return {}; } };
+const saveWrong = (w) => { try { localStorage.setItem(WR_KEY, JSON.stringify(w)); } catch (e) {} };
+const srcOf = () => (lesson.srcs ? lesson.srcs[lessonStep.item] : { lid: lesson.id, idx: lessonStep.item });
+function wrongMark() { if (!lesson || lesson.kibo) return; const k = srcOf(), key = k.lid + ':' + k.idx, w = loadWrong(), e = w[key] || { n: 0, box: 0 }; e.n++; e.box = 0; e.due = Date.now(); w[key] = e; saveWrong(w); }
+function wrongClean() { const k = srcOf(), key = k.lid + ':' + k.idx, w = loadWrong(), e = w[key]; if (!e) return; e.box++; if (e.box >= 3) delete w[key]; else e.due = Date.now() + WR_GAP[e.box]; saveWrong(w); }
+function wrongPool(onlyDue) { const w = loadWrong(), out = []; Object.keys(w).forEach((key) => { if (onlyDue && w[key].due > Date.now()) return; const [lid, idx] = key.split(':'), l = L.LESSONS.find((q) => q.id === lid); if (l && l.items[+idx]) out.push({ lid, idx: +idx, it: l.items[+idx], n: w[key].n }); }); return out.sort((a, b) => b.n - a.n); }
+function startWrong() {
+  let pool = wrongPool(true); if (!pool.length) pool = wrongPool(false); pool = pool.slice(0, 10); if (!pool.length) { openCurriculum(); return; }
+  startLesson('wrong', { id: 'wrong', lv: 1, title: '오답노트', pages: [], items: pool.map((q) => q.it), srcs: pool.map((q) => ({ lid: q.lid, idx: q.idx })), done: '틀렸던 문제를 다시 풀었어요. 깨끗이 풀면 노트에서 점점 사라져요.' });
+}
 function openCurriculum() {
   const el = $('menu'); el.hidden = false; document.querySelectorAll('.oks-overlay').forEach((x) => x.remove());
   let nextId = null; L.LESSONS.some((l) => { if (!progress[l.id]) { nextId = l.id; return true; } return false; });
@@ -274,8 +286,10 @@ function openCurriculum() {
     return '<section class="go-lv"><h3><i>' + lv.icon + '</i> ' + lv.name + ' <small>' + lv.sub + ' · ' + done + '/' + list.length + '</small></h3><div class="go-lessons">' +
       list.map((l) => '<button type="button" class="go-lesson' + (progress[l.id] ? ' done' : '') + (l.id === nextId ? ' next' : '') + '" data-id="' + l.id + '"><i>' + l.icon + '</i><b>' + l.title + '</b><span>' + (progress[l.id] ? '⭐'.repeat(progress[l.id].stars) : (l.id === nextId ? '다음 차례' : l.sub || '')) + '</span></button>').join('') + '</div></section>';
   }).join('');
-  el.innerHTML = '<div class="ch-card go-map"><h2>🎓 바둑 배우기</h2><p>처음이라면 <b>입문</b>부터 차례대로! 이미 아는 부분은 건너뛰어도 돼요.</p>' + lv + '<div class="ch-row"><button type="button" class="ch-chip" id="mapBack">← 처음 화면</button></div></div>';
+  const wn = Object.keys(loadWrong()).length, wd = wrongPool(true).length;
+  el.innerHTML = '<div class="ch-card go-map"><h2>🎓 바둑 배우기</h2><p>처음이라면 <b>입문</b>부터 차례대로! 이미 아는 부분은 건너뛰어도 돼요.</p>' + (wn ? '<button type="button" class="ch-btn big go" id="wrongBtn">📕 오답노트 · 틀린 문제 ' + wn + '개' + (wd ? ' (복습할 때: ' + wd + '개)' : '') + '</button>' : '') + lv + '<div class="ch-row"><button type="button" class="ch-chip" id="mapBack">← 처음 화면</button></div></div>';
   el.querySelectorAll('[data-id]').forEach((b) => { b.onclick = () => { O.unlock(); startLesson(b.dataset.id); }; });
+  if ($('wrongBtn')) $('wrongBtn').onclick = () => { O.unlock(); startWrong(); };
   $('mapBack').onclick = () => openMenu(false); const nx = el.querySelector('.next'); if (nx && nx.scrollIntoView) setTimeout(() => nx.scrollIntoView({ block: 'center' }), 50);
 }
 
@@ -370,7 +384,7 @@ async function lessonTap(s) {
   if (r.play) { busy = true; updateButtons(); clearMarks(true); const x = s % N, y = (s / N) | 0; const rec = game.play(x, y); if (rec) await animateRec(rec); busy = false; updateButtons(); }
   if (r.show) applyShow(r.show);
   if (r.seq && r.seq.length) await playSeq(r.seq, P);
-  if (r.ok === false) { P.mist++; lessonStep.mistakes++; stats.mistakes++; O.sfx('no'); say(r.msg, 'warn', r.msg); if (r.reset) { await sleep(r.resetDelay || 2200); if (stepPhase === 'item') retryKeep(); } if (P.mist >= 2 && P.hint && !r.noAutoHint) { const h = P.hint(); if (h && !r.reset) { marks.ring.add(h.s); refreshMarkers(); } } }
+  if (r.ok === false) { P.mist++; lessonStep.mistakes++; stats.mistakes++; wrongMark(); O.sfx('no'); say(r.msg, 'warn', r.msg); if (r.reset) { await sleep(r.resetDelay || 2200); if (stepPhase === 'item') retryKeep(); } if (P.mist >= 2 && P.hint && !r.noAutoHint) { const h = P.hint(); if (h && !r.reset) { marks.ring.add(h.s); refreshMarkers(); } } }
   else if (r.ok === true) { O.sfx(r.done ? 'ok' : 'tick'); say(r.msg, 'good', r.msg); if (r.done) itemDone(r); }
   if (r.ok === null && r.msg) note(r.msg);
 }
@@ -382,22 +396,22 @@ async function playSeq(seq, Pr) {   // 풀이 그림: 번호 붙은 수를 차�
 function retryKeep() { if (!P) return; const keep = P.mist; P = L.prepare(lesson.items[lessonStep.item], { same: P.seed }); P.mist = keep; loadPosition(P.n, P.game); applyShow(P.show); updateButtons(); }
 async function lessonAnswer(v) {
   if (!P || P.finished || busy) return; O.unlock(); const r = P.answer(v); if (!r) return;
-  if (r.ok === false) { P.mist++; lessonStep.mistakes++; stats.mistakes++; O.sfx('no'); say(r.msg, 'warn', r.msg); if (r.show) applyShow(r.show); const el = $('quiz'); el.querySelectorAll('button').forEach((b) => { if (b.dataset.v === String(v)) { b.disabled = true; b.classList.add('bad'); } }); }
+  if (r.ok === false) { P.mist++; lessonStep.mistakes++; stats.mistakes++; wrongMark(); O.sfx('no'); say(r.msg, 'warn', r.msg); if (r.show) applyShow(r.show); const el = $('quiz'); el.querySelectorAll('button').forEach((b) => { if (b.dataset.v === String(v)) { b.disabled = true; b.classList.add('bad'); } }); }
   else { if (r.show) applyShow(r.show); O.sfx('ok'); say(r.msg, 'good', r.msg); itemDone(r); }
 }
 async function itemDone(r) {
-  P.finished = true; const rid = runId, it = lessonStep.item; stepPhase = 'wait'; updateButtons(); busy = true; if (P.mode === 'quiz') { $('quiz').querySelectorAll('button').forEach((b) => { b.disabled = true; }); }
+  P.finished = true; if (!P.mist) wrongClean(); const rid = runId, it = lessonStep.item; stepPhase = 'wait'; updateButtons(); busy = true; if (P.mode === 'quiz') { $('quiz').querySelectorAll('button').forEach((b) => { b.disabled = true; }); }
   if (r.after && r.after.length) await playSeq(r.after, P);
   await sleep(r.after && r.after.length ? 1800 : 2300); busy = false; if (rid !== runId) return; lessonStep.item++; if (lessonStep.item >= lesson.items.length) return lessonDone(); showItem();
 }
 function lessonDone() {
   const rid = runId, m = lessonStep.mistakes, n = Math.max(1, lesson.items.length), stars = m <= Math.max(1, n * 0.15) ? 3 : m <= n * 0.6 ? 2 : 1; over = true; stepPhase = 'done'; updateButtons(); hideQuiz();
-  const prev = progress[lesson.id]; if (!prev || prev.stars < stars) progress[lesson.id] = { stars, at: Date.now() }; saveProg(); O.rememberLevel(LEARN_LESSON, lesson.lv);
+  const prev = progress[lesson.id]; if (lesson.id !== 'wrong' && (!prev || prev.stars < stars)) progress[lesson.id] = { stars, at: Date.now() }; saveProg(); O.rememberLevel(LEARN_LESSON, lesson.lv);
   const entry = { at: new Date().toISOString(), lesson: LEARN_LESSON, subject: 'play', subjectName: '놀이(바둑)', school: 'elem', topic: '3D 바둑 배우기 · ' + lesson.title, level: lesson.lv, engine: 'go-learn', rounds: n, mistakes: m, glow: 0, hand: 0, asked: lessonStep.asked, sec: Math.round((Date.now() - stats.t0) / 1000) };
-  const idx = L.LESSONS.indexOf(lesson), nxt = L.LESSONS[idx + 1], me = lesson;
+  const idx = L.LESSONS.indexOf(lesson), nxt = lesson.srcs ? null : L.LESSONS[idx + 1], me = lesson;
   const btns = []; if (nxt) btns.push({ label: '▶ 다음 수업: ' + nxt.title, color: 'green', onClick: () => startLesson(nxt.id) });
   if (me.play) btns.push({ label: '⚫ 바로 대국해 보기', color: 'orange', onClick: () => startGame(Object.assign({ mode: 'play', n: 9, level: 1, color: 1, handicap: 0 }, me.play)) });
-  btns.push({ label: '🔁 다시 하기', color: 'blue', onClick: () => startLesson(me.id) }); btns.push({ label: '☰ 수업 목록', color: 'blue', onClick: () => openCurriculum() });
+  btns.push({ label: '🔁 다시 하기', color: 'blue', onClick: () => (me.srcs ? startWrong() : startLesson(me.id)) }); btns.push({ label: '☰ 수업 목록', color: 'blue', onClick: () => openCurriculum() });
   say(lesson.title + ' 수업을 마쳤어요!', 'good', false);
   setTimeout(() => { if (rid === runId) O.finish({ stats, entry, stars, title: lesson.title + ' 수업 끝!', text: lesson.done || '문제 ' + n + '개 · 틀린 횟수 ' + m + '번', speak: '수업을 마쳤어요! 정말 잘했어요!', mission: { lesson: 1 }, buttons: btns }); }, 500);
 }
@@ -550,6 +564,6 @@ S.onFrame((dt, t) => { const k = 1 + Math.sin(t * 5) * 0.1; markPool.forEach((m)
 /* 시험용 손잡이 */
 window.__go = {
   game: () => game, mode: () => mode, over: () => over, busy: () => busy, scoring: () => scoring, prep: () => P, lesson: () => lesson, step: () => lessonStep, stoneCount: () => stones.size, n: () => N, dead: () => [...deadSet],
-  tap: (s) => (mode === 'learn' ? lessonTap(s) : mode === 'guess' ? guessTap(s) : humanTap(s)), guessState: () => G, answer: lessonAnswer, start: startGame, startLesson, openMenu, openCurriculum, nextPage, marks, finishScoring, progress,
+  tap: (s) => (mode === 'learn' ? lessonTap(s) : mode === 'guess' ? guessTap(s) : humanTap(s)), guessState: () => G, wrong: () => loadWrong(), answer: lessonAnswer, start: startGame, startLesson, openMenu, openCurriculum, nextPage, marks, finishScoring, progress,
   screen(s) { return S.screenOf(new THREE.Vector3(wx(s), REST, wz(s))); }
 };
