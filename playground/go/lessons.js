@@ -48,7 +48,7 @@
       var cnt = 0; P.mode = 'tap'; P.tap = function (s) { var g2 = g.copy(); if (!g2.play(s % n, (s / n) | 0)) return badR(errText(g2)); cnt++; if (cnt >= item.count) return okR('잘했어요! ' + explain); return { ok: true, done: false, play: true, msg: cnt + '개 놓았어요. 더 놓아 봐요! (' + cnt + '/' + item.count + ')' }; };
       P.hint = function () { return null; };
     } else if (item.kind === 'capture' || item.kind === 'atari') {
-      P.show = { rings: [] }; P.hint = function () { var ls = libsOfT(g), best = ls[0]; return { s: best, text: item.kind === 'capture' ? '활로가 남은 곳에 두어 봐요.' : '활로를 하나 막아서 1개만 남겨요.' }; };
+      P.show = { rings: item.ring && tS >= 0 ? [tS] : [] }; P.hint = function () { var ls = libsOfT(g), best = ls[0]; return { s: best, text: item.kind === 'capture' ? '활로가 남은 곳에 두어 봐요.' : '활로를 하나 막아서 1개만 남겨요.' }; };
       P.tap = function (s) {
         var g2 = g.copy(), rec = g2.play(s % n, (s / n) | 0); if (!rec) return badR(errText(g2));
         var gr = g2.group(tS % n, (tS / n) | 0), gone = !gr || g2.get(tS) !== -me;
