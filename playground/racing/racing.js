@@ -26,10 +26,10 @@ const CARS = [
   { id: 'toy_comet', build: 'toy', style: 'comet', dc: 9, colors: true, name: '코멧', sub: '카툰 · 혜성 꼬리 · 만능이에요', title: '', src: '', front: 1, vmax: 68, acc: 27, lat: 12, nmul: 1.3, stats: [5, 5, 4, 4] },
   { id: 'toy_red1', file: 'assets/toy_red1.glb', split: { fz: 0.327, rz: -0.31, y: 0.14, r: 0.17, ix: 0.215 }, scale: 4, wr: 0.56, name: '레드 원', sub: '3D 장난감 · 1번 레이서 · 반짝 광택', title: '', src: '', front: 1, vmax: 62, acc: 24, lat: 12, nmul: 1.3, stats: [4, 4, 4, 4] },
   { id: 'toy_red2', file: 'assets/toy_red2.glb', split: { fz: 0.285, rz: -0.335, y: 0.12, r: 0.135, ix: 0.2 }, scale: 4, wr: 0.5, name: '레드 포뮬러', sub: '3D 장난감 · 날렵한 오픈휠 · 가장 빨라요', title: '', src: '', front: 1, vmax: 68, acc: 24, lat: 10.5, nmul: 1.3, stats: [5, 4, 3, 4] },
-  { id: 'rx7', file: 'assets/rx7.glb', name: '마쓰다 RX-7', sub: '2002 · 일본 스포츠카', title: '2002 Mazda RX-7 Spirit-R', src: 'https://sketchfab.com/3d-models/2002-mazda-rx-7-spirit-r-277e2569280d4c9fa3bc3a85bbc627f1', front: 1, vmax: 56, acc: 24, lat: 12.5, nmul: 1.3, stats: [3, 4, 5, 3] },
-  { id: 'm720', file: 'assets/mclaren720s.glb', name: '맥라렌 720S GT3', sub: '2019 · 영국 레이싱카', title: '2019 McLaren 720S GT3', src: 'https://sketchfab.com/3d-models/2019-mclaren-720s-gt3-cdf4ca67a56b497493931e8852e70b05', front: 1, vmax: 70, acc: 19, lat: 10.5, nmul: 1.26, stats: [5, 3, 3, 4] },
-  { id: 'carrera', file: 'assets/car_carrera.glb', paint: 'Material.001', colors: true, dc: 6, wr: 0.338, name: '카레라 쿠페', sub: '클래식 · 뒤쪽 꼬리날개 · 균형형', credit: ['CARRERA.MAX (Original Porker 2)', 'Geedtopia', 'https://sketchfab.com/3d-models/carreramax-original-porker-2-3a932ae988154bd480b0e8b38a7efd6c', 'CC BY-NC 4.0'], front: 1, vmax: 62, acc: 23, lat: 12.5, nmul: 1.3, stats: [4, 4, 4, 4] },
-  { id: 'chevy57', file: 'assets/car_chevy.glb', paint: 'Material.001', colors: true, dc: 7, wr: 0.302, name: '클래식 쿠페 57', sub: '1957 · 꼬리 날개가 멋진 옛날 차 · 든든해요', credit: ['CHEVY.MAX (Unused)', 'Geedtopia', 'https://sketchfab.com/3d-models/chevymax-unused-6dacdbb7581e4858a1f16adad6861664', 'CC BY-NC 4.0'], front: 1, vmax: 56, acc: 21, lat: 11, nmul: 1.3, stats: [3, 3, 4, 4] },
+  { id: 'rx7', heavy: true, file: 'assets/rx7.glb', name: '마쓰다 RX-7', sub: '2002 · 일본 스포츠카', title: '2002 Mazda RX-7 Spirit-R', src: 'https://sketchfab.com/3d-models/2002-mazda-rx-7-spirit-r-277e2569280d4c9fa3bc3a85bbc627f1', front: 1, vmax: 56, acc: 24, lat: 12.5, nmul: 1.3, stats: [3, 4, 5, 3] },
+  { id: 'm720', heavy: true, file: 'assets/mclaren720s.glb', name: '맥라렌 720S GT3', sub: '2019 · 영국 레이싱카', title: '2019 McLaren 720S GT3', src: 'https://sketchfab.com/3d-models/2019-mclaren-720s-gt3-cdf4ca67a56b497493931e8852e70b05', front: 1, vmax: 70, acc: 19, lat: 10.5, nmul: 1.26, stats: [5, 3, 3, 4] },
+  { id: 'carrera', heavy: true, file: 'assets/car_carrera.glb', paint: 'Material.001', colors: true, dc: 6, wr: 0.338, name: '카레라 쿠페', sub: '클래식 · 뒤쪽 꼬리날개 · 균형형', credit: ['CARRERA.MAX (Original Porker 2)', 'Geedtopia', 'https://sketchfab.com/3d-models/carreramax-original-porker-2-3a932ae988154bd480b0e8b38a7efd6c', 'CC BY-NC 4.0'], front: 1, vmax: 62, acc: 23, lat: 12.5, nmul: 1.3, stats: [4, 4, 4, 4] },
+  { id: 'chevy57', heavy: true, file: 'assets/car_chevy.glb', paint: 'Material.001', colors: true, dc: 7, wr: 0.302, name: '클래식 쿠페 57', sub: '1957 · 꼬리 날개가 멋진 옛날 차 · 든든해요', credit: ['CHEVY.MAX (Unused)', 'Geedtopia', 'https://sketchfab.com/3d-models/chevymax-unused-6dacdbb7581e4858a1f16adad6861664', 'CC BY-NC 4.0'], front: 1, vmax: 56, acc: 21, lat: 11, nmul: 1.3, stats: [3, 3, 4, 4] },
   { id: 'niva', file: 'assets/car_niva.glb', kit: { R: 0.36, fz: 1.22, rz: -1.11, hx: 0.7, w: 0.62 }, paint: 'Scene_-_Root', colors: true, dc: 0, wr: 0.36, name: '니바 짱짱', sub: '네모 SUV · 휠을 골라 끼워요 · 숲길 친구', credit: ['caisse Niva', 'Configcars / maxipub', 'https://sketchfab.com/3d-models/caisse-niva-14a2140480a74d39b0446950ea56764f', 'CC BY 4.0'], front: 1, vmax: 54, acc: 24, lat: 13, nmul: 1.3, stats: [3, 4, 5, 3] },
   { id: 'pickup', file: 'assets/car_pickup.glb', kit: { R: 0.44, fz: 1.84, rz: -1.39, hx: 0.8, w: 0.62 }, paint: 'White', colors: true, dc: 3, wr: 0.44, name: '픽업 트럭', sub: '큰 바퀴 · 휠을 골라 끼워요 · 튼튼해요', credit: ['Generic American C/K \'72', 'Jorma Rysky', 'https://sketchfab.com/3d-models/generic-american-ck-72-ae3b6fe3863f4bb498cef95945584aaa', 'CC BY 4.0'], front: 1, vmax: 54, acc: 22, lat: 11.5, nmul: 1.3, stats: [3, 3, 4, 4] },
 ];
@@ -53,7 +53,8 @@ const COURSES = [
   { id: 'aurora', props: [['atree', 240, 9, 5, 45], ['acry', 140, 5, 4, 40], ['aorb', 50, 4, 3, 30], ['aarch', 22, 12, 8, 40], ['lamp', 40, 5.5, 1.4, 2.6], ['flag', 30, 4.5, 1.4, 2.6]], name: '오로라 별길', emoji: '🌌', seed: 127, length: 1250, laps: 3, shape: 'aurora', bg: 'bg_aurora', hz: 0.56, sky: ['#150a52', '#6a3fd8'], fog: 0x8a5fe8, ground: 0x6a46d8, bank: 0x5736b8, tree: 'round', leaf: 0xaef0ff },
 ];
 const DIFFS = [{ id: 0, name: '여유롭게', pace: 0.8 }, { id: 1, name: '보통', pace: 0.9 }, { id: 2, name: '도전!', pace: 0.99 }];
-const AI_COLORS = ['#ff7a2e', '#3d8bff', '#39c46a'];
+const AI_COLORS = ['#ff7a2e', '#3d8bff', '#39c46a', '#ffd23c', '#b06cff', '#2fd4c4', '#ff6fa8'];
+const N_AI = 7, HELD_MAX = 2;
 
 /* ---------- 저장 ---------- */
 function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return { best: s.best || {}, done: s.done || {}, gar: { owned: (s.gar && s.gar.owned) || {}, eq: (s.gar && s.gar.eq) || {} }, prefs: Object.assign({ car: 0, course: 0, diff: 1, assist: 1, color: -1, laps: 3, len: 1 }, s.prefs || {}) }; } catch (e) { return { best: {}, done: {}, gar: { owned: {}, eq: {} }, prefs: { car: 0, course: 0, diff: 1, assist: 1, color: -1, laps: 3, len: 1 } }; } }
@@ -291,12 +292,14 @@ function newRacer(def, isPlayer, slot, idx, colorIdx, eq) {
 function startRace() {
   O.unlock(); loadSfx(); runId++; $('tune').hidden = true; tuneSel = null; $('garage').hidden = true; $('hud').hidden = false; $('pad').hidden = false; $('count').hidden = false;
   const co = effCourse(); buildRace(co);
-  racers = []; const slots = [{ s: 8, d: 2.6 }, { s: 8, d: -2.6 }, { s: 0, d: 2.6 }, { s: 0, d: -2.6 }];
+  racers = []; const slots = [{ s: 16, d: 2.6 }, { s: 24, d: 2.6 }, { s: 24, d: -2.6 }, { s: 16, d: -2.6 }, { s: 8, d: 2.6 }, { s: 8, d: -2.6 }, { s: 0, d: 2.6 }, { s: 0, d: -2.6 }];
   const pdef = CARS[prefs.car]; player = newRacer(pdef, true, slots[0], 0, colOf(pdef, prefs.color), eqOf(pdef)); racers.push(player);
-  for (let i = 0; i < 3; i++) { const r = newRacer(CARS[(i + (prefs.car + 1)) % CARS.length], false, slots[i + 1], i + 1, aiColor(CARS[(i + (prefs.car + 1)) % CARS.length], colOf(pdef, prefs.color)), aiEq()); r.pace = DIFFS[prefs.diff].pace * (0.95 + i * 0.035); r.name = AI_COLORS[i]; racers.push(r); }
+  const pool = CARS.filter((d) => d !== pdef).sort(() => Math.random() - 0.5), pick = []; let heavy = 0;
+  pool.forEach((d) => { if (pick.length >= N_AI) return; if (d.heavy && heavy >= 2) return; if (d.heavy) heavy++; pick.push(d); });
+  pick.forEach((d, i) => { let ci = Math.floor(Math.random() * TOY_COLORS.length); if (ci === colOf(pdef, prefs.color)) ci = (ci + 3) % TOY_COLORS.length; const r = newRacer(d, false, slots[i + 1], i + 1, ci, aiEq()); r.pace = DIFFS[prefs.diff].pace * (0.93 + i * 0.016); r.name = AI_COLORS[i]; racers.push(r); });
   // 진행 막대 점
   const pr = $('hudProg'); pr.querySelectorAll('u').forEach((u) => u.remove()); racers.slice(1).forEach((r, i) => { const u = document.createElement('u'); u.style.background = AI_COLORS[i]; r.dot = u; pr.appendChild(u); });
-  finishOrder = []; raceT = 0; bumps = 0; nOrbs = 0; raceCoins = 0; heldItem = ''; rolling = false; fxs.length = 0; projs.length = 0; hud.coins = -1; updateItemUI(); finishS = co.shape ? 32 + co.laps * co.length : co.length - 40; lapNow = 1; mode = 'count'; cdT = 3.6; cdShown = -1; hud.rank = hud.speed = hud.nitro = -1; hud.time = '';
+  finishOrder = []; raceT = 0; bumps = 0; nOrbs = 0; raceCoins = 0; held = []; rolling = false; fxs.length = 0; projs.length = 0; hud.coins = -1; updateItemUI(); finishS = co.shape ? 32 + co.laps * co.length : co.length - 40; lapNow = 1; mode = 'count'; cdT = 3.6; cdShown = -1; hud.rank = hud.speed = hud.nitro = -1; hud.time = '';
   racers.forEach((r) => placeCar(r, 0.016, true)); camPos.set(0, 0, 0); snapCamera(); $('btnMenu').textContent = '🚗 차고';
   say('준비! 방향 버튼으로 달려요.', null, '준비하세요!'); startEngine(); simulate(0); updateHud(true);
 }
@@ -369,7 +372,7 @@ function onPlayerFinish() {
 }
 
 /* ---------- 장애물 · 아이템 상자 · 아이템 ---------- */
-let hzs = [], boxes = [], fxs = [], projs = [], raceCoins = 0, heldItem = '', rolling = false;
+let hzs = [], boxes = [], fxs = [], projs = [], raceCoins = 0, held = [], rolling = false;
 const txCache = {};
 function txc(n) { if (!txCache[n]) { const t = new THREE.TextureLoader().load('assets/' + n + '.webp'); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; txCache[n] = t; } return txCache[n]; }
 const HZ = {
@@ -433,7 +436,7 @@ function hzHit(r, m, u) {
   else if (!pw) { r.v *= H.vf; if (H.spin) { setSpin(r, H.spin); fxAt(r, 'dizzy', 2.6, H.spin, 0, 2.6); if (r.isPlayer) snd('funny', 0.7); } else { r.slowT = 0.7; r.slowF = 0.72; } hitMsg(r, H.say); }
   else if (r.isPlayer) { note('와! 쾅! 부쉈어요!'); snd('boom', 0.55, 1.1, 'coin'); }
   fx('dust', p.x, p.y + 1, p.z, 3.2, 0.6, 1.2); fx('burst', p.x, p.y + 1.4, p.z, 2.6, 0.5, 1);
-  if (r.isPlayer && !H.spin) { raceCoins++; if (!heldItem && !rolling && Math.random() < 0.35) giveItem(); }
+  if (r.isPlayer && !H.spin) { raceCoins++; if (held.length < HELD_MAX && !rolling && Math.random() < 0.35) giveItem(); }
   if (u.owner) { hzs.splice(hzs.indexOf(m), 1); rScene.remove(m); }
 }
 function boxHit(r, m, u) {
@@ -446,15 +449,16 @@ function hitCheck(dt) {
   if (course.shape && player) [...hzs, ...boxes].forEach((m) => { const u = m.userData; if (!u.on && !u.owner) { const rel = ((player.s - u.s) % lp + lp * 1.5) % lp - lp / 2; if (Math.abs(rel) > 70) { u.on = true; m.visible = true; } } });
 }
 function giveItem() {
-  if (!player) return; if (heldItem || rolling) { raceCoins += 2; player.nitro = Math.min(1, player.nitro + 0.12); note('코인 +2'); return; }
+  if (!player) return; if (held.length >= HELD_MAX || rolling) { raceCoins += 2; player.nitro = Math.min(1, player.nitro + 0.12); note('코인 +2'); return; }
   const place = Math.min(3, ranks().indexOf(player) + 1) - 1, pick = pickW(ITM_W[Math.max(0, place)]), rid = runId; rolling = true; let n = 0; const names = Object.keys(ITM);
-  const tick = () => { if (rid !== runId || mode === 'garage') { rolling = false; return; } n++; if (n < 9) { setItemUi(names[n % names.length], true); O.sfx('tick'); setTimeout(tick, 70 + n * 12); } else { rolling = false; heldItem = pick; setItemUi(pick); snd('got', 0.8, 1, 'ok'); say(ITM[pick].say, 'good', ITM[pick].n + '!'); } };
+  const tick = () => { if (rid !== runId || mode === 'garage') { rolling = false; updateItemUI(); return; } n++; if (n < 9) { setItemUi(names[n % names.length]); O.sfx('tick'); setTimeout(tick, 70 + n * 12); } else { rolling = false; held.push(pick); updateItemUI(); snd('got', 0.8, 1, 'ok'); say(ITM[pick].say, 'good', ITM[pick].n + '!'); } };
   tick();
 }
-function setItemUi(name, spin) { const b = $('btnI'); b.innerHTML = name ? '<img src="assets/it_' + name + '.webp" alt="" draggable="false">' : ''; b.classList.toggle('has', !!name && !spin); b.classList.toggle('roll', !!spin); b.disabled = !name || !!spin; b.setAttribute('aria-label', name && !spin ? ITM[name].n + ' 쓰기' : '아이템 칸'); }
-function updateItemUI() { setItemUi(heldItem); }
-function useItem() {
-  if (mode !== 'race' || !heldItem || rolling || !player) return; let it = heldItem; heldItem = ''; updateItemUI(); snd('use', 0.9, 1, 'ok');
+function paintSlot(b, name, spin, n) { b.innerHTML = name ? '<img src="assets/it_' + name + '.webp" alt="" draggable="false">' : ''; b.classList.toggle('has', !!name && !spin); b.classList.toggle('roll', !!spin); b.disabled = !name || !!spin; b.setAttribute('aria-label', name && !spin ? ITM[name].n + ' 쓰기' : '아이템 칸 ' + n); }
+function setItemUi(spin) { const sp = (k) => !!spin && held.length === k; paintSlot($('btnI'), held[0] || (sp(0) ? spin : ''), sp(0), 1); paintSlot($('btnI2'), held[1] || (sp(1) ? spin : ''), sp(1), 2); }
+function updateItemUI() { setItemUi(); }
+function useItem(k) {
+  k = k || 0; if (mode !== 'race' || !held[k] || !player) return; let it = held[k]; held.splice(k, 1); updateItemUI(); snd('use', 0.9, 1, 'ok');
   if (it === 'mystery') { snd('funny', 0.7); it = ['rocket', 'wings', 'giant', 'coinrain', 'shield', 'magnet', 'rainbow'][Math.floor(Math.random() * 7)]; say('나온 건… ' + ITM[it].n + '!', 'good', ITM[it].n + '!'); }
   if (it === 'shield') { player.shield = 1; note('방패를 썼어요!'); }
   else if (it === 'rocket') { player.boostT = 2.8; snd('boost', 0.9); fxAt(player, 'burst', 3, 0.5); note('로켓 부스트!'); shake = 0.5; }
@@ -630,10 +634,10 @@ function bindBtn(id, key) {
   b.addEventListener('contextmenu', (e) => e.preventDefault());
   return set;
 }
-$('btnI').onclick = () => useItem();
+$('btnI').onclick = () => useItem(0); $('btnI2').onclick = () => useItem(1);
 const setL = bindBtn('btnL', 'L'), setR = bindBtn('btnR', 'R'), setB = bindBtn('btnB', 'B'), setN = bindBtn('btnN', 'N');
 const KEYMAP = { ArrowLeft: setL, a: setL, A: setL, ArrowRight: setR, d: setR, D: setR, ArrowDown: setB, s: setB, S: setB, ' ': setN, ArrowUp: setN, w: setN, W: setN, Shift: setN };
-window.addEventListener('keydown', (e) => { if (e.repeat) return; if (mode === 'garage') { if (e.key === 'ArrowLeft') $('carPrev').click(); else if (e.key === 'ArrowRight') $('carNext').click(); else if (e.key === 'Enter') startRace(); return; } if (e.key === 'e' || e.key === 'E' || e.key === 'Enter' || e.key === 'x' || e.key === 'X') { e.preventDefault(); useItem(); return; } const f = KEYMAP[e.key]; if (f) { e.preventDefault(); f(true); } });
+window.addEventListener('keydown', (e) => { if (e.repeat) return; if (mode === 'garage') { if (e.key === 'ArrowLeft') $('carPrev').click(); else if (e.key === 'ArrowRight') $('carNext').click(); else if (e.key === 'Enter') startRace(); return; } if (e.key === 'e' || e.key === 'E' || e.key === 'Enter' || e.key === 'x' || e.key === 'X') { e.preventDefault(); useItem(0); return; } if (e.key === 'q' || e.key === 'Q' || e.key === '2') { e.preventDefault(); useItem(1); return; } const f = KEYMAP[e.key]; if (f) { e.preventDefault(); f(true); } });
 window.addEventListener('keyup', (e) => { const f = KEYMAP[e.key]; if (f) f(false); });
 window.addEventListener('blur', () => { setL(false); setR(false); setB(false); setN(false); });
 
@@ -675,7 +679,7 @@ function frame(now) {
 }
 document.addEventListener('visibilitychange', () => { if (document.hidden) { stopEngine(); } else if (mode === 'race' || mode === 'count') startEngine(); });
 
-window.__race = { SFX, get mode() { return mode; }, get item() { return heldItem; }, get coins() { return raceCoins; }, get hzs() { return hzs; }, get boxes() { return boxes; }, give(n) { heldItem = n; updateItemUI(); }, use: () => useItem(), get racers() { return racers; }, get player() { return player; }, get track() { return track; }, keys, step(n, dt) { for (let i = 0; i < n; i++) simulate(dt || 0.033); updateHud(); }, snap: () => { snapCamera(); updateCamera(1); }, start: startRace, garage: openGarage, prefs, protos, W };
+window.__race = { SFX, get mode() { return mode; }, get item() { return held[0] || ''; }, get held() { return held; }, get coins() { return raceCoins; }, get hzs() { return hzs; }, get boxes() { return boxes; }, give(n) { if (held.length < HELD_MAX) held.push(n); updateItemUI(); }, use: () => useItem(), get racers() { return racers; }, get player() { return player; }, get track() { return track; }, keys, step(n, dt) { for (let i = 0; i < n; i++) simulate(dt || 0.033); updateHud(); }, snap: () => { snapCamera(); updateCamera(1); }, start: startRace, garage: openGarage, prefs, protos, W };
 
 (async function boot() {
   resize(); requestAnimationFrame(frame);

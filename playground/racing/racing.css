@@ -113,3 +113,5 @@ img.ui.rb{animation:rcrb 3s linear infinite}@keyframes rcrb{to{filter:hue-rotate
 @media (max-width:520px){.rc-btn.item{width:76px;height:76px}.rc-coins{top:calc(max(10px,env(safe-area-inset-top)) + 196px);font-size:16px}}
 @media (max-height:720px){.rc-coins{top:calc(max(10px,env(safe-area-inset-top)) + 180px)}}
 .gp-rims{grid-column:1/-1;display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+
+.rc-btn.item2{width:70px;height:70px;align-self:flex-end}@media (max-width:520px){.rc-btn.item2{width:58px;height:58px}}
