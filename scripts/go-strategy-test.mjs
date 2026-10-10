@@ -2,6 +2,7 @@
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 const require = createRequire(import.meta.url);
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'playground', 'go');
@@ -142,5 +143,14 @@ same(s15[2].answers, cells(13, (x, y) => (Math.abs(x - 6) === 2 && y === 6) || (
 same(s17[1].answers, [[4, 4]]);
 { const t = E.Game.fromRows(s16[0].rows, 'X', 9).territory([]); assert.equal(t.terrB, 9, '귀의 집은 9칸'); assert.equal(t.terrW, 0); }
 ok('s14~s17 전략 심화 정답이 모양 정의와 같음');
+
+/* ---------- 6. 공개 기보 팩: 모든 기보가 규칙대로 끝까지 두어지는지 ---------- */
+if (fs.existsSync(path.join(dir, 'games-pack.js'))) {
+  globalThis.window = globalThis; require(path.join(dir, 'games.js')); require(path.join(dir, 'games-pack.js'));
+  const pack = globalThis.OKS_GO_GAMES.filter((g) => g.id[0] === 'c'), cnt = [1, 2, 3].map((lv) => pack.filter((g) => g.lv === lv).length);
+  assert.ok(cnt.every((c) => c >= 20), '수준별 기보 수 ' + cnt);
+  for (const g of pack) { const n = g.n, gm = new E.Game(n); for (let i = 0; i + 1 < g.mv.length; i += 2) { const a = g.mv.slice(i, i + 2); if (a === '--') { gm.pass(); continue; } assert.ok(gm.play(a.charCodeAt(0) - 97, a.charCodeAt(1) - 97), g.id + ' ' + (i / 2 + 1) + '수가 규칙에 안 맞아요'); } assert.ok(g.lv === 1 ? n === 9 : g.lv === 2 ? n === 13 || (n === 19 && g.mv.length / 2 <= 150) : n === 19 && g.mv.length / 2 >= 200, g.id + ' 수준 기준'); }
+  ok('공개 기보 팩 ' + pack.length + '판(' + cnt.join('/') + ') 모두 규칙대로 두어지고 수준 기준에 맞음');
+}
 
 console.log(pass + ' PASS');

@@ -552,6 +552,8 @@ const allGames = () => (window.OKS_GO_GAMES || []).concat(loadUserGames());
 const reText = (re) => { if (!re) return ''; const m = /^([BW])\+(.*)$/i.exec(re); if (!m) return re; const w = m[1].toUpperCase() === 'B' ? '흑' : '백', r = m[2]; return w + (/^R/i.test(r) ? ' 불계승' : /^T/i.test(r) ? ' 시간승' : /^[\d.]+$/.test(r) ? ' ' + r + '집 승' : ' 승'); };
 const gTitle = (g) => g.b + ' 대 ' + g.w;
 const decodeMv = (g) => { const out = []; for (let i = 0; i + 1 < g.mv.length; i += 2) { const a = g.mv.slice(i, i + 2); out.push(a === '--' ? { pass: true } : { x: a.charCodeAt(0) - 97, y: a.charCodeAt(1) - 97 }); } return out; };
+const LV_NAME = { 1: '🌱 입문', 2: '🌿 중급', 3: '🌳 고급' };
+let kiboLv = 0;   // 기보 목록 걸러 보기: 0 전체, 1 입문, 2 중급, 3 고급
 const hasSetup = (g) => !!(g.setup && (g.setup.B.length || g.setup.W.length));
 function kiboLabels(pp, k) {
   labelData.length = 0;
@@ -560,14 +562,15 @@ function kiboLabels(pp, k) {
 }
 function openKibo() {
   scriptRun++; PL.tok++; PL.playing = false; const el = $('menu'); el.hidden = false; document.querySelectorAll('.oks-overlay').forEach((x) => x.remove()); hideQuiz(); $('player').hidden = true;
-  const gs = allGames(), sc = guessScore();
-  el.innerHTML = '<div class="ch-card"><h1>📜 기보 · 맞히기</h1><p class="why">프로 대국을 한 수씩 보거나, 다음 수를 맞혀 봐요. 입문이라면 <b>🎯 맞히기</b>로 앞부분 60수부터 해 봐요.' + (sc.asked ? '<br>지금까지 <b>' + sc.asked + '번 중 ' + sc.right + '번</b> 맞혔어요.' : '') + '</p><div class="ch-row kibo-ph"><label>🎯 맞히기 단계</label>' + [[-1, '🎲', '앞부분 60수'], [0, '🌅', '초반'], [1, '⚔️', '중반'], [2, '🏁', '종반']].map((q) => '<button type="button" class="ch-chip' + (guessPh === q[0] ? ' on' : '') + '" data-ph="' + q[0] + '">' + q[1] + ' ' + q[2] + '</button>').join('') + '</div><div class="kibo-list">' +
-    gs.map((g) => '<div class="kibo-item"><div><b>' + gTitle(g) + '</b><small>' + [g.dt, reText(g.re), decodeMv(g).length + '수', g.n && g.n !== 19 ? g.n + '줄' : '', g.id[0] === 'u' ? '내 기보' : ''].filter(Boolean).join(' · ') + '</small></div><span><button type="button" class="ch-chip" data-v="' + g.id + '">▶ 보기</button>' +
+  const all0 = allGames(), gs = all0.filter((g) => !kiboLv || g.lv === kiboLv || (kiboLv === 3 && !g.lv)).sort((a, b) => (a.lv || 9) - (b.lv || 9)), sc = guessScore();
+  el.innerHTML = '<div class="ch-card"><h1>📜 기보 · 맞히기</h1><p class="why">프로 대국을 한 수씩 보거나, 다음 수를 맞혀 봐요. 입문이라면 <b>🎯 맞히기</b>로 앞부분 60수부터 해 봐요.' + (sc.asked ? '<br>지금까지 <b>' + sc.asked + '번 중 ' + sc.right + '번</b> 맞혔어요.' : '') + '</p><div class="ch-row kibo-ph"><label>📚 기보 수준</label>' + [[0, '전체'], [1, '🌱 입문 · 9줄'], [2, '🌿 중급 · 13줄·짧은 19줄'], [3, '🌳 고급 · 긴 19줄']].map((q) => '<button type="button" class="ch-chip' + (kiboLv === q[0] ? ' on' : '') + '" data-lv="' + q[0] + '">' + q[1] + '</button>').join('') + '</div><div class="ch-row kibo-ph"><label>🎯 맞히기 단계</label>' + [[-1, '🎲', '앞부분 60수'], [0, '🌅', '초반'], [1, '⚔️', '중반'], [2, '🏁', '종반']].map((q) => '<button type="button" class="ch-chip' + (guessPh === q[0] ? ' on' : '') + '" data-ph="' + q[0] + '">' + q[1] + ' ' + q[2] + '</button>').join('') + '</div><div class="kibo-list">' +
+    gs.map((g) => '<div class="kibo-item"><div><b>' + gTitle(g) + '</b><small>' + [g.lv ? LV_NAME[g.lv] : '', g.dt, reText(g.re), decodeMv(g).length + '수', g.n && g.n !== 19 ? g.n + '줄' : '', g.op || '', g.id[0] === 'u' ? '내 기보' : ''].filter(Boolean).join(' · ') + '</small></div><span><button type="button" class="ch-chip" data-v="' + g.id + '">▶ 보기</button>' +
       (hasSetup(g) ? '' : '<button type="button" class="ch-chip" data-g="' + g.id + '">🎯 맞히기</button>') + (g.id[0] === 'u' ? '<button type="button" class="ch-chip" data-d="' + g.id + '" aria-label="지우기">🗑</button>' : '') + '</span></div>').join('') +
     '</div><div class="ch-row"><button type="button" class="ch-chip" id="kiboImp">📂 내 SGF 불러오기</button><input type="file" id="kiboFile" accept=".sgf,.SGF,text/plain" multiple hidden><button type="button" class="ch-chip" id="kiboBack">← 처음으로</button></div></div>';
   const byId = (id) => allGames().find((g) => g.id === id);
   el.querySelectorAll('[data-v]').forEach((b) => { b.onclick = () => { O.unlock(); startKibo(byId(b.dataset.v)); }; });
   el.querySelectorAll('[data-g]').forEach((b) => { b.onclick = () => { O.unlock(); startGuess(byId(b.dataset.g), guessPh); }; });
+  el.querySelectorAll('[data-lv]').forEach((b) => { b.onclick = () => { kiboLv = +b.dataset.lv; O.sfx('tick'); openKibo(); }; });
   el.querySelectorAll('[data-ph]').forEach((b) => { b.onclick = () => { guessPh = +b.dataset.ph; O.sfx('tick'); openKibo(); }; });
   el.querySelectorAll('[data-d]').forEach((b) => { b.onclick = () => { saveUserGames(loadUserGames().filter((g) => g.id !== b.dataset.d)); openKibo(); }; });
   $('kiboBack').onclick = () => openMenu(!mode); $('kiboImp').onclick = () => $('kiboFile').click();
