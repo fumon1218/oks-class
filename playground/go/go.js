@@ -402,8 +402,8 @@ function showItem() {
 }
 function retryItem() { if (stepPhase !== 'item' || !P || busy) return; O.unlock(); const it = lesson.items[lessonStep.item]; const keep = P.mist; P = L.prepare(it, { same: P.seed }); P.mist = keep; loadPosition(P.n, P.game); applyShow(P.show); say(P.prompt, null, false); if (P.mode === 'quiz') showQuiz('item'); }
 function lessonHint() {
-  if (!P || stepPhase !== 'item' || busy) return; const h = P.hint && P.hint(); lessonStep.asked++; if (!h) { say('문제를 다시 읽어 봐요.', null, false); return; }
-  clearMarks(); applyShow(P.show); marks.ring.add(h.s); refreshMarkers(); say(h.text || '노란 동그라미 자리를 생각해 봐요.', 'good', h.text);
+  if (!P || stepPhase !== 'item' || busy) return; const h = P.hint && P.hint(); lessonStep.asked++; if (!h) { say('돌의 활로를 하나씩 세어 보고, 노란 동그라미나 표시된 곳이 있는지 살펴봐요.', null, false); return; }
+  clearMarks(); applyShow(P.show); if (h.s >= 0) marks.ring.add(h.s); refreshMarkers(); say(h.text || '노란 동그라미 자리를 생각해 봐요.', 'good', h.text);
 }
 async function lessonTap(s) {
   if (!P || stepPhase !== 'item' || busy || P.finished) return; O.unlock();

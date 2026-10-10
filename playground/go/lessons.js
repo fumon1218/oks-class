@@ -97,7 +97,10 @@
       } else { ans = item.answer; P.options = [{ t: '⚫ 흑이 유리', v: 'B' }, { t: '🤝 비슷해요', v: 'E' }, { t: '⚪ 백이 유리', v: 'W' }]; }
       P.answer = function (i) { var o = P.options[i]; if (!o) return null; var right = o.v === ans; var show = item.showAfter ? { terrB: [], terrW: [] } : null; var showOf = function () { if (!item.showTerr) return null; var tt = g.territory([]), a = [], b = []; for (var s = 0; s < n * n; s++) { if (g.get(s)) continue; if (tt.own[s] > 0) a.push(s); else if (tt.own[s] < 0) b.push(s); } return { terrB: a, terrW: b }; };
         if (right) return { ok: true, done: true, msg: (item.why && item.why[String(o.v)]) || explain, show: showOf() }; return { ok: false, msg: (item.why && item.why[String(o.v)]) || (item.wrong || '다시 생각해 봐요.') }; };
-      P.hint = function () { return item.target ? { s: tS, text: item.hintText || '표시된 돌을 잘 살펴봐요.' } : null; };
+      var qHint = item.kind === 'count' ? '빈 점을 하나씩 세어 봐요. 흑 돌로만 둘러싸인 빈 점이 흑 집, 백 돌로만 둘러싸인 빈 점이 백 집이에요.'
+        : item.kind === 'eval3' ? '① 흑 집과 백 집을 어림해 비교해요. ② 백은 덤 6.5집을 받아요. ③ 활로가 적어 위험한 돌이 있는지도 살펴봐요.'
+        : '규칙을 떠올려 봐요. 활로가 몇 개인지, 단수인지, 둘 수 있는 자리인지 하나씩 확인해요.';
+      P.hint = function () { return item.target ? { s: tS, text: item.hintText || '표시된 돌을 잘 살펴봐요.' } : { s: -1, text: item.hintText || qHint }; };
     }
     return P;
   }
