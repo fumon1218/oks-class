@@ -94,7 +94,106 @@
     return { phase: ph, id: P.id, name: P.name, icon: P.icon, sub: P.sub, moves: mv, headline: head, tips: tips, marks: marks };
   }
 
-  var api = { PHASES: PHASES, movesOf: movesOf, phaseOf: phaseOf, phaseRange: phaseRange, corners: corners, sides: sides, weak: weak, allGroups: allGroups, adviceFromLead: adviceFromLead, analyze: analyze };
+  /* ====================================================================
+     수 종류 해설: 한 수가 "무슨 수"인지 이름을 붙여서 이유와 함께 알려 줘요(복기·프로 기보·코치가 함께 써요).
+     ==================================================================== */
+  function nbrs(n, x, y) { var o = []; if (x > 0) o.push(y * n + x - 1); if (x < n - 1) o.push(y * n + x + 1); if (y > 0) o.push((y - 1) * n + x); if (y < n - 1) o.push((y + 1) * n + x); return o; }
+  function lineOf(n, s) { var x = s % n, y = (s / n) | 0, a = Math.min(x, n - 1 - x) + 1, b = Math.min(y, n - 1 - y) + 1; return a < b ? [a, b] : [b, a]; }   // [낮은 줄, 높은 줄] (1줄이 가장자리)
+  function cheb(n, a, b) { return Math.max(Math.abs((a % n) - (b % n)), Math.abs(((a / n) | 0) - ((b / n) | 0))); }
+  function cornerIdx(n, s) { var r = n >= 19 ? 9 : n >= 13 ? 6 : 4, x = s % n, y = (s / n) | 0, l = x < r, rt = x >= n - r, t = y < r, b = y >= n - r; if (!((l || rt) && (t || b))) return -1; return (rt ? 1 : 0) + (b ? 2 : 0); }
+  function sideOf(n, s) { var x = s % n, y = (s / n) | 0, d = [x, n - 1 - x, y, n - 1 - y], m = Math.min.apply(null, d), k = d.indexOf(m); return d.filter(function (v) { return v === m; }).length > 1 ? -1 : k; }
+  var CORNER_NAME = { '3-3': '삼삼', '3-4': '소목', '4-4': '화점', '3-5': '외목' };
+  function groupsAround(g, n, s, color) {   // s 둘레에서 color 색 덩어리(중복 없이)
+    var seen = {}, out = []; nbrs(n, s % n, (s / n) | 0).forEach(function (q) { if (g.get(q) !== color) return; var gr = g.group(q % n, (q / n) | 0), k = gr.stones[0]; if (seen[k]) return; seen[k] = 1; out.push(gr); }); return out;
+  }
+  function stonesOf(g, n, color) { var o = []; for (var q = 0; q < n * n; q++) if (g.get(q) === color) o.push(q); return o; }
+  function rd(t, kind, icon, tag, text) { return { kind: kind, icon: icon, tag: tag, text: text }; }
+
+  /* g: 두기 전의 판(바꾸지 않아요), mv: {x,y} 또는 {pass:true}. 돌려주는 값: {kind, icon, tag, text} 또는 null(둘 수 없는 수) */
+  function describeMove(g, mv) {
+    if (!mv || mv.pass) return rd(0, 'pass', '⏸', '쉼', '한 수 쉬었어요.');
+    var n = g.n, color = g.turn, x = mv.x, y = mv.y, s = y * n + x; if (g.get(s)) return null;
+    var g2 = g.copy(), rec = g2.play(x, y); if (!rec) return null;
+    var ph = phaseOf(n, movesOf(g)), enemyBefore = groupsAround(g, n, s, -color), mineBefore = groupsAround(g, n, s, color), enemyAfter = groupsAround(g2, n, s, -color), me2 = g2.group(x, y), myLibs = me2 ? me2.libs.length : 0, ln = lineOf(n, s);
+    if (rec.captured && rec.captured.length) return rd(0, 'capture', '💥', '따냄', '상대 돌 ' + rec.captured.length + '점을 따냈어요. 활로가 하나뿐이던 돌을 마지막으로 막았어요.');
+    var atariBefore = mineBefore.filter(function (gr) { return gr.libs.length === 1; });
+    if (atariBefore.length && myLibs >= 2) return rd(0, 'escape', '🏃', '도망', '단수가 된 내 돌이 활로를 늘려서 살아 나갔어요.');
+    var at = enemyAfter.filter(function (gr) { return gr.libs.length === 1; });
+    if (at.length) return rd(0, 'atari', '⚡', '단수', '상대 돌 ' + at.reduce(function (a, gr) { return a + gr.stones.length; }, 0) + '점을 단수로 몰았어요. 다음 수로 따낼 수 있어요.');
+    if (mineBefore.length >= 2) return rd(0, 'connect', '🔗', '이음', '떨어져 있던 내 돌 ' + mineBefore.length + '덩어리를 하나로 이었어요. 이어 두면 약점이 없어져요.');
+    if (enemyBefore.length >= 2) return rd(0, 'cut', '✂️', '끊음', '상대 돌 ' + enemyBefore.length + '덩어리 사이를 끊었어요. 갈라진 돌은 약해져요.');
+    if (ph === 0 && n >= 9) {
+      var ci = cornerIdx(n, s), cs = corners(g);
+      if (ci >= 0 && cs[ci] && cs[ci].empty) { var nm = n >= 13 ? CORNER_NAME[ln[0] + '-' + ln[1]] : ''; return rd(0, 'corner', '🏠', '귀 차지', '빈 귀에 먼저 두었어요' + (nm ? '(' + nm + ')' : '') + '. 귀는 두 변이 막아 줘서 적은 돌로 집을 만들기 쉬워요.'); }
+      if (n >= 13) {
+        var es = stonesOf(g, n, -color), ms = stonesOf(g, n, color), i;
+        for (i = 0; i < es.length; i++) { var el = lineOf(n, es[i]); if (cheb(n, s, es[i]) <= 2 && el[0] <= 4 && el[1] <= 5 && ln[0] <= 5) return rd(0, 'kakari', '🤏', '걸침', '상대가 차지한 귀에 걸쳤어요. 귀를 혼자 차지하지 못하게 방해하는 수예요.'); }
+        for (i = 0; i < ms.length; i++) { var ml = lineOf(n, ms[i]); if (ml[0] <= 4 && ln[0] <= 4 && cheb(n, s, ms[i]) <= 2) return rd(0, 'fold', '🧱', '굳힘', '내 귀의 돌 옆에 한 수 더 두어 귀를 단단하게 만들었어요.');
+          var sd = sideOf(n, s), q9 = ms[i], qx = q9 % n, qy = (q9 / n) | 0, edgeD = sd < 0 ? 99 : [qx, n - 1 - qx, qy, n - 1 - qy][sd], gap = sd < 0 ? 0 : (sd < 2 ? Math.abs(((s / n) | 0) - qy) : Math.abs((s % n) - qx));
+          if (sd >= 0 && ln[0] <= 4 && edgeD <= 3 && gap >= 3 && gap <= (n >= 19 ? 9 : 6)) return rd(0, 'extend', '↔️', '변 벌림', '내 귀의 돌에서 같은 변으로 멀리 벌렸어요. 변에 넓은 집 모양을 만들어요.'); }
+      }
+    }
+    var wk = mineBefore.filter(function (gr) { return gr.libs.length <= 2; });
+    if (wk.length && myLibs >= 3) return rd(0, 'protect', '🛡️', '보강', '활로가 적던 내 돌을 늘려서 튼튼하게 만들었어요.');
+    var near2 = enemyAfter.filter(function (gr) { return gr.libs.length === 2; });
+    if (near2.length) return rd(0, 'attack', '⚔️', '공격', '상대 돌의 활로를 2개로 줄였어요. 몰아붙이면 잡을 수 있어요.');
+    var mv9 = stonesOf(g, n, color), sh = null;
+    mv9.forEach(function (q) { var dx = Math.abs((q % n) - x), dy = Math.abs(((q / n) | 0) - y); if (sh) return;
+      if ((dx === 1 && dy === 2) || (dx === 2 && dy === 1)) sh = rd(0, 'knight', '🐴', '눈목자', '내 돌에서 눈목자(말처럼 한 칸 건너 대각선으로 뛴 모양)로 두었어요. 빠르게 퍼지면서도 이어질 수 있는 모양이에요.');
+      else if ((dx === 2 && dy === 0) || (dx === 0 && dy === 2)) { var mid = (((q / n) | 0) + y) / 2 * n + (q % n + x) / 2; if (!g.get(mid)) sh = rd(0, 'jump', '🦘', '한 칸 뜀', '내 돌에서 한 칸 떨어져 두었어요. 넓게 벌리지만 끼워 들어올 틈이 있어요.'); }
+      else if (dx === 1 && dy === 1) sh = rd(0, 'diag', '◢', '날일자', '내 돌과 대각선(날일자)으로 놓았어요. 가볍게 이어지지만 끊기는 약점을 조심해요.'); });
+    if (sh) return sh;
+    if (enemyBefore.length === 1 && !mineBefore.length) return rd(0, 'contact', '🤝', '붙임', '상대 돌에 바로 붙였어요. 힘겨루기가 시작돼요.');
+    if (ph === 2 && ln[0] <= 3) return rd(0, 'yose', '🏁', '끝내기', '경계를 정리하는 끝내기예요. 큰 곳부터 두는 게 좋아요.');
+    if (ph === 0) return rd(0, 'big', '🌅', '큰 자리', '초반의 큰 자리를 차지했어요.');
+    if (ph === 1) return rd(0, 'shape', '🧩', '모양 갖추기', '중반에 돌의 모양과 집의 경계를 정리하는 수예요.');
+    return rd(0, 'yose', '🏁', '끝내기', '종반에 한 집이라도 큰 곳을 챙기는 수예요.');
+  }
+
+  /* 한 판 전체를 다시 두어 보며 내 수를 단계별로 평가해요.
+     newGame: 새 판을 돌려주는 함수(접바둑 돌 포함), hist: [{s, pass}], me: 내 돌 색. 점수는 규칙 기반의 "대략"이에요. */
+  function report(newGame, hist, me) {
+    var g = newGame(), n = g.n, P = [0, 1, 2].map(function (i) { return { ph: i, my: 0, tags: {}, skipCorner: 0, low: 0, ignored: 0, lost: 0, won: 0, hit: 0 }; }), i, h;
+    for (i = 0; i < hist.length; i++) {
+      h = hist[i]; var color = g.turn, ph = phaseOf(n, movesOf(g)), R = P[ph], mine = color === me, before = g, d = null, atariIds = [];
+      if (mine && !h.pass) {
+        d = describeMove(g, { x: h.s % n, y: (h.s / n) | 0 }); R.my++; if (d) R.tags[d.kind] = (R.tags[d.kind] || 0) + 1;
+        var ln = lineOf(n, h.s);
+        if (ph === 0 && ln[0] <= (n >= 13 ? 2 : 1)) R.low++;
+        if (ph === 0 && n >= 13 && d && d.kind !== 'corner' && d.kind !== 'capture' && d.kind !== 'atari' && d.kind !== 'escape' && corners(g).some(function (c) { return c.empty; }) && d.kind !== 'kakari') R.skipCorner++;
+        allGroups(g).forEach(function (gr) { if (gr.color === me && gr.libs.length === 1) atariIds.push(gr.stones[0]); });
+      }
+      var rec = h.pass ? g.pass() : g.play(h.s % n, (h.s / n) | 0); if (!rec) break;
+      if (mine && !h.pass) {
+        atariIds.forEach(function (st) { if (g.get(st) === me) { var gr = g.group(st % n, (st / n) | 0); if (gr && gr.libs.length === 1) R.ignored++; } });
+        if (d && (d.kind === 'capture' || d.kind === 'atari' || d.kind === 'attack' || d.kind === 'cut')) R.hit++;
+        if (rec.captured && rec.captured.length) R.won += rec.captured.length;
+      } else if (!mine && rec.captured && rec.captured.length) R.lost += rec.captured.length;
+    }
+    var clamp = function (v) { return Math.max(0, Math.min(100, Math.round(v))); }, out = [];
+    P.forEach(function (R) {
+      if (R.my < 2) return; var notes = [], score = 100, less = null, name = PHASES[R.ph].name;
+      if (R.ph === 0) {
+        score -= R.low * 18 + Math.min(R.skipCorner, 3) * 10; var big = (R.tags.corner || 0) + (R.tags.kakari || 0) + (R.tags.extend || 0) + (R.tags.fold || 0); if (n >= 13 && !big) score -= 15;
+        if (R.tags.corner) notes.push('빈 귀를 ' + R.tags.corner + '번 차지했어요.'); if (R.tags.kakari) notes.push('걸침 ' + R.tags.kakari + '번, 좋은 공격이에요.'); if (R.tags.extend) notes.push('변으로 벌린 수가 ' + R.tags.extend + '번 있어요.');
+        if (R.low) notes.push('1~2줄 낮은 곳에 ' + R.low + '번 두었어요. 3~4줄이 효율이 좋아요.'); if (R.skipCorner) notes.push('빈 귀가 남아 있는데 다른 곳에 둔 적이 ' + R.skipCorner + '번 있어요.');
+        less = (R.low || R.skipCorner) ? 's3' : 's4';
+      } else {
+        score -= R.ignored * 25 + Math.min(R.lost, 5) * 8; score += Math.min(R.hit, 4) * 5;
+        if (R.hit) notes.push('상대를 단수·공격·끊은 수가 ' + R.hit + '번 있어요.'); if (R.won) notes.push('돌 ' + R.won + '점을 따냈어요.');
+        if (R.ignored) notes.push('내 돌이 단수인데 살리지 않은 적이 ' + R.ignored + '번 있어요.'); if (R.lost) notes.push('돌 ' + R.lost + '점을 빼앗겼어요.');
+        if (R.ph === 2 && R.tags.yose) notes.push('끝내기를 ' + R.tags.yose + '번 챙겼어요.');
+        less = R.ignored ? 's7' : R.lost ? 's6' : R.ph === 1 ? 's8' : 's11';
+        if (R.ph === 2 && !R.ignored && !R.lost) less = 's10';
+      }
+      if (!notes.length) notes.push('특별히 흔들린 곳이 없어요.');
+      out.push({ ph: R.ph, name: name, icon: PHASES[R.ph].icon, score: clamp(score), notes: notes, lesson: less, my: R.my });
+    });
+    var best = out.slice().sort(function (a, b) { return b.score - a.score; })[0], worst = out.slice().sort(function (a, b) { return a.score - b.score; })[0];
+    return { phases: out, best: best || null, worst: worst || null };
+  }
+
+  var api = { describeMove: describeMove, report: report, lineOf: lineOf, PHASES: PHASES, movesOf: movesOf, phaseOf: phaseOf, phaseRange: phaseRange, corners: corners, sides: sides, weak: weak, allGroups: allGroups, adviceFromLead: adviceFromLead, analyze: analyze };
   root.OKS_GO_STRATEGY = api;
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
 })(typeof window !== 'undefined' ? window : globalThis);

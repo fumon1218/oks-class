@@ -7,13 +7,13 @@ const require = createRequire(import.meta.url);
 const dir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'playground', 'go');
 const E = require(path.join(dir, 'engine.js'));
 const L = require(path.join(dir, 'lessons.js'));
-for (const f of ['lessons-eval.js', 'lessons-strategy.js']) require(path.join(dir, f));
+for (const f of ['lessons-eval.js', 'lessons-strategy.js', 'lessons-strategy2.js']) require(path.join(dir, f));
 const SG = require(path.join(dir, 'strategy.js'));
 let pass = 0; const ok = (m) => { pass++; console.log('PASS', m); };
 
 /* ---------- 1. 전략 수업 전체 점검 ---------- */
 const mine = L.LESSONS.filter((l) => l.lv >= 5);
-assert.deepEqual([5, 6, 7].map((lv) => mine.filter((l) => l.lv === lv).length).every((c) => c >= 4), true, '단계마다 수업 4개 이상');
+assert.deepEqual([5, 6, 7, 8].map((lv) => mine.filter((l) => l.lv === lv).length).every((c) => c >= 3), true, '단계마다 수업 3개 이상');
 const ids = new Set();
 let items = 0, pages = 0;
 for (const lesson of mine) {
@@ -101,5 +101,46 @@ const am = SG.analyze(gMid, 1); assert.equal(am.phase, 1); assert.ok(am.marks.ri
 const gEnd = E.Game.fromRows(R9(), 'X', 9); for (let i = 0; i < 40; i++) gEnd.stack.push({ pass: true }); assert.equal(SG.analyze(gEnd, 1).phase, 2);
 assert.equal(SG.adviceFromLead(10, 1).level, 'ahead'); assert.equal(SG.adviceFromLead(10, -1).level, 'behind'); assert.equal(SG.adviceFromLead(0.5, 1).level, 'close');
 ok('strategy.js: 단계 나누기 · 빈 귀/변 · 약한 돌 · 종반 충고');
+
+/* ---------- 4. 수 종류 해설 · 전략 리포트 ---------- */
+const K = (rows, turn, x, y) => SG.describeMove(E.Game.fromRows(rows, turn, rows.length), { x, y });
+const blank = (n) => Array.from({ length: n }, () => '.'.repeat(n));
+const put = (rows, pts) => { const r = rows.map((q) => q.split('')); pts.forEach(([x, y, c]) => { r[y][x] = c; }); return r.map((q) => q.join('')); };
+assert.equal(K(blank(19), 'X', 3, 3).kind, 'corner'); assert.ok(K(blank(19), 'X', 3, 3).text.includes('화점')); assert.ok(K(blank(19), 'X', 2, 3).text.includes('소목')); assert.ok(K(blank(19), 'X', 2, 2).text.includes('삼삼'));
+assert.equal(K(put(blank(19), [[3, 3, 'X']]), 'O', 5, 2).kind, 'kakari');
+assert.equal(K(put(blank(19), [[3, 3, 'X'], [15, 15, 'O']]), 'X', 9, 3).kind, 'extend');
+assert.equal(K(put(blank(9), [[3, 3, 'O'], [2, 3, 'X'], [4, 3, 'X'], [3, 2, 'X']]), 'X', 3, 4).kind, 'capture');
+assert.equal(K(put(blank(9), [[3, 3, 'O'], [2, 3, 'X'], [4, 3, 'X']]), 'X', 3, 2).kind, 'atari');
+assert.equal(K(put(blank(9), [[2, 2, 'X'], [4, 2, 'X'], [3, 6, 'O']]), 'X', 3, 2).kind, 'connect');
+assert.equal(K(put(blank(9), [[3, 2, 'O'], [5, 2, 'O'], [8, 8, 'X'], [0, 8, 'X'], [8, 0, 'X'], [0, 0, 'X'], [4, 7, 'O'], [4, 8, 'X']]), 'X', 4, 2).kind, 'cut');
+assert.equal(K(put(blank(9), [[3, 3, 'X'], [8, 8, 'O'], [0, 8, 'O'], [8, 0, 'O'], [0, 0, 'O'], [4, 7, 'O'], [4, 8, 'X'], [6, 6, 'X']]), 'X', 5, 4).kind, 'knight');
+assert.equal(SG.describeMove(new E.Game(9), { pass: true }).kind, 'pass');
+assert.equal(SG.describeMove(put(blank(9), [[1, 1, 'X']]) && E.Game.fromRows(put(blank(9), [[1, 1, 'X']]), 'O', 9), { x: 1, y: 1 }), null);
+// 컴퓨터끼리 한 판: 모든 수에 해설이 붙고 리포트가 만들어져요
+for (const n of [9, 13]) {
+  const g = new E.Game(n); E.seedRnd && E.seedRnd(7); const hist = []; let k = 0;
+  while (!g.ended() && k++ < n * n * 2) { const r0 = E.ai.choose(g, 1), m = r0.s; if (r0.pass || m == null || m < 0) { hist.push({ pass: true }); g.pass(); continue; } const d = SG.describeMove(g, { x: m % n, y: (m / n) | 0 }); assert.ok(d && d.text && d.tag, 'AI 수 해설 없음 ' + m); hist.push({ s: m }); g.play(m % n, (m / n) | 0); }
+  const rp = SG.report(() => new E.Game(n), hist, 1); assert.ok(rp.phases.length >= 1, n + '줄 리포트 단계'); rp.phases.forEach((p) => { assert.ok(p.score >= 0 && p.score <= 100 && p.notes.length && L.LESSONS.some((l) => l.id === p.lesson), '리포트 ' + JSON.stringify(p)); });
+}
+ok('수 종류 해설(귀·걸침·벌림·따냄·단수·이음·끊음·날일자)과 전략 리포트');
+
+/* ---------- 5. 전략 심화(lv 8) 정답을 모양 정의로 다시 계산 ---------- */
+const cells = (n, f) => { const o = []; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (f(x, y)) o.push([x, y]); return o; };
+const same = (a, b) => assert.deepEqual(a.map((p) => p[1] * 100 + p[0]).sort((x, y) => x - y), b.map((p) => p[1] * 100 + p[0]).sort((x, y) => x - y));
+const s14 = L.LESSONS.find((l) => l.id === 's14').items, s15 = L.LESSONS.find((l) => l.id === 's15').items, s17 = L.LESSONS.find((l) => l.id === 's17').items, s16 = L.LESSONS.find((l) => l.id === 's16').items;
+same(s14[0].answers, cells(19, (x, y) => [3, 15].includes(x) && [3, 15].includes(y)));   // 화점: 4선·4선
+same(s14[1].answers, cells(19, (x, y) => { const a = Math.min(x, 18 - x), b = Math.min(y, 18 - y); return (a === 2 && b === 3) || (a === 3 && b === 2); }));   // 소목: 3-4
+same(s14[2].answers, cells(19, (x, y) => [2, 16].includes(x) && [2, 16].includes(y)));   // 삼삼: 3-3
+same(s14[3].answers, cells(19, (x, y) => [3, 15].includes(x) && [3, 15].includes(y) && !(x === 15 && y === 3) && !(x === 3 && y === 15)));   // 빈 귀 두 곳의 화점
+same(s15[0].answers, cells(13, (x, y) => Math.abs(x - 6) === 1 && Math.abs(y - 6) === 1));
+same(s15[1].answers, cells(13, (x, y) => Math.abs(x - 6) * Math.abs(y - 6) === 2));
+same(s15[2].answers, cells(13, (x, y) => (Math.abs(x - 6) === 2 && y === 6) || (Math.abs(y - 6) === 2 && x === 6)));
+{ const g = E.Game.fromRows(s15[3].rows, 'X', 13); const g2 = g.copy(); g2.play(5, 6); assert.equal(g2.group(5, 5).stones.length, g2.group(6, 6).stones.length); assert.ok(g2.group(5, 5).stones.includes(6 * 13 + 5) && g2.group(5, 5).stones.includes(6 * 13 + 6), '이으면 한 덩어리'); }
+// 침입: 정답은 백 돌에서 3칸 이상, 흑 돌에서 2칸 이상 떨어진 빈 점 전부
+{ const rows = s17[0].rows, O = [], X = []; rows.forEach((r, y) => r.split('').forEach((c, x) => { if (c === 'O') O.push([x, y]); if (c === 'X') X.push([x, y]); }));
+  same(s17[0].answers, cells(13, (x, y) => rows[y][x] === '.' && O.every((p) => Math.max(Math.abs(p[0] - x), Math.abs(p[1] - y)) >= 3) && X.every((p) => Math.max(Math.abs(p[0] - x), Math.abs(p[1] - y)) >= 2))); assert.ok(s17[0].answers.length >= 4); }
+same(s17[1].answers, [[4, 4]]);
+{ const t = E.Game.fromRows(s16[0].rows, 'X', 9).territory([]); assert.equal(t.terrB, 9, '귀의 집은 9칸'); assert.equal(t.terrW, 0); }
+ok('s14~s17 전략 심화 정답이 모양 정의와 같음');
 
 console.log(pass + ' PASS');

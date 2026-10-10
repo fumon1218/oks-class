@@ -86,7 +86,7 @@ function clearMarks(keepLast) { Object.keys(marks).forEach((k) => { if (k === 'l
 const setMarks = (kind, list) => { marks[kind].clear(); (list || []).forEach((s) => marks[kind].add(s)); };
 
 /* ---------- 상태 ---------- */
-let stratOn = false, stratFull = false;
+let stratOn = false, stratFull = false, lastTag = null;
 let game = new E.Game(9), mode = null, cfg = { n: 9, level: 3, color: 1, handicap: 0, komi: 6.5 }, busy = false, over = false, scoring = false, stats = O.newStats(), runId = 0, assistOn = true, terrOn = false;
 let lesson = null, P = null, stepPhase = '', reviewAt = -1, deadSet = new Set(), lastScore = null;
 const stones = new Map();
@@ -162,7 +162,7 @@ function stratRender(a, extra) {
   el.hidden = false; el.style.bottom = (document.querySelector('.ch-bottom').getBoundingClientRect().height + 8) + 'px';
   el.className = 'go-strat ph' + a.phase;
   el.innerHTML = '<div class="gs-top"><i>' + a.icon + '</i><b>' + a.name + '</b><small>' + a.moves + '수째 · ' + a.sub + '</small><u>' + (stratFull ? '접기 ▾' : '펼치기 ▴') + '</u></div><p>' + a.headline + '</p>' +
-    (extra && !stratFull ? '<p class="gs-adv">' + extra + '</p>' : '') + (tips.length ? '<ul>' + tips.map((t) => '<li>' + t + '</li>').join('') + '</ul>' : '');
+    (lastTag ? '<p class="gs-last">내 지난 수 ' + lastTag.icon + ' <b>' + lastTag.tag + '</b> — ' + lastTag.text + '</p>' : '') + (extra && !stratFull ? '<p class="gs-adv">' + extra + '</p>' : '') + (tips.length ? '<ul>' + tips.map((t) => '<li>' + t + '</li>').join('') + '</ul>' : '');
   el.onclick = () => { stratFull = !stratFull; stratRender(a, extra); };
 }
 async function stratCoach() {
@@ -187,9 +187,9 @@ async function humanTap(s) {
   if (scoring) return toggleDead(s);
   if (!isHumanTurn()) return; O.unlock(); const x = s % N, y = (s / N) | 0;
   if (game.get(s)) return;
-  const rec = game.play(x, y);
+  const dTag = stratOn && mode === 'play' ? (() => { try { return SG.describeMove(game, { x, y }); } catch (e) { return null; } })() : null, rec = game.play(x, y);
   if (!rec) { stats.mistakes++; O.sfx('no'); say(game.err === 'ko' ? '패예요! 방금 따낸 곳은 바로 되따낼 수 없어요. 다른 곳에 한 수 두고 오세요.' : game.err === 'suicide' ? '거기는 둘 수 없어요(자충). 두자마자 활로가 없는 곳이에요.' : '거기는 둘 수 없어요.', 'warn', game.err === 'ko' ? '패예요. 바로 되따낼 수 없어요.' : '거기는 둘 수 없어요.'); return; }
-  busy = true; updateButtons(); clearMarks(true); await animateRec(rec); busy = false; updateButtons(); await afterMove(rec, true);
+  lastTag = dTag; busy = true; updateButtons(); clearMarks(true); await animateRec(rec); busy = false; updateButtons(); await afterMove(rec, true);
 }
 async function doPass() {
   if (scoring || over || busy || !(mode === 'play' || mode === 'two') || !isHumanTurn()) return; O.unlock();
@@ -256,29 +256,45 @@ function finishScoring() {
   const text = '⚫ 흑 ' + sc.black + '집 (집 ' + sc.terrB + ' + 따낸 돌 ' + (sc.capsB + sc.deadW) + ') · ⚪ 백 ' + sc.white + '집 (집 ' + sc.terrW + ' + 따낸 돌 ' + (sc.capsW + sc.deadB) + ' + 덤 ' + sc.komi + ')';
   const stars = humanWon ? 3 : margin <= 10 ? 2 : 1, speak = humanWon ? '이겼어요! 정말 잘했어요!' : '아쉽지만 끝까지 잘했어요. 한 번 더 해 볼까요?';
   say(title, humanWon ? 'good' : null, false);
-  const entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'play', subjectName: '놀이(바둑)', school: 'elem', topic: '3D 바둑 ' + N + '줄', level: mode === 'play' ? cfg.level : 1, engine: 'go',
+  const repP = mode === 'play' ? safeReport(game.stack, game.handicap, cfg.color) : null;
+  const entry = { at: new Date().toISOString(), lesson: LESSON, subject: 'play', subjectName: '놀이(바둑)', school: 'elem', topic: '3D 바둑 ' + N + '줄' + (repP && repP.phases.length ? ' · 전략 ' + repP.phases.map((p) => p.name + ' ' + p.score).join('/') : ''), level: mode === 'play' ? cfg.level : 1, engine: 'go',
     rounds: game.stack.length, mistakes: stats.mistakes, glow: 0, hand: 0, asked: stats.asked, sec: Math.round((Date.now() - stats.t0) / 1000) };
   const btns = [{ label: '🔁 한 번 더', color: 'green', onClick: () => startGame(cfg) }];
   btns.push({ label: '🔍 복기하기', color: 'orange', onClick: () => startReview() });
+  if (repP && repP.phases.length) btns.push({ label: '📊 전략 리포트', color: 'green', onClick: () => showReport(repP) });
   if (mode === 'play' && humanWon && cfg.level < 5) btns.push({ label: '⬆ 다음 수준 (' + (cfg.level + 1) + ')', color: 'orange', onClick: () => { O.rememberLevel(LESSON, cfg.level + 1); startGame(Object.assign({}, cfg, { level: cfg.level + 1 })); } });
   btns.push({ label: '☰ 다른 놀이', color: 'blue', onClick: () => openMenu(true) });
   setTimeout(() => { if (rid === runId) O.finish({ stats, entry, stars, title, text, speak, mission: { lesson: 1 }, buttons: btns }); }, 1600);
 }
 
 /* ---------- 복기 ---------- */
+function newPlainGame(n, hc) { const g = new E.Game(n); if (hc) g.setHandicap(hc); return g; }
 function startReview() {
   const hist = game.stack.map((r) => ({ s: r.s, color: r.color, pass: r.pass })); const full = game; mode = 'review'; reviewAt = hist.length; scoring = false; over = true;
+  const descs = []; try { const sg = newPlainGame(N, full.handicap); hist.forEach((h) => { descs.push(h.pass ? null : SG.describeMove(sg, { x: h.s % N, y: (h.s / N) | 0 })); if (h.pass) sg.pass(); else sg.play(h.s % N, (h.s / N) | 0); }); } catch (e) {}
+  const humanColor = cfg && cfg.mode === 'play' ? cfg.color : 1, rep = cfg && cfg.mode === 'play' ? safeReport(hist, full.handicap, humanColor) : null;
   const render = () => {
     const g = new E.Game(N); if (full.handicap) g.setHandicap(full.handicap); for (let i = 0; i < reviewAt; i++) { const h = hist[i]; if (h.pass) g.pass(); else g.play(h.s % N, (h.s / N) | 0); }
-    game = g; syncBoard(); clearMarks(); const l = hist[reviewAt - 1]; if (l && !l.pass) marks.last.add(l.s); refreshMarkers(); $('modeLabel').textContent = '복기 · ' + reviewAt + ' / ' + hist.length + '수';
+    game = g; syncBoard(); clearMarks(); const l = hist[reviewAt - 1]; if (l && !l.pass) marks.last.add(l.s); refreshMarkers(); $('modeLabel').textContent = '복기 · ' + reviewAt + ' / ' + hist.length + '수'; const dd = descs[reviewAt - 1]; if (l && dd) say(reviewAt + '수 · ' + colName(l.color) + ' · ' + dd.icon + ' ' + dd.tag + ' — ' + dd.text, null, false);
   };
-  const el = $('quiz'); el.hidden = false; el.innerHTML = '<button class="ch-btn" data-d="-10">⏮ 10수 앞</button><button class="ch-btn" data-d="-1">◀ 한 수 앞</button><button class="ch-btn" data-d="1">한 수 뒤 ▶</button><button class="ch-btn" data-d="10">10수 뒤 ⏭</button><button class="ch-btn" data-d="0">☰ 그만 보기</button>';
-  el.querySelectorAll('button').forEach((b) => { b.onclick = () => { const d = +b.dataset.d; if (!d) { hideQuiz(); openMenu(true); return; } reviewAt = Math.max(0, Math.min(hist.length, reviewAt + d)); O.sfx('tick'); render(); }; });
+  const el = $('quiz'); el.hidden = false; el.innerHTML = '<button class="ch-btn" data-d="-10">⏮ 10수 앞</button><button class="ch-btn" data-d="-1">◀ 한 수 앞</button><button class="ch-btn" data-d="1">한 수 뒤 ▶</button><button class="ch-btn" data-d="10">10수 뒤 ⏭</button><button class="ch-btn" data-d="0">☰ 그만 보기</button>' + (rep && rep.phases.length ? '<button class="ch-btn" data-d="99">📊 전략 리포트</button>' : '');
+  el.querySelectorAll('button').forEach((b) => { b.onclick = () => { const d = +b.dataset.d; if (d === 99) { showReport(rep); return; } if (!d) { hideQuiz(); openMenu(true); return; } reviewAt = Math.max(0, Math.min(hist.length, reviewAt + d)); O.sfx('tick'); render(); }; });
   updateButtons(); say('복기해요. 단추로 앞뒤 수를 살펴봐요.', null, false); render();
 }
 
+/* ---------- 전략 리포트(대국 뒤 진단) ---------- */
+function safeReport(hist, hc, color) { try { return SG.report(() => newPlainGame(N, hc), hist.map((h) => ({ s: h.s, pass: h.pass })), color); } catch (e) { return null; } }
+function showReport(rep) {
+  const el = $('menu'); el.hidden = false; document.querySelectorAll('.oks-overlay').forEach((x) => x.remove()); hideQuiz(); const title = (id) => { const l = L.LESSONS.find((q) => q.id === id); return l ? l.title : id; };
+  el.innerHTML = '<div class="ch-card rp"><h1>📊 내 전략 리포트</h1><p class="why">' + (rep.best && rep.worst && rep.best !== rep.worst ? '가장 잘한 단계는 <b>' + rep.best.icon + ' ' + rep.best.name + '</b>(' + rep.best.score + '점), 더 연습하면 좋은 단계는 <b>' + rep.worst.icon + ' ' + rep.worst.name + '</b>(' + rep.worst.score + '점)이에요.' : '이번 대국의 단계별 모습이에요.') + ' 점수는 규칙으로 세어 본 <u>대략의 점수</u>예요.</p>' +
+    rep.phases.map((p) => '<div class="rp-ph ph' + p.ph + '"><div class="rp-top"><b>' + p.icon + ' ' + p.name + '</b><span class="rp-bar"><i style="width:' + p.score + '%"></i></span><em>' + p.score + '점</em></div><ul>' + p.notes.map((t) => '<li>' + t + '</li>').join('') + '</ul><button type="button" class="ch-chip" data-l="' + p.lesson + '">📚 ' + title(p.lesson) + '</button></div>').join('') +
+    '<div class="ch-row"><button type="button" class="ch-chip" id="rpBack">← 돌아가기</button></div></div>';
+  el.querySelectorAll('[data-l]').forEach((b) => { b.onclick = () => { O.unlock(); startLesson(b.dataset.l); }; });
+  $('rpBack').onclick = () => { if (mode === 'review') el.hidden = true; else openMenu(true); }; O.say('이번 대국의 전략 리포트예요.');
+}
+
 /* ---------- 대국 시작 ---------- */
-function resetState() { stratHide(); over = false; busy = false; scoring = false; runId++; terrOn = false; $('btnTerr').textContent = '🧮 집 보기'; deadSet = new Set(); clearMarks(); stats = O.newStats(); lesson = null; P = null; stepPhase = ''; hideQuiz(); }
+function resetState() { lastTag = null; stratHide(); over = false; busy = false; scoring = false; runId++; terrOn = false; $('btnTerr').textContent = '🧮 집 보기'; deadSet = new Set(); clearMarks(); stats = O.newStats(); lesson = null; P = null; stepPhase = ''; hideQuiz(); }
 function startGame(c) {
   resetState(); startWorker(); mode = c.mode || (c.two ? 'two' : 'play'); cfg = Object.assign({ n: 9, level: 3, color: 1, handicap: 0 }, c, { mode }); cfg.komi = komiOf(cfg.n, cfg.handicap);
   stratOn = c.strategy != null ? !!c.strategy : !!prefs.strategy; stratFull = false; stratBtn();
@@ -291,11 +307,12 @@ function startGame(c) {
 }
 
 /* ---------- 배우기: 교육과정 지도 ---------- */
-const PROG_KEY = 'oks_go_prog_v1';
+const PSUF = (() => { try { const a = O.profile && O.profile.active(); return a ? '__' + a : ''; } catch (e) { return ''; } })();   // 학생(프로필)마다 진도·오답노트를 따로 저장해요
+const PROG_KEY = 'oks_go_prog_v1' + PSUF;
 const progress = (() => { try { return JSON.parse(localStorage.getItem(PROG_KEY) || '{}'); } catch (e) { return {}; } })();
 const saveProg = () => { try { localStorage.setItem(PROG_KEY, JSON.stringify(progress)); } catch (e) {} };
 /* ---------- 오답노트: 틀린 문제를 모아 두었다가 1일 → 3일 → 7일 뒤에 다시 풀어요(3번 연속 깨끗이 풀면 졸업) ---------- */
-const WR_KEY = 'oks_go_wrong_v1', DAY = 864e5, WR_GAP = [0, DAY, 3 * DAY, 7 * DAY];
+const WR_KEY = 'oks_go_wrong_v1' + PSUF, DAY = 864e5, WR_GAP = [0, DAY, 3 * DAY, 7 * DAY];
 const loadWrong = () => { try { return JSON.parse(localStorage.getItem(WR_KEY) || '{}'); } catch (e) { return {}; } };
 const saveWrong = (w) => { try { localStorage.setItem(WR_KEY, JSON.stringify(w)); } catch (e) {} };
 const srcOf = () => (lesson.srcs ? lesson.srcs[lessonStep.item] : { lid: lesson.id, idx: lessonStep.item });
@@ -306,6 +323,24 @@ function startWrong() {
   let pool = wrongPool(true); if (!pool.length) pool = wrongPool(false); pool = pool.slice(0, 10); if (!pool.length) { openCurriculum(); return; }
   startLesson('wrong', { id: 'wrong', lv: 1, title: '오답노트', pages: [], items: pool.map((q) => q.it), srcs: pool.map((q) => ({ lid: q.lid, idx: q.idx })), done: '틀렸던 문제를 다시 풀었어요. 깨끗이 풀면 노트에서 점점 사라져요.' });
 }
+/* ---------- 쉬운 낱말 풀이 ---------- */
+const WORDS = [['활로', '돌 바로 옆(위·아래·왼쪽·오른쪽)의 빈 점이에요. 돌이 숨 쉬는 구멍이에요.'], ['단수', '활로가 딱 1개만 남은 위험한 상태예요. 하나만 더 막히면 잡혀요.'], ['따내기', '활로가 0이 된 돌을 판에서 들어내는 거예요.'], ['집', '내 돌로 둘러싼 빈 곳이에요. 집이 많은 쪽이 이겨요.'], ['덤', '흑이 먼저 두는 대신 백에게 주는 점수예요(6.5집).'], ['귀 · 변 · 중앙', '판의 모서리 · 가장자리 · 가운데예요. 초반에는 귀 → 변 → 중앙 순서로 둬요.'], ['화점 · 소목 · 삼삼', '귀에서 많이 두는 자리예요(4-4 · 3-4 · 3-3). 줄 번호는 가장자리가 1줄이에요.'], ['걸침', '상대가 차지한 귀의 돌에 가까이 두어 방해하는 수예요.'], ['벌림', '내 돌에서 변을 따라 멀리 두어 집 모양을 넓히는 수예요.'], ['굳힘', '내 귀의 돌 옆에 한 수 더 두어 귀를 단단하게 하는 수예요.'], ['날일자 · 눈목자 · 한 칸 뜀', '날일자는 내 돌과 대각선으로 놓는 모양, 눈목자는 말처럼 한 칸 건너 대각선으로 뛰는 모양, 한 칸 뜀은 곧게 한 칸 떨어져 두는 모양이에요.'], ['선수 · 후수', '선수는 상대가 꼭 받아야 하는 수, 후수는 안 받아도 되는 수예요. 선수를 먼저 쓰고 큰 곳으로 가요.'], ['끝내기', '집의 경계를 마지막으로 정리하는 단계예요. 큰 곳부터 둬요.'], ['세력(두터움)', '집은 아니지만 돌이 힘차게 서 있는 벽이에요. 나중에 공격에 쓸 수 있어요.'], ['접바둑', '실력 차이를 줄이려고 약한 쪽이 흑으로 돌을 미리 놓고 시작하는 거예요.']];
+function showWords() {
+  document.querySelectorAll('.oks-overlay').forEach((x) => x.remove()); const ov = document.createElement('div'); ov.className = 'oks-overlay'; ov.style.zIndex = 90;
+  ov.innerHTML = '<div class="ch-card go-words"><h2>📖 바둑 낱말 풀이</h2><dl>' + WORDS.map((w) => '<dt>' + w[0] + '</dt><dd>' + w[1] + '</dd>').join('') + '</dl><div class="ch-row"><button type="button" class="ch-chip" id="wordsRead">🔊 읽어 주기</button><button type="button" class="ch-chip" id="wordsClose">닫기</button></div></div>';
+  document.body.appendChild(ov); $('wordsClose').onclick = () => ov.remove(); $('wordsRead').onclick = () => { O.unlock(); O.say(WORDS.map((w) => w[0] + '. ' + w[1]).join(' ')); };
+}
+/* ---------- 실력 진단: 단계마다 한 문제씩 풀어 보고, 어디서부터 시작하면 좋을지 알려 줘요 ---------- */
+function startDiag() {
+  const picks = []; L.LEVELS.forEach((lv, i) => { const ls = L.LESSONS.filter((l) => l.lv === i + 1 && l.items.length && !l.replay && !/^r\d+$/.test(l.id)); if (!ls.length) return; const l = ls[Math.floor(ls.length / 2)]; picks.push({ lv: i + 1, lid: l.id, idx: 0, it: l.items[0] }); });
+  startLesson('diag', { id: 'diag', diag: true, lv: 1, title: '실력 진단', pages: [], items: picks.map((q) => q.it), srcs: picks.map((q) => ({ lid: q.lid, idx: q.idx })), picks, done: '' });
+}
+function diagResult() {
+  const bad = lessonStep.bad || {}, ps = lesson.picks; let at = ps.findIndex((q, i) => bad[i]); const okAll = at < 0;
+  const lvl = okAll ? L.LEVELS.length : ps[at].lv; const list = L.LESSONS.filter((l) => l.lv === (okAll ? 5 : lvl)), first = list.find((l) => !progress[l.id]) || list[0];
+  const msg = okAll ? '모든 단계를 잘 풀었어요! 전략 수업이나 컴퓨터와의 대국에 도전해 보세요.' : L.LEVELS[lvl - 1].icon + ' ' + L.LEVELS[lvl - 1].name + ' 단계부터 시작하면 딱 좋아요.';
+  return { msg, first, lvl, okAll };
+}
 function openCurriculum() {
   const el = $('menu'); el.hidden = false; document.querySelectorAll('.oks-overlay').forEach((x) => x.remove());
   let nextId = null; L.LESSONS.some((l) => { if (!progress[l.id]) { nextId = l.id; return true; } return false; });
@@ -315,17 +350,18 @@ function openCurriculum() {
       list.map((l) => '<button type="button" class="go-lesson' + (progress[l.id] ? ' done' : '') + (l.id === nextId ? ' next' : '') + '" data-id="' + l.id + '"><i>' + l.icon + '</i><b>' + l.title + '</b><span>' + (progress[l.id] ? '⭐'.repeat(progress[l.id].stars) : (l.id === nextId ? '다음 차례' : l.sub || '')) + '</span></button>').join('') + '</div></section>';
   }).join('');
   const wn = Object.keys(loadWrong()).length, wd = wrongPool(true).length;
-  el.innerHTML = '<div class="ch-card go-map"><h2>🎓 바둑 배우기</h2><p>처음이라면 <b>입문</b>부터 차례대로! 이미 아는 부분은 건너뛰어도 돼요.</p>' + (wn ? '<button type="button" class="ch-btn big go" id="wrongBtn">📕 오답노트 · 틀린 문제 ' + wn + '개' + (wd ? ' (복습할 때: ' + wd + '개)' : '') + '</button>' : '') + lv + '<div class="ch-row"><button type="button" class="ch-chip" id="mapBack">← 처음 화면</button></div></div>';
+  el.innerHTML = '<div class="ch-card go-map"><h2>🎓 바둑 배우기</h2><p>처음이라면 <b>입문</b>부터 차례대로! 이미 아는 부분은 건너뛰어도 돼요.</p>' + '<button type="button" class="ch-btn big" id="diagBtn">🧭 실력 진단 · 어디서부터 할까?</button>' + (wn ? '<button type="button" class="ch-btn big go" id="wrongBtn">📕 오답노트 · 틀린 문제 ' + wn + '개' + (wd ? ' (복습할 때: ' + wd + '개)' : '') + '</button>' : '') + lv + '<div class="ch-row"><button type="button" class="ch-chip" id="wordsBtn2">📖 낱말 풀이</button><button type="button" class="ch-chip" id="mapBack">← 처음 화면</button></div></div>';
   el.querySelectorAll('[data-id]').forEach((b) => { b.onclick = () => { O.unlock(); startLesson(b.dataset.id); }; });
+  $('diagBtn').onclick = () => { O.unlock(); startDiag(); }; $('wordsBtn2').onclick = showWords;
   if ($('wrongBtn')) $('wrongBtn').onclick = () => { O.unlock(); startWrong(); };
   $('mapBack').onclick = () => openMenu(false); const nx = el.querySelector('.next'); if (nx && nx.scrollIntoView) setTimeout(() => nx.scrollIntoView({ block: 'center' }), 50);
 }
 
 /* ---------- 배우기: 수업 진행 ---------- */
-let lessonStep = { page: 0, item: 0, mistakes: 0, asked: 0, phase: 'page' }, scriptRun = 0;
+let lessonStep = { page: 0, item: 0, mistakes: 0, asked: 0, phase: 'page', bad: {} }, scriptRun = 0;
 function startLesson(id, obj) {
   resetState(); startWorker(); mode = 'learn'; lesson = obj || L.LESSONS.find((l) => l.id === id); if (!lesson) return; $('menu').hidden = true; $('modeLabel').textContent = L.LEVELS[lesson.lv - 1].name + ' · ' + lesson.title;
-  lessonStep = { page: 0, item: 0, mistakes: 0, asked: 0, phase: 'page' }; stats = O.newStats(); S.setView(0, false, 0.62); planLesson(); showPage();
+  lessonStep = { page: 0, item: 0, mistakes: 0, asked: 0, phase: 'page', bad: {} }; stats = O.newStats(); S.setView(0, false, 0.62); planLesson(); showPage();
 }
 function loadPosition(n, g) { game = g; newBoard(n, g); clearMarks(); }
 function applyShow(show) {
@@ -341,7 +377,7 @@ async function showPage() {
   if (pp.script && pp.script.length && !isReplayLesson()) plPlay(true);
 }
 /* ---------- 재생 막대(복기·시범 수업): 재생·일시정지·정지·한 수 되돌리기·빠르게 감기 ---------- */
-const PL = { playing: false, speed: 1, k: 0, pp: null, plan: [], total: 0, tok: 0, anim: null, rid: 0 };
+const PL = { playing: false, speed: (() => { try { return O.settings().slow ? 0.5 : 1; } catch (e) { return 1; } })(), k: 0, pp: null, plan: [], total: 0, tok: 0, anim: null, rid: 0 };
 const PL_SPEEDS = [0.5, 1, 2, 4];
 const isReplayLesson = () => !!lesson && (lesson.kibo || lesson.replay || /^r\d+$/.test(lesson.id));
 function planLesson() { PL.plan = lesson.pages.map((pg) => (L.preparePage(pg).script || []).length); PL.total = PL.plan.reduce((a, b) => a + b, 0); PL.playing = false; PL.tok++; PL.pp = null; PL.k = 0; }
@@ -401,9 +437,18 @@ function showItem() {
   say(P.prompt, null, P.prompt); if (P.mode === 'quiz') showQuiz('item');
 }
 function retryItem() { if (stepPhase !== 'item' || !P || busy) return; O.unlock(); const it = lesson.items[lessonStep.item]; const keep = P.mist; P = L.prepare(it, { same: P.seed }); P.mist = keep; loadPosition(P.n, P.game); applyShow(P.show); say(P.prompt, null, false); if (P.mode === 'quiz') showQuiz('item'); }
+/* 힌트는 3단계: ① 생각하는 방법 → ② 자리·핵심 알려 주기 → ③ 거의 정답(보기 하나 지우기 / 정답 자리 표시) */
+const HINT_TIP = { set: '먼저 판 전체를 보고, 활로가 적어 위험한 돌이 어디인지 찾아봐요. 아직 자리는 알려 주지 않을게요.', pick: '고를 수 있는 돌(또는 자리)마다 활로나 이웃 돌을 하나씩 비교해 봐요.', yn: '"예/아니오"를 고르기 전에 규칙을 떠올려요. 활로·단수·둘 수 있는 자리인지 순서대로 확인해요.', count: '빈 점을 한 줄씩 훑으면서 세어 봐요. 어느 돌이 둘러싼 집인지 먼저 정해요.', eval3: '흑 집과 백 집을 따로 어림해 보고, 위험한 돌이 있는지도 살펴본 뒤 비교해요.' };
 function lessonHint() {
-  if (!P || stepPhase !== 'item' || busy) return; const h = P.hint && P.hint(); lessonStep.asked++; if (!h) { say('돌의 활로를 하나씩 세어 보고, 노란 동그라미나 표시된 곳이 있는지 살펴봐요.', null, false); return; }
-  clearMarks(); applyShow(P.show); if (h.s >= 0) marks.ring.add(h.s); refreshMarkers(); say(h.text || '노란 동그라미 자리를 생각해 봐요.', 'good', h.text);
+  if (!P || stepPhase !== 'item' || busy) return; const it = lesson.items[lessonStep.item]; lessonStep.asked++; P.hl = (P.hl || 0) + 1; const hl = P.hl, h = P.hint && P.hint();
+  clearMarks(); applyShow(P.show);
+  if (hl === 1) { refreshMarkers(); const t = '💡 힌트 1단계 · ' + (it.tip1 || HINT_TIP[it.kind] || '문제를 천천히 읽고, 돌의 활로를 하나씩 세어 봐요.'); say(t, 'good', t.replace('💡 ', '')); return; }
+  if (P.mode === 'quiz' && hl >= 3) {
+    const bs = [...$('quiz').querySelectorAll('button')].filter((b) => !b.disabled && P.answer && (() => { const r = P.answer(+b.dataset.v); return r && r.ok === false; })()); refreshMarkers();
+    if (bs.length) { const b = bs[Math.floor(Math.random() * bs.length)]; b.disabled = true; b.classList.add('bad'); const t = '💡 힌트 3단계 · 정답이 아닌 보기 하나를 지웠어요. 남은 보기에서 골라 봐요.'; say(t, 'good', '정답이 아닌 보기를 하나 지웠어요.'); return; }
+  }
+  const tap = P.mode !== 'quiz' && h && h.s >= 0; if (tap && hl >= 3) marks.ring.add(h.s); refreshMarkers();   // 자리는 3단계에서 비로소 알려 줘요
+  const t = tap && hl >= 3 ? '💡 힌트 3단계 · 노란 동그라미가 정답 자리예요. 눌러 봐요!' : h && h.text ? '💡 힌트 2단계 · ' + h.text : '💡 힌트 · 표시된 곳을 살펴봐요.'; say(t, 'good', t.replace('💡 ', ''));
 }
 async function lessonTap(s) {
   if (!P || stepPhase !== 'item' || busy || P.finished) return; O.unlock();
@@ -428,11 +473,14 @@ async function lessonAnswer(v) {
   else { if (r.show) applyShow(r.show); O.sfx('ok'); say(r.msg, 'good', r.msg); itemDone(r); }
 }
 async function itemDone(r) {
-  P.finished = true; if (!P.mist) wrongClean(); const rid = runId, it = lessonStep.item; stepPhase = 'wait'; updateButtons(); busy = true; if (P.mode === 'quiz') { $('quiz').querySelectorAll('button').forEach((b) => { b.disabled = true; }); }
+  P.finished = true; if (P.mist) lessonStep.bad[lessonStep.item] = 1; if (!P.mist) wrongClean(); const rid = runId, it = lessonStep.item; stepPhase = 'wait'; updateButtons(); busy = true; if (P.mode === 'quiz') { $('quiz').querySelectorAll('button').forEach((b) => { b.disabled = true; }); }
   if (r.after && r.after.length) await playSeq(r.after, P);
   await sleep(r.after && r.after.length ? 1800 : 2300); busy = false; if (rid !== runId) return; lessonStep.item++; if (lessonStep.item >= lesson.items.length) return lessonDone(); showItem();
 }
 function lessonDone() {
+  if (lesson.diag) { const rid0 = runId, d = diagResult(); over = true; stepPhase = 'done'; updateButtons(); hideQuiz(); say('진단이 끝났어요. ' + d.msg, 'good', d.msg);
+    const b0 = [{ label: '▶ ' + d.first.title + ' 수업 시작', color: 'green', onClick: () => startLesson(d.first.id) }, { label: '☰ 수업 목록', color: 'blue', onClick: () => openCurriculum() }];
+    setTimeout(() => { if (rid0 === runId) O.finish({ stats, entry: { at: new Date().toISOString(), lesson: LEARN_LESSON, subject: 'play', subjectName: '놀이(바둑)', school: 'elem', topic: '3D 바둑 · 실력 진단 → ' + (d.okAll ? '전 단계 통과' : L.LEVELS[d.lvl - 1].name + ' 부터'), level: 1, engine: 'go-learn', rounds: lesson.items.length, mistakes: lessonStep.mistakes, glow: 0, hand: 0, asked: lessonStep.asked, sec: Math.round((Date.now() - stats.t0) / 1000) }, stars: d.okAll ? 3 : 2, title: '실력 진단 결과', text: d.msg + ' (틀린 단계 ' + Object.keys(lessonStep.bad).length + '개 / ' + lesson.items.length + '개 중)', speak: d.msg, mission: { lesson: 1 }, buttons: b0 }); }, 400); return; }
   const rid = runId, m = lessonStep.mistakes, n = Math.max(1, lesson.items.length), stars = m <= Math.max(1, n * 0.15) ? 3 : m <= n * 0.6 ? 2 : 1; over = true; stepPhase = 'done'; updateButtons(); hideQuiz();
   const prev = progress[lesson.id]; if (lesson.id !== 'wrong' && (!prev || prev.stars < stars)) progress[lesson.id] = { stars, at: Date.now() }; saveProg(); O.rememberLevel(LEARN_LESSON, lesson.lv);
   const entry = { at: new Date().toISOString(), lesson: LEARN_LESSON, subject: 'play', subjectName: '놀이(바둑)', school: 'elem', topic: '3D 바둑 배우기 · ' + lesson.title, level: lesson.lv, engine: 'go-learn', rounds: n, mistakes: m, glow: 0, hand: 0, asked: lessonStep.asked, sec: Math.round((Date.now() - stats.t0) / 1000) };
@@ -467,7 +515,7 @@ function openMenu(fromFinish) {
   function render() {
     const modes = [['learn', '🎓', '바둑 배우기', '입문부터 고급까지'], ['play', '🤖', '컴퓨터와 대국', '9·13·19줄'], ['two', '👫', '둘이서 대국', '친구와 번갈아'], ['kibo', '📜', '기보·맞히기', '프로 대국 보기']];
     const doneN = L.LESSONS.filter((l) => progress[l.id]).length; let opt = '';
-    if (sel.mode === 'learn') opt = '<p class="why">입문 → 초급 → 중급 → 고급 → <b>전략(초반·중반·종반)</b>, 전체 ' + L.LESSONS.length + '개 수업 중 <b>' + doneN + '개</b>를 마쳤어요. 규칙, 단수·따내기, 사활, 축·장문, 포석, 끝내기, 형세 판단, 그리고 판 전체를 읽는 전략까지 하나씩 풀면서 익혀요.</p>';
+    if (sel.mode === 'learn') opt = '<p class="why">입문 → 초급 → 중급 → 고급 → <b>전략(초반·중반·종반)</b> → <b>전략 심화</b>, 전체 ' + L.LESSONS.length + '개 수업 중 <b>' + doneN + '개</b>를 마쳤어요. 규칙, 단수·따내기, 사활, 축·장문, 포석, 끝내기, 형세 판단, 그리고 판 전체를 읽는 전략까지 하나씩 풀면서 익혀요.</p>';
     else if (sel.mode === 'kibo') opt = '<p class="why">프로 대국을 처음부터 끝까지 보거나, <b>다음 수를 맞혀</b> 보면서 눈을 길러요. 내가 가진 SGF 파일도 불러올 수 있어요.</p>';
     else {
       const mh = E.maxHandicap(sel.n); if (sel.handicap > mh) sel.handicap = mh;
@@ -479,14 +527,14 @@ function openMenu(fromFinish) {
     }
     el.innerHTML = '<div class="ch-card"><h1>⚫⚪ 3D 바둑</h1><p>집을 더 많이 차지하면 이기는 바둑이에요.</p><div class="ch-modes">' +
       modes.map((m) => '<button type="button" class="ch-mode' + (sel.mode === m[0] ? ' on' : '') + '" data-mode="' + m[0] + '"><i>' + m[1] + '</i><b>' + m[2] + '</b><span>' + m[3] + '</span></button>').join('') + '</div>' + opt +
-      '<button type="button" class="ch-go" id="goBtn">' + (sel.mode === 'learn' ? '수업 고르기' : sel.mode === 'kibo' ? '기보 고르기' : '시작!') + '</button>' + (mode && !fromFinish ? '<div class="ch-row"><button type="button" class="ch-chip" id="closeMenu">닫기</button></div>' : '') + '</div>';
+      '<button type="button" class="ch-go" id="goBtn">' + (sel.mode === 'learn' ? '수업 고르기' : sel.mode === 'kibo' ? '기보 고르기' : '시작!') + '</button>' + '<div class="ch-row"><button type="button" class="ch-chip" id="wordsBtn">📖 낱말 풀이</button></div>' + (mode && !fromFinish ? '<div class="ch-row"><button type="button" class="ch-chip" id="closeMenu">닫기</button></div>' : '') + '</div>';
     el.querySelectorAll('[data-mode]').forEach((b) => { b.onclick = () => { sel.mode = b.dataset.mode; O.unlock(); O.sfx('tick'); render(); }; });
     el.querySelectorAll('[data-n]').forEach((b) => { b.onclick = () => { sel.n = +b.dataset.n; render(); }; });
     el.querySelectorAll('[data-plv]').forEach((b) => { b.onclick = () => { sel.playLv = +b.dataset.plv; render(); }; });
     el.querySelectorAll('[data-color]').forEach((b) => { b.onclick = () => { sel.color = +b.dataset.color; render(); }; });
     el.querySelectorAll('[data-hc]').forEach((b) => { b.onclick = () => { sel.handicap = +b.dataset.hc; render(); }; });
     el.querySelectorAll('[data-strat]').forEach((b) => { b.onclick = () => { sel.strategy = +b.dataset.strat === 1; render(); }; });
-    const cm = $('closeMenu'); if (cm) cm.onclick = () => { el.hidden = true; };
+    $('wordsBtn').onclick = showWords; const cm = $('closeMenu'); if (cm) cm.onclick = () => { el.hidden = true; };
     $('goBtn').onclick = () => { O.unlock(); Object.assign(prefs, { mode: sel.mode, n: sel.n, color: sel.color, handicap: sel.handicap, strategy: sel.strategy }); savePrefs();
       if (sel.mode === 'learn') openCurriculum();
       else if (sel.mode === 'kibo') openKibo();
@@ -533,7 +581,10 @@ function openKibo() {
 function startKibo(g) {
   const n = g.n || 19, mv = decodeMv(g), fc = g.fc === 'W' ? 1 : 0, nm = (i) => ((i + fc) % 2 === 0 ? '흑' : '백');
   const grid = []; for (let y = 0; y < n; y++) grid.push(new Array(n).fill('.')); if (g.setup) { g.setup.B.forEach((p) => { grid[p[1]][p[0]] = 'X'; }); g.setup.W.forEach((p) => { grid[p[1]][p[0]] = 'O'; }); }
-  const script = mv.map((m, i) => (m.pass ? { pass: true, text: (i + 1) + '수 · ' + nm(i) + ' 패스', wait: 700 } : [m.x, m.y, (i + 1) + '수 · ' + nm(i), 900]));
+  let sim = null; try { sim = E.Game.fromRows(grid.map((r) => r.join('')), fc ? 'O' : 'X', n); } catch (e) {}
+  const script = mv.map((m, i) => { let d = null; if (sim) { try { d = SG.describeMove(sim, m); const ok = m.pass ? sim.pass() : sim.play(m.x, m.y); if (!ok) sim = null; } catch (e) { sim = null; } }
+    const tx = (i + 1) + '수 · ' + nm(i) + (d && !m.pass ? ' · ' + d.icon + ' ' + d.tag + ' — ' + d.text : ''), sp = d && ['corner', 'kakari', 'extend', 'fold', 'capture', 'atari', 'cut', 'escape', 'connect', 'protect', 'attack'].includes(d.kind);
+    return m.pass ? { pass: true, text: tx + ' 패스', wait: 700 } : [m.x, m.y, tx, sp ? 2200 : 1300]; });
   const page = { n, rows: grid.map((r) => r.join('')), turn: fc ? 'O' : 'X', text: gTitle(g) + (g.dt ? ' (' + g.dt + ')' : '') + (g.re ? ' · ' + reText(g.re) : '') + '. ▶ 를 눌러 처음부터 보거나, 아래 막대를 끌어서 원하는 수로 가요.', script };
   startLesson('kibo', { id: 'kibo', kibo: true, lv: 3, title: gTitle(g), pages: [page], items: [] });
 }
@@ -608,5 +659,6 @@ S.onFrame((dt, t) => { const k = 1 + Math.sin(t * 5) * 0.1; markPool.forEach((m)
 window.__go = {
   game: () => game, mode: () => mode, over: () => over, busy: () => busy, scoring: () => scoring, prep: () => P, lesson: () => lesson, step: () => lessonStep, stoneCount: () => stones.size, n: () => N, dead: () => [...deadSet],
   tap: (s) => (mode === 'learn' ? lessonTap(s) : mode === 'guess' ? guessTap(s) : humanTap(s)), guessState: () => G, wrong: () => loadWrong(), answer: lessonAnswer, start: startGame, startLesson, openMenu, openCurriculum, nextPage, marks, finishScoring, progress,
+  startDiag, startReview, showReport, safeReport, startKibo, startGuessPhase, allGames, showWords, lessonHint,
   screen(s) { return S.screenOf(new THREE.Vector3(wx(s), REST, wz(s))); }
 };
