@@ -5,7 +5,7 @@
 import { createStage, THREE, woodCanvas, canvasTexture } from '../common3d.js';
 import { GLTFLoader } from '../../vendor/three/addons/loaders/GLTFLoader.js';
 
-const E = window.OKS_GO, L = window.OKS_GO_LESSONS, O = window.OKS;
+const E = window.OKS_GO, L = window.OKS_GO_LESSONS, O = window.OKS, SG = window.OKS_GO_STRATEGY;
 const LESSON = 'play-go', LEARN_LESSON = 'play-go-learn';
 const LEVEL_NAME = ['', '아주 쉬워요', '쉬워요', '보통', '어려워요', '아주 어려워요'];
 const colName = (c) => (c > 0 ? '흑' : '백');
@@ -86,6 +86,7 @@ function clearMarks(keepLast) { Object.keys(marks).forEach((k) => { if (k === 'l
 const setMarks = (kind, list) => { marks[kind].clear(); (list || []).forEach((s) => marks[kind].add(s)); };
 
 /* ---------- 상태 ---------- */
+let stratOn = false, stratFull = false;
 let game = new E.Game(9), mode = null, cfg = { n: 9, level: 3, color: 1, handicap: 0, komi: 6.5 }, busy = false, over = false, scoring = false, stats = O.newStats(), runId = 0, assistOn = true, terrOn = false;
 let lesson = null, P = null, stepPhase = '', reviewAt = -1, deadSet = new Set(), lastScore = null;
 const stones = new Map();
@@ -142,12 +143,38 @@ function coachScan() {   // 단수 난 덩어리 찾기
   return { mine, theirs, me };
 }
 function coach() {
-  clearMarks(true); if (over || scoring || !assistOn) return; const c = coachScan();
-  c.mine.forEach((g) => { marks.danger.add(g.libs[0]); g.stones.forEach((s) => marks.atari.add(s)); }); c.theirs.forEach((g) => { marks.safe.add(g.libs[0]); });
-  refreshMarkers();
-  if (c.mine.length) say('내 돌이 단수예요! 주황 돌을 살리거나(빨간 동그라미로 도망) 먼저 반격해 보세요.', 'warn', '내 돌이 단수예요!');
-  else if (c.theirs.length) say('상대 돌이 단수예요! 초록 동그라미에 두면 따낼 수 있어요.', 'good', '상대 돌이 단수예요!');
-  else note(turnText());
+  clearMarks(true); if (over || scoring) { stratHide(); return; }
+  if (assistOn) {
+    const c = coachScan();
+    c.mine.forEach((g) => { marks.danger.add(g.libs[0]); g.stones.forEach((s) => marks.atari.add(s)); }); c.theirs.forEach((g) => { marks.safe.add(g.libs[0]); });
+    refreshMarkers();
+    if (c.mine.length) say('내 돌이 단수예요! 주황 돌을 살리거나(빨간 동그라미로 도망) 먼저 반격해 보세요.', 'warn', '내 돌이 단수예요!');
+    else if (c.theirs.length) say('상대 돌이 단수예요! 초록 동그라미에 두면 따낼 수 있어요.', 'good', '상대 돌이 단수예요!');
+    else note(turnText());
+  }
+  stratCoach();
+}
+/* ---------- 전략 코치: 초반·중반·종반 단계를 알려 주고 큰 자리·약한 돌을 표시해요(strategy.js) ---------- */
+function stratHide() { const el = $('strat'); el.hidden = true; el.innerHTML = ''; }
+function stratBtn() { const b = $('btnStrat'); b.setAttribute('aria-pressed', stratOn); b.textContent = stratOn ? '🎯 전략 코치 끄기' : '🎯 전략 코치'; }
+function stratRender(a, extra) {
+  const el = $('strat'), tips = stratFull ? a.tips.concat(extra ? [extra] : []) : [];
+  el.hidden = false; el.style.bottom = (document.querySelector('.ch-bottom').getBoundingClientRect().height + 8) + 'px';
+  el.className = 'go-strat ph' + a.phase;
+  el.innerHTML = '<div class="gs-top"><i>' + a.icon + '</i><b>' + a.name + '</b><small>' + a.moves + '수째 · ' + a.sub + '</small><u>' + (stratFull ? '접기 ▾' : '펼치기 ▴') + '</u></div><p>' + a.headline + '</p>' +
+    (extra && !stratFull ? '<p class="gs-adv">' + extra + '</p>' : '') + (tips.length ? '<ul>' + tips.map((t) => '<li>' + t + '</li>').join('') + '</ul>' : '');
+  el.onclick = () => { stratFull = !stratFull; stratRender(a, extra); };
+}
+async function stratCoach() {
+  if (!stratOn || !(mode === 'play' || mode === 'two') || over || scoring) { stratHide(); return; }
+  const me = mode === 'two' ? game.turn : cfg.color, a = SG.analyze(game, me), rid = runId, len = game.stack.length;
+  a.marks.ring.forEach((s) => marks.ring.add(s)); a.marks.warn.forEach((s) => marks.warn.add(s)); a.marks.dot.forEach((s) => marks.dot.add(s)); a.marks.danger.forEach((s) => marks.danger.add(s)); refreshMarkers();
+  stratRender(a, '');
+  if (a.phase === 2 && !busy) {   // 종반: 컴퓨터가 어림한 집 차이로 "안전하게 / 승부수"를 알려 줘요
+    stratRender(a, '집 차이를 어림하는 중…');
+    const r = await ask('est', { runs: N <= 9 ? 160 : N <= 13 ? 90 : 50 }); if (rid !== runId || len !== game.stack.length || !stratOn || over || scoring) return;
+    stratRender(a, SG.adviceFromLead(r.diff, me).text);
+  }
 }
 async function afterMove(rec, human) {
   const rid = runId;
@@ -190,7 +217,7 @@ function doUndo() {
 }
 function updateButtons() {
   const play = mode === 'play' || mode === 'two', learn = mode === 'learn';
-  $('btnUndo').hidden = !play; $('btnPass').hidden = !play; $('btnTerr').hidden = !play; $('btnAssist').hidden = !play;
+  $('btnUndo').hidden = !play; $('btnPass').hidden = !play; $('btnTerr').hidden = !play; $('btnAssist').hidden = !play; $('btnStrat').hidden = !play; if (!play) stratHide();
   $('btnNext').hidden = !(learn && stepPhase === 'page' && !(lesson && lesson.kibo)); $('btnRetry').hidden = !(learn && stepPhase === 'item'); $('btnList').hidden = !learn; $('btnHint').hidden = !(play || (learn && stepPhase === 'item'));
   { const showBar = learn && stepPhase === 'page' && PL.total > 0; $('player').hidden = !showBar; if (!showBar && PL.playing) { PL.playing = false; PL.tok++; } }
   $('btnUndo').disabled = busy || over || scoring || !play || !game.stack.length;
@@ -251,14 +278,15 @@ function startReview() {
 }
 
 /* ---------- 대국 시작 ---------- */
-function resetState() { over = false; busy = false; scoring = false; runId++; terrOn = false; $('btnTerr').textContent = '🧮 집 보기'; deadSet = new Set(); clearMarks(); stats = O.newStats(); lesson = null; P = null; stepPhase = ''; hideQuiz(); }
+function resetState() { stratHide(); over = false; busy = false; scoring = false; runId++; terrOn = false; $('btnTerr').textContent = '🧮 집 보기'; deadSet = new Set(); clearMarks(); stats = O.newStats(); lesson = null; P = null; stepPhase = ''; hideQuiz(); }
 function startGame(c) {
   resetState(); startWorker(); mode = c.mode || (c.two ? 'two' : 'play'); cfg = Object.assign({ n: 9, level: 3, color: 1, handicap: 0 }, c, { mode }); cfg.komi = komiOf(cfg.n, cfg.handicap);
+  stratOn = c.strategy != null ? !!c.strategy : !!prefs.strategy; stratFull = false; stratBtn();
   if (mode === 'play') O.rememberLevel(LESSON, cfg.level);
   const g = new E.Game(cfg.n); const hs = cfg.handicap ? g.setHandicap(cfg.handicap) : []; newBoard(cfg.n, g); $('menu').hidden = true;
   $('modeLabel').textContent = mode === 'play' ? cfg.n + '줄 · 컴퓨터 수준 ' + cfg.level + (cfg.handicap ? ' · ' + cfg.handicap + '점 접바둑' : '') : cfg.n + '줄 · 둘이서';
   S.setView(mode === 'play' && cfg.color < 0 ? Math.PI : 0, false, 0.62); updateButtons();
-  if (mode === 'play' && game.turn !== cfg.color) { say('컴퓨터가 먼저 시작해요.'); aiTurn(); } else say(mode === 'two' ? '흑부터 시작해요. 줄이 만나는 점을 눌러요.' : (cfg.handicap ? '접바둑이에요. 백이 먼저 두어요.' : '내가 흑이에요. 줄이 만나는 점을 눌러 시작해요!'));
+  if (mode === 'play' && game.turn !== cfg.color) { say('컴퓨터가 먼저 시작해요.'); aiTurn(); } else { say(mode === 'two' ? '흑부터 시작해요. 줄이 만나는 점을 눌러요.' : (cfg.handicap ? '접바둑이에요. 백이 먼저 두어요.' : '내가 흑이에요. 줄이 만나는 점을 눌러 시작해요!')); stratCoach(); }
   if (mode === 'play' && cfg.handicap && cfg.color > 0) {}
 }
 
@@ -410,7 +438,8 @@ function lessonDone() {
   const entry = { at: new Date().toISOString(), lesson: LEARN_LESSON, subject: 'play', subjectName: '놀이(바둑)', school: 'elem', topic: '3D 바둑 배우기 · ' + lesson.title, level: lesson.lv, engine: 'go-learn', rounds: n, mistakes: m, glow: 0, hand: 0, asked: lessonStep.asked, sec: Math.round((Date.now() - stats.t0) / 1000) };
   const idx = L.LESSONS.indexOf(lesson), nxt = lesson.srcs ? null : L.LESSONS[idx + 1], me = lesson;
   const btns = []; if (nxt) btns.push({ label: '▶ 다음 수업: ' + nxt.title, color: 'green', onClick: () => startLesson(nxt.id) });
-  if (me.play) btns.push({ label: '⚫ 바로 대국해 보기', color: 'orange', onClick: () => startGame(Object.assign({ mode: 'play', n: 9, level: 1, color: 1, handicap: 0 }, me.play)) });
+  if (me.play) btns.push({ label: me.play.strategy ? '🎯 전략 코치와 대국해 보기' : '⚫ 바로 대국해 보기', color: 'orange', onClick: () => startGame(Object.assign({ mode: 'play', n: 9, level: 1, color: 1, handicap: 0 }, me.play)) });
+  if (me.guess != null) btns.push({ label: '🎯 프로 기보로 ' + SG.PHASES[me.guess].name + ' 맞히기', color: 'orange', onClick: () => startGuessPhase(me.guess) });
   btns.push({ label: '🔁 다시 하기', color: 'blue', onClick: () => (me.srcs ? startWrong() : startLesson(me.id)) }); btns.push({ label: '☰ 수업 목록', color: 'blue', onClick: () => openCurriculum() });
   say(lesson.title + ' 수업을 마쳤어요!', 'good', false);
   setTimeout(() => { if (rid === runId) O.finish({ stats, entry, stars, title: lesson.title + ' 수업 끝!', text: lesson.done || '문제 ' + n + '개 · 틀린 횟수 ' + m + '번', speak: '수업을 마쳤어요! 정말 잘했어요!', mission: { lesson: 1 }, buttons: btns }); }, 500);
@@ -428,23 +457,24 @@ function showQuiz(kind) {
 }
 
 /* ---------- 처음 메뉴 ---------- */
-const DEFAULT_PREFS = { mode: 'learn', n: 9, color: 1, handicap: 0 };
+const DEFAULT_PREFS = { mode: 'learn', n: 9, color: 1, handicap: 0, strategy: false };
 const prefs = (() => { try { return Object.assign({}, DEFAULT_PREFS, JSON.parse(localStorage.getItem('oks_go_prefs_v1') || '{}')); } catch (e) { return Object.assign({}, DEFAULT_PREFS); } })();
 const savePrefs = () => { try { localStorage.setItem('oks_go_prefs_v1', JSON.stringify(prefs)); } catch (e) {} };
 function openMenu(fromFinish) {
   const el = $('menu'); el.hidden = false; document.querySelectorAll('.oks-overlay').forEach((x) => x.remove()); hideQuiz();
-  const sel = { mode: prefs.mode === 'learn' ? 'learn' : prefs.mode, n: prefs.n, color: prefs.color, handicap: prefs.handicap, playLv: O.levelFor(LESSON) };
+  const sel = { mode: prefs.mode === 'learn' ? 'learn' : prefs.mode, n: prefs.n, color: prefs.color, handicap: prefs.handicap, strategy: !!prefs.strategy, playLv: O.levelFor(LESSON) };
   const chip = (cls, val, label, small, on) => '<button type="button" class="ch-chip' + (on ? ' on' : '') + '" data-' + cls + '="' + val + '">' + label + (small ? '<small>' + small + '</small>' : '') + '</button>';
   function render() {
     const modes = [['learn', '🎓', '바둑 배우기', '입문부터 고급까지'], ['play', '🤖', '컴퓨터와 대국', '9·13·19줄'], ['two', '👫', '둘이서 대국', '친구와 번갈아'], ['kibo', '📜', '기보·맞히기', '프로 대국 보기']];
     const doneN = L.LESSONS.filter((l) => progress[l.id]).length; let opt = '';
-    if (sel.mode === 'learn') opt = '<p class="why">입문 → 초급 → 중급 → 고급, 전체 ' + L.LESSONS.length + '개 수업 중 <b>' + doneN + '개</b>를 마쳤어요. 규칙, 단수·따내기, 사활, 축·장문, 포석, 끝내기, 형세 판단까지 하나씩 풀면서 익혀요.</p>';
+    if (sel.mode === 'learn') opt = '<p class="why">입문 → 초급 → 중급 → 고급 → <b>전략(초반·중반·종반)</b>, 전체 ' + L.LESSONS.length + '개 수업 중 <b>' + doneN + '개</b>를 마쳤어요. 규칙, 단수·따내기, 사활, 축·장문, 포석, 끝내기, 형세 판단, 그리고 판 전체를 읽는 전략까지 하나씩 풀면서 익혀요.</p>';
     else if (sel.mode === 'kibo') opt = '<p class="why">프로 대국을 처음부터 끝까지 보거나, <b>다음 수를 맞혀</b> 보면서 눈을 길러요. 내가 가진 SGF 파일도 불러올 수 있어요.</p>';
     else {
       const mh = E.maxHandicap(sel.n); if (sel.handicap > mh) sel.handicap = mh;
       opt = '<div class="ch-row"><label>판 크기</label>' + [9, 13, 19].map((n) => chip('n', n, n + '줄', n === 9 ? '처음이라면' : n === 13 ? '중간' : '정식', sel.n === n)).join('') + '</div>';
       if (sel.mode === 'play') opt += '<div class="ch-row"><label>컴퓨터 수준</label>' + [1, 2, 3, 4, 5].map((l) => chip('plv', l, l, LEVEL_NAME[l], sel.playLv === l)).join('') + '</div><div class="ch-row"><label>내 돌</label>' + chip('color', 1, '⚫ 흑', '먼저 시작', sel.color === 1) + chip('color', -1, '⚪ 백', '나중에', sel.color === -1) + '</div>' +
         '<div class="ch-row"><label>접바둑(흑 돌 미리 놓기)</label>' + [0, 2, 3, 4, 5, 6, 7, 8, 9].filter((h) => h <= mh).map((h) => chip('hc', h, h ? h + '점' : '없음', '', sel.handicap === h)).join('') + '</div>';
+      opt += '<div class="ch-row"><label>🎯 전략 코치</label>' + chip('strat', 1, '켜기', '단계별 안내', sel.strategy) + chip('strat', 0, '끄기', '', !sel.strategy) + '</div>';
       if (sel.mode === 'play' && sel.handicap && sel.color < 0) opt += '<p class="why">접바둑은 약한 쪽이 흑을 잡아요. 내가 흑일 때 돌을 미리 놓고 시작해요.</p>';
     }
     el.innerHTML = '<div class="ch-card"><h1>⚫⚪ 3D 바둑</h1><p>집을 더 많이 차지하면 이기는 바둑이에요.</p><div class="ch-modes">' +
@@ -455,8 +485,9 @@ function openMenu(fromFinish) {
     el.querySelectorAll('[data-plv]').forEach((b) => { b.onclick = () => { sel.playLv = +b.dataset.plv; render(); }; });
     el.querySelectorAll('[data-color]').forEach((b) => { b.onclick = () => { sel.color = +b.dataset.color; render(); }; });
     el.querySelectorAll('[data-hc]').forEach((b) => { b.onclick = () => { sel.handicap = +b.dataset.hc; render(); }; });
+    el.querySelectorAll('[data-strat]').forEach((b) => { b.onclick = () => { sel.strategy = +b.dataset.strat === 1; render(); }; });
     const cm = $('closeMenu'); if (cm) cm.onclick = () => { el.hidden = true; };
-    $('goBtn').onclick = () => { O.unlock(); Object.assign(prefs, { mode: sel.mode, n: sel.n, color: sel.color, handicap: sel.handicap }); savePrefs();
+    $('goBtn').onclick = () => { O.unlock(); Object.assign(prefs, { mode: sel.mode, n: sel.n, color: sel.color, handicap: sel.handicap, strategy: sel.strategy }); savePrefs();
       if (sel.mode === 'learn') openCurriculum();
       else if (sel.mode === 'kibo') openKibo();
       else { el.hidden = true; const hc = sel.mode === 'play' ? sel.handicap : 0; startGame({ mode: sel.mode, n: sel.n, level: sel.playLv, color: sel.mode === 'play' ? (hc && sel.color < 0 ? -1 : sel.color) : 1, handicap: hc }); } };
@@ -482,13 +513,14 @@ function kiboLabels(pp, k) {
 function openKibo() {
   scriptRun++; PL.tok++; PL.playing = false; const el = $('menu'); el.hidden = false; document.querySelectorAll('.oks-overlay').forEach((x) => x.remove()); hideQuiz(); $('player').hidden = true;
   const gs = allGames(), sc = guessScore();
-  el.innerHTML = '<div class="ch-card"><h1>📜 기보 · 맞히기</h1><p class="why">프로 대국을 한 수씩 보거나, 다음 수를 맞혀 봐요. 입문이라면 <b>🎯 맞히기</b>로 앞부분 60수부터 해 봐요.' + (sc.asked ? '<br>지금까지 <b>' + sc.asked + '번 중 ' + sc.right + '번</b> 맞혔어요.' : '') + '</p><div class="kibo-list">' +
+  el.innerHTML = '<div class="ch-card"><h1>📜 기보 · 맞히기</h1><p class="why">프로 대국을 한 수씩 보거나, 다음 수를 맞혀 봐요. 입문이라면 <b>🎯 맞히기</b>로 앞부분 60수부터 해 봐요.' + (sc.asked ? '<br>지금까지 <b>' + sc.asked + '번 중 ' + sc.right + '번</b> 맞혔어요.' : '') + '</p><div class="ch-row kibo-ph"><label>🎯 맞히기 단계</label>' + [[-1, '🎲', '앞부분 60수'], [0, '🌅', '초반'], [1, '⚔️', '중반'], [2, '🏁', '종반']].map((q) => '<button type="button" class="ch-chip' + (guessPh === q[0] ? ' on' : '') + '" data-ph="' + q[0] + '">' + q[1] + ' ' + q[2] + '</button>').join('') + '</div><div class="kibo-list">' +
     gs.map((g) => '<div class="kibo-item"><div><b>' + gTitle(g) + '</b><small>' + [g.dt, reText(g.re), decodeMv(g).length + '수', g.n && g.n !== 19 ? g.n + '줄' : '', g.id[0] === 'u' ? '내 기보' : ''].filter(Boolean).join(' · ') + '</small></div><span><button type="button" class="ch-chip" data-v="' + g.id + '">▶ 보기</button>' +
       (hasSetup(g) ? '' : '<button type="button" class="ch-chip" data-g="' + g.id + '">🎯 맞히기</button>') + (g.id[0] === 'u' ? '<button type="button" class="ch-chip" data-d="' + g.id + '" aria-label="지우기">🗑</button>' : '') + '</span></div>').join('') +
     '</div><div class="ch-row"><button type="button" class="ch-chip" id="kiboImp">📂 내 SGF 불러오기</button><input type="file" id="kiboFile" accept=".sgf,.SGF,text/plain" multiple hidden><button type="button" class="ch-chip" id="kiboBack">← 처음으로</button></div></div>';
   const byId = (id) => allGames().find((g) => g.id === id);
   el.querySelectorAll('[data-v]').forEach((b) => { b.onclick = () => { O.unlock(); startKibo(byId(b.dataset.v)); }; });
-  el.querySelectorAll('[data-g]').forEach((b) => { b.onclick = () => { O.unlock(); startGuess(byId(b.dataset.g)); }; });
+  el.querySelectorAll('[data-g]').forEach((b) => { b.onclick = () => { O.unlock(); startGuess(byId(b.dataset.g), guessPh); }; });
+  el.querySelectorAll('[data-ph]').forEach((b) => { b.onclick = () => { guessPh = +b.dataset.ph; O.sfx('tick'); openKibo(); }; });
   el.querySelectorAll('[data-d]').forEach((b) => { b.onclick = () => { saveUserGames(loadUserGames().filter((g) => g.id !== b.dataset.d)); openKibo(); }; });
   $('kiboBack').onclick = () => openMenu(!mode); $('kiboImp').onclick = () => $('kiboFile').click();
   $('kiboFile').onchange = async (e) => {
@@ -506,10 +538,18 @@ function startKibo(g) {
   startLesson('kibo', { id: 'kibo', kibo: true, lv: 3, title: gTitle(g), pages: [page], items: [] });
 }
 let G = null;
-function startGuess(g) {
-  resetState(); startWorker(); mode = 'guess'; $('menu').hidden = true; $('modeLabel').textContent = '다음 수 맞히기 · ' + gTitle(g); const mv = decodeMv(g), n = g.n || 19;
-  newBoard(n); S.setView(0, false, 0.62); G = { g, mv, i: 0, tries: 0, pts: 0, right: 0, asked: 0, max: Math.min(60, mv.length), busy: true, from: 2 };
+let guessPh = -1;   // 맞히기 단계: -1 앞부분 60수, 0 초반, 1 중반, 2 종반
+function startGuess(g, ph) {
+  if (ph === undefined) ph = guessPh; guessPh = ph;
+  resetState(); startWorker(); mode = 'guess'; $('menu').hidden = true; const mv = decodeMv(g), n = g.n || 19, PH = ph >= 0 ? SG.PHASES[ph] : null;
+  $('modeLabel').textContent = (PH ? PH.icon + ' ' + PH.name + ' 맞히기 · ' : '다음 수 맞히기 · ') + gTitle(g);
+  let from = 2, max = Math.min(60, mv.length);
+  if (PH) { const r = SG.phaseRange(n, ph), cnt = 24, lo = Math.max(2, Math.min(r[0], mv.length - cnt)), hi = Math.max(lo, Math.min(r[1], mv.length) - cnt); from = ph === 0 ? 2 : lo + Math.floor(Math.random() * (hi - lo + 1)); max = Math.min(mv.length, from + cnt); }
+  newBoard(n); S.setView(0, false, 0.62); G = { g, mv, i: 0, tries: 0, pts: 0, right: 0, asked: 0, max, busy: true, from, ph };
   updateButtons(); guessNext(true);
+}
+function startGuessPhase(ph) {   // 수업 끝에서 바로: 프로 기보 중 그 단계가 있는 19줄 대국 하나를 골라 맞히기
+  const r = SG.phaseRange(19, ph), pool = allGames().filter((g) => !hasSetup(g) && (g.n || 19) === 19 && decodeMv(g).length >= Math.min(r[1], r[0] + 30)); const g = pool[Math.floor(Math.random() * pool.length)] || allGames()[0]; if (g) startGuess(g, ph);
 }
 function guessPanel(buttons) {
   const q = $('quiz'); q.hidden = false; q.style.bottom = (document.querySelector('.ch-bottom').getBoundingClientRect().height + 10) + 'px'; q.innerHTML = buttons.map((b, i) => '<button type="button" class="ch-btn big' + (b.cls ? ' ' + b.cls : '') + '" data-i="' + i + '">' + b.t + '</button>').join('');
@@ -517,10 +557,12 @@ function guessPanel(buttons) {
 }
 async function guessNext(first) {
   if (!G) return; const rid = runId;
-  while (G.i < G.from && G.i < G.mv.length) { const m = G.mv[G.i]; const rec = m.pass ? game.pass() : game.play(m.x, m.y); if (rec && !rec.pass) await animateRec(rec); if (rid !== runId) return; G.i++; }
+  const quick = G.from - G.i > 6;
+  while (G.i < G.from && G.i < G.mv.length) { const m = G.mv[G.i]; const rec = m.pass ? game.pass() : game.play(m.x, m.y); if (rec && !rec.pass && !quick) await animateRec(rec); if (rid !== runId) return; G.i++; }
+  if (quick) { syncBoard(); const lm = game.stack[game.stack.length - 1]; if (lm && !lm.pass) { marks.last.clear(); marks.last.add(lm.s); refreshMarkers(); } }
   if (G.i >= G.max) return guessEnd();
   G.tries = 0; G.busy = false; clearMarks(); const m = G.mv[G.i]; if (m.pass) { game.pass(); G.i++; return guessNext(); }
-  const c = game.turn; say(G.i + 1 + '수째 · ' + colName(c) + ' 차례. 프로는 어디에 뒀을까요? 판을 눌러 봐요.', null, first ? '프로는 어디에 뒀을까요? 판을 눌러 봐요.' : false);
+  const c = game.turn, PHs = SG.PHASES[SG.phaseOf(N, SG.movesOf(game))]; say(PHs.icon + ' ' + PHs.name + ' · ' + (G.i + 1) + '수째 · ' + colName(c) + ' 차례. 프로는 어디에 뒀을까요? (' + PHs.motto + ')', null, first ? '프로는 어디에 뒀을까요? 판을 눌러 봐요.' : false);
   guessPanel([{ t: '🤔 모르겠어요', f: () => guessReveal(false) }, { t: '✋ 그만하기', f: guessEnd }]);
 }
 async function guessTap(s) {
@@ -539,9 +581,9 @@ async function guessPlay() {
   clearMarks(); if (rec) { marks.last.add(m.y * N + m.x); refreshMarkers(); } G.i++; guessNext();
 }
 function guessEnd() {
-  if (!G) return; const g = G.g, a = G.asked, r = G.right; hideQuiz(); clearMarks(); const pct = a ? Math.round(r / a * 100) : 0;
+  if (!G) return; const g = G.g, a = G.asked, r = G.right, ph = G.ph; hideQuiz(); clearMarks(); const pct = a ? Math.round(r / a * 100) : 0;
   say(a ? a + '번 중 ' + r + '번 맞혔어요! (' + pct + '%, ' + G.pts + '점) ' + (pct >= 40 ? '눈이 좋아요!' : '프로의 수를 많이 봤으니 곧 늘어요.') : '다음에 또 해 봐요.', pct >= 40 ? 'good' : null, false); G.busy = true;
-  guessPanel([{ t: '🔁 한 번 더', f: () => startGuess(g) }, { t: '📜 기보 목록', cls: 'go', f: () => { G = null; openKibo(); } }]);
+  guessPanel([{ t: '🔁 한 번 더', f: () => (ph >= 0 ? startGuessPhase(ph) : startGuess(g, -1)) }, { t: '📜 기보 목록', cls: 'go', f: () => { G = null; openKibo(); } }]);
 }
 
 /* ---------- 입력 ---------- */
@@ -552,6 +594,7 @@ function cellAt(clientX, clientY) {
 S.onTap((x, y) => { const s = cellAt(x, y); if (s < 0) return; if (mode === 'learn') lessonTap(s); else if (mode === 'guess') guessTap(s); else if (mode === 'play' || mode === 'two') humanTap(s); });
 S.wireButtons({ menu: () => openMenu(false) });
 $('btnUndo').onclick = doUndo; $('btnHint').onclick = doHint; $('btnPass').onclick = doPass; $('btnTerr').onclick = toggleTerr; $('btnNext').onclick = nextPage; $('btnRetry').onclick = retryItem; $('btnList').onclick = () => { scriptRun++; if (lesson && lesson.kibo) openKibo(); else openCurriculum(); };
+$('btnStrat').onclick = () => { stratOn = !stratOn; prefs.strategy = stratOn; savePrefs(); stratBtn(); if (stratOn) { O.unlock(); coach(); } else { clearMarks(true); stratHide(); if (mode === 'play' || mode === 'two') coach(); } };
 $('btnAssist').onclick = (e) => { assistOn = !assistOn; e.currentTarget.setAttribute('aria-pressed', assistOn); e.currentTarget.textContent = assistOn ? '🧭 알려주기' : '⬜ 알려주기 끔'; if (mode === 'play' || mode === 'two') coach(); };
 S.setAlive(() => marks.ring.size || marks.danger.size || marks.safe.size || marks.atari.size || marks.warn.size);
 S.onFrame((dt, t) => { const k = 1 + Math.sin(t * 5) * 0.1; markPool.forEach((m) => { if (m.visible && m.userData.pulse) m.scale.setScalar(m.userData.base * k); }); });

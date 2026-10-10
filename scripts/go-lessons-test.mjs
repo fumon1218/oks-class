@@ -11,12 +11,12 @@ const Go = require(path.join(dir, 'engine.js'));
 const solvedFile = path.join(dir, 'lessons-solved.js');
 if (fs.existsSync(solvedFile)) vm.runInThisContext(fs.readFileSync(solvedFile, 'utf8').replace('window.', 'globalThis.'));
 const L = require(path.join(dir, 'lessons.js'));
-for (const f of fs.readdirSync(dir).filter((x) => /^lessons-(l\d|eval|prac|replay)\.js$/.test(x)).sort()) require(path.join(dir, f));
+for (const f of fs.readdirSync(dir).filter((x) => /^lessons-(l\d|eval|prac|replay|strategy)\.js$/.test(x)).sort()) require(path.join(dir, f));
 let pass = 0; const ok = (m) => { pass++; console.log('PASS', m); };
 const ids = new Set(); let items = 0, pages = 0;
 for (const lesson of L.LESSONS) {
   assert.ok(!ids.has(lesson.id), '중복 id ' + lesson.id); ids.add(lesson.id);
-  assert.ok(lesson.lv >= 1 && lesson.lv <= 4, lesson.id + ' 단계');
+  assert.ok(lesson.lv >= 1 && lesson.lv <= 7, lesson.id + ' 단계');
   assert.ok(lesson.pages.length > 0, lesson.id + ' 장면 없음');
   lesson.pages.forEach((pg, i) => {
     const P = L.preparePage(pg); pages++; assert.ok(pg.text && pg.text.length > 10, lesson.id + ' 장면 ' + i + ' 설명');
@@ -46,5 +46,5 @@ for (const lesson of L.LESSONS) {
 assert.ok(L.LESSONS.length >= 20, '수업 수 ' + L.LESSONS.length);
 ok('수업 ' + L.LESSONS.length + '개 · 장면 ' + pages + '개 · 문제 ' + items + '개 모두 정상');
 // 단계별 수업 수
-const per = [0, 0, 0, 0]; L.LESSONS.forEach((l) => per[l.lv - 1]++); assert.ok(per.every((c) => c >= 3), '각 단계 수업 수 ' + per); ok('단계별 수업 수 ' + per.join('/'));
+const per = [0, 0, 0, 0, 0, 0, 0]; L.LESSONS.forEach((l) => per[l.lv - 1]++); assert.ok(per.every((c) => c >= 3), '각 단계 수업 수 ' + per); ok('단계별 수업 수 ' + per.join('/'));
 console.log(pass + ' PASS');

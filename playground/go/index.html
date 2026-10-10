@@ -16,6 +16,7 @@
 <div class="ch-msg" id="msg" role="status" aria-live="polite"><span id="msgText">바둑판을 펼치는 중이에요…</span></div>
 <div class="ot-score" id="score" aria-live="polite" hidden><span class="b" id="scB">⚫ 0</span><span class="w" id="scW">⚪ 0</span><small>따낸 돌</small></div>
 <div class="go-quiz" id="quiz" hidden></div>
+<div class="go-strat" id="strat" hidden role="status" aria-live="polite"></div>
 <div class="go-player" id="player" role="group" aria-label="재생 막대" hidden>
   <div class="pl-row"><button type="button" id="plStop" aria-label="정지(처음으로)"><img src="assets/pl_stop.webp" alt="" draggable="false"></button><button type="button" id="plBack10" aria-label="10수 뒤로"><img src="assets/pl_back10.webp" alt="" draggable="false"></button><button type="button" id="plBack" aria-label="한 수 되돌리기"><img src="assets/pl_back1.webp" alt="" draggable="false"></button><button type="button" id="plPlay" class="pl-big" aria-label="재생"><img src="assets/pl_play.webp" alt="" draggable="false"></button><button type="button" id="plPause" class="pl-big" aria-label="일시정지"><img src="assets/pl_pause.webp" alt="" draggable="false"></button><button type="button" id="plFwd" aria-label="한 수 앞으로"><img src="assets/pl_fwd1.webp" alt="" draggable="false"></button><button type="button" id="plFwd10" aria-label="10수 빠르게 감기"><img src="assets/pl_fwd10.webp" alt="" draggable="false"></button><button type="button" id="plRestart" aria-label="처음부터 다시 재생"><img src="assets/pl_restart.webp" alt="" draggable="false"></button></div>
   <div class="pl-row pl-bot"><button type="button" id="plSpeed" class="pl-chip" aria-label="속도"><img src="assets/pl_rocket.webp" alt="" draggable="false"><b id="plSpeedTx">×1</b></button><input type="range" id="plSeek" min="0" max="0" value="0" step="1" aria-label="진행 위치"><small id="plPos"></small></div>
@@ -31,13 +32,14 @@
   <button class="ch-btn big" id="btnView" type="button">🔄 시점 바꾸기</button>
   <button class="ch-btn big" id="btnLock" type="button" aria-pressed="false">🔓 화면 돌리기</button>
   <button class="ch-btn big" id="btnAssist" type="button" aria-pressed="true">🧭 알려주기</button>
+  <button class="ch-btn big" id="btnStrat" type="button" aria-pressed="false">🎯 전략 코치</button>
 </footer>
 <div class="ch-loading" id="loading"><div><div class="ch-spin"></div><p>3D 바둑판을 펼치는 중…</p></div></div>
 <div class="ch-overlay" id="menu" hidden></div>
 <dialog id="helpDialog" class="ch-dialog"><h2>이렇게 놀아요</h2>
-<ol><li><b>줄이 만나는 점을 눌러요.</b> 흑이 먼저, 흑과 백이 번갈아 한 수씩 두어요.</li><li>돌의 <b>활로</b>(상하좌우 빈 점)가 모두 막히면 그 돌은 <b>따내요</b>. 활로가 하나뿐이면 <b>단수</b>예요.</li><li>둘 곳이 없거나 더 둘 필요가 없으면 <b>한 수 쉬기</b>. 둘이 연달아 쉬면 끝나고 <b>집</b>을 세요. 집이 많은 쪽이 이겨요(백에게 덤 6.5집).</li><li>🧮 <b>집 보기</b>로 지금 누가 앞서는지 알아볼 수 있어요. 💡 힌트는 컴퓨터가 추천해요.</li><li><b>바둑 배우기</b>에서 입문부터 고급까지 문제를 풀며 차근차근 배워요.</li></ol>
+<ol><li><b>줄이 만나는 점을 눌러요.</b> 흑이 먼저, 흑과 백이 번갈아 한 수씩 두어요.</li><li>돌의 <b>활로</b>(상하좌우 빈 점)가 모두 막히면 그 돌은 <b>따내요</b>. 활로가 하나뿐이면 <b>단수</b>예요.</li><li>둘 곳이 없거나 더 둘 필요가 없으면 <b>한 수 쉬기</b>. 둘이 연달아 쉬면 끝나고 <b>집</b>을 세요. 집이 많은 쪽이 이겨요(백에게 덤 6.5집).</li><li>🧮 <b>집 보기</b>로 지금 누가 앞서는지 알아볼 수 있어요. 💡 힌트는 컴퓨터가 추천해요.</li><li><b>바둑 배우기</b>에서 입문부터 고급까지 문제를 풀며 차근차근 배워요. 그다음 <b>전략</b> 단계(초반·중반·종반)에서 판을 읽는 눈을 길러요.</li><li>🎯 <b>전략 코치</b>를 켜고 대국하면 지금이 초반인지 중반인지 종반인지 알려 주고, 큰 자리와 약한 돌을 표시해 줘요.</li></ol>
 <form method="dialog"><button class="ch-btn big">알겠어요</button></form></dialog>
-<script src="../../core/oks-core.js"></script><script src="../../core/oks-eco.js"></script><script src="../pieces-sound.js"></script><script src="engine.js"></script><script src="lessons-solved.js"></script><script src="lessons.js"></script><script src="lessons-l1.js"></script><script src="lessons-l2.js"></script><script src="lessons-l3.js"></script><script src="lessons-l4.js"></script><script src="lessons-prac.js"></script><script src="lessons-replay.js"></script><script src="lessons-problems.js"></script><script src="lessons-life.js"></script><script src="lessons-joseki.js"></script><script src="lessons-eval.js"></script><script src="sgf.js"></script><script src="games.js"></script>
+<script src="../../core/oks-core.js"></script><script src="../../core/oks-eco.js"></script><script src="../pieces-sound.js"></script><script src="engine.js"></script><script src="lessons-solved.js"></script><script src="lessons.js"></script><script src="lessons-l1.js"></script><script src="lessons-l2.js"></script><script src="lessons-l3.js"></script><script src="lessons-l4.js"></script><script src="lessons-prac.js"></script><script src="lessons-replay.js"></script><script src="lessons-problems.js"></script><script src="lessons-life.js"></script><script src="lessons-joseki.js"></script><script src="lessons-eval.js"></script><script src="strategy.js"></script><script src="lessons-strategy.js"></script><script src="sgf.js"></script><script src="games.js"></script>
 <script type="module" src="go.js"></script>
 <script>if('serviceWorker' in navigator)navigator.serviceWorker.register('../../sw.js').catch(function(){});</script>
 </body></html>

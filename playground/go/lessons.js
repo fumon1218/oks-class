@@ -5,7 +5,8 @@
   'use strict';
   var E = root.OKS_GO || (typeof require !== 'undefined' ? require('./engine.js') : null);
   var Game = E.Game, S = E.solver;
-  var LEVELS = [{ name: '입문', sub: '처음 만나는 바둑', icon: '🌱' }, { name: '초급', sub: '기본 기술', icon: '🌿' }, { name: '중급', sub: '사활과 수읽기', icon: '🌳' }, { name: '고급', sub: '전략과 형세 판단', icon: '🏔️' }];
+  var LEVELS = [{ name: '입문', sub: '처음 만나는 바둑', icon: '🌱' }, { name: '초급', sub: '기본 기술', icon: '🌿' }, { name: '중급', sub: '사활과 수읽기', icon: '🌳' }, { name: '고급', sub: '전략과 형세 판단', icon: '🏔️' },
+    { name: '초반 전략', sub: '귀·변·중앙, 포석의 눈', icon: '🌅' }, { name: '중반 전략', sub: '약한 돌 · 공격과 방어', icon: '⚔️' }, { name: '종반 전략', sub: '끝내기와 승기 잡기', icon: '🏁' }];
 
   /* ---------- 도구 ---------- */
   function mkRng(seed) { var a = seed | 0 || 1; return function () { a ^= a << 13; a ^= a >>> 17; a ^= a << 5; return (a >>> 0) / 4294967296; }; }

@@ -41,3 +41,14 @@ body.go-page{background:radial-gradient(ellipse at 50% 30%,#7a6340 0%,#4b3b27 58
 @media (max-width:420px){.go-player small{font-size:11px}}
 
 .kibo-list{max-height:48vh;overflow:auto;margin:8px 0;display:flex;flex-direction:column;gap:6px;text-align:left}.kibo-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(255,255,255,.55);border-radius:12px;padding:6px 10px}.kibo-item b{display:block;font-size:16px}.kibo-item small{display:block;font-size:12px;opacity:.75}.kibo-item span{display:flex;gap:4px;flex-shrink:0}.kibo-item .ch-chip{padding:6px 10px;min-width:0}
+
+/* 전략 코치 패널 + 맞히기 단계 고르기 */
+.go-strat{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--bot,86px) + 8px);z-index:6;width:min(560px,calc(100% - 16px));box-sizing:border-box;background:rgba(255,253,246,.96);color:#2b3f5c;border-radius:20px;padding:8px 14px 9px;box-shadow:0 6px 16px rgba(0,0,0,.35);border:3px solid #ffc93c;cursor:pointer;text-align:left}
+.go-strat[hidden]{display:none}
+.go-strat.ph0{border-color:#4fb3ff}.go-strat.ph1{border-color:#ff9d2e}.go-strat.ph2{border-color:#2f966f}
+.go-strat .gs-top{display:flex;align-items:baseline;gap:6px}.go-strat .gs-top i{font-style:normal;font-size:20px}.go-strat .gs-top b{font-size:18px}.go-strat .gs-top small{font-size:12px;opacity:.75;font-weight:700}.go-strat .gs-top u{margin-left:auto;font-size:12px;text-decoration:none;opacity:.7;font-weight:700}
+.go-strat p{margin:3px 0 0;font-size:16px;font-weight:800;line-height:1.35}
+.go-strat p.gs-adv{font-size:14px;font-weight:700;color:#1d6a32;background:#e6f6e6;border-radius:10px;padding:3px 8px}
+.go-strat ul{margin:5px 0 0;padding-left:20px;font-size:14px;font-weight:600;line-height:1.4}
+@media (max-width:520px){.go-strat{padding:6px 11px 7px}.go-strat p{font-size:14.5px}.go-strat .gs-top b{font-size:16px}}
+.kibo-ph{flex-wrap:wrap;gap:6px;justify-content:center;margin:4px 0}.kibo-ph label{width:100%;font-weight:800;font-size:15px}.kibo-ph .ch-chip{font-size:15px;padding:6px 10px}
