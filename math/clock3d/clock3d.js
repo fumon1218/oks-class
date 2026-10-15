@@ -18,7 +18,7 @@ const sun = new THREE.DirectionalLight(0xffffff, 2.4); sun.position.set(2, 4, 6)
 const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
 
 /* ---------- 상태 ---------- */
-const S = { t: 15 * 60 + 30, s: 0, mode: 'free', speed: 0, voice: true, level: 3, q: null, answered: false, stars: 0 };
+const S = { t: 15 * 60 + 30, s: 0, mode: 'free', speed: 0, view: 'both', voice: true, level: 3, q: null, answered: false, stars: 0 };
 try { S.stars = +localStorage.getItem('oks_clock3d_stars') || 0; } catch (e) {}
 const h12 = (t) => ((Math.floor(t / 60) + 11) % 12) + 1;
 const mm = (t) => ((t % 60) + 60) % 60;
@@ -90,11 +90,14 @@ function freeRect() {
 }
 function layout() {
   const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false);
-  const r = freeRect(), key = [w, h, Math.round(r.y), Math.round(r.h)].join(',');
+  const r = freeRect(), key = [w, h, Math.round(r.y), Math.round(r.h), S.view].join(',');
   if (key === VP.key) return; VP.key = key; VP.x = r.x; VP.w = r.w; VP.h = r.h; VP.top = r.y;
   const asp = r.w / r.h; camera.aspect = asp;
   let halfW, halfH;
-  if (asp >= 1.5) { anaRoot.position.set(-3.6, 0, 0); anaRoot.scale.setScalar(.85); digRoot.position.set(3.9, -0.2, 0); digRoot.scale.setScalar(1.5); halfW = 7.3; halfH = 3.2; }
+  anaRoot.visible = S.view !== 'dig'; digRoot.visible = S.view !== 'ana';
+  if (S.view === 'ana') { anaRoot.position.set(0, 0, 0); anaRoot.scale.setScalar(1); halfW = 3.5; halfH = 3.5; }
+  else if (S.view === 'dig') { digRoot.position.set(0, 0, 0); digRoot.scale.setScalar(2.3); halfW = 4.5; halfH = 3.0; }
+  else if (asp >= 1.5) { anaRoot.position.set(-3.6, 0, 0); anaRoot.scale.setScalar(.85); digRoot.position.set(3.9, -0.2, 0); digRoot.scale.setScalar(1.5); halfW = 7.3; halfH = 3.2; }
   else { anaRoot.position.set(0, 2.6, 0); anaRoot.scale.setScalar(.9); digRoot.position.set(0, -2.6, 0); digRoot.scale.setScalar(1.55); halfW = 3.6; halfH = 5.6; }
   const tf = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
   const dist = Math.max(halfH / tf, halfW / (tf * asp));
@@ -134,8 +137,13 @@ function randMin() { return S.level === 1 ? 0 : S.level === 2 ? 30 * ri(0, 1) : 
 function randTime(avoid) { let t; do { t = ri(1, 12) * 60 + randMin(); } while (avoid !== undefined && t % 720 === avoid % 720); return norm(t); }
 
 /* ---------- 놀이 모드 ---------- */
+function setView(v) {
+  S.view = v; document.querySelectorAll('#rowView button').forEach((b) => b.classList.toggle('on', b.dataset.v === v)); VP.key = ''; layout();
+}
 function setMode(m) {
-  S.mode = m; S.answered = false; S.q = null; clearTimeout(voiceTimer);
+  S.mode = m;
+  if (m === 'read' && S.view !== 'both') setView('both');
+  document.querySelectorAll('#rowView button').forEach((b) => (b.disabled = m === 'read')); S.answered = false; S.q = null; clearTimeout(voiceTimer);
   document.querySelectorAll('#modes button').forEach((b) => b.classList.toggle('on', b.dataset.m === m));
   $('#btnCheck').hidden = m !== 'make'; $('#btnNext').hidden = m === 'free'; $('#choices').hidden = m !== 'read'; $('#btnRun').hidden = m !== 'free'; $('#btnNow').hidden = m !== 'free'; $('#btnSay').hidden = m !== 'free';
   $('#rowAdj').style.display = m === 'read' ? 'none' : '';
@@ -194,7 +202,7 @@ function pointerAngle(e) {
   return { deg: (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360, r: Math.hypot(dx, dy) / R };
 }
 canvas.addEventListener('pointerdown', (e) => {
-  if (S.mode === 'read' || S.answered && S.mode === 'make') return;
+  if (S.mode === 'read' || S.answered && S.mode === 'make' || !anaRoot.visible) return;
   const a = pointerAngle(e); if (a.r > 1.2) return;
   canvas.setPointerCapture(e.pointerId); canvas.classList.add('drag'); S.speed = 0; updRun();
   drag = { kind: S.level === 1 || a.r < 0.5 ? 'h' : 'm', prev: mm(S.t) };
@@ -216,6 +224,7 @@ function onDrag(e) {
 }
 
 /* ---------- 단추 ---------- */
+document.querySelectorAll('#rowView button').forEach((b) => (b.onclick = () => { if (S.mode !== 'read') setView(b.dataset.v); }));
 document.querySelectorAll('#modes button').forEach((b) => (b.onclick = () => setMode(b.dataset.m)));
 document.querySelectorAll('#rowAdj button').forEach((b) => (b.onclick = () => {
   if (S.answered && S.mode === 'make') return; S.speed = 0; updRun(); S.t = norm(S.t + (+b.dataset.d)); S.s = 0; if (S.mode === 'free') { showFree(); sayLater(say(S.t)); } drawDigital(false);
@@ -247,5 +256,5 @@ function loop(now) {
   try { await loadAll(); } catch (e) { $('#loading p').textContent = '시계를 불러오지 못했어요. 다시 열어 주세요.'; console.error(e); return; }
   const T = targets(); ang.h = T.h; ang.m = T.m;
   setMode('free'); VP.key = ''; layout(); $('#loading').classList.add('off'); requestAnimationFrame(loop);
-  window.__clock3d = { S, ang, setMode, drawDigital, VP, camera, anaRoot, ANA_R: () => ANA_R, THREE };
+  window.__clock3d = { S, ang, setMode, setView, drawDigital, VP, camera, anaRoot, ANA_R: () => ANA_R, THREE };
 })();
