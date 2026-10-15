@@ -252,6 +252,7 @@ body.th-bw .d-spk{display:none!important}
 <script src="english.js"></script>
 <script src="../trace/data-hangul.js"></script>
 <script src="hangul.js"></script>
+<script src="clock.js"></script>
 <script src="../sports/titles.js"></script><script src="../sports/lessons.js"></script><script src="../sports/lessons2.js"></script><script src="../sports/lessons-ball.js"></script><script src="sports.js"></script>
 <script src="../games/tycoon/town.js"></script><script src="../games/tycoon/town2.js"></script>
 <script>
@@ -262,6 +263,8 @@ body.th-bw .d-spk{display:none!important}
   var LESSONS = (window.OKS_LESSONS.lessons || []).filter(function (l) { return window.OKS_CONTENT && window.OKS_CONTENT[l.id]; });
   /* 씽씽 별 마을 체육 학습지 (종목 × 학교급 × 3차시) */
   if (window.OKS_WS_SPORTS) OKS_WS_SPORTS.lessons().forEach(function (l) { LESSONS.push(l); });
+  /* 수학 · 시계와 시간 (7단계) */
+  if (window.OKS_WS_CLOCK) OKS_WS_CLOCK.lessons().forEach(function (l) { LESSONS.push(l); });
   /* 게임 연계 학습지 */
   LESSONS.push({ id: 'farm-delivery', subject: 'social', subjectName: '사회', schoolName: '게임 연계', unitNo: '', unit: '쑥쑥 햇살 농장', no: '배달', topic: '지도 보고 배달하기', goal: '주소를 읽고 마을 지도에서 집을 찾아 길을 나타낸다', special: true });
   var id = Q.get('id') && LESSONS.some(function (l) { return l.id === Q.get('id'); }) ? Q.get('id') : LESSONS[0].id;
@@ -457,7 +460,7 @@ body.th-bw .d-spk{display:none!important}
     var D = function (n, c) { return '<img class="deco ' + c + '" src="../art/ws/deco_' + n + '.webp" alt="" draggable="false">'; };
     function hl(t) { var k = t.indexOf(' ('), main = k > 0 ? t.slice(0, k) : t, rest = k > 0 ? t.slice(k) : '', w = main.split(' '), last = w.pop(); return (w.length ? w.join(' ') + ' ' : '') + '<em>' + last + '</em>' + rest; }
     return '<section class="page' + (ans ? ' ans' : '') + '"><div class="inner">' + '' +
-      '<div class="head"><div class="tt">' + D('books', 'd-books') + D('star', 'd-star') + D('cloud', 'd-cloud') + D('bush', 'd-bush') + '<div class="sub">' + (L.special ? L.subjectName + ' · ' + L.unit + ' 게임 연계 학습지' : L.subjectName + ' · ' + L.schoolName + ' ' + L.unitNo + '단원 · ' + L.unit + ' · ' + L.no + '차시') + '</div><h1>' + hl(L.topic) + (ans ? ' <span style="color:#e53935;font-size:22px">[정답지]</span>' : '') + '</h1><div class="goal">🎯 학습 목표: ' + L.goal + '</div><div class="lv">' + LVN[level - 1] + '</div></div>' +
+      '<div class="head"><div class="tt">' + D('books', 'd-books') + D('star', 'd-star') + D('cloud', 'd-cloud') + D('bush', 'd-bush') + '<div class="sub">' + (L.sub ? L.sub : L.special ? L.subjectName + ' · ' + L.unit + ' 게임 연계 학습지' : L.subjectName + ' · ' + L.schoolName + ' ' + L.unitNo + '단원 · ' + L.unit + ' · ' + L.no + '차시') + '</div><h1>' + hl(L.topic) + (ans ? ' <span style="color:#e53935;font-size:22px">[정답지]</span>' : '') + '</h1><div class="goal">🎯 학습 목표: ' + L.goal + '</div><div class="lv">' + LVN[level - 1] + '</div></div>' +
       '<div class="score"><b>점수</b><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ 100</span>' + D('star', 'd-sstar') + '</div></div>' +
       '<div class="info">' + D('notebook', 'd-nb') + D('calendar', 'd-cal') + '<div>학년<i></i></div><div>반<i></i></div><div>번호<i></i></div><div>이름<i></i></div><div>날짜<i>&nbsp;&nbsp;&nbsp;월&nbsp;&nbsp;&nbsp;&nbsp;일</i></div></div>' +
       qs.map(function (q, i) { return '<div class="q c' + (i % 6) + '"><div class="qh"><span class="no">' + (i + 1) + '</span>' + (/읽어 주는|듣고|잘 듣/.test(q.t) ? '<img class="deco d-spk" src="../art/ws/deco_speaker.webp" alt="">' : '') + '<span>' + q.t + '</span><span class="pt">(' + pts[i] + '점)</span></div><div class="qb">' + q.b + '</div></div>'; }).join('') +
@@ -479,7 +482,7 @@ body.th-bw .d-spk{display:none!important}
   if (theme !== 'bw') theme = 'color';
   document.body.className = 'th-' + theme;
   function render() {
-    var s0 = seed, qs = MAKE[id] ? MAKE[id]() : (window.OKS_WS_SPORTS && OKS_WS_SPORTS.has(id)) ? OKS_WS_SPORTS.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : (window.OKS_WS_KO && OKS_WS_KO.has(id)) ? OKS_WS_KO.make({ id: id, level: level, shuf: shuf, ri: ri, box: box, layout: KL, glyph: KG }) : (window.OKS_WS_EN && OKS_WS_EN.has(id)) ? OKS_WS_EN.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
+    var s0 = seed, qs = MAKE[id] ? MAKE[id]() : (window.OKS_WS_CLOCK && OKS_WS_CLOCK.has(id)) ? OKS_WS_CLOCK.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : (window.OKS_WS_SPORTS && OKS_WS_SPORTS.has(id)) ? OKS_WS_SPORTS.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : (window.OKS_WS_KO && OKS_WS_KO.has(id)) ? OKS_WS_KO.make({ id: id, level: level, shuf: shuf, ri: ri, box: box, layout: KL, glyph: KG }) : (window.OKS_WS_EN && OKS_WS_EN.has(id)) ? OKS_WS_EN.make({ id: id, level: level, shuf: shuf, ri: ri, box: box }) : window.OKS_WS_GENERIC({ id: id, level: level, shuf: shuf, ri: ri, box: box, trace: trace, nMax: nMax, LESSONS: LESSONS });
     /* 한 장에 너무 많이 몰리면(글씨가 작아질 만큼) 마지막 문제부터 덜어 냅니다 */
     function need1(q) { var box = document.createElement('div'); box.style.cssText = 'position:absolute;left:-9999px;top:0;width:210mm'; box.innerHTML = pageHtml(q, false); document.body.appendChild(box);
       var inn = box.querySelector('.inner'); inn.classList.add('measure'); var h = inn.scrollHeight; box.remove(); return h; }
@@ -524,7 +527,7 @@ body.th-bw .d-spk{display:none!important}
   var thSel = document.getElementById('theme'); thSel.value = theme;
   thSel.onchange = function () { theme = thSel.value; try { localStorage.setItem('oks_ws_theme', theme); } catch (e) {} document.body.className = 'th-' + theme; render(); };
   document.getElementById('print').onclick = function () { var im = [].slice.call(document.images).filter(function (i) { return !i.complete; }); Promise.all(im.map(function (i) { return new Promise(function (r) { i.onload = i.onerror = r; }); })).then(function () { window.print(); }); };
-  document.getElementById('back').href = /^sp-/.test(id) ? '../sports/?festival=summer&sport=' + id.split('-')[1] + '&school=' + id.split('-')[2] : '../play/?id=' + id + '&level=' + level;
+  document.getElementById('back').href = /^clk-/.test(id) ? '../' : /^sp-/.test(id) ? '../sports/?festival=summer&sport=' + id.split('-')[1] + '&school=' + id.split('-')[2] : '../play/?id=' + id + '&level=' + level;
   if (!Q.get('seed')) history.replaceState(null, '', '?id=' + id + '&level=' + level + '&seed=' + seed);
   L = LESSONS.filter(function (l) { return l.id === id; })[0];
   render();
