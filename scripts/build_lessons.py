@@ -35,6 +35,21 @@ def basics(fname, key, subj, subjName, code, verify):
             })
 basics('english_basics.json', 'en', 'english', '영어', '05', '자체 구성(기초 영어)')
 basics('korean_basics.json', 'ko', 'korean', '국어', '01', '자체 구성(기초 한글 · 수업 설계 제안)')
+basics('math_clock_basics.json', 'mc', 'math', '수학', '02', '자체 구성(시각과 시간 · 수업 설계 제안)')
+
+# 시각과 시간 차시의 게임 내용표(play/clock-content.js) — 엔진 play/clock.js, 문제 math/clock3d/clock-rounds.js
+def clock_content():
+    CB = json.load(open(os.path.join(ROOT, 'curriculum/source/math_clock_basics.json'), encoding='utf-8'))
+    rows = []
+    for u in CB['units']:
+        for k, L in enumerate(u['lessons'], 1):
+            rid = '02-00-%02d-%02d' % (u['no'], k)
+            desc = json.dumps([t for t in L['levels']], ensure_ascii=False)
+            extra = ", rounds: [3, 3, 3, 3, 4]" if L['clock'] == 'timer' else ''
+            rows.append("  C['%s'] = { engine: 'clock', clock: '%s'%s, desc: %s };" % (rid, L['clock'], extra, desc))
+    with open(os.path.join(ROOT, 'play/clock-content.js'), 'w', encoding='utf-8') as f:
+        f.write("/* 자동 생성: scripts/build_lessons.py (curriculum/source/math_clock_basics.json) — 시각과 시간 차시 내용표. 엔진: play/clock.js */\n(function () {\n  var C = window.OKS_CONTENT = window.OKS_CONTENT || {};\n" + "\n".join(rows) + "\n})();\n")
+clock_content()
 out = {
     'title': guide.get('옥쌤의 즐거운 교실 | 7교과 3D 교육게임 통합 설계표') or '7교과 3D 교육게임 통합 설계표',
     'version': guide.get('버전'), 'note': guide.get('중요 구분'),

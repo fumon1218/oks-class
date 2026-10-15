@@ -11,9 +11,32 @@ window.OKS_WS_CLOCK = (function () {
     ['몇 시 몇 분', '5분 단위로 시계를 읽고, 1시간은 60분임을 안다'],
     ['몇 분 전', '‘몇 시 몇 분 전’과 ‘몇 분이 남았는지’를 말한다'],
     ['초', '1분은 60초임을 알고 초침을 읽는다'],
-    ['시간의 길이', '시작과 끝 시각으로 걸린 시간을 구하고 하루·일주일·1년을 안다']
+    ['시간의 길이', '시작과 끝 시각으로 걸린 시간을 구하고 하루·일주일·1년을 안다'],
+    ['오전 · 오후 · 하루', '오전과 오후를 가르고 하루는 24시간임을 안다'],
+    ['하루 일과 순서', '시각을 보고 하루 일과를 먼저 한 것부터 차례로 말한다'],
+    ['시간표 읽기', '시간표에서 시각과 하는 일을 찾아 읽는다'],
+    ['1분 체험과 시간 어림', '10초·1분·1시간의 길이를 느끼고, 시간과 돈을 이어 생각한다']
   ];
-  function parse(id) { var m = /^clk-([1-7])$/.exec(id || ''); return m ? +m[1] : 0; }
+  /* 배움 근거(2022 개정 특수교육 기본 교육과정 수학 ‘시간’ 영역) — tier: 핵심 = 성취기준 안, 심화 = 자체 구성(성취기준 밖) */
+  var META = [
+    null,
+    { basis: '[6수학03-03] 시계의 공통 구성 요소(시침·분침·숫자)를 탐색', tier: '핵심' },
+    { basis: '[6수학03-03] 시각을 ‘몇 시’로 나타낸다', tier: '핵심' },
+    { basis: '[6수학03-03] 시각을 ‘몇 시 30분’으로 나타낸다', tier: '핵심' },
+    { basis: '[9수학03-03] 1시간은 60분임을 알고 시간을 ‘몇 분’으로 나타낸다', tier: '핵심' },
+    { basis: '[9수학03-03]을 넓힌 ‘몇 분 전·후’ (기본 교육과정에는 없는 자체 구성)', tier: '심화' },
+    { basis: '교육과정에는 분·시간까지만 있어요 · 초는 자체 구성', tier: '심화' },
+    { basis: '[9수학03-03] 시작·끝 시각을 비교해 걸린 시간을 안다 · [6수학03-04] 1일·1주일', tier: '핵심' },
+    { basis: '[6수학03-04] 1일은 하루 동안의 시간 · 오전/오후는 자체 구성', tier: '핵심+심화' },
+    { basis: '[6수학03-03] 일상생활과 관련된 시각 · [6수학03-04] 하루의 활동', tier: '핵심' },
+    { basis: '[6수학03-04] 일정표 읽기(주간 일정표를 하루 시간표로 바꾼 자체 구성)', tier: '핵심+심화' },
+    { basis: '[9수학03-03] 5·10·30분 단위의 짧은 시간을 놀이로 경험 · 시간과 돈 연결은 자체 구성', tier: '핵심+심화' }
+  ];
+  var LVNOTE = ['따라 쓰기 · 보기 2개 (도움이 가장 많아요)', '따라 쓰기 · 보기 2개', '스스로 쓰기 · 보기 3개', '스스로 쓰기 · 보기 3개 · 문항 늘어남', '스스로 쓰기 · 보기 4개 · 도전(★) 문제'];
+  /* 게임 차시(02-00-단원-차시)는 같은 순서의 학습지 단계와 이어요 */
+  var ALIAS = { '02-00-01-01': 1, '02-00-01-02': 2, '02-00-01-03': 3, '02-00-01-04': 4, '02-00-01-05': 5, '02-00-02-01': 6, '02-00-02-02': 7, '02-00-02-03': 8, '02-00-03-01': 9, '02-00-03-02': 10, '02-00-03-03': 11 };
+  function parse(id) { if (ALIAS[id]) return ALIAS[id]; var m = /^clk-([1-9]|1[01])$/.exec(id || ''); return m ? +m[1] : 0; }
+  function meta(id, level) { var st = parse(id); if (!st) return null; var m = META[st]; return { goal: STAGES[st - 1][1], basis: m.basis, tier: m.tier, level: LVNOTE[(level || 3) - 1] }; }
   function has(id) { return !!parse(id); }
   function lessons() {
     return STAGES.map(function (s, i) {
@@ -30,7 +53,7 @@ window.OKS_WS_CLOCK = (function () {
   }
   /* o: h, m, s(초침), noHour/noMin(손 감춤), ansH/ansM(정답지에만 그려 보이는 바늘), blankNums(숨길 숫자), mins(분 숫자), size, sec(초 시계) */
   function clock(o) {
-    o = o || {}; var sz = o.size || 118, s = '<svg viewBox="0 0 120 120" width="' + sz + '" height="' + sz + '" style="flex:none">';
+    o = o || {}; var sz = o.size || 118, s = '<svg viewBox="0 0 120 120" width="' + sz + '" height="' + sz + '" style="flex:none"' + (o.h != null && o.m != null ? ' data-t="' + o.h + ':' + o.m + '"' : '') + '>';
     s += '<circle cx="60" cy="60" r="57" fill="#fffdf8" stroke="' + (o.rim || '#d9728a') + '" stroke-width="5"/>';
     for (var i = 0; i < 60; i++) { var a = pt(i * 6, 52), b = pt(i * 6, i % 5 ? 49.5 : 46); s += '<line x1="' + a[0].toFixed(1) + '" y1="' + a[1].toFixed(1) + '" x2="' + b[0].toFixed(1) + '" y2="' + b[1].toFixed(1) + '" stroke="#2d2a26" stroke-width="' + (i % 5 ? .6 : 1.4) + '"/>'; }
     for (var n = 1; n <= 12; n++) {
@@ -163,9 +186,64 @@ window.OKS_WS_CLOCK = (function () {
       qs.push({ t: '알맞은 수를 써 넣으세요.', b: '<div style="font-size:22px;display:flex;gap:10px 30px;flex-wrap:wrap"><span>1일 = ' + box(24, trace) + ' 시간</span><span>1주일 = ' + box(7, trace) + ' 일</span><span>1년 = ' + box(12, trace) + ' 개월</span>' + (level >= 4 ? '<span>2일 = ' + box(48, false) + ' 시간</span>' : '') + '</div>' });
     }
 
+    /* ===== 8단계: 오전 · 오후 · 하루 ===== */
+    if (stage === 8) {
+      var SC = [['🌅', '아침에 일어나요', '오전'], ['🏫', '1교시 수업을 해요', '오전'], ['🍚', '점심을 먹어요', '오후'], ['⚽', '학교가 끝나고 놀아요', '오후'], ['🍽️', '저녁을 먹어요', '오후'], ['🥣', '아침밥을 먹어요', '오전'], ['🌙', '밤에 잠을 자요', '오후']];
+      var sc = shuf(SC).slice(0, level <= 2 ? 3 : 4);
+      qs.push({ t: '오전일까요, 오후일까요? ○ 하세요.', b: '<div class="row" style="gap:12px 20px">' + sc.map(function (u) { return '<div class="card" style="min-width:160px"><span style="font-size:36px">' + u[0] + '</span><span style="font-size:17px">' + u[1] + '</span>' + cho(['오전', '오후'], u[2]) + '</div>'; }).join('') + '</div>' });
+      var AP = uniq(level <= 2 ? 2 : 3, function () { return { h: pickOne([7, 8, 9, 10, 1, 2, 3, 4, 5, 6]), m: 0 }; });
+      qs.push({ t: '시계의 시각에 맞는 말을 ' + (trace ? '따라 쓰세요.' : '쓰세요.') + ' (낮 12시 전은 오전, 낮 12시 뒤는 오후)', b: fr(AP.map(function (x) { var pm = x.h <= 6; return cell(clock({ h: x.h, m: 0, size: 108 }) + '<span style="font-size:18px">' + (pm ? '👉 학교가 끝난 뒤' : '👉 학교 가기 전·수업 중') + '</span><span>' + box(pm ? '오후' : '오전', trace) + ' ' + x.h + '시</span>'); })) });
+      qs.push({ t: '알맞은 수를 써 넣으세요.', b: '<div style="font-size:22px;display:flex;gap:10px 30px;flex-wrap:wrap"><span>오전 = ' + box(12, trace) + ' 시간</span><span>오후 = ' + box(12, trace) + ' 시간</span><span>하루 = ' + box(24, trace) + ' 시간</span></div><div style="font-size:16px;color:#666;margin-top:6px">밤 12시부터 낮 12시까지가 오전, 낮 12시부터 밤 12시까지가 오후예요.</div>' });
+      if (level >= 3) {
+        var Q8 = pickOne([['오후 3시', 2, '오후', 5], ['오전 10시', 3, '오후', 1], ['오전 8시', 2, '오전', 10], ['오후 1시', 4, '오후', 5]]);
+        qs.push({ adv: level >= 4, t: '시간이 지난 뒤의 시각을 써 보세요.', b: '<div style="font-size:21px">' + Q8[0] + '에서 ' + Q8[1] + '시간이 지나면 → ' + box(Q8[2], false) + ' ' + box(Q8[3], false) + ' 시</div>' });
+      }
+    }
+
+    /* ===== 9단계: 하루 일과 순서 ===== */
+    if (stage === 9) {
+      var RT = [['🌅', '일어나요', 7, 0], ['🪥', '이를 닦아요', 7, 20], ['🍞', '아침을 먹어요', 7, 40], ['🚌', '학교에 가요', 8, 30], ['📖', '공부해요', 10, 0], ['🍚', '점심을 먹어요', 12, 10], ['🏠', '집에 돌아와요', 15, 0], ['🍽️', '저녁을 먹어요', 18, 0], ['🛁', '씻어요', 20, 0], ['🛏️', '잠을 자요', 21, 30]];
+      var nR = [2, 2, 3, 4, 4][level - 1], st0 = ri(0, RT.length - nR), pk = RT.slice(st0, st0 + nR), sh = shuf(pk.map(function (x, i) { return { x: x, i: i }; }));
+      var tstr = function (x) { return (x[2] >= 12 ? '오후 ' : '오전 ') + ((x[2] + 11) % 12 + 1) + '시' + (x[3] ? ' ' + x[3] + '분' : ''); };
+      qs.push({ t: '먼저 하는 것부터 1, 2, 3… 번호를 ' + (trace ? '따라 쓰세요.' : '쓰세요.'), b: fr(sh.map(function (o) { return cell('<span style="font-size:40px">' + o.x[0] + '</span><span style="font-size:18px">' + o.x[1] + '</span>' + (level <= 3 ? '<span style="font-size:18px;color:#e0572f;font-weight:700">' + tstr(o.x) + '</span>' : clock({ h: o.x[2], m: o.x[3], size: 86 })) + '<span>' + box(o.i + 1, trace) + '</span>'); })) });
+      var one = pickOne(pk), bad = RT.filter(function (x) { return x[2] % 12 !== one[2] % 12 || x[3] !== one[3]; }), pc = shuf([{ x: one, ok: true }].concat(shuf(bad).slice(0, NOPT - 1).map(function (x) { return { x: x, ok: false }; })));
+      qs.push({ t: '“' + one[0] + ' ' + one[1] + '” 시각을 나타낸 시계에 ○ 하세요.', b: fr(pc.map(function (o) { return '<div class="card' + (o.ok ? ' circ' : '') + '" style="padding:8px">' + clock({ h: o.x[2], m: o.x[3], size: 100 }) + '</div>'; })) });
+      var my = pickOne([[7, 0, '일어나는 시각'], [8, 30, '학교에 가는 시각'], [12, 10, '점심 먹는 시각'], [6, 0, '저녁 먹는 시각']]);
+      qs.push({ t: '나의 하루: 시각에 맞게 긴바늘과 짧은바늘을 그려 넣으세요.', b: fr([cell('<span style="font-size:20px;background:#e8f3fb;border:1.4px solid #9fb8cc;border-radius:8px;padding:2px 10px">' + my[2] + ' ' + my[0] + '시' + (my[1] ? ' ' + my[1] + '분' : '') + '</span>' + clock({ noHour: true, noMin: true, ansH: my[0], ansM: my[1], size: 116 }))]) });
+      if (level >= 4) {
+        var gapM = (pk[nR - 1][2] * 60 + pk[nR - 1][3]) - (pk[0][2] * 60 + pk[0][3]);
+        qs.push({ adv: true, t: '일과 사이의 시간을 써 보세요.', b: '<div style="font-size:21px">' + pk[0][1] + '(' + tstr(pk[0]) + ') → ' + pk[nR - 1][1] + '(' + tstr(pk[nR - 1]) + ') : ' + box(Math.floor(gapM / 60), false) + ' 시간 ' + box(gapM % 60, false) + ' 분</div>' });
+      }
+    }
+
+    /* ===== 10단계: 시간표 읽기 ===== */
+    if (stage === 10) {
+      var TT = [['9:00', '국어', '📖'], ['10:00', '수학', '🔢'], ['11:00', '통합', '🎨'], ['12:00', '점심', '🍚'], ['1:00', '체육', '⚽'], ['2:00', '청소', '🧹']];
+      var nT = level <= 2 ? 4 : 6, tt = TT.slice(0, nT);
+      var ttab = function () { return '<table style="border-collapse:collapse;font-size:20px;background:#fff"><tr><th style="border:1.6px solid #2d2a26;padding:4px 18px;background:#e8f3fb">시각</th><th style="border:1.6px solid #2d2a26;padding:4px 18px;background:#e8f3fb">하는 일</th></tr>' + tt.map(function (r) { return '<tr><td style="border:1.6px solid #2d2a26;padding:4px 18px;text-align:center">' + r[0] + '</td><td style="border:1.6px solid #2d2a26;padding:4px 18px">' + r[2] + ' ' + r[1] + '</td></tr>'; }).join('') + '</table>'; };
+      var r1 = pickOne(tt), r2 = pickOne(tt.slice(0, nT - 1));
+      qs.push({ t: '시간표를 보고 알맞은 것에 ○ 하세요.', b: fr([ttab(), '<div style="display:flex;flex-direction:column;gap:12px"><div style="font-size:20px">' + r1[0] + '에 하는 일은? ' + cho(other(tt.map(function (r) { return r[1]; }), r1[1], NOPT), r1[1]) + '</div><div style="font-size:20px">' + r1[1] + ' 시간은 몇 시? ' + cho(other(tt.map(function (r) { return r[0]; }), r1[0], NOPT), r1[0]) + '</div></div>']) });
+      var nx = tt[tt.indexOf(r2) + 1];
+      qs.push({ t: '시간표를 보고 ' + (trace ? '따라 쓰세요.' : '쓰세요.'), b: '<div style="font-size:21px;line-height:2.1">' + r2[1] + ' 다음에는 ' + box(nx[1], trace) + ' 을(를) 해요.<br>' + nx[1] + '은 ' + box(nx[0], trace) + ' 에 시작해요.</div>' });
+      qs.push({ adv: level >= 4, t: '시간표를 보고 알맞은 수를 써 넣으세요.', b: '<div style="font-size:21px;line-height:2.1">수업 한 시간은 ' + box(1, false) + ' 시간(= ' + box(60, false) + ' 분)이에요.<br>' + tt[0][1] + ' 시간부터 ' + tt[2][1] + ' 시간이 시작할 때까지 ' + box(2, false) + ' 시간이 걸려요.</div>' });
+      qs.push({ t: '우리 반 시간표는? 칸에 직접 써 보세요. (게임의 “✏️ 우리 반 시간표”로 입력할 수도 있어요)', b: '<table style="border-collapse:collapse;font-size:20px"><tr><th style="border:1.6px solid #2d2a26;padding:6px 26px;background:#fff6dd">시각</th><th style="border:1.6px solid #2d2a26;padding:6px 60px;background:#fff6dd">하는 일</th></tr>' + [0, 1, 2, 3].map(function () { return '<tr><td style="border:1.6px solid #2d2a26;height:34px"></td><td style="border:1.6px solid #2d2a26"></td></tr>'; }).join('') + '</table>' });
+    }
+
+    /* ===== 11단계: 1분 체험과 시간 어림 ===== */
+    if (stage === 11) {
+      var TL = [['눈 한 번 깜빡이기', '👀', '초'], ['손 씻기', '🧼', '초'], ['점심 먹기', '🍚', '분'], ['수업 한 시간', '📚', '분'], ['영화 한 편 보기', '🎬', '시간'], ['밤에 자기', '😴', '시간']];
+      var tl = shuf(TL).slice(0, level <= 2 ? 3 : 4);
+      qs.push({ t: '알맞은 단위에 ○ 하세요. (초 · 분 · 시간)', b: '<div class="row" style="gap:12px 20px">' + tl.map(function (u) { return '<div class="card" style="min-width:150px"><span style="font-size:34px">' + u[1] + '</span><span style="font-size:17px">' + u[0] + '</span>' + cho(['초', '분', '시간'], u[2]) + '</div>'; }).join('') + '</div>' });
+      var secs = [10, 20, 30, 60][Math.min(level, 4) - 1];
+      qs.push({ t: '해 보아요: ' + secs + '초 동안 박수를 몇 번 쳤나요? (선생님이 초시계를 눌러 줘요)', b: '<div style="font-size:21px;line-height:2.2">' + secs + '초 동안 박수 <span class="box" style="min-width:70px"></span> 번<br>1분 동안 하면 몇 번쯤? ( <span class="box" style="min-width:70px"></span> 번 )</div><div style="font-size:15px;color:#666">정답은 사람마다 달라요. 시간을 몸으로 느끼는 활동이에요.</div>', free: true });
+      var K = pickOne([[10, 500, '🅿️ 주차'], [10, 1000, '🎠 놀이기구'], [20, 500, '🚲 자전거']]), mult = ri(2, 4);
+      qs.push({ t: '시간과 돈 — ' + K[2] + '은 ' + K[0] + '분에 ' + K[1] + '원이에요. 알맞은 수를 써 보세요.', b: '<div style="font-size:21px;line-height:2.2">' + K[0] * mult + '분은 ' + K[0] + '분이 ' + box(mult, trace) + ' 번이에요.<br>그래서 ' + box(K[1] * mult, trace) + ' 원이에요.</div><div style="font-size:15px;color:#666">💡 ' + K[1] + '원 = ' + (K[1] === 500 ? '500원 동전 1개' : '1000원 지폐 1장') + '</div>' });
+      qs.push({ adv: level >= 4, t: '알맞은 수를 써 보세요.', b: '<div style="font-size:23px">1분 = ' + box(60, trace) + ' 초 &nbsp;&nbsp; 1시간 = ' + box(60, trace) + ' 분</div>' });
+    }
+
     /* 점선 이음 표시용 작은 점 스타일: 문서에 한 번만 넣어요 */
     if (!document.getElementById('clk-style')) { var st = document.createElement('style'); st.id = 'clk-style'; st.textContent = '.dt{display:block;width:12px;height:12px;border-radius:50%;background:#2d2a26;margin:5px auto}'; document.head.appendChild(st); }
     return qs;
   }
-  return { has: has, make: make, lessons: lessons, clock: clock };
+  return { has: has, make: make, lessons: lessons, clock: clock, meta: meta, STAGES: STAGES.length };
 })();

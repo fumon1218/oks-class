@@ -4,7 +4,7 @@
   'use strict';
   var ENG = {
     pick: '고르기', pairs: '짝 찾기', sort: '나누어 담기', order: '순서 맞추기', pattern: '규칙 기차', count: '세기·모으기·가르기', farm: '햇살 농장',
-    rhythm: '리듬 연주', gauge: '힘 조절 게이지', mix: '색 섞기', route: '길 찾기', draw: '선 따라 그리기', build: '도형 조립', portal: '미술실 활동', abc: '영어 기초(알파벳·낱말·문장)'
+    rhythm: '리듬 연주', gauge: '힘 조절 게이지', mix: '색 섞기', route: '길 찾기', draw: '선 따라 그리기', build: '도형 조립', portal: '미술실 활동', abc: '영어 기초(알파벳·낱말·문장)', clock: '3D 시계(시각과 시간)'
   };
   function cfgAt(c, lv) {
     var x = Object.assign({}, c || {});

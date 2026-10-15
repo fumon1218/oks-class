@@ -1,6 +1,6 @@
 // ok's class - 오프라인(설치형) 사용을 위한 서비스 워커
 // 내용을 바꿀 때마다 CACHE_NAME 뒤 숫자를 올려주세요 (그래야 브라우저가 업데이트를 감지합니다)
-const CACHE_NAME = 'oks-class-v232';
+const CACHE_NAME = 'oks-class-v235';
 const ASSETS = [
   './',
   './index.html',
@@ -136,6 +136,8 @@ const ASSETS = [
   './play/content2.js',
   './play/content-extra.js',
   './play/english-content.js',
+  './play/clock-content.js',
+  './play/clock.js',
   './play/english.js',
   './play/custom.js',
   './curriculum/editor.html',
@@ -198,6 +200,8 @@ const ASSETS = [
   './search/index.json',
   './math/clock3d/index.html',
   './math/clock3d/clock3d.js',
+  './math/clock3d/clock-view.js',
+  './math/clock3d/clock-rounds.js',
   './math/clock3d/clock3d.css',
   './math/clock3d/assets/clock-analog.glb',
   './math/clock3d/assets/clock-digital.glb',

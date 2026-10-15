@@ -34,7 +34,7 @@ for (const rel of files.filter(f => f.endsWith('.html'))) {
   }
   assert(!/fumon1218\.github\.io\/jungle-jump\/[^"' ]*\.(webp|png|jpe?g|gif|svg)/.test(src), `다른 저장소 그림을 직접 불러오면 오프라인에서 깨집니다: ${rel}`);
 }
-for (const rel of files.filter(f => f.endsWith('.js') && !f.startsWith('scripts/') && !f.startsWith('vendor/') && f !== 'playground/chess/chess.js' && f !== 'playground/darts/darts.js' && !f.startsWith('playground/bowling/') && !f.startsWith('playground/rushhour/') && !f.startsWith('playground/racing/') && f !== 'playground/janggi/janggi.js' && f !== 'playground/omok/omok.js' && f !== 'playground/othello/othello.js' && f !== 'playground/go/go.js' && f !== 'playground/common3d.js' && f !== 'math/clock3d/clock3d.js')) {
+for (const rel of files.filter(f => f.endsWith('.js') && !f.startsWith('scripts/') && !f.startsWith('vendor/') && f !== 'playground/chess/chess.js' && f !== 'playground/darts/darts.js' && !f.startsWith('playground/bowling/') && !f.startsWith('playground/rushhour/') && !f.startsWith('playground/racing/') && f !== 'playground/janggi/janggi.js' && f !== 'playground/omok/omok.js' && f !== 'playground/othello/othello.js' && f !== 'playground/go/go.js' && f !== 'playground/common3d.js' && !f.startsWith('math/clock3d/'))) {
   const src = fs.readFileSync(path.join(root, rel), 'utf8');
   new vm.Script(src, { filename: rel }); scripts++;
   assert(!/fumon1218\.github\.io\/jungle-jump\/[^"' ]*\.(webp|png|jpe?g|gif|svg)/.test(src), `다른 저장소 그림 직접 참조: ${rel}`);
@@ -51,13 +51,13 @@ console.log(`PASS 오프라인 캐시 목록 ${listed.length}개`);
 const lessonsPath = path.join(root, 'curriculum/lessons.json');
 if (fs.existsSync(lessonsPath)) {
   const data = JSON.parse(fs.readFileSync(lessonsPath, 'utf8'));
-  assert.equal(data.lessons.length, 174, '174차시(엑셀 126 + 영어 기초 43 + 국어 기초 5)가 있어야 합니다');
+  assert.equal(data.lessons.length, 185, '185차시(엑셀 126 + 영어 기초 43 + 국어 기초 5 + 시각과 시간 11)가 있어야 합니다');
   const ids = new Set();
   for (const l of data.lessons) {
     assert(!ids.has(l.id), '중복 차시 ID ' + l.id); ids.add(l.id);
     assert.equal(l.levels.length, 5, '차시마다 5수준 ' + l.id);
   }
-  console.log('PASS 교육과정 174차시 · 5수준');
+  console.log('PASS 교육과정 185차시 · 5수준');
 }
 
 // 차시 게임 내용표: 활동ID가 교육과정에 있고, 엔진이 있고, 쓰는 그림 파일이 모두 있어야 합니다.
@@ -68,8 +68,9 @@ if (fs.existsSync(contentPath)) {
   const c2 = path.join(root, 'play/content2.js'); if (fs.existsSync(c2)) vm.runInNewContext(fs.readFileSync(c2, 'utf8'), { window: win });
   const c3 = path.join(root, 'play/content-extra.js'); if (fs.existsSync(c3)) vm.runInNewContext(fs.readFileSync(c3, 'utf8'), { window: win });
   const c4 = path.join(root, 'play/english-content.js'); if (fs.existsSync(c4)) vm.runInNewContext(fs.readFileSync(c4, 'utf8'), { window: win });
+  const c5 = path.join(root, 'play/clock-content.js'); if (fs.existsSync(c5)) vm.runInNewContext(fs.readFileSync(c5, 'utf8'), { window: win });
   const engWin = { OKS: {}, OKS_ENGINES: {} };
-  for (const f of ['engines.js', 'engines2.js', 'farm.js', 'english.js']) vm.runInNewContext(fs.readFileSync(path.join(root, 'play', f), 'utf8'), { window: engWin, document: {} });
+  for (const f of ['engines.js', 'engines2.js', 'farm.js', 'english.js', 'clock.js']) vm.runInNewContext(fs.readFileSync(path.join(root, 'play', f), 'utf8'), { window: engWin, document: {} });
   const data = JSON.parse(fs.readFileSync(lessonsPath, 'utf8'));
   const ids = new Set(data.lessons.map(l => l.id));
   let imgs = 0;
