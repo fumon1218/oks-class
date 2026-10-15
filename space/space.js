@@ -315,6 +315,7 @@
     document.getElementById('sheetSub').textContent = s.name + ' · ' + b.sub;
     var body = document.getElementById('sheetBody'); body.innerHTML = '';
     sheet.style.setProperty('--c', s.color);
+    if (b.groups) b.groups.forEach(function (g) { var d = E('section', 'sp-group'); d.appendChild(E('h3', '', g.title)); d.appendChild(linkList(g.links)); body.appendChild(d); });
     ({ lessons: lessonsView, hub: hubView, review: reviewView, room: roomView, link: function () {}, dock: dockView })[b.kind](body, s, b);
     if (b.links) body.appendChild(linkList(b.links));
     sheet.hidden = false;

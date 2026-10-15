@@ -262,3 +262,7 @@ body.portrait.sp-zooming[data-view="map"] .sp-stage{background:#140f33 var(--map
 
 .sp-voice{cursor:pointer;font:inherit;}
 .sp-voice.off{opacity:.8;background:#e9e3f3;}
+
+.sp-group{background:linear-gradient(180deg,#fff7d9,#fff);border:3px solid #ffd767;border-radius:22px;padding:10px 14px 14px;margin:0 0 14px;}
+.sp-group h3{margin:4px 0 2px;font-size:21px;color:var(--ink);}
+.sp-group .sp-links{margin-top:8px;}

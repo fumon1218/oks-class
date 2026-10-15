@@ -80,7 +80,7 @@ SP.STARS.forEach((s) => {
   add({ t: s.name, c: 'place', e: '🪐', s: '우주 지도 · 별', k: s.subjects.map((x) => KO[x] || x).join(' ') + ' ' + (s.hello || ''), u: 'index.html#' + s.id });
   (SP.B[s.id] || []).forEach((b) => {
     if (b.kind === 'lessons' || b.kind === 'hub' || b.kind === 'room' || b.kind === 'review') add({ t: b.name, c: 'place', e: b.emo || '🏠', s: s.short + ' · ' + b.sub, k: (b.keys || []).join(' '), u: 'index.html#' + s.id + '/' + b.id });
-    (b.links || []).forEach((l) => { const m = /^(\S+)\s+(.*)$/.exec(l[0]) || [0, '🔗', l[0]]; add({ t: m[2].replace(/\s*\(.*$/, ''), c: l[1].indexOf('http') === 0 ? 'game' : 'game', e: m[1], s: b.name + ' · ' + s.short, k: l[0], u: l[1] }); });
+    ((b.links || []).concat(...(b.groups || []).map((g) => g.links))).forEach((l) => { const m = /^(\S+)\s+(.*)$/.exec(l[0]) || [0, '🔗', l[0]]; add({ t: m[2].replace(/\s*\(.*$/, ''), c: l[1].indexOf('http') === 0 ? 'game' : 'game', e: m[1], s: b.name + ' · ' + s.short, k: l[0], u: l[1] }); });
   });
 });
 
