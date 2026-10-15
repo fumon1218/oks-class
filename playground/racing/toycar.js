@@ -27,7 +27,7 @@ export function buildToyCar(THREE, bodyColor, style, eq) {
   const M = (c, o) => new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.3, metalness: 0.1 }, o || {}));
   const body = M(bodyColor, { roughness: 0.2, metalness: 0.15 }), white = M(0xffffff, { roughness: 0.35 }), yellow = M(ST.acc, { roughness: 0.3 }), black = M(0x14161b, { roughness: 0.7 }),
     glass = M(0x1b2a3c, { roughness: 0.05, metalness: 0.5 }), silver = M(0xe3e8ee, { metalness: 0.85, roughness: 0.25 }), tail = M(0xd01a2c, { emissive: 0x6a0010, roughness: 0.3 });
-  const rb = [], spin = []; g.userData.rb = rb; g.userData.spin = spin;
+  body.name = 'carbody'; const rb = [], spin = []; g.userData.rb = rb; g.userData.spin = spin;
   { const pn = eq.paint; if (pn === 'p_pearl') { body.metalness = 0.55; body.roughness = 0.12; } else if (pn === 'p_matte') { body.metalness = 0; body.roughness = 0.95; } else if (pn === 'p_chrome') { body.metalness = 1; body.roughness = 0.05; body.color.set(0xdfe6ee); } else if (pn === 'p_gold') { body.color.set(0xffc21a); body.metalness = 0.9; body.roughness = 0.2; } else if (pn === 'p_rainbow') rb.push({ m: body, s: 0.85, l: 0.55 }); }
   const sph = new THREE.SphereGeometry(1, 28, 20);
   const starGeo = (r1, r2, depth) => { const sh = new THREE.Shape(); for (let i = 0; i < 10; i++) { const a = Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? r2 : r1; sh[i ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r); } const geo = new THREE.ExtrudeGeometry(sh, { depth, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 2 }); geo.translate(0, 0, -depth / 2); return geo; };

@@ -166,3 +166,12 @@ img.ui.rb{animation:rcrb 3s linear infinite}@keyframes rcrb{to{filter:hue-rotate
 
 .rc-drift{position:fixed;left:50%;transform:translateX(-50%);bottom:30%;padding:5px 16px;border-radius:999px;font-weight:900;font-size:clamp(14px,2vw,20px);color:#fff;background:rgba(40,80,200,.85);box-shadow:0 3px 10px rgba(0,0,0,.35);pointer-events:none;z-index:6;letter-spacing:2px}
 .rc-drift[data-lv="1"]{background:rgba(255,140,20,.92)}.rc-drift[data-lv="2"]{background:rgba(255,70,120,.92)}.rc-drift[data-lv="3"]{background:linear-gradient(90deg,#ff4d6d,#ffd60a,#4cd964,#3aa6ff,#9b6bff)}
+
+/* 내 도안(색칠해서 올리기) */
+.gp-dsg{margin-top:8px;border-top:2px dashed #f0dcb8;padding-top:7px}.gp-dsg[hidden]{display:none}
+.gp-dsg b{display:block;font-size:13px;font-weight:900;color:#7a3d00;margin-bottom:4px}
+.gp-dsg .row{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.gp-dsg a,.gp-dsg button{appearance:none;font:inherit;font-weight:900;font-size:12.5px;text-decoration:none;color:#2b3f5c;background:#fff;border:2px solid #dbe6f3;border-radius:999px;padding:4px 9px;cursor:pointer;box-shadow:0 2px 0 #c8d4e4;line-height:1.2}
+.gp-dsg .up{background:linear-gradient(#ffe48a,#ffbf3a);border-color:#f0b020;color:#6b3500;box-shadow:0 2px 0 #c9780a}
+.gp-dsg .thumb{width:44px;height:64px;border-radius:6px;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3);background:#fff center/cover}
+.gp-dsg small{display:block;font-size:11.5px;color:#6a5a40;margin-top:3px;line-height:1.3}

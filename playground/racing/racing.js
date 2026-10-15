@@ -6,6 +6,7 @@ import { GLTFLoader } from '../../vendor/three/addons/loaders/GLTFLoader.js';
 import { makeTrack, makeLoopTrack, LOOP_SHAPES } from './track.js';
 import { buildToyCar, TOY_COLORS } from './toycar.js';
 import { SLOTS, ITEMS, ITEM } from './parts.js';
+import { applyDesign, readDesign, renderSheet, boxOf, saveDesign, loadDesign, deleteDesign, listDesigns, BODY_NAME } from './cartemplate.js';
 
 const O = window.OKS;
 const $ = (id) => document.getElementById(id);
@@ -147,10 +148,13 @@ function addKitWheels(model, def, ri) {
   });
   return out;
 }
-function makeCarObject(def, colorIdx, eq) {
+/* 내가 색칠한 도안(차 id → 그림). 차마다 도안 상자는 cartpl.json 에 있어요 */
+const designs = {}, tplBox = {};
+function makeCarObject(def, colorIdx, eq, useDesign) {
   eq = eq || {}; let model, wl, len, wid;
   if (def.build) { const b = buildToyCar(THREE, TOY_COLORS[(colorIdx || 0) % TOY_COLORS.length][0], def.style, eq); model = b.group; wl = b.wheels; len = b.len; wid = b.wid; }
   else { const p = protos[def.id]; model = p.holder.clone(true); wl = p.wheels; len = p.len; wid = p.wid; if (def.paint) paintBody(model, def, colorIdx); if (def.kit) wl = wl.concat(addKitWheels(model, def, rimIdx(def, eq))); }
+  if (useDesign && designs[def.id] && tplBox[def.id] && !(prefs.dsgOff || {})[def.id]) { try { applyDesign(THREE, model, [def.paint || BODY_NAME], tplBox[def.id], designs[def.id]); } catch (e) { /* 도안이 안 입혀져도 달릴 수 있어요 */ } }
   model.rotation.y = def.front < 0 ? Math.PI : 0;
   const root = new THREE.Group(), tilt = new THREE.Group(); root.add(tilt); tilt.add(model);
   const blob = new THREE.Mesh(new THREE.PlaneGeometry(wid * 1.9, len * 1.35), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false })); blob.rotation.x = -Math.PI / 2; blob.position.y = 0.03; tilt.add(blob);
@@ -193,7 +197,7 @@ function aiEq() { const e = { rim: Math.floor(Math.random() * RIMS.length) }; SL
 let gCar = null, gYaw = 0.6, gSpin = 0.35, gPop = 1, gDrag = null, gIdx = 0;
 function showGarageCar(i) {
   const ni = (i + CARS.length) % CARS.length; if (ni !== prefs.car) prefs.color = -1; gIdx = ni; prefs.car = gIdx; writeSave();
-  if (gCar) { turn.remove(gCar.root); } gCar = makeCarObject(CARS[gIdx], colOf(CARS[gIdx], prefs.color), eqOf(CARS[gIdx])); turn.add(gCar.root); gPop = 0; renderGarageInfo();
+  if (gCar) { turn.remove(gCar.root); } gCar = makeCarObject(CARS[gIdx], colOf(CARS[gIdx], prefs.color), eqOf(CARS[gIdx]), true); turn.add(gCar.root); gPop = 0; renderGarageInfo();
 }
 
 /* ---------- 경기 장면 ---------- */
@@ -340,7 +344,7 @@ function say(text, kind, speak) { msgText.textContent = text; msgEl.className = 
 const note = (t) => say(t, null, false);
 
 function newRacer(def, isPlayer, slot, idx, colorIdx, eq) {
-  const o = makeCarObject(def, colorIdx, eq); rScene.add(o.root);
+  const o = makeCarObject(def, colorIdx, eq, isPlayer); rScene.add(o.root);
   const r = Object.assign(o, { isPlayer, s: slot.s, d: slot.d, v: 0, dd: 0, u: 0, yaw: 0, nitro: isPlayer ? 0.35 : 0, nOn: false, brake: false, finished: false, fT: 0, wallCd: 0, hitCd: 0, slowT: 0, slowF: 1, spinT: 0, spinDur: 1, boostT: 0, magT: 0, flyT: 0, bigT: 0, hold: null, holdT: 0, fy: 0, jy: 0, jv: 0, airT: 0, sup: 0, dr: 0, drT: 0, drLv: 0, drA: 0, drFx: 0, bs: 1, shield: 0, hzCd: 0, tgtD: slot.d, tgtT: 2 + Math.random() * 2, wob: Math.random() * 6, idx, aiV: 0, travel: 0 });
   return r;
 }
@@ -692,11 +696,53 @@ function renderGarageInfo() {
   on('#opts [data-df]', (b) => { prefs.diff = +b.dataset.df; writeSave(); O.sfx('tick'); renderGarageInfo(); });
   on('#opts [data-as]', (b) => { prefs.assist = +b.dataset.as; writeSave(); O.sfx('tick'); renderGarageInfo(); });
   on('.gp-qb [data-q]', (b) => openTune(b.dataset.q));
+  renderDsg(d);
   const sel = $('courseRow').querySelector('.on'); if (sel && $('courseRow').scrollTo) { const row = $('courseRow'); row.scrollTo({ left: sel.offsetLeft - (row.clientWidth - sel.offsetWidth) / 2, behavior: 'auto' }); }
+}
+/* ---------- 내 도안: 받아서 색칠 → 사진 올리기 → 차에 입혀요 ---------- */
+function designTexOf(canvas) { const t = new THREE.CanvasTexture(canvas); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; }
+function renderDsg(d) {
+  const box = $('dsgBox'); if (!box) return; if (!d.colors || !tplBox[d.id]) { box.hidden = true; box.innerHTML = ''; return; }
+  const has = !!designs[d.id], off = !!(prefs.dsgOff || {})[d.id];
+  box.hidden = false;
+  box.innerHTML = '<b>🖍️ 내가 색칠한 차</b><div class="row"><a href="../../art/cartemplate/img/' + d.id + '.png" download="자동차도안_' + d.name + '.png">⬇ 도안 받기</a><button type="button" class="up" id="dsgUp">📷 칠한 도안 올리기</button>'
+    + (has ? '<button type="button" id="dsgOn">' + (off ? '내 도안 켜기' : '내 도안 끄기') + '</button><button type="button" id="dsgDel">🗑 지우기</button>' : '') + '</div>'
+    + '<small>' + (has ? (off ? '내 도안이 꺼져 있어요.' : '내 도안으로 달려요! 하얗게 둔 곳은 고른 색이에요.') : '도안을 인쇄해 색칠하고 사진을 찍어 올리면 내 디자인 차로 달려요.') + ' <a href="../../art/cartemplate/" style="border:0;box-shadow:none;background:none;padding:0;text-decoration:underline">🎨 미술 도안 학습지</a></small>'
+    + '<input type="file" id="dsgFile" accept="image/*" hidden>';
+  $('dsgUp').onclick = () => $('dsgFile').click();
+  $('dsgFile').onchange = async (ev) => {
+    const f = ev.target.files && ev.target.files[0]; if (!f) return;
+    say('도안을 읽는 중이에요…', null, false);
+    try {
+      const bmp = await createImageBitmap(f), res = readDesign(bmp);
+      if (res.filled < 0.015) { say('칠한 곳이 거의 없어요. 색을 더 칠해서 다시 찍어 주세요!', 'warn', '칠한 곳이 거의 없어요. 색을 더 칠해서 다시 찍어 주세요!'); return; }
+      await saveDesign(d.id, res.canvas); designs[d.id] = designTexOf(res.canvas); (prefs.dsgOff = prefs.dsgOff || {})[d.id] = false; writeSave();
+      rebuildGarageCar(); renderDsg(d);
+      say(res.found ? '내가 칠한 차예요! 멋져요!' : '네 모서리 까만 네모를 못 찾아서 종이 전체로 맞췄어요. 어긋나 보이면 다시 찍어 주세요.', res.found ? null : 'warn', res.found ? '내가 칠한 차예요! 멋져요!' : false);
+    } catch (e) { say('그림을 읽지 못했어요. 다른 사진으로 해 볼까요?', 'warn', false); }
+    ev.target.value = '';
+  };
+  if (has) {
+    $('dsgOn').onclick = () => { prefs.dsgOff = prefs.dsgOff || {}; prefs.dsgOff[d.id] = !off; writeSave(); O.sfx('tick'); rebuildGarageCar(); renderDsg(d); };
+    $('dsgDel').onclick = async () => { await deleteDesign(d.id); delete designs[d.id]; writeSave(); O.sfx('tick'); rebuildGarageCar(); renderDsg(d); say('내 도안을 지웠어요.', null, false); };
+  }
+}
+async function loadDesigns() {
+  try { const r = await fetch('cartpl.json'); if (r.ok) Object.assign(tplBox, await r.json()); } catch (e) { return; }
+  for (const id of await listDesigns()) { if (!tplBox[id]) continue; const cv = await loadDesign(id); if (cv) designs[id] = designTexOf(cv); }
+}
+/* 도안 만들기 도우미(?tpl=1): 모든 차의 도안 그림과 상자 크기를 만들어 window.__TPL 에 담아요 */
+async function buildTemplates() {
+  const out = {};
+  for (const d of CARS) {
+    if (!d.colors) continue; const o = makeCarObject(d, colOf(d, -1), {}, false), box = boxOf(THREE, o.model);
+    const cv = renderSheet(THREE, o.model, box, { title: d.name + ' 색칠 도안' }); out[d.id] = { box, png: cv.toDataURL('image/png') };
+  }
+  window.__TPL = out; document.title = 'TPL-DONE';
 }
 /* ---------- 내 차고 꾸미기 (코인으로 사서 달아요) ---------- */
 const coinsNow = () => { try { return O.eco.info().coins; } catch (e) { return 0; } };
-function rebuildGarageCar() { if (gCar) turn.remove(gCar.root); gCar = makeCarObject(CARS[gIdx], colOf(CARS[gIdx], prefs.color), eqOf(CARS[gIdx])); turn.add(gCar.root); gPop = 1; }
+function rebuildGarageCar() { if (gCar) turn.remove(gCar.root); gCar = makeCarObject(CARS[gIdx], colOf(CARS[gIdx], prefs.color), eqOf(CARS[gIdx]), true); turn.add(gCar.root); gPop = 1; }
 function openTune(slot) {
   if (typeof slot === 'string' && SLOTS.some((x) => x.id === slot)) tuneSlot = slot; O.unlock(); O.sfx('tick'); tuneSel = null; $('garage').hidden = true; $('tune').hidden = false; renderTune(); resize(); say('코인으로 차를 꾸며요!', null, '코인으로 내 차를 꾸며요! 마음에 드는 걸 눌러 보세요.');
 }
@@ -798,5 +844,7 @@ window.__race = { get ramps() { return ramps; }, get feats() { return feats; }, 
   resize(); requestAnimationFrame(frame);
   try { await loadModels((p) => { $('loadText').textContent = '차를 가져오는 중… ' + Math.round(p * 100) + '%'; }); }
   catch (e) { $('loading').innerHTML = '<div><p>차 모델을 불러오지 못했어요.<br>인터넷 연결을 확인하고 다시 열어 주세요.</p><a class="ch-btn" href="../?zone=board">← 놀이별로</a></div>'; throw e; }
+  if (/[?&]tpl=1/.test(location.search)) { await buildTemplates(); return; }
+  await loadDesigns();
   openGarage(); $('loading').classList.add('off'); setTimeout(() => { $('loading').hidden = true; }, 500);
 })();

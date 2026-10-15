@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>자동차 도안 학습지 · 옥쌤의 즐거운 교실</title>
+<style>
+:root{--ink:#3b2f2f;--pink:#ff6fa6;--sky:#3fa0ff;--line:#e6d7bb}
+*{box-sizing:border-box}
+body{margin:0;font-family:'Noto Sans KR','Apple SD Gothic Neo','Malgun Gothic',sans-serif;background:#f3ead8;color:var(--ink);line-height:1.55}
+a{color:#1c63c4}
+.bar{position:sticky;top:0;z-index:5;background:#fffdf8;padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;box-shadow:0 2px 10px rgba(0,0,0,.15)}
+.bar b{font-size:17px;margin-right:6px}
+.bar button,.bar a.btn{font:inherit;font-size:15px;padding:6px 12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
+.bar .go{background:var(--pink);border-color:var(--pink);color:#fff;font-weight:700}
+.bar .sp{flex:1}
+.bar label{font-size:14px;display:flex;gap:5px;align-items:center}
+main{max-width:1080px;margin:0 auto;padding:12px 16px 60px}
+h1{font-size:26px;margin:14px 0 4px}
+.lead{margin:0 0 12px;font-size:16px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:12px 0 18px;padding:0;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;background:#fff;border:2px solid var(--line);border-radius:16px;padding:10px 12px 10px 48px;position:relative;font-size:15px}
+.steps li::before{content:counter(s);position:absolute;left:10px;top:10px;width:28px;height:28px;border-radius:50%;background:var(--sky);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+.steps b{display:block}
+h2{font-size:20px;margin:22px 0 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.card{background:#fff;border:3px solid #fff;border-radius:16px;box-shadow:0 3px 10px rgba(0,0,0,.14);padding:8px;display:flex;flex-direction:column;gap:6px}
+.card.on{border-color:var(--pink)}
+.card .th{background:#fff;border:1px solid #eee;border-radius:10px;aspect-ratio:210/297;overflow:hidden;display:block}
+.card .th img{width:100%;height:100%;object-fit:contain;display:block}
+.card .nm{display:flex;gap:6px;align-items:center;font-weight:700}
+.card .nm input{width:20px;height:20px}
+.card .row{display:flex;gap:6px;flex-wrap:wrap}
+.card .row a,.card .row button{font:inherit;font-size:13px;padding:3px 9px;border-radius:999px;border:2px solid var(--line);background:#fff;color:var(--ink);text-decoration:none;cursor:pointer}
+.note{background:#fffdf4;border:2px dashed var(--line);border-radius:14px;padding:10px 14px;font-size:15px}
+.note ul{margin:4px 0 0;padding-left:20px}
+table.lv{border-collapse:collapse;width:100%;background:#fff;font-size:14px}
+table.lv th,table.lv td{border:1px solid var(--line);padding:6px 8px;vertical-align:top;text-align:left}
+table.lv th{background:#fff4d8;white-space:nowrap}
+.msg{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);background:#333;color:#fff;padding:8px 16px;border-radius:999px;font-size:15px;opacity:0;pointer-events:none;transition:.25s}
+.msg.on{opacity:.95}
+/* 인쇄 영역 */
+#printArea{display:none}
+.pg{width:210mm;height:297mm;position:relative;overflow:hidden;background:#fff;page-break-after:always;break-after:page}
+.pg img.full{position:absolute;inset:0;width:100%;height:100%}
+.act{padding:16mm 18mm;font-size:15px}
+.act h3{margin:0 0 4mm;font-size:24px}
+.act .box{border:2px solid #444;border-radius:10px;padding:5mm;margin:4mm 0}
+.act .ln{border-bottom:1.5px solid #999;height:9mm}
+.act .stars{font-size:26px;letter-spacing:4px;color:#bbb}
+.act .pic{display:flex;gap:8mm;align-items:center}
+.act .pic img{width:68mm;border:1px solid #ccc}
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}
+  .bar,main,.msg{display:none!important}
+  #printArea{display:block}
+}
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>🎨 자동차 도안 학습지</b>
+  <button type="button" id="all">전체 선택</button><button type="button" id="none">선택 해제</button>
+  <label><input type="checkbox" id="withAct" checked> 활동지(소개·자기평가) 함께</label>
+  <span class="sp"></span>
+  <button type="button" class="go" id="print">🖨️ 선택한 도안 인쇄 <span id="cnt1">(0)</span></button>
+  <button type="button" id="zip">📦 한 번에 받기(ZIP) <span id="cnt2">(0)</span></button>
+  <a class="btn" href="../../playground/racing/">🏎️ 레이싱 게임으로</a>
+</div>
+<main>
+  <h1>🏎️ 내가 디자인하는 자동차</h1>
+  <p class="lead">미술 시간에 색칠한 자동차를 사진으로 올리면, 스피드 레이싱 게임에서 <b>내 디자인 그대로</b> 달려요!</p>
+  <ol class="steps">
+    <li><b>도안 고르기</b>좋아하는 차를 골라 선택하고 인쇄하거나 받아요.</li>
+    <li><b>색칠하기 (미술)</b>옆·위·앞 세 그림을 어울리게 칠해요. 하얀 곳은 게임에서 차 색깔이 돼요.</li>
+    <li><b>사진 찍기</b>네 모서리 까만 네모가 모두 보이게 반듯하게 찍어요. 스캔도 좋아요.</li>
+    <li><b>게임에 올리기</b>레이싱 차고에서 그 차를 고르고 〈📷 칠한 도안 올리기〉를 눌러요.</li>
+  </ol>
+
+  <h2>실제 모델 자동차 <small style="font-weight:400">(3D 모델을 위·옆·앞에서 본 모습)</small></h2>
+  <div class="grid" id="gReal"></div>
+  <h2>카툰 장난감 자동차 <small style="font-weight:400">(옥쌤이 만든 차)</small></h2>
+  <div class="grid" id="gToy"></div>
+
+  <h2>수업 안내 (미술 · 표현)</h2>
+  <div class="note">
+    <b>이렇게 활용해요</b>
+    <ul>
+      <li><b>색 탐색·표현:</b> 좋아하는 색을 골라 차의 앞·옆·위를 어울리게 칠하며 색과 모양의 느낌을 나타내요.</li>
+      <li><b>감상·소개:</b> 완성한 차를 친구에게 소개하고, 게임에서 달리는 모습을 함께 감상해요. (활동지 사용)</li>
+      <li><b>학습지 묶음:</b> 위의 〈선택한 도안 인쇄〉는 도안과 활동지를 한 장씩 번갈아 인쇄해요. 〈ZIP〉은 도안 그림 파일을 한꺼번에 받아요.</li>
+      <li><b>색칠 도구:</b> 색연필·사인펜·크레파스 모두 좋아요. 아주 진한 검정·회색은 게임에서 차 색깔로 바뀔 수 있어요(선으로 보여서요).</li>
+    </ul>
+  </div>
+  <h2>수준별 활동 아이디어</h2>
+  <table class="lv">
+    <tr><th>수준</th><th>활동</th></tr>
+    <tr><td>1</td><td>한 가지 색을 골라 차 안쪽을 마음대로 칠해요. (선택 · 큰 면 칠하기)</td></tr>
+    <tr><td>2</td><td>두 가지 색으로 지붕과 몸통을 나누어 칠해요.</td></tr>
+    <tr><td>3</td><td>옆·위·앞 세 그림의 색을 서로 맞추어 칠해요.</td></tr>
+    <tr><td>4</td><td>줄무늬·물방울·별 같은 무늬를 넣어 나만의 디자인을 만들어요.</td></tr>
+    <tr><td>5</td><td>주제(바다·우주·과일 등)를 정해 디자인하고 이름과 이유를 소개해요.</td></tr>
+  </table>
+  <p style="font-size:13px;color:#7a6a50">3D 모델 출처: 카레라·클래식 쿠페 (Geedtopia, CC BY-NC 4.0), 니바 (Configcars / maxipub, CC BY 4.0), 픽업 (Jorma Rysky, CC BY 4.0). 도안은 모델을 윤곽선으로 바꾼 것이에요.</p>
+</main>
+<div class="msg" id="msg"></div>
+<div id="printArea"></div>
+<script>
+(function () {
+  var CARS = [
+    ['carrera', '카레라 쿠페', 'real'], ['chevy57', '클래식 쿠페 57', 'real'], ['niva', '니바 짱짱', 'real'], ['pickup', '픽업 트럭', 'real'],
+    ['toy_sport', '스프린트', 'toy'], ['toy_formula', '포뮬러', 'toy'], ['toy_wave', '웨이브', 'toy'], ['toy_buggy', '버기', 'toy'], ['toy_flower', '블로섬', 'toy'],
+    ['toy_star', '스타', 'toy'], ['toy_rocket', '로켓', 'toy'], ['toy_cloud', '클라우드', 'toy'], ['toy_knight', '나이트', 'toy'], ['toy_comet', '코멧', 'toy']
+  ];
+  var sel = {};
+  try { sel = JSON.parse(sessionStorage.getItem('oks_cartpl_sel') || '{}') || {}; } catch (e) { sel = {}; }
+  var $ = function (i) { return document.getElementById(i); };
+  function say(t) { var m = $('msg'); m.textContent = t; m.classList.add('on'); clearTimeout(say.t); say.t = setTimeout(function () { m.classList.remove('on'); }, 2400); }
+  function count() { var n = CARS.filter(function (c) { return sel[c[0]]; }).length; $('cnt1').textContent = '(' + n + ')'; $('cnt2').textContent = '(' + n + ')'; return n; }
+  function save() { try { sessionStorage.setItem('oks_cartpl_sel', JSON.stringify(sel)); } catch (e) { /* 저장 안 돼도 괜찮아요 */ } }
+  function draw() {
+    ['real', 'toy'].forEach(function (k) {
+      $(k === 'real' ? 'gReal' : 'gToy').innerHTML = CARS.filter(function (c) { return c[2] === k; }).map(function (c) {
+        return '<div class="card' + (sel[c[0]] ? ' on' : '') + '" data-id="' + c[0] + '"><label class="th"><img loading="lazy" src="img/' + c[0] + '.png" alt="' + c[1] + ' 도안"></label>' +
+          '<div class="nm"><input type="checkbox" id="c_' + c[0] + '"' + (sel[c[0]] ? ' checked' : '') + '><label for="c_' + c[0] + '">' + c[1] + '</label></div>' +
+          '<div class="row"><a href="img/' + c[0] + '.png" download="자동차도안_' + c[1] + '.png">⬇ 받기</a><button type="button" data-one="' + c[0] + '">🖨️ 이 도안만</button></div></div>';
+      }).join('');
+    });
+    document.querySelectorAll('.card').forEach(function (cd) {
+      var id = cd.getAttribute('data-id'), cb = cd.querySelector('input');
+      cb.onchange = function () { sel[id] = cb.checked; cd.classList.toggle('on', cb.checked); save(); count(); };
+      cd.querySelector('.th').onclick = function (e) { e.preventDefault(); cb.checked = !cb.checked; cb.onchange(); };
+      cd.querySelector('[data-one]').onclick = function () { printIds([id]); };
+    });
+    count();
+  }
+  function nameOf(id) { for (var i = 0; i < CARS.length; i++) if (CARS[i][0] === id) return CARS[i][1]; return id; }
+  function printIds(ids) {
+    var withAct = $('withAct').checked, h = '';
+    ids.forEach(function (id) {
+      h += '<div class="pg"><img class="full" src="img/' + id + '.png" alt=""></div>';
+      if (withAct) h += '<div class="pg act"><h3>🏎️ 내 자동차를 소개해요</h3><div class="pic"><img src="img/' + id + '.png" alt=""><div style="flex:1"><p>도안: <b>' + nameOf(id) + '</b></p><p>이름: ____________________</p><p>내 차 이름: ____________________</p></div></div>' +
+        '<div class="box"><b>① 내 차는 어떤 색과 무늬예요?</b><div class="ln"></div><div class="ln"></div></div>' +
+        '<div class="box"><b>② 가장 마음에 드는 곳은 어디예요?</b><div class="ln"></div><div class="ln"></div></div>' +
+        '<div class="box"><b>③ 친구에게 자랑하고 싶은 말</b><div class="ln"></div><div class="ln"></div></div>' +
+        '<div class="box"><b>④ 스스로 평가해요</b><p>색을 골라 칠했어요 <span class="stars">☆☆☆☆☆</span></p><p>세 그림을 어울리게 칠했어요 <span class="stars">☆☆☆☆☆</span></p><p>게임에서 내 차로 달려 봤어요 <span class="stars">☆☆☆☆☆</span></p></div></div>';
+    });
+    $('printArea').innerHTML = h;
+    var imgs = Array.prototype.slice.call($('printArea').querySelectorAll('img')), left = imgs.length;
+    if (!left) return;
+    var go = function () { if (--left <= 0) setTimeout(function () { window.print(); }, 150); };
+    imgs.forEach(function (im) { if (im.complete) go(); else { im.onload = go; im.onerror = go; } });
+  }
+  function chosen() { return CARS.filter(function (c) { return sel[c[0]]; }).map(function (c) { return c[0]; }); }
+  $('all').onclick = function () { CARS.forEach(function (c) { sel[c[0]] = true; }); save(); draw(); };
+  $('none').onclick = function () { sel = {}; save(); draw(); };
+  $('print').onclick = function () { var ids = chosen(); if (!ids.length) { say('인쇄할 도안을 먼저 선택해 주세요.'); return; } printIds(ids); };
+
+  /* 간단한 ZIP(압축 없이 담기) */
+  var T = (function () { var t = [], c, n, k; for (n = 0; n < 256; n++) { c = n; for (k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc(u) { var c = 0xFFFFFFFF; for (var i = 0; i < u.length; i++) c = T[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  function zip(files) {
+    var enc = new TextEncoder(), parts = [], cen = [], off = 0;
+    var le = function (v, n) { var a = []; for (var i = 0; i < n; i++) a.push((v >>> (8 * i)) & 255); return a; };
+    files.forEach(function (f) {
+      var nm = enc.encode(f.name), cr = crc(f.data), sz = f.data.length;
+      var lh = [].concat(le(0x04034b50, 4), le(20, 2), le(0x0800, 2), le(0, 2), le(0, 2), le(0x21, 2), le(cr, 4), le(sz, 4), le(sz, 4), le(nm.length, 2), le(0, 2));
+      parts.push(new Uint8Array(lh), nm, f.data);
+      cen.push(new Uint8Array([].concat(le(0x02014b50, 4), le(20, 2), le(20, 2), le(0x0800, 2), le(0, 2), le(0, 2), le(0x21, 2), le(cr, 4), le(sz, 4), le(sz, 4), le(nm.length, 2), le(0, 2), le(0, 2), le(0, 2), le(0, 2), le(0, 4), le(off, 4))), nm);
+      off += lh.length + nm.length + sz;
+    });
+    var cs = 0; cen.forEach(function (c) { cs += c.length; });
+    var end = new Uint8Array([].concat(le(0x06054b50, 4), le(0, 2), le(0, 2), le(files.length, 2), le(files.length, 2), le(cs, 4), le(off, 4), le(0, 2)));
+    return new Blob(parts.concat(cen, [end]), { type: 'application/zip' });
+  }
+  $('zip').onclick = function () {
+    var ids = chosen(); if (!ids.length) { say('받을 도안을 먼저 선택해 주세요.'); return; }
+    say('도안을 모으는 중이에요…');
+    Promise.all(ids.map(function (id) { return fetch('img/' + id + '.png').then(function (r) { if (!r.ok) throw 0; return r.arrayBuffer(); }).then(function (b) { return { name: '자동차도안_' + nameOf(id) + '.png', data: new Uint8Array(b) }; }); }))
+      .then(function (fs) { var a = document.createElement('a'); a.href = URL.createObjectURL(zip(fs)); a.download = '자동차도안_' + ids.length + '장.zip'; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500); say('ZIP으로 받았어요!'); })
+      .catch(function () { say('도안을 받지 못했어요. 인터넷 연결을 확인해 주세요.'); });
+  };
+  draw();
+})();
+</script>
+</body>
+</html>

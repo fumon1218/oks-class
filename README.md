@@ -172,6 +172,7 @@ GitHub Pages 배포 후 `https://<계정>.github.io/oks-class/` 에서 바로 �
 
 ## 놀이별 · 스피드 레이스 (자동차 경주)
 - `playground/racing/` — 차고(차 고르기·360° 돌려 보기·능력치)와 3D 경주. 코스 3개(숲길·사막·눈길), 상대 3대, 파란 구슬로 니트로, 핸들 도움.
+  - 내가 색칠한 차: `cartemplate.js`(도안 만들기·사진 보정·차체 입히기)와 `cartpl.json`(차별 상자 크기). 도안 그림은 `art/cartemplate/img/*.png` — 차고의 〈도안 받기·칠한 도안 올리기〉와 미술 학습지(`art/cartemplate/`)가 같은 도안을 써요. 도안을 다시 만들려면 `node scripts/build-car-templates.mjs`(서버 8123).
 - 부딪쳐도 지거나 다치지 않아요(살짝 튕김). 결과는 순위·기록만 보여 줘요.
 - `track.js` 는 코스 길을 만드는 코드(`node scripts/racing-track-test.mjs` 로 확인).
 - **자동차 3D 모델 라이선스**: `assets/rx7.glb`(2002 Mazda RX-7 Spirit-R), `assets/mclaren720s.glb`(2019 McLaren 720S GT3) — 제작 OUTPISTON, [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/). **비영리로만** 쓰고, 모델을 고치면 같은 조건으로 공개해야 하며, 출처 표시가 필요해요(게임 차고 화면에 표시). 원본: https://sketchfab.com/outpiston

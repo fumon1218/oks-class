@@ -48,6 +48,7 @@ const PAGES = [
   ['game', '⚪', '3D 오목', '놀이별', '오목 보드게임 바둑돌', 'playground/omok/index.html'],
   ['game', '🔘', '3D 오셀로', '놀이별', '오셀로 보드게임 뒤집기', 'playground/othello/index.html'],
   ['game', '🏎️', '스피드 레이스', '놀이별', '레이싱 자동차 달리기', 'playground/racing/index.html'],
+  ['sheet', '🎨', '자동차 도안 학습지', '미술 · 스피드 레이스 연결', '자동차 도안 색칠 색칠하기 미술 학습지 레이싱 디자인 내 차 업로드 인쇄', 'art/cartemplate/index.html'],
   ['game', '🚗', '주차장 탈출', '놀이별', '퍼즐 러시아워 자동차 길 찾기', 'playground/rushhour/index.html'],
   ['game', '🕰️', '3D 시계', '수학 · 시각과 시간', '시계 아날로그 디지털 전자시계 시침 분침 초침 시각 시간 몇 시 몇 분', 'math/clock3d/index.html'],
   ['game', '🌴', '정글 점프 별', '모험 게임', '정글 점프 열매 모험', 'https://fumon1218.github.io/jungle-jump/'],
