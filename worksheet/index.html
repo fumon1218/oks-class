@@ -240,6 +240,7 @@ body.th-bw .d-spk{display:none!important}
   <label><input type="checkbox" id="withAns"> 정답지 같이</label>
   <button class="print" id="print" type="button">🖨️ 인쇄 / PDF로 저장</button>
   <a id="back" href="../learn/">⬅ 돌아가기</a>
+  <a id="to3d" href="../math/clock3d/" style="display:none;text-decoration:none">🕰️ 3D 시계로 연습</a>
 </div>
 <div class="pages" id="pages"></div>
 <script src="../curriculum/lessons.js"></script>
@@ -530,6 +531,7 @@ body.th-bw .d-spk{display:none!important}
   thSel.onchange = function () { theme = thSel.value; try { localStorage.setItem('oks_ws_theme', theme); } catch (e) {} document.body.className = 'th-' + theme; render(); };
   document.getElementById('print').onclick = function () { var im = [].slice.call(document.images).filter(function (i) { return !i.complete; }); Promise.all(im.map(function (i) { return new Promise(function (r) { i.onload = i.onerror = r; }); })).then(function () { window.print(); }); };
   document.getElementById('back').href = /^(clk|mny)-/.test(id) ? '../' : /^sp-/.test(id) ? '../sports/?festival=summer&sport=' + id.split('-')[1] + '&school=' + id.split('-')[2] : '../play/?id=' + id + '&level=' + level;
+  if (/^clk-/.test(id)) { var a3 = document.getElementById('to3d'); a3.style.display = ''; a3.className = document.getElementById('back').className; }
   if (!Q.get('seed')) history.replaceState(null, '', '?id=' + id + '&level=' + level + '&seed=' + seed);
   L = LESSONS.filter(function (l) { return l.id === id; })[0];
   render();

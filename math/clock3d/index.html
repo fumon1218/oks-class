@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#2b3f5c">
+<title>3D 시계 · 시각과 시간</title><link rel="icon" href="../../icons/ok-face-192.png"><link rel="apple-touch-icon" href="../../icons/ok-face-180.png">
+<link rel="stylesheet" href="../../core/oks-core.css"><link rel="stylesheet" href="clock3d.css"></head>
+<body class="oks c3-page">
+<canvas id="gl" aria-label="3D 아날로그 시계와 디지털 시계"></canvas>
+<header class="c3-top">
+  <a class="c3-btn" id="back" href="../../worksheet/?id=clk-1">← 돌아가기</a>
+  <div class="c3-title"><span>수학 · 시각과 시간</span><b>3D 시계</b></div>
+  <div class="c3-tools"><button class="c3-btn" id="btnVoice" type="button" aria-pressed="true" aria-label="읽어 주기 켜기·끄기">🔊</button><span class="c3-star" id="stars" aria-label="모은 별">⭐ 0</span></div>
+</header>
+<nav class="c3-modes" id="modes" aria-label="놀이 고르기">
+  <button type="button" data-m="free" class="on">🕰️ 함께 보기</button><button type="button" data-m="make">🎯 시각 만들기</button><button type="button" data-m="read">🔍 시각 읽기</button>
+</nav>
+<div class="c3-say" id="say" role="status" aria-live="polite"><div class="c3-time" id="timeText">3시 30분</div><div class="c3-sub" id="subText"></div></div>
+<div class="c3-choices" id="choices" hidden></div>
+<footer class="c3-bottom" id="ctl">
+  <div class="c3-row" id="rowAdj"><button class="c3-btn" data-d="-60" type="button">−1시간</button><button class="c3-btn" data-d="-5" type="button">−5분</button><button class="c3-btn" data-d="-1" type="button">−1분</button><button class="c3-btn" data-d="1" type="button">+1분</button><button class="c3-btn" data-d="5" type="button">+5분</button><button class="c3-btn" data-d="60" type="button">+1시간</button></div>
+  <div class="c3-row"><button class="c3-btn big" id="btnRun" type="button">▶ 시계 가기</button><button class="c3-btn big" id="btnSay" type="button">🔊 읽어 주기</button><button class="c3-btn big" id="btnNow" type="button">⏰ 지금 시각</button><label class="c3-lv">수준 <select id="lv"><option value="1">정각</option><option value="2">30분</option><option value="3" selected>5분 단위</option><option value="4">1분 단위</option></select></label><button class="c3-btn big go" id="btnCheck" type="button" hidden>✔ 확인</button><button class="c3-btn big" id="btnNext" type="button" hidden>다음 ▶</button></div>
+</footer>
+<div class="c3-loading" id="loading"><div><div class="c3-spin"></div><p>시계를 걸고 있어요…</p></div></div>
+<script type="module" src="clock3d.js"></script>
+</body></html>
