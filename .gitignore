@@ -8,6 +8,7 @@ assets/
 !playground/racing/assets/
 !playground/go/assets/
 !playground/assets/
+!math/clock3d/assets/
 !playground/othello/assets/
 
 # 테스트 도구 설치물(저장소에 올리지 않음)
