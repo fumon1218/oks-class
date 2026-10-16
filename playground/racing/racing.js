@@ -709,8 +709,8 @@ function renderDsg(d) {
   const has = !!designs[d.id], off = !!(prefs.dsgOff || {})[d.id];
   box.hidden = false;
   box.innerHTML = '<b>🖍️ 내가 색칠한 차</b><div class="row"><a href="../../art/cartemplate/img/' + d.id + '.png" download="자동차도안_' + d.name + '.png">⬇ 도안 받기</a><button type="button" class="up" id="dsgUp">📷 칠한 도안 올리기</button>'
-    + (has ? '<button type="button" id="dsgOn">' + (off ? '내 도안 켜기' : '내 도안 끄기') + '</button><button type="button" id="dsgDel">🗑 지우기</button>' : '') + '</div>'
-    + (has ? '<div class="row" style="margin-top:5px"><button type="button" class="up" id="dsgTest">🚗 시범 운전</button><span style="font-size:12px">차를 손으로 돌려 살펴본 뒤 달려 봐요</span></div>' : '') + '<small>' + (has ? (off ? '내 도안이 꺼져 있어요.' : '내 도안으로 달려요! 하얗게 둔 곳은 고른 색이에요.') : '도안을 인쇄해 색칠하고 사진을 찍어 올리면 내 디자인 차로 달려요.') + ' <a href="../../art/cartemplate/" style="border:0;box-shadow:none;background:none;padding:0;text-decoration:underline">🎨 미술 도안 학습지</a></small>'
+    + (has ? '<button type="button" id="dsgOn">' + (off ? '켜기' : '끄기') + '</button><button type="button" id="dsgDel">🗑</button>' : '') + '</div>'
+    + '<small>' + (has ? (off ? '내 도안이 꺼져 있어요.' : '내 도안으로 달려요! 차를 돌려 살펴봐요.') : '도안을 인쇄해 색칠하고 사진을 찍어 올리면 내 디자인 차로 달려요.') + ' <a href="../../art/cartemplate/" style="border:0;box-shadow:none;background:none;padding:0;text-decoration:underline">🎨 미술 도안 학습지</a></small>'
     + '<input type="file" id="dsgFile" accept="image/*" hidden>';
   $('dsgUp').onclick = () => $('dsgFile').click();
   $('dsgFile').onchange = async (ev) => {

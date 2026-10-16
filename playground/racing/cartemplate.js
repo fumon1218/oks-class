@@ -195,6 +195,29 @@ export function readDesign(img) {
     lineMask.set(nm);
   }
   for (let i = 0; i < W * H; i++) if (lineMask[i]) o[i * 4 + 3] = 0;
+  // 크레용 결: 작은 빈틈은 이웃 색으로 메우고, 칠한 곳 색은 살짝 부드럽게 해요(하얀 점·줄이 차에 지저분하게 남지 않게)
+  {
+    const N = W * H, R = 6, pa = new Float32Array(N), ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
+    for (let i = 0; i < N; i++) { const q = i * 4, a2 = o[q + 3] / 255; pa[i] = a2; ch[0][i] = o[q] * a2; ch[1][i] = o[q + 1] * a2; ch[2][i] = o[q + 2] * a2; }
+    const box = (src) => { // 가로·세로 상자 흐림 두 번(부드러운 종 모양)
+      let cur = src;
+      for (let pass = 0; pass < 2; pass++) {
+        const tmp = new Float32Array(N), out = new Float32Array(N), w2 = 2 * R + 1;
+        for (let y = 0; y < H; y++) { let sum = 0; const b = y * W; for (let x = -R; x <= R; x++) sum += cur[b + Math.min(W - 1, Math.max(0, x))];
+          for (let x = 0; x < W; x++) { tmp[b + x] = sum / w2; sum += cur[b + Math.min(W - 1, x + R + 1)] - cur[b + Math.max(0, x - R)]; } }
+        for (let x = 0; x < W; x++) { let sum = 0; for (let y = -R; y <= R; y++) sum += tmp[Math.min(H - 1, Math.max(0, y)) * W + x];
+          for (let y = 0; y < H; y++) { out[y * W + x] = sum / w2; sum += tmp[Math.min(H - 1, y + R + 1) * W + x] - tmp[Math.max(0, y - R) * W + x]; } }
+        cur = out;
+      }
+      return cur;
+    };
+    const ba = box(pa), b0 = box(ch[0]), b1 = box(ch[1]), b2 = box(ch[2]);
+    for (let i = 0; i < N; i++) {
+      const q = i * 4, c = ba[i], t = Math.max(0, Math.min(1, (c - 0.26) / 0.26));
+      if (t <= 0) { o[q + 3] = 0; continue; }
+      o[q] = b0[i] / c; o[q + 1] = b1[i] / c; o[q + 2] = b2[i] / c; o[q + 3] = Math.round(t * 255);
+    }
+  }
   // 가장자리 6칸은 지워요(표식·종이 그림자)
   for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (x < 6 || y < 6 || x >= W - 6 || y >= H - 6) o[(y * W + x) * 4 + 3] = 0;
   og.putImageData(od, 0, 0);
@@ -212,27 +235,44 @@ export const BODY_NAME = 'carbody';
 export function applyDesign(THREE, model, matNames, box, atlas) {
   const lo = layout(box), S = SHEET, tex = atlas.isTexture ? atlas : (() => { const t = new THREE.CanvasTexture(atlas); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; return t; })();
   const names = new Set(matNames); let n = 0; model.updateMatrixWorld(true);
-  const p = new THREE.Vector3(), q = new THREE.Vector3(), r = new THREE.Vector3(), e1 = new THREE.Vector3(), e2 = new THREE.Vector3(), nr = new THREE.Vector3();
+  // 세 방향(옆·위·앞) 그림을 면의 방향에 따라 부드럽게 섞어 입혀요(면마다 뚝 끊기지 않게 셰이더에서 섞어요)
+  const U = {
+    dCen: { value: new THREE.Vector3(lo.c[0], lo.c[1], lo.c[2]) }, dArea: { value: new THREE.Vector2(S.areaW, S.areaH) },
+    dSide: { value: new THREE.Vector3(lo.side.cx, lo.side.cy, lo.side.s) }, dTop: { value: new THREE.Vector3(lo.top.cx, lo.top.cy, lo.top.s) }, dFront: { value: new THREE.Vector3(lo.front.cx, lo.front.cy, lo.front.s) },
+  };
+  const nm3 = new THREE.Matrix3(), v = new THREE.Vector3();
   model.traverse((o) => {
     if (!o.isMesh) return;
     const mats = Array.isArray(o.material) ? o.material : [o.material];
-    if (!mats.some((m) => names.has(m.name))) return;
-    if (mats.length > 1) return;                                // 여러 재질이 섞인 덩어리는 건드리지 않아요
-    const geo = (o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone()), pos = geo.attributes.position, cnt = pos.count, uv = new Float32Array(cnt * 2);
-    for (let t = 0; t < cnt; t += 3) {
-      const vs = [p.fromBufferAttribute(pos, t).applyMatrix4(o.matrixWorld).clone(), q.fromBufferAttribute(pos, t + 1).applyMatrix4(o.matrixWorld).clone(), r.fromBufferAttribute(pos, t + 2).applyMatrix4(o.matrixWorld).clone()];
-      e1.subVectors(vs[1], vs[0]); e2.subVectors(vs[2], vs[0]); nr.crossVectors(e1, e2).normalize();
-      const ax = Math.abs(nr.x), ay = Math.abs(nr.y), az = Math.abs(nr.z);
-      const mp = ay > ax * 0.9 && ay > az * 0.9 ? toTop : (ax >= az ? toSide : toFront);
-      for (let k = 0; k < 3; k++) { const v = vs[k], mmv = mp(lo, v.x, v.y, v.z); uv[(t + k) * 2] = mmv[0] / S.areaW; uv[(t + k) * 2 + 1] = 1 - mmv[1] / S.areaH; }
+    if (!mats.some((m) => names.has(m.name)) || mats.length > 1) return;   // 여러 재질이 섞인 덩어리는 건드리지 않아요
+    const geo = o.geometry.clone(), pos = geo.attributes.position, cnt = pos.count;
+    if (!geo.attributes.normal) geo.computeVertexNormals();
+    const nor = geo.attributes.normal, dp = new Float32Array(cnt * 3), dn = new Float32Array(cnt * 3); nm3.getNormalMatrix(o.matrixWorld);
+    for (let k = 0; k < cnt; k++) {
+      v.fromBufferAttribute(pos, k).applyMatrix4(o.matrixWorld); dp[k * 3] = v.x; dp[k * 3 + 1] = v.y; dp[k * 3 + 2] = v.z;
+      v.fromBufferAttribute(nor, k).applyMatrix3(nm3).normalize(); dn[k * 3] = v.x; dn[k * 3 + 1] = v.y; dn[k * 3 + 2] = v.z;
     }
-    geo.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); geo.computeVertexNormals();
-    // 월드→로컬: 모델이 이미 원점이라 메시 행렬이 있으면 그 역으로 되돌릴 필요 없이 같은 부모 아래이므로 그대로 둬요
+    geo.setAttribute('dpos', new THREE.BufferAttribute(dp, 3)); geo.setAttribute('dnor', new THREE.BufferAttribute(dn, 3));
+    if (!geo.attributes.uv) geo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(cnt * 2), 2));
     o.geometry = geo;
     const fix = (m) => {
       if (!names.has(m.name)) return m; const nm = m.clone(); nm.map = tex; nm.userData.design = 1; nm.name = m.name;
-      nm.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', 'vec4 dsg = texture2D( map, vMapUv ); diffuseColor.rgb = mix( diffuseColor.rgb, dsg.rgb, dsg.a );'); };
-      nm.customProgramCacheKey = () => 'cardesign'; nm.needsUpdate = true; return nm;
+      nm.onBeforeCompile = (sh) => {
+        Object.assign(sh.uniforms, U);
+        sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec3 dpos;\nattribute vec3 dnor;\nvarying vec3 vDp;\nvarying vec3 vDn;')
+          .replace('#include <begin_vertex>', '#include <begin_vertex>\nvDp = dpos; vDn = dnor;');
+        sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vDp;\nvarying vec3 vDn;\nuniform vec3 dCen;\nuniform vec2 dArea;\nuniform vec3 dSide;\nuniform vec3 dTop;\nuniform vec3 dFront;')
+          .replace('#include <map_fragment>', `
+          vec3 dq = vDp - dCen; vec3 dw = pow( abs( normalize( vDn ) ), vec3( 5.0 ) ); dw /= ( dw.x + dw.y + dw.z + 1e-5 );
+          vec2 uS = vec2( dSide.x + dq.z * dSide.z, dSide.y - dq.y * dSide.z ) / dArea;
+          vec2 uT = vec2( dTop.x + dq.z * dTop.z, dTop.y - dq.x * dTop.z ) / dArea;
+          vec2 uF = vec2( dFront.x + dq.x * dFront.z, dFront.y - dq.y * dFront.z ) / dArea;
+          vec4 sS = texture2D( map, vec2( uS.x, 1.0 - uS.y ) ); vec4 sT = texture2D( map, vec2( uT.x, 1.0 - uT.y ) ); vec4 sF = texture2D( map, vec2( uF.x, 1.0 - uF.y ) );
+          float dA = sS.a * dw.x + sT.a * dw.y + sF.a * dw.z;
+          vec3 dC = ( sS.rgb * sS.a * dw.x + sT.rgb * sT.a * dw.y + sF.rgb * sF.a * dw.z ) / max( dA, 1e-4 );
+          diffuseColor.rgb = mix( diffuseColor.rgb, dC, dA );`);
+      };
+      nm.customProgramCacheKey = () => 'cardesign3'; nm.needsUpdate = true; return nm;
     };
     o.material = Array.isArray(o.material) ? o.material.map(fix) : fix(o.material); n++;
   });
