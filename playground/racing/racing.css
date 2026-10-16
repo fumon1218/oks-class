@@ -129,7 +129,7 @@ img.ui.rb{animation:rcrb 3s linear infinite}@keyframes rcrb{to{filter:hue-rotate
 .gp-title small,.gp-title b,.gp-title span{position:absolute;left:0;right:0;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 12%}
 .gp-title small{top:4%;font-size:3.6cqw;font-weight:900;color:#8a6a3a;line-height:1.5}
 .gp-title b{top:23%;font-size:10cqw;line-height:1.25;color:#e03a24;font-weight:900;-webkit-text-stroke:0;text-shadow:0 2px 0 #fff,0 3px 5px rgba(120,40,0,.35);letter-spacing:.02em}
-.gp-title span{top:67%;font-size:3.4cqw;font-weight:900;color:#8a5a00;line-height:1.6}
+.gp-title span{top:73%;font-size:3.4cqw;font-weight:900;color:#8a5a00;line-height:1.6}
 .gp-lamp{position:absolute;top:calc(max(8px,env(safe-area-inset-top)) + 40px);width:clamp(54px,6vw,100px);filter:drop-shadow(0 8px 14px rgba(255,190,60,.55));pointer-events:none;z-index:0}.gp-lamp.l{left:15%}.gp-lamp.r{right:15%}
 .gp-deco{position:absolute;bottom:0;pointer-events:none;z-index:0}.gp-deco img{display:block;pointer-events:none}
 .gp-deco.l{left:1%;width:clamp(150px,17vw,280px)}.gp-deco.l .box{width:100%;margin-bottom:-14%}.gp-deco.l .helmet{width:38%;margin:0 0 -6% 28%;position:relative;z-index:1}
