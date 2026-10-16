@@ -154,7 +154,7 @@ function makeCarObject(def, colorIdx, eq, useDesign) {
   eq = eq || {}; let model, wl, len, wid;
   if (def.build) { const b = buildToyCar(THREE, TOY_COLORS[(colorIdx || 0) % TOY_COLORS.length][0], def.style, eq); model = b.group; wl = b.wheels; len = b.len; wid = b.wid; }
   else { const p = protos[def.id]; model = p.holder.clone(true); wl = p.wheels; len = p.len; wid = p.wid; if (def.paint) paintBody(model, def, colorIdx); if (def.kit) wl = wl.concat(addKitWheels(model, def, rimIdx(def, eq))); }
-  if (useDesign && designs[def.id] && tplBox[def.id] && !(prefs.dsgOff || {})[def.id]) { try { applyDesign(THREE, model, [def.paint || BODY_NAME], tplBox[def.id], designs[def.id]); } catch (e) { /* 도안이 안 입혀져도 달릴 수 있어요 */ } }
+  if (useDesign && designs[def.id] && tplBox[def.id] && !(prefs.dsgOff || {})[def.id]) { try { applyDesign(THREE, model, [def.paint || BODY_NAME], tplBox[def.id], designs[def.id], (prefs.dsgBase || {})[def.id] !== 'color'); } catch (e) { /* 도안이 안 입혀져도 달릴 수 있어요 */ } }
   model.rotation.y = def.front < 0 ? Math.PI : 0;
   const root = new THREE.Group(), tilt = new THREE.Group(); root.add(tilt); tilt.add(model);
   const blob = new THREE.Mesh(new THREE.PlaneGeometry(wid * 1.9, len * 1.35), new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false })); blob.rotation.x = -Math.PI / 2; blob.position.y = 0.03; tilt.add(blob);
@@ -706,11 +706,11 @@ function renderGarageInfo() {
 function designTexOf(canvas) { const t = new THREE.CanvasTexture(canvas); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; }
 function renderDsg(d) {
   const box = $('dsgBox'); if (!box) return; if (!d.colors || !tplBox[d.id]) { box.hidden = true; box.innerHTML = ''; return; }
-  const has = !!designs[d.id], off = !!(prefs.dsgOff || {})[d.id];
+  const has = !!designs[d.id], off = !!(prefs.dsgOff || {})[d.id], baseColor = (prefs.dsgBase || {})[d.id] === 'color';
   box.hidden = false;
   box.innerHTML = '<b>🖍️ 내가 색칠한 차</b><div class="row"><a href="../../art/cartemplate/img/' + d.id + '.png" download="자동차도안_' + d.name + '.png">⬇ 도안 받기</a><button type="button" class="up" id="dsgUp">📷 칠한 도안 올리기</button>'
-    + (has ? '<button type="button" id="dsgOn">' + (off ? '켜기' : '끄기') + '</button><button type="button" id="dsgDel">🗑</button>' : '') + '</div>'
-    + '<small>' + (has ? (off ? '내 도안이 꺼져 있어요.' : '내 도안으로 달려요! 차를 돌려 살펴봐요.') : '도안을 인쇄해 색칠하고 사진을 찍어 올리면 내 디자인 차로 달려요.') + ' <a href="../../art/cartemplate/" style="border:0;box-shadow:none;background:none;padding:0;text-decoration:underline">🎨 미술 도안 학습지</a></small>'
+    + (has ? '<button type="button" class="up" id="dsgTest">🚗 시범 운전</button><button type="button" id="dsgBase">바탕: ' + (baseColor ? '고른 색' : '흰색') + '</button><button type="button" id="dsgOn">' + (off ? '켜기' : '끄기') + '</button><button type="button" id="dsgDel">🗑</button>' : '') + '</div>'
+    + '<small>' + (has ? (off ? '내 도안이 꺼져 있어요.' : '내 도안으로 달려요! 칠하지 않은 곳은 바탕 색이에요.') : '도안을 인쇄해 색칠하고 사진을 찍어 올리면 내 디자인 차로 달려요.') + ' <a href="../../art/cartemplate/" style="border:0;box-shadow:none;background:none;padding:0;text-decoration:underline">🎨 미술 도안 학습지</a></small>'
     + '<input type="file" id="dsgFile" accept="image/*" hidden>';
   $('dsgUp').onclick = () => $('dsgFile').click();
   $('dsgFile').onchange = async (ev) => {
@@ -727,6 +727,7 @@ function renderDsg(d) {
   };
   if (has) {
     $('dsgTest').onclick = () => startRace(true);
+    $('dsgBase').onclick = () => { prefs.dsgBase = prefs.dsgBase || {}; prefs.dsgBase[d.id] = baseColor ? 'white' : 'color'; writeSave(); O.sfx('tick'); rebuildGarageCar(); renderDsg(d); };
     $('dsgOn').onclick = () => { prefs.dsgOff = prefs.dsgOff || {}; prefs.dsgOff[d.id] = !off; writeSave(); O.sfx('tick'); rebuildGarageCar(); renderDsg(d); };
     $('dsgDel').onclick = async () => { await deleteDesign(d.id); delete designs[d.id]; writeSave(); O.sfx('tick'); rebuildGarageCar(); renderDsg(d); say('내 도안을 지웠어요.', null, false); };
   }

@@ -232,7 +232,7 @@ export function readDesign(img) {
 
 /* ---- 차체에 입히기 ---- */
 export const BODY_NAME = 'carbody';
-export function applyDesign(THREE, model, matNames, box, atlas) {
+export function applyDesign(THREE, model, matNames, box, atlas, whiteBase) {
   const lo = layout(box), S = SHEET, tex = atlas.isTexture ? atlas : (() => { const t = new THREE.CanvasTexture(atlas); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; t.generateMipmaps = true; t.minFilter = THREE.LinearMipmapLinearFilter; return t; })();
   const names = new Set(matNames); let n = 0; model.updateMatrixWorld(true);
   // 세 방향(옆·위·앞) 그림을 면의 방향에 따라 부드럽게 섞어 입혀요(면마다 뚝 끊기지 않게 셰이더에서 섞어요)
@@ -256,7 +256,7 @@ export function applyDesign(THREE, model, matNames, box, atlas) {
     if (!geo.attributes.uv) geo.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(cnt * 2), 2));
     o.geometry = geo;
     const fix = (m) => {
-      if (!names.has(m.name)) return m; const nm = m.clone(); nm.map = tex; nm.userData.design = 1; nm.name = m.name;
+      if (!names.has(m.name)) return m; const nm = m.clone(); nm.map = tex; nm.userData.design = 1; nm.name = m.name; if (whiteBase) nm.color.set(0xffffff);
       nm.onBeforeCompile = (sh) => {
         Object.assign(sh.uniforms, U);
         sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute vec3 dpos;\nattribute vec3 dnor;\nvarying vec3 vDp;\nvarying vec3 vDn;')
@@ -272,7 +272,7 @@ export function applyDesign(THREE, model, matNames, box, atlas) {
           vec3 dC = ( sS.rgb * sS.a * dw.x + sT.rgb * sT.a * dw.y + sF.rgb * sF.a * dw.z ) / max( dA, 1e-4 );
           diffuseColor.rgb = mix( diffuseColor.rgb, dC, dA );`);
       };
-      nm.customProgramCacheKey = () => 'cardesign3'; nm.needsUpdate = true; return nm;
+      nm.customProgramCacheKey = () => 'cardesign3' + (whiteBase ? 'w' : 'c'); nm.needsUpdate = true; return nm;
     };
     o.material = Array.isArray(o.material) ? o.material.map(fix) : fix(o.material); n++;
   });
