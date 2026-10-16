@@ -348,13 +348,15 @@ function newRacer(def, isPlayer, slot, idx, colorIdx, eq) {
   const r = Object.assign(o, { isPlayer, s: slot.s, d: slot.d, v: 0, dd: 0, u: 0, yaw: 0, nitro: isPlayer ? 0.35 : 0, nOn: false, brake: false, finished: false, fT: 0, wallCd: 0, hitCd: 0, slowT: 0, slowF: 1, spinT: 0, spinDur: 1, boostT: 0, magT: 0, flyT: 0, bigT: 0, hold: null, holdT: 0, fy: 0, jy: 0, jv: 0, airT: 0, sup: 0, dr: 0, drT: 0, drLv: 0, drA: 0, drFx: 0, bs: 1, shield: 0, hzCd: 0, tgtD: slot.d, tgtT: 2 + Math.random() * 2, wob: Math.random() * 6, idx, aiV: 0, travel: 0 });
   return r;
 }
-function startRace() {
+let testDrive = false;   // 시범 운전: 혼자, 한 바퀴, 기록·코인 없음
+function startRace(test) {
+  testDrive = test === true;
   O.unlock(); loadSfx(); runId++; $('tune').hidden = true; tuneSel = null; $('garage').hidden = true; $('hud').hidden = false; $('pad').hidden = false; $('count').hidden = false;
-  const co = effCourse(); buildRace(co);
+  const co = effCourse(testDrive); buildRace(co);
   racers = []; const slots = [{ s: 16, d: 2.6 }, { s: 24, d: 2.6 }, { s: 24, d: -2.6 }, { s: 16, d: -2.6 }, { s: 8, d: 2.6 }, { s: 8, d: -2.6 }, { s: 0, d: 2.6 }, { s: 0, d: -2.6 }];
   const pdef = CARS[prefs.car]; player = newRacer(pdef, true, slots[0], 0, colOf(pdef, prefs.color), eqOf(pdef)); racers.push(player);
   const pool = CARS.filter((d) => d !== pdef).sort(() => Math.random() - 0.5), pick = []; let heavy = 0;
-  pool.forEach((d) => { if (pick.length >= N_AI) return; if (d.heavy && heavy >= 2) return; if (d.heavy) heavy++; pick.push(d); });
+  pool.forEach((d) => { if (testDrive || pick.length >= N_AI) return; if (d.heavy && heavy >= 2) return; if (d.heavy) heavy++; pick.push(d); });
   pick.forEach((d, i) => { let ci = Math.floor(Math.random() * TOY_COLORS.length); if (ci === colOf(pdef, prefs.color)) ci = (ci + 3) % TOY_COLORS.length; const r = newRacer(d, false, slots[i + 1], i + 1, ci, aiEq()); r.pace = DIFFS[prefs.diff].pace * (0.93 + i * 0.016); r.name = AI_COLORS[i]; racers.push(r); });
   // 진행 막대 점
   const pr = $('hudProg'); pr.querySelectorAll('u').forEach((u) => u.remove()); racers.slice(1).forEach((r, i) => { const u = document.createElement('u'); u.style.background = AI_COLORS[i]; r.dot = u; pr.appendChild(u); });
@@ -434,6 +436,7 @@ function simulate(dt) {
   shake = Math.max(0, shake - dt * 2);
 }
 function onPlayerFinish() {
+  if (testDrive) { const rid0 = runId; mode = 'finish'; player.nOn = false; snd('win', 0.9, 1, 'win'); say('시범 운전 끝! 내 디자인 차 멋져요!', 'good', '시범 운전이 끝났어요! 내 디자인 차가 멋져요!'); setTimeout(() => { if (rid0 === runId) openGarage(); }, 2200); return; }
   const place = finishOrder.indexOf(player) + 1, rid = runId, time = player.fT; mode = 'finish'; player.nOn = false;
   const key = course.key + ':' + player.def.id, old = save.best[key], newBest = !old || time < old; if (newBest) save.best[key] = time; if (place === 1) save.done[course.id] = 1; writeSave();
   const stars = place === 1 ? 3 : place === 2 ? 2 : 1, ord = ['', '1등', '2등', '3등', '4등'][place];
@@ -671,7 +674,7 @@ function updateHud(force) {
 
 /* ---------- 차고 ---------- */
 const LENS = [{ name: '짧은 길', f: 0.7 }, { name: '긴 길', f: 1 }];
-function effCourse() { const c = COURSES[prefs.course], lp = Math.max(1, Math.min(5, prefs.laps | 0 || 3)), ln = prefs.len === 0 ? 0 : 1; return Object.assign({}, c, { length: Math.round(c.length * LENS[ln].f / 4) * 4, laps: lp, key: c.id + (lp === 3 && ln === 1 ? '' : '_' + lp + 'x' + ln) }); }
+function effCourse(test) { const c = COURSES[prefs.course], lp = test ? 1 : Math.max(1, Math.min(5, prefs.laps | 0 || 3)), ln = test || prefs.len === 0 ? 0 : 1; return Object.assign({}, c, { length: Math.round(c.length * LENS[ln].f / 4) * 4, laps: lp, key: test ? 'test_' + c.id : c.id + (lp === 3 && ln === 1 ? '' : '_' + lp + 'x' + ln) }); }
 function bestOf(courseKey, carId) { return save.best[courseKey + ':' + carId]; }
 function renderGarageInfo() {
   const d = CARS[gIdx]; { const sp = d.sub.split(' · '); $('carSub').textContent = sp[0]; $('carDesc').textContent = sp.slice(1).join(' · '); } $('carName').textContent = d.name;
@@ -707,7 +710,7 @@ function renderDsg(d) {
   box.hidden = false;
   box.innerHTML = '<b>🖍️ 내가 색칠한 차</b><div class="row"><a href="../../art/cartemplate/img/' + d.id + '.png" download="자동차도안_' + d.name + '.png">⬇ 도안 받기</a><button type="button" class="up" id="dsgUp">📷 칠한 도안 올리기</button>'
     + (has ? '<button type="button" id="dsgOn">' + (off ? '내 도안 켜기' : '내 도안 끄기') + '</button><button type="button" id="dsgDel">🗑 지우기</button>' : '') + '</div>'
-    + '<small>' + (has ? (off ? '내 도안이 꺼져 있어요.' : '내 도안으로 달려요! 하얗게 둔 곳은 고른 색이에요.') : '도안을 인쇄해 색칠하고 사진을 찍어 올리면 내 디자인 차로 달려요.') + ' <a href="../../art/cartemplate/" style="border:0;box-shadow:none;background:none;padding:0;text-decoration:underline">🎨 미술 도안 학습지</a></small>'
+    + (has ? '<div class="row" style="margin-top:5px"><button type="button" class="up" id="dsgTest">🚗 시범 운전</button><span style="font-size:12px">차를 손으로 돌려 살펴본 뒤 달려 봐요</span></div>' : '') + '<small>' + (has ? (off ? '내 도안이 꺼져 있어요.' : '내 도안으로 달려요! 하얗게 둔 곳은 고른 색이에요.') : '도안을 인쇄해 색칠하고 사진을 찍어 올리면 내 디자인 차로 달려요.') + ' <a href="../../art/cartemplate/" style="border:0;box-shadow:none;background:none;padding:0;text-decoration:underline">🎨 미술 도안 학습지</a></small>'
     + '<input type="file" id="dsgFile" accept="image/*" hidden>';
   $('dsgUp').onclick = () => $('dsgFile').click();
   $('dsgFile').onchange = async (ev) => {
@@ -718,11 +721,12 @@ function renderDsg(d) {
       if (res.filled < 0.015) { say('칠한 곳이 거의 없어요. 색을 더 칠해서 다시 찍어 주세요!', 'warn', '칠한 곳이 거의 없어요. 색을 더 칠해서 다시 찍어 주세요!'); return; }
       await saveDesign(d.id, res.canvas); designs[d.id] = designTexOf(res.canvas); (prefs.dsgOff = prefs.dsgOff || {})[d.id] = false; writeSave();
       rebuildGarageCar(); renderDsg(d);
-      say(res.found ? '내가 칠한 차예요! 멋져요!' : '네 모서리 까만 네모를 못 찾아서 종이 전체로 맞췄어요. 어긋나 보이면 다시 찍어 주세요.', res.found ? null : 'warn', res.found ? '내가 칠한 차예요! 멋져요!' : false);
+      say(res.found ? '내가 칠한 차예요! 돌려서 살펴보고 시범 운전도 해 봐요!' : '네 모서리 까만 네모를 못 찾아서 종이 전체로 맞췄어요. 어긋나 보이면 다시 찍어 주세요.', res.found ? null : 'warn', res.found ? '내가 칠한 차예요! 멋져요!' : false);
     } catch (e) { say('그림을 읽지 못했어요. 다른 사진으로 해 볼까요?', 'warn', false); }
     ev.target.value = '';
   };
   if (has) {
+    $('dsgTest').onclick = () => startRace(true);
     $('dsgOn').onclick = () => { prefs.dsgOff = prefs.dsgOff || {}; prefs.dsgOff[d.id] = !off; writeSave(); O.sfx('tick'); rebuildGarageCar(); renderDsg(d); };
     $('dsgDel').onclick = async () => { await deleteDesign(d.id); delete designs[d.id]; writeSave(); O.sfx('tick'); rebuildGarageCar(); renderDsg(d); say('내 도안을 지웠어요.', null, false); };
   }
