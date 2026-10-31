@@ -185,11 +185,12 @@
     }
     var p = cur, i = p.info, h = '';
     /* 1 기본 정보 */
-    h += '<section class="card" id="s-basic"><h2>1. 기본 정보·인적사항</h2><p class="hint">특수교육법 시행규칙 제4조: 개별화교육지원팀은 학기 시작일부터 2주 이내 구성, 계획은 매 학기 시작일부터 30일 이내 작성(지역 지침 확인).</p>';
+    h += '<section class="card" id="s-basic"><h2>기본 정보</h2><p class="hint">특수교육법 시행규칙 제4조: 개별화교육지원팀은 학기 시작일부터 2주 이내 구성, 계획은 매 학기 시작일부터 30일 이내 작성(지역 지침 확인).</p>';
     h += '<div class="grid">' + fld('학년도', 'year', p.year) + fld('학기', 'term', p.term, { sel: ['1', '2'] }) + fld('학기 시작일(배치일)', 'start', p.start, { type: 'date' }) +
       fld('계획 유형', 'type', p.type, { sel: ['교과 중심', '생활지원 중심', '교과 및 생활지원 중심'] }) +
       fld('적용 교육과정', 'course', p.course || COURSE_B, { sel: [COURSE_B, COURSE_C, '기본·공통 교육과정 병행'] }) + '</div>';
     h += '<p class="dates">팀 구성 기한 <b>' + (addDays(p.start, 14) || '-') + '</b> · 계획 결재 기한 <b>' + (addDays(p.start, 30) || '-') + '</b> · 학기 말 평가 결과 보호자 안내</p>';
+    h += '</section><section class="card" id="s-info"><h2>학교·학생 인적사항</h2><p class="hint">출력물 첫 장의 학교·학생 정보예요. 비워 두면 출력에서도 빠집니다.</p>';
     h += '<div class="grid">' + fld('학교명', 'info.school', i.school) + fld('학년 반', 'info.gradeClass', i.gradeClass, { ph: '예: 5학년 2반' }) + fld('이름', 'info.name', i.name) +
       fld('특수학급(특수교육) 담임', 'info.specialTeacher', i.specialTeacher) + fld('통합학급 담임', 'info.generalTeacher', i.generalTeacher) + '</div>';
     h += '<h3 style="font-size:15px;margin:14px 0 6px">학생·가족 정보</h3><div class="grid">' + fld('생년월일', 'info.birth', i.birth, { type: 'date' }) +
@@ -244,20 +245,57 @@
     h += '</section>';
 
     /* 6 평가 */
-    h += '<section class="card" id="s-eval"><h2>6. 평가</h2><p class="hint">학기별 1회 보호자에게 평가 결과를 안내합니다. 점수보다 학생의 변화를 담은 서술형 평가를 중심으로, 앱 기록은 근거로 함께 씁니다.</p>';
+    h += '<section class="card" id="s-eval"><h2>6. 평가</h2><p class="hint">학기별 1회 보호자에게 평가 결과를 안내합니다. 4번 월별 계획의 단원·단기 목표·성취준거마다 결과(가·나·다·라)와 관찰 메모를 남기면, 그 내용으로 교과별 서술형 평가 문장을 만듭니다. 앱 기록이 있으면 결과를 먼저 제안받을 수 있어요.</p>';
     h += '<div class="grid">' + fld('가: 이상(%)', 'scale.a', p.scale.a, { type: 'number' }) + fld('나: 이상(%)', 'scale.b', p.scale.b, { type: 'number' }) + '</div>';
-    h += '<p class="hint" style="margin-top:6px">가 ' + p.scale.a + '% 이상 대체로 스스로 수행 · 나 ' + p.scale.b + '~' + p.scale.a + '% 부분적 도움 · 다 ' + p.scale.b + '% 미만 전반적 도움 · 라 수행하지 못함. 앱 기록은 독립·언어힌트로 해낸 비율로 계산해요.</p>';
-    h += '<div class="actions"><button class="pri" data-act="fillEval">📊 앱 기록으로 평가 결과 제안</button><button data-act="draftEval">✍️ 종합 평가 초안 쓰기</button></div>';
-    h += p.subjects.map(function (s, si) { return '<div class="grid" style="margin-bottom:8px">' + fld(s.name + ' 평가 결과(서술)', 'subjects.' + si + '.eval', s.eval, { area: 1, wide: 1 }) + '</div>'; }).join('');
-    h += '<div class="grid">' + fld('종합 평가', 'evalTotal', p.evalTotal, { area: 1, wide: 1 }) + '</div></section>';
+    h += '<p class="hint" style="margin-top:6px">가 ' + p.scale.a + '% 이상 대체로 스스로 수행 · 나 ' + p.scale.b + '~' + p.scale.a + '% 부분적 도움 · 다 ' + p.scale.b + '% 미만 전반적 도움 · 라 수행하지 못함</p>';
+    h += '<div class="actions"><button data-act="fillEval">📊 앱 기록으로 결과 제안</button><button class="pri" data-act="evalWriteAll">✍️ 모든 교과 평가 문장 만들기</button><button data-act="aiOpen" data-si="-1">🤖 AI 도움 받기(전체)</button></div>';
+    if (!p.subjects.length) h += '<p class="note">4번에서 교과·영역을 먼저 추가해 주세요.</p>';
+    h += p.subjects.map(evalSubjectHtml).join('');
+    h += '<div class="subj"><div class="head"><h3>종합 평가</h3><button data-act="evalTotal">✍️ 종합 평가 만들기</button></div><div class="body"><div class="grid">' + fld('종합 평가', 'evalTotal', p.evalTotal, { area: 1, wide: 1, ph: '교과별 평가와 행동·생활 영역을 묶어 학생의 성장과 다음 학기 중점을 적어요.' }) + '</div></div></div></section>';
 
     /* 7 파일 */
-    h += '<section class="card" id="s-file"><h2>7. 저장·불러오기</h2><p class="hint">작성 내용은 이 기기에 자동 저장돼요(인적사항은 1번 설정에 따름). 다른 기기로 옮기거나 보관하려면 백업 파일을 쓰세요.</p>' +
+    h += '<section class="card" id="s-file"><h2>7. 저장·불러오기</h2><p class="hint">작성 내용은 이 기기에 자동 저장돼요(실명·연락처는 인적사항 항목의 저장 설정에 따름). 다른 기기로 옮기거나 보관하려면 백업 파일을 쓰세요.</p>' +
       '<div class="actions"><button data-act="exportJson">💾 백업 파일 저장</button><label class="ghost" style="display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:8px 12px;color:var(--ink);margin:0;cursor:pointer">📂 백업 파일 불러오기<input type="file" id="importJson" accept="application/json,.json" style="display:none"></label>' +
       '<button data-act="copyPlan">📑 다음 학기로 복사</button><button class="del" data-act="delPlan">🗑️ 이 계획 삭제</button></div></section>';
-    app.innerHTML = h;
-    $$('table.edit textarea', app).forEach(grow);
+    app.innerHTML = arrange(h, p);
+    $$('table.edit textarea, #s-eval textarea', app).forEach(grow);
   }
+  /* 교과·평가를 앞에, 인적사항·진단·지원팀·행동지원은 '선택'으로 접어 둠(필요할 때만 펼침) */
+  var MAIN = ['s-basic', 's-subj', 's-eval'], OPTS = ['s-info', 's-diag', 's-team', 's-beh'];
+  var OPT_TITLE = { 's-info': '학교·학생 인적사항', 's-diag': '진단·현재 수행 수준', 's-team': '지원팀·관련서비스', 's-beh': '도전행동 지원·전환교육' };
+  function uiOpen(id) { return !!jget('oks_iep_ui', {})[id]; }
+  function filled(id, p) {
+    var i = p.info, any = function (a) { return a.some(function (x) { return x && String(x).trim(); }); };
+    if (id === 's-info') return any([i.school, i.gradeClass, i.name, i.specialTeacher, i.generalTeacher, i.birth, i.disability, i.welfare, i.guardian, i.address, i.selectDate, i.phone]);
+    if (id === 's-diag') return any([p.present, p.strengths, p.studentNeeds, p.parentNeeds, p.etc].concat(p.tests.map(function (t) { return t.tool + t.result; })));
+    if (id === 's-team') return any(p.team.map(function (t) { return t.name; }).concat(p.meetings.map(function (m) { return m.date; }), p.services.map(function (x) { return x.org + x.content; })));
+    if (id === 's-beh') return !!((p.behavior && p.behavior.on) || (p.transition && p.transition.on));
+    return false;
+  }
+  function arrange(h, p) {
+    var chunks = {};
+    h.split(/(?=<section class="card" id=")/).forEach(function (c) { var m = /^<section class="card" id="([^"]+)"/.exec(c); if (m) chunks[m[1]] = c; });
+    var n = 0, out = '';
+    MAIN.forEach(function (id) { if (chunks[id]) { n++; out += chunks[id].replace(/<h2>(?:\d+\.\s*)?/, '<h2>' + n + '. '); } });
+    out += '<h2 class="optdiv">선택 항목 <small>필요할 때만 펼쳐서 쓰세요 · 비워 두면 출력에서 빠져요</small></h2>';
+    OPTS.forEach(function (id) {
+      var c = chunks[id]; if (!c) return;
+      c = c.replace('<section class="card" id="' + id + '">', '<details class="card opt" id="' + id + '"' + (uiOpen(id) ? ' open' : '') + '><summary>')
+        .replace(/<h2>(?:\d+\.\s*)?([^<]*)<\/h2>/, '<h2>' + OPT_TITLE[id] + '</h2><span class="opt-tag' + (filled(id, p) ? ' on">작성됨' : '">비어 있음') + '</span></summary>')
+        .replace(/<\/section>\s*$/, '</details>');
+      out += c;
+    });
+    if (chunks['s-file']) out += chunks['s-file'].replace(/<h2>(?:\d+\.\s*)?/, '<h2>');
+    return out;
+  }
+  document.addEventListener('toggle', function (e) {
+    var d = e.target; if (!d.matches || !d.matches('details.opt')) return;
+    var u = jget('oks_iep_ui', {}); u[d.id] = d.open; jset('oks_iep_ui', u);
+  }, true);
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('nav.steps a'); if (!a) return;
+    var t = document.querySelector(a.getAttribute('href')); if (t && t.tagName === 'DETAILS') t.open = true;
+  });
   function grow(t) { t.style.height = 'auto'; t.style.height = Math.max(56, t.scrollHeight + 2) + 'px'; }
 
   function subjectHtml(s, si) {
@@ -374,23 +412,158 @@
     });
     save(); render(); toast(n ? n + '개 행에 평가 결과를 제안했어요' + (none ? ' (기록 없는 행 ' + none + '개)' : '') : '학기 기간 안의 앱 기록이 없어요');
   }
-  function draftEval() {
-    cur.subjects.forEach(function (s) {
-      var by = { '가': [], '나': [], '다': [], '라': [] };
-      s.rows.forEach(function (r) { if (by[r.result]) by[r.result].push(r.goal.replace(/\s*\n\s*/g, ' ').replace(/\.$/, '')); });
-      var parts = [];
-      if (by['가'].length) parts.push('‘' + by['가'].join('’, ‘') + '’ 목표는 대체로 스스로 수행함.');
-      if (by['나'].length) parts.push('‘' + by['나'].join('’, ‘') + '’ 목표는 부분적인 도움을 받아 수행함.');
-      if (by['다'].length) parts.push('‘' + by['다'].join('’, ‘') + '’ 목표는 전반적인 도움이 필요하여 다음 학기에도 이어서 지도가 필요함.');
-      if (by['라'].length) parts.push('‘' + by['라'].join('’, ‘') + '’ 목표는 아직 수행하지 못하여 목표 수준이나 지원 방법을 조정할 필요가 있음.');
-      if (parts.length && !s.eval) s.eval = parts.join(' ');
-    });
-    if (!cur.evalTotal) {
-      var all = []; cur.subjects.forEach(function (s) { s.rows.forEach(function (r) { if (r.result) all.push(r.result); }); });
-      var good = all.filter(function (g) { return g === '가' || g === '나'; }).length;
-      cur.evalTotal = all.length ? '이번 학기 단기 목표 ' + all.length + '개 중 ' + good + '개를 스스로 또는 부분적인 도움을 받아 수행함. (학생의 변화, 강점, 가정과 연계할 점을 덧붙여 주세요.)' : '';
+  /* ---------- 평가: 목표별 결과 표 → 서술형 문장 ---------- */
+  function subjLabel(s) { return s.life ? s.name + ' 영역' : s.name + ' (' + (courseOf(s) === COURSE_C ? '공통' : '기본') + (s.band ? ' ' + s.band : '') + ')'; }
+  function oneLine(t) { return String(t || '').replace(/\s*\n\s*/g, ' ').trim(); }
+  function cleanGoal(g) { return oneLine(g).replace(/^-\s*/, '').replace(/[.。]\s*$/, ''); }
+  function unitName(u) { return oneLine(String(u || '').split('\n')[0]).replace(/^\[|\]$/g, ''); }
+  function evalSubjectHtml(s, si) {
+    var h = '<div class="subj"><div class="head"><h3>' + esc(subjLabel(s)) + ' 평가</h3><button data-act="evalWrite" data-si="' + si + '">✍️ 문장 만들기</button><button data-act="aiOpen" data-si="' + si + '">🤖 AI 도움</button></div><div class="body">';
+    if (s.rows.length) {
+      h += '<div class="scroll"><table class="edit"><thead><tr><th style="width:64px">월</th><th style="width:150px">단원</th><th>단기 교육목표</th><th style="width:22%">성취준거</th><th style="width:150px">결과</th><th style="width:22%">관찰 메모·근거</th></tr></thead><tbody>' +
+        s.rows.map(function (r, ri) {
+          return '<tr><td>' + esc(r.month) + '</td><td>' + esc(unitName(r.unit)) + '</td><td>' + esc(cleanGoal(r.goal)) + (r.std.length ? '<div class="chips">' + r.std.map(function (c) { return '<span class="chip std" title="' + esc(STD[c]) + '">' + esc(c) + '</span>'; }).join('') + '</div>' : '') + '</td><td>' + esc(oneLine(r.crit)) + '</td>' +
+            '<td><div class="gbtns" role="group" aria-label="평가 결과">' + ['가', '나', '다', '라'].map(function (g) { return '<button type="button" class="gbtn' + (r.result === g ? ' on' : '') + '" data-grade="' + g + '" data-si="' + si + '" data-ri="' + ri + '" aria-pressed="' + (r.result === g) + '" title="' + GRADE_TEXT[g] + '">' + g + '</button>'; }).join('') + '</div></td>' +
+            '<td><textarea data-p="subjects.' + si + '.rows.' + ri + '.memo" placeholder="예: 그림 카드를 주면 스스로 고름">' + esc(r.memo) + '</textarea></td></tr>';
+        }).join('') + '</tbody></table></div>';
+    } else {
+      h += '<p class="hint">4번에서 월별 계획을 채우면 단기 목표마다 결과를 고를 수 있어요. 지금은 장기 목표와 성취기준으로 문장을 만듭니다.</p>';
     }
-    save(); render(); toast('비어 있는 평가 칸에 초안을 넣었어요');
+    h += '<div class="grid" style="margin-top:8px">' + fld(subjLabel(s) + ' 평가 결과(서술)', 'subjects.' + si + '.eval', s.eval, { area: 1, wide: 1 }) + '</div></div></div>';
+    return h;
+  }
+  var GRADE_PHRASE = { '가': '대체로 스스로 수행함', '나': '부분적인 도움을 받아 수행함', '다': '전반적인 도움을 받아 수행함', '라': '아직 수행하지 못함' };
+  function goalPhrase(r) {
+    var g = cleanGoal(r.goal) || cleanGoal(r.content) || unitName(r.unit);
+    var memo = oneLine(r.memo);
+    return '‘' + g + '’' + (/있다$/.test(g) ? '는' : '') + ' 목표는 ' + GRADE_PHRASE[r.result] + (memo ? '(' + memo + ')' : '') + '.';
+  }
+  function evalText(s) {
+    var out = [], rows = s.rows.filter(function (r) { return cleanGoal(r.goal) || cleanGoal(r.content); });
+    /* '[읽기]'처럼 대괄호로 들어간 것은 앱 차시가 없어 영역 이름을 넣어 둔 것 → 단원이 아니라 영역으로 씀 */
+    var units = [], areas = [];
+    rows.forEach(function (r) {
+      var raw = oneLine(String(r.unit || '').split('\n')[0]), u = unitName(r.unit);
+      if (!u) return;
+      if (/^\[.*\]$/.test(raw)) { if (areas.indexOf(u) < 0) areas.push(u); } else if (units.indexOf(u) < 0) units.push(u);
+    });
+    if (!units.length && !areas.length) s.stds.forEach(function (c) { var m = meta(c); if (m && m.area && areas.indexOf(m.area) < 0) areas.push(m.area); });
+    var nm = s.life ? s.name + ' 영역' : s.name;
+    var uTxt = units.length ? units.slice(0, 4).map(function (u) { return '‘' + u + '’'; }).join(', ') + (units.length > 4 ? ' 등' : '') + ' 단원' : '';
+    var aTxt = areas.length ? areas.join('·') + ' 영역' : '';
+    if (uTxt || aTxt) out.push('이번 학기 ' + nm + '에서는 ' + [uTxt, aTxt].filter(Boolean).join('과 ') + '을 중심으로 학습함.');
+    else out.push('이번 학기 ' + nm + '에서는 개별화교육 목표를 중심으로 학습함.');
+    var done = rows.filter(function (r) { return GRADE_PHRASE[r.result]; });
+    ['가', '나', '다', '라'].forEach(function (g) { done.filter(function (r) { return r.result === g; }).forEach(function (r) { out.push(goalPhrase(r)); }); });
+    var todo = rows.filter(function (r) { return !GRADE_PHRASE[r.result]; });
+    if (!rows.length) {
+      var lg = String(s.longGoals || '').split('\n').map(cleanGoal).filter(Boolean);
+      if (lg.length) out.push(lg.slice(0, 3).map(function (g) { return '‘' + g + '’'; }).join(', ') + (/있다’$/.test('‘' + lg[0] + '’') ? '는' : '') + ' 목표를 중심으로 지도하였으며 [성취 정도와 관찰한 변화]를 보임.');
+      else out.push('[성취 정도와 관찰한 변화를 적어 주세요]');
+    } else if (todo.length) {
+      var tg = todo.map(function (r) { return '‘' + cleanGoal(r.goal || r.content) + '’'; });
+      out.push(tg.join(', ') + (/있다’$/.test(tg[tg.length - 1]) ? '는' : '') + ' 목표는 [평가 결과를 적어 주세요].');
+    }
+    var weak = done.filter(function (r) { return r.result === '다' || r.result === '라'; });
+    if (weak.length) {
+      var m0 = oneLine(String(weak[0].method || '').split('\n')[0]);
+      out.push('다음 학기에는 ‘' + cleanGoal(weak[0].goal) + '’ 목표를 이어서 지도하고, ' + (m0 ? m0 + ' 등' : '단계별 촉진') + '의 지원을 계속할 필요가 있음.');
+    } else if (done.length && done.every(function (r) { return r.result === '가'; })) {
+      out.push('다음 학기에는 익힌 내용을 실제 생활 장면에 적용하고 스스로 하는 기회를 넓힐 필요가 있음.');
+    } else if (done.length) {
+      out.push('다음 학기에는 도움을 점차 줄여 스스로 수행하는 비율을 높일 필요가 있음.');
+    }
+    return { text: out.join(' '), todo: todo.length, rows: rows.length };
+  }
+  function writeEval(si, quiet) {
+    var s = cur.subjects[si];
+    if (s.eval && !quiet && !confirm(subjLabel(s) + ' 평가 칸에 이미 글이 있어요. 새 문장으로 바꿀까요?')) return null;
+    var r = evalText(s); s.eval = r.text; return r;
+  }
+  function totalText(p) {
+    var all = [], names = [], by = { '가': 0, '나': 0, '다': 0, '라': 0 }, best = null, bestN = -1;
+    p.subjects.forEach(function (s) {
+      names.push(s.life ? s.name + ' 영역' : s.name);
+      var n = 0; s.rows.forEach(function (r) { if (by[r.result] != null) { by[r.result]++; all.push(r); if (r.result === '가') n++; } });
+      if (n > bestN && n > 0) { bestN = n; best = s; }
+    });
+    var t = [];
+    if (all.length) {
+      t.push('이번 학기 ' + names.join(', ') + '에서 단기 목표 ' + all.length + '개 중 ' + by['가'] + '개는 대체로 스스로, ' + by['나'] + '개는 부분적인 도움을 받아 수행함.');
+      if (best) t.push('특히 ' + (best.life ? best.name + ' 영역' : best.name) + '에서 스스로 해내는 모습이 늘어남.');
+      if (by['다'] + by['라']) t.push('도움이 많이 필요했던 ' + (by['다'] + by['라']) + '개 목표는 다음 학기에 이어서 지도할 예정임.');
+    } else {
+      t.push('이번 학기 ' + (names.join(', ') || '개별화교육 목표') + '를 중심으로 지도함.');
+    }
+    if (p.behavior && p.behavior.on && p.behavior.target) t.push('도전행동(' + oneLine(p.behavior.target).slice(0, 40) + ')은 지원 계획에 따라 지도하였으며 [변화 정도]를 보임.');
+    if (p.transition && p.transition.on && p.transition.goal) t.push('전환 목표(' + oneLine(p.transition.goal).slice(0, 40) + ')와 관련하여 [진행 상황]을 보임.');
+    t.push('[학생의 강점과 가정에서 함께 도와줄 점을 덧붙여 주세요]');
+    return t.join(' ');
+  }
+
+  /* ---------- AI 도움: 개인정보를 뺀 요청문을 만들어 복사 → 답을 붙여 넣으면 교과별로 나눠 넣기 ---------- */
+  var aiTarget = -1;
+  function aiPrompt(si) {
+    var p = cur, list = si >= 0 ? [p.subjects[si]] : p.subjects;
+    var L = [];
+    L.push('너는 특수교육 교사의 개별화교육계획 학기말 평가 작성을 돕는 조수야. 아래 근거만 사용해 서술형 평가를 써 줘.');
+    L.push('');
+    L.push('[작성 조건]');
+    L.push('- 교과마다 3~5문장. 문장 끝은 "~함", "~임", "~보임"처럼 개조식으로.');
+    L.push('- 성장과 강점을 먼저 쓰고, 도움이 필요한 점, 다음 학기 지도 방향 순서로.');
+    L.push('- 결과 척도: 가 ' + p.scale.a + '% 이상 대체로 스스로 수행 / 나 ' + p.scale.b + '~' + p.scale.a + '% 부분적 도움 / 다 ' + p.scale.b + '% 미만 전반적 도움 / 라 수행하지 못함.');
+    L.push('- 근거에 없는 사실(진단명, 가정 형편, 성격 판단 등)은 지어내지 말고, 모르는 부분은 [ ]로 비워 둬.');
+    L.push('- 학생 이름 대신 "학생"이라고 써.');
+    L.push('- 출력 형식: 교과마다 "[교과 이름]" 줄 다음에 문단' + (si >= 0 ? '.' : ', 마지막에 "[종합 평가]" 2~3문장.'));
+    L.push('');
+    L.push('[학생 정보] ' + p.year + '학년도 ' + p.term + '학기 · 계획 유형: ' + p.type + ' · 적용 교육과정: ' + (p.course || COURSE_B));
+    if (p.present) L.push('현재 수행 수준(학기 초): ' + oneLine(p.present).slice(0, 400));
+    list.forEach(function (s) {
+      L.push('');
+      L.push('[' + subjLabel(s) + ']');
+      if (s.stds.length) L.push('관련 성취기준: ' + s.stds.map(function (c) { return '[' + c + '] ' + STD[c]; }).join(' / '));
+      if (s.longGoals) L.push('장기 목표: ' + oneLine(s.longGoals));
+      if (s.present) L.push('학기 초 수행 수준: ' + oneLine(s.present).slice(0, 300));
+      s.rows.forEach(function (r) {
+        L.push('- ' + (r.month ? r.month + ' · ' : '') + (unitName(r.unit) ? '단원 ' + unitName(r.unit) + ' · ' : '') + '단기 목표: ' + cleanGoal(r.goal) +
+          (r.crit ? ' · 성취준거: ' + oneLine(r.crit) : '') + ' · 결과: ' + (r.result ? r.result + '(' + GRADE_TEXT[r.result] + ')' : '미평가') + (r.memo ? ' · 관찰: ' + oneLine(r.memo) : ''));
+      });
+    });
+    if (si < 0 && p.behavior && p.behavior.on && p.behavior.target) { L.push(''); L.push('[도전행동 지원] 목표 행동: ' + oneLine(p.behavior.target) + (p.behavior.replace ? ' · 대체행동: ' + oneLine(p.behavior.replace) : '')); }
+    return L.join('\n');
+  }
+  function openAi(si) {
+    aiTarget = si;
+    var d = $('#aiDlg');
+    $('.dbody', d).innerHTML = '<p class="note">이름·생년월일·주소·연락처는 넣지 않았어요. 현재 수준이나 메모에 실명·학교명이 있으면 지우고 보내세요. 학교의 생성형 AI 사용 지침을 따라 주세요.</p>' +
+      '<label for="aiPrompt">1. 이 요청문을 복사해 Claude 같은 AI 대화창에 붙여 넣으세요 (고쳐도 돼요)</label><textarea id="aiPrompt" style="min-height:220px;font-size:13px">' + esc(aiPrompt(si)) + '</textarea>' +
+      '<div class="actions"><button type="button" class="pri" id="aiCopy">📋 요청문 복사</button></div>' +
+      '<label for="aiAnswer">2. AI가 써 준 답을 여기에 붙여 넣으세요</label><textarea id="aiAnswer" style="min-height:160px" placeholder="[국어 (기본 중1~3)]\n…\n[종합 평가]\n…"></textarea>' +
+      '<p class="hint">"[교과 이름]" 줄로 나뉜 답은 교과별 칸에 나눠 들어가고, "[종합 평가]"는 종합 평가 칸에 들어가요. 꼭 다시 읽고 고쳐 주세요.</p>';
+    d.showModal();
+  }
+  function applyAi() {
+    var txt = String(($('#aiAnswer') || {}).value || '').trim();
+    if (!txt) { toast('AI 답을 붙여 넣어 주세요'); return; }
+    var parts = [], re = /^\s*\[([^\]\n]{1,40})\]\s*$/gm, m, last = null;
+    while ((m = re.exec(txt))) { if (last) last.body = txt.slice(last.end, m.index).trim(); last = { head: m[1].trim(), end: re.lastIndex }; parts.push(last); }
+    if (last) last.body = txt.slice(last.end).trim();
+    var n = 0;
+    if (!parts.length) {
+      if (aiTarget >= 0) { cur.subjects[aiTarget].eval = txt; n = 1; } else { cur.evalTotal = txt; n = 1; }
+    } else {
+      var used = {};
+      parts.forEach(function (pt) {
+        if (/종합/.test(pt.head)) { cur.evalTotal = pt.body; n++; return; }
+        var idx = -1;
+        cur.subjects.forEach(function (s, i) { if (idx < 0 && !used[i] && subjLabel(s) === pt.head) idx = i; });
+        if (idx < 0) cur.subjects.forEach(function (s, i) { if (idx < 0 && !used[i] && (pt.head.indexOf(s.name) === 0 || s.name.indexOf(pt.head) === 0)) idx = i; });
+        if (idx < 0 && aiTarget >= 0) idx = aiTarget;
+        if (idx >= 0) { cur.subjects[idx].eval = pt.body; used[idx] = 1; n++; }
+      });
+    }
+    $('#aiDlg').close(); save(); var y = window.scrollY; render(); window.scrollTo(0, y);
+    toast(n ? n + '개 칸에 AI 답을 넣었어요. 다시 읽고 고쳐 주세요' : '나눠 넣을 곳을 찾지 못했어요');
   }
 
   /* ---------- 앱 차시 고르기 ---------- */
@@ -413,35 +586,47 @@
     var i = p.info, title = p.year + '학년도 ' + p.term + '학기 개별화교육계획';
     var subjNames = p.subjects.map(function (s) { return s.name; }).join(', ');
     var h = '<div class="docwrap"><h1>' + esc(title) + (subjNames ? ' (' + esc(subjNames) + ')' : '') + '</h1>';
-    h += '<table><tr><th>학교명</th><td>' + esc(i.school) + '</td><th>학년 반</th><td>' + esc(i.gradeClass) + '</td><th>이 름</th><td>' + esc(i.name) + '</td></tr>' +
-      '<tr><th>특수학급 담임</th><td>' + esc(i.specialTeacher) + '</td><th>통합학급 담임</th><td>' + esc(i.generalTeacher) + '</td><th>계획 유형</th><td>' + esc(p.type) + '</td></tr>' +
-      '<tr><th>적용 교육과정</th><td colspan="5">' + esc(p.course || COURSE_B) + '</td></tr></table>';
-    h += '<h2>1. 인적사항</h2><table><tr><th colspan="2">학생 정보</th><th colspan="2">가족 정보</th></tr>' +
-      '<tr><th>생년월일</th><td>' + esc(i.birth) + '</td><th>보호자</th><td>' + esc(i.guardian) + '</td></tr>' +
-      '<tr><th>배치형태</th><td>' + esc(i.placement) + '</td><th>주 소</th><td>' + esc(i.address) + '</td></tr>' +
-      '<tr><th>장애유형</th><td>' + esc(i.disability) + '</td><th>특수교육대상자<br>선정배치일</th><td>' + esc(i.selectDate) + '</td></tr>' +
-      '<tr><th>복지카드</th><td>' + esc(i.welfare) + '</td><th>전화번호</th><td>' + esc(i.phone) + '</td></tr></table>';
-    var team = p.team.filter(function (t) { return t.role || t.name; });
-    h += '<h2>2. 개별화교육지원팀</h2><table><tr><th>역할</th><th>이름</th><th style="width:22%">서명</th></tr>' + team.map(function (t) { return '<tr><td>' + esc(t.role) + '</td><td>' + esc(t.name) + '</td><td></td></tr>'; }).join('') + '</table>';
-    var mt = p.meetings.filter(function (m) { return m.date || m.topic; });
-    if (mt.length) h += '<table><tr><th style="width:22%">협의회 일자</th><th>협의 내용</th></tr>' + mt.map(function (m) { return '<tr><td class="center">' + esc(m.date) + '</td><td>' + esc(m.topic) + '</td></tr>'; }).join('') + '</table>';
-    var sv = p.services.filter(function (s) { return s.org || s.content || s.note; }); if (!sv.length) sv = p.services;
-    h += '<h2>3. 특수교육 관련서비스</h2><table><tr><th>제공 서비스</th><th>지원기관명</th><th>교육(지원) 내용</th><th>비고</th></tr>' + sv.map(function (s) { return '<tr><td>' + esc(s.kind) + '</td><td>' + esc(s.org) + '</td><td>' + esc(s.content) + '</td><td>' + esc(s.note) + '</td></tr>'; }).join('') + '</table>';
-    h += '<h2>4. 진단·평가 결과</h2><table><tr><th>검사도구</th><th style="width:18%">검사일자</th><th>검사결과</th></tr>' + p.tests.map(function (t) { return '<tr><td>' + esc(t.tool) + '</td><td class="center">' + esc(t.date) + '</td><td>' + esc(t.result) + '</td></tr>'; }).join('') + '</table>';
-    h += '<h2>5. 현재 수행 수준 및 도전행동 관련 사항</h2><table>' +
-      '<tr><th style="width:20%">현재 수행 수준 및<br>행동특성</th><td>' + lines(p.present) + '</td></tr>' +
-      (p.strengths ? '<tr><th>강점·흥미</th><td>' + lines(p.strengths) + '</td></tr>' : '') +
-      (p.studentNeeds ? '<tr><th>학생 요구</th><td>' + lines(p.studentNeeds) + '</td></tr>' : '') +
-      '<tr><th>학부모 요구사항</th><td>' + lines(p.parentNeeds) + '</td></tr>' +
-      '<tr><th>도전행동</th><td>' + (p.behavior.on ? lines(p.behavior.target) + (p.behavior.func ? '<br><small>추정 기능: ' + esc(p.behavior.func) + '</small>' : '') : '') + '</td></tr>' +
-      '<tr><th>도전행동 중재방안</th><td>' + (p.behavior.on ? ['예방 전략|prevent', '대체행동 교수|replace', '반응 전략|respond', '위기 대응|crisis'].map(function (x) { var a = x.split('|'); return p.behavior[a[1]] ? '<b>' + a[0] + '</b>: ' + lines(p.behavior[a[1]]) : ''; }).filter(Boolean).join('<br>') : '') + '</td></tr></table>';
-    if (p.etc) h += '<h2>6. 기타</h2><div class="box">' + esc(p.etc) + '</div>';
-    if (p.transition.on) {
-      var t = p.transition;
-      h += '<h2>' + (p.etc ? '7' : '6') + '. 개별화전환교육계획</h2><table><tr><th style="width:22%">희망 진로</th><td>' + lines(t.hope) + '</td></tr><tr><th>현재 진로 준비 수준</th><td>' + lines(t.now) + '</td></tr><tr><th>전환 목표</th><td>' + lines(t.goal) + '</td></tr><tr><th>연계 기관·실습</th><td>' + lines(t.link) + '</td></tr><tr><th>필요한 지원</th><td>' + lines(t.support) + '</td></tr></table>';
+    var num = 0, H2 = function (t) { num++; return '<h2>' + num + '. ' + t + '</h2>'; }, has = function (v) { return v != null && String(v).trim() !== ''; };
+    var hdr = [['학교명', i.school], ['학년 반', i.gradeClass], ['이 름', i.name], ['특수학급 담임', i.specialTeacher], ['통합학급 담임', i.generalTeacher], ['계획 유형', p.type], ['적용 교육과정', p.course || COURSE_B]].filter(function (x) { return has(x[1]); });
+    if (hdr.length) {
+      h += '<table>';
+      for (var k = 0; k < hdr.length; k += 3) h += '<tr>' + hdr.slice(k, k + 3).map(function (x) { return '<th style="width:13%">' + esc(x[0]) + '</th><td>' + esc(x[1]) + '</td>'; }).join('') + '</tr>';
+      h += '</table>';
     }
-    p.subjects.forEach(function (s) {
-      h += '<div class="pb"></div><h3>' + esc(p.term) + '학기 ' + esc(s.name) + (s.life ? ' 영역' : / /.test(s.name) ? '' : '과') + ' 교육계획</h3>';
+    var info = [['생년월일', i.birth], ['배치형태', i.placement], ['장애유형', i.disability], ['복지카드', i.welfare], ['보호자', i.guardian], ['주 소', i.address], ['특수교육대상자<br>선정배치일', i.selectDate], ['전화번호', i.phone]];
+    if (info.some(function (x, k) { return k !== 1 && has(x[1]); })) {
+      info = info.filter(function (x) { return has(x[1]); });
+      h += H2('인적사항') + '<table>';
+      for (var q = 0; q < info.length; q += 2) h += '<tr>' + info.slice(q, q + 2).map(function (x) { return '<th style="width:16%">' + x[0] + '</th><td>' + esc(x[1]) + '</td>'; }).join('') + '</tr>';
+      h += '</table>';
+    }
+    var team = p.team.filter(function (t) { return has(t.role) || has(t.name); });
+    var mt = p.meetings.filter(function (m) { return has(m.date); });
+    if (p.team.some(function (t) { return has(t.name); }) || mt.length) {
+      h += H2('개별화교육지원팀') + '<table><tr><th>역할</th><th>이름</th><th style="width:22%">서명</th></tr>' + team.map(function (t) { return '<tr><td>' + esc(t.role) + '</td><td>' + esc(t.name) + '</td><td></td></tr>'; }).join('') + '</table>';
+      if (mt.length) h += '<table><tr><th style="width:22%">협의회 일자</th><th>협의 내용</th></tr>' + mt.map(function (m) { return '<tr><td class="center">' + esc(m.date) + '</td><td>' + esc(m.topic) + '</td></tr>'; }).join('') + '</table>';
+    }
+    var sv = p.services.filter(function (x) { return has(x.org) || has(x.content) || has(x.note); });
+    if (sv.length) h += H2('특수교육 관련서비스') + '<table><tr><th>제공 서비스</th><th>지원기관명</th><th>교육(지원) 내용</th><th>비고</th></tr>' + sv.map(function (x) { return '<tr><td>' + esc(x.kind) + '</td><td>' + esc(x.org) + '</td><td>' + esc(x.content) + '</td><td>' + esc(x.note) + '</td></tr>'; }).join('') + '</table>';
+    var tests = p.tests.filter(function (t) { return has(t.tool) || has(t.result); });
+    if (tests.length) h += H2('진단·평가 결과') + '<table><tr><th>검사도구</th><th style="width:18%">검사일자</th><th>검사결과</th></tr>' + tests.map(function (t) { return '<tr><td>' + esc(t.tool) + '</td><td class="center">' + esc(t.date) + '</td><td>' + esc(t.result) + '</td></tr>'; }).join('') + '</table>';
+    var b = p.behavior || {}, pr = [];
+    if (has(p.present)) pr.push(['현재 수행 수준 및<br>행동특성', lines(p.present)]);
+    if (has(p.strengths)) pr.push(['강점·흥미', lines(p.strengths)]);
+    if (has(p.studentNeeds)) pr.push(['학생 요구', lines(p.studentNeeds)]);
+    if (has(p.parentNeeds)) pr.push(['학부모 요구사항', lines(p.parentNeeds)]);
+    if (b.on && has(b.target)) pr.push(['도전행동', lines(b.target) + (b.func ? '<br><small>추정 기능: ' + esc(b.func) + '</small>' : '')]);
+    var bm = b.on ? ['예방 전략|prevent', '대체행동 교수|replace', '반응 전략|respond', '위기 대응|crisis'].map(function (x) { var a2 = x.split('|'); return has(b[a2[1]]) ? '<b>' + a2[0] + '</b>: ' + lines(b[a2[1]]) : ''; }).filter(Boolean).join('<br>') : '';
+    if (bm) pr.push(['도전행동 중재방안', bm]);
+    if (pr.length) h += H2('현재 수행 수준' + (b.on ? ' 및 도전행동 관련 사항' : '')) + '<table>' + pr.map(function (x) { return '<tr><th style="width:20%">' + x[0] + '</th><td>' + x[1] + '</td></tr>'; }).join('') + '</table>';
+    if (has(p.etc)) h += H2('기타') + '<div class="box">' + esc(p.etc) + '</div>';
+    if (p.transition && p.transition.on) {
+      var t = p.transition;
+      h += H2('개별화전환교육계획') + '<table><tr><th style="width:22%">희망 진로</th><td>' + lines(t.hope) + '</td></tr><tr><th>현재 진로 준비 수준</th><td>' + lines(t.now) + '</td></tr><tr><th>전환 목표</th><td>' + lines(t.goal) + '</td></tr><tr><th>연계 기관·실습</th><td>' + lines(t.link) + '</td></tr><tr><th>필요한 지원</th><td>' + lines(t.support) + '</td></tr></table>';
+    }
+    var firstSubj = num === 0;
+    p.subjects.forEach(function (s, k) {
+      h += (firstSubj && k === 0 ? '' : '<div class="pb"></div>') + '<h3>' + esc(p.term) + '학기 ' + esc(s.name) + (s.life ? ' 영역' : / /.test(s.name) ? '' : '과') + ' 교육계획</h3>';
       h += '<table><tr><th>현재 학습 수행 수준</th></tr><tr><td>' + lines(s.present) + '</td></tr><tr><th>' + esc(p.term) + '학기 장기 목표</th></tr><tr><td>' + lines(s.longGoals) + '</td></tr></table>';
       if (s.stds.length) h += '<table><tr><th style="width:18%">관련 성취기준<br><small>' + esc(courseLabel(courseOf(s))) + '</small></th><td>' + s.stds.map(function (c) { return '[' + esc(c) + '] ' + esc(STD[c]); }).join('<br>') + '</td></tr></table>';
       h += '<table><tr><th rowspan="2" style="width:7%">월</th><th rowspan="2" style="width:13%">단원</th><th rowspan="2" style="width:18%">단기 교육목표</th><th rowspan="2">교육내용</th><th rowspan="2" style="width:10%">교육<br>방법</th><th colspan="2">평가계획</th></tr><tr><th style="width:17%">성취준거</th><th style="width:8%">평가결과</th></tr>' +
@@ -489,7 +674,7 @@
   /* ---------- 이벤트 ---------- */
   document.addEventListener('input', function (e) {
     var t = e.target, path = t.getAttribute && t.getAttribute('data-p');
-    if (t.tagName === 'TEXTAREA' && t.closest('table.edit')) grow(t);
+    if (t.tagName === 'TEXTAREA' && t.closest('table.edit, #s-eval')) grow(t);
     if (path && cur) {
       var v = t.type === 'number' ? Number(t.value) : t.value; setP(cur, path, v);
       if (PERSONAL.indexOf(path.replace('info.', '')) >= 0 && path.indexOf('info.') === 0) { memPersonal[cur.id] = memPersonal[cur.id] || {}; memPersonal[cur.id][path.slice(5)] = v; }
@@ -516,6 +701,8 @@
   });
   document.addEventListener('click', function (e) {
     var b = e.target.closest('button'); if (!b) return;
+    var gr = b.getAttribute('data-grade');
+    if (gr) { var row = cur.subjects[+b.getAttribute('data-si')].rows[+b.getAttribute('data-ri')]; row.result = row.result === gr ? '' : gr; save(); var y0 = window.scrollY; render(); window.scrollTo(0, y0); return; }
     var y = window.scrollY, rerender = function () { render(); window.scrollTo(0, y); };
     var add = b.getAttribute('data-add');
     if (add) {
@@ -544,7 +731,17 @@
     if (act === 'presentFromRec') return presentFromRec(si);
     if (act === 'recSummary') return recSummary();
     if (act === 'fillEval') return fillEval();
-    if (act === 'draftEval') return draftEval();
+    if (act === 'evalWrite') { var rr = writeEval(si); if (rr) { save(); rerender(); toast(rr.todo ? '문장을 만들었어요. 결과를 고르지 않은 목표 ' + rr.todo + '개는 [ ]로 남겼어요' : '평가 문장을 만들었어요. 학생에 맞게 다듬어 주세요'); } return; }
+    if (act === 'evalWriteAll') {
+      if (!cur.subjects.length) { toast('4번에서 교과·영역을 먼저 추가해 주세요'); return; }
+      var filled = cur.subjects.filter(function (x) { return x.eval; }).length;
+      if (filled && !confirm('이미 글이 있는 ' + filled + '개 교과도 새 문장으로 바꿀까요?')) return;
+      var todo = 0; cur.subjects.forEach(function (x, i) { todo += writeEval(i, true).todo; });
+      if (!cur.evalTotal) cur.evalTotal = totalText(cur);
+      save(); rerender(); toast(cur.subjects.length + '개 교과 평가 문장을 만들었어요' + (todo ? ' · 결과 미선택 ' + todo + '개는 [ ]로 남김' : '')); return;
+    }
+    if (act === 'evalTotal') { if (cur.evalTotal && !confirm('종합 평가를 새 문장으로 바꿀까요?')) return; cur.evalTotal = totalText(cur); save(); rerender(); toast('종합 평가 초안을 만들었어요. [ ] 부분을 채워 주세요'); return; }
+    if (act === 'aiOpen') return openAi(si);
     if (act === 'pickLes') return openLesDlg(si, ri);
     if (act === 'exportJson') { persistNow(); download(fileBase() + '.json', new Blob([JSON.stringify({ app: 'oks-iep', v: 1, plan: cur }, null, 1)], { type: 'application/json' })); toast('백업 파일을 저장했어요(인적사항 포함 — 보관에 주의)'); return; }
     if (act === 'copyPlan') {
@@ -574,6 +771,14 @@
   $('#pPrint').onclick = function () { $('#doc').innerHTML = docHtml(cur); $('#preview').close(); setTimeout(function () { window.print(); }, 50); };
   $('#pWord').onclick = exportWord;
   $('#lesClose').onclick = function () { $('#lesDlg').close(); };
+  $('#aiClose').onclick = function () { $('#aiDlg').close(); };
+  $('#aiApply').onclick = applyAi;
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('#aiCopy')) return;
+    var ta = $('#aiPrompt'), done = function () { toast('요청문을 복사했어요. AI 대화창에 붙여 넣으세요'); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(ta.value).then(done, function () { ta.select(); document.execCommand('copy'); done(); });
+    else { ta.select(); document.execCommand('copy'); done(); }
+  });
   $('#lesOk').onclick = function () {
     var r = cur.subjects[lesTarget.si].rows[lesTarget.ri];
     r.lessons = $$('#lesDlg .lespick input:checked').map(function (x) { return x.value; });

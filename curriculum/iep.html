@@ -58,6 +58,20 @@ table.edit td textarea{min-height:56px}
 .stdlist small{color:var(--soft)}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 .note{background:var(--warn);border-radius:10px;padding:10px 12px;font-size:13.5px;margin:8px 0}
+.gbtns{display:flex;gap:4px}.gbtn{min-height:36px;min-width:32px;padding:4px 8px;border-radius:8px;font-weight:700}.gbtn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+details.card.opt{padding:0}
+details.card.opt>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:14px 16px}
+details.card.opt>summary::-webkit-details-marker{display:none}
+details.card.opt>summary::before{content:"▸";color:var(--soft);transition:transform .15s}
+details.card.opt[open]>summary::before{transform:rotate(90deg)}
+details.card.opt>summary h2{font-size:16px;margin:0}
+details.card.opt[open]>summary{border-bottom:1px solid var(--line)}
+details.card.opt>*:not(summary){margin-left:16px;margin-right:16px}
+details.card.opt>*:last-child{margin-bottom:16px}
+.opt-tag{font-size:12px;padding:2px 8px;border-radius:999px;background:#eef2f5;color:var(--soft)}
+.opt-tag.on{background:var(--ok);color:#1e6b3a}
+h2.optdiv{font-size:15px;color:var(--soft);margin:22px 4px 8px}
+h2.optdiv small{font-weight:400;margin-left:6px}
 .okbox{background:var(--ok);border-radius:10px;padding:10px 12px;font-size:13.5px;margin:8px 0}
 .dates{display:flex;gap:14px;flex-wrap:wrap;font-size:14px}
 .dates b{color:var(--accent)}
@@ -113,12 +127,13 @@ dialog .dbody{padding:14px;max-height:78vh;overflow:auto}
   <a href="../learn/">🌱 배움 지도</a>
 </header>
 <nav class="steps" aria-label="작성 순서">
-  <a href="#s-basic">1 기본 정보</a><a href="#s-team">2 지원팀·관련서비스</a><a href="#s-diag">3 진단·현재 수준</a>
-  <a href="#s-subj">4 교과·영역별 계획</a><a href="#s-beh">5 행동지원·전환</a><a href="#s-eval">6 평가</a><a href="#s-file">7 저장·불러오기</a>
+  <a href="#s-basic">1 기본 정보</a><a href="#s-subj">2 교과·영역별 계획</a><a href="#s-eval">3 평가</a>
+  <a href="#s-info">인적사항(선택)</a><a href="#s-diag">진단·현재 수준(선택)</a><a href="#s-team">지원팀·관련서비스(선택)</a><a href="#s-beh">행동지원·전환(선택)</a><a href="#s-file">저장·불러오기</a>
 </nav>
 <main id="app"><p>불러오는 중…</p></main>
 <div id="doc"></div>
 <dialog id="preview"><div class="dhead"><b>미리보기</b><button type="button" id="pPrint" class="pri">🖨️ 인쇄·PDF</button><button type="button" id="pWord">📄 한글·Word 파일</button><button type="button" id="pClose">닫기</button></div><div class="dbody"></div></dialog>
+<dialog id="aiDlg"><div class="dhead"><b>🤖 AI 도움으로 평가 쓰기</b><button type="button" id="aiApply" class="pri">평가 칸에 넣기</button><button type="button" id="aiClose">닫기</button></div><div class="dbody"></div></dialog>
 <dialog id="lesDlg"><div class="dhead"><b>앱 차시 연결</b><button type="button" id="lesOk" class="pri">연결</button><button type="button" id="lesClose">닫기</button></div><div class="dbody"></div></dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="lessons.js"></script>
