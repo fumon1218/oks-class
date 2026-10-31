@@ -80,7 +80,7 @@
     s = String(s || '').trim().replace(/\s+/g, ' ').replace(/\.$/, '');
     if (!s) return '';
     if (/수 있다$/.test(s)) return s + '.';
-    if (/한다$/.test(s)) return s.replace(/한다$/, '할 수 있다.');
+    if (/한다$|하다$/.test(s)) return s.replace(/한다$|하다$/, '할 수 있다.');   /* 원문 '인식하다.'(6실04-06) 같은 표기도 처리 */
     var m = /(\S*?)는다$/.exec(s);
     if (m && m[1]) {
       var st = m[1], last = st.slice(-1), head = s.replace(/는다$/, '');
@@ -92,6 +92,35 @@
     if (m && JONG(m[1]) === 4) return s.slice(0, -2) + setJong(m[1], 8) + ' 수 있다.';
     if (/이다$|있다$|없다$/.test(s)) return s + '.';
     return s + '.';
+  }
+  /* 성취기준 → 교육내용(활동) 초안: '~한다/~할 수 있다'를 '~하기'로 바꾸고, '~하고/~하며'에서 단계로 나눔 */
+  var L_STEM = ['만들', '알', '놀', '살', '열', '걸', '팔', '밀', '끌', '돌', '불', '빌', '얼', '울', '털'];   /* ㄹ 받침 동사: 만든다→만들기 (간다→가기, 준다→주기는 제외) */
+  function nomEnd(s) {
+    s = String(s || '').trim().replace(/\.$/, '');
+    var m;
+    if ((m = /(\S*)을 수 있다$/.exec(s))) return s.replace(/을 수 있다$/, '기');
+    if ((m = /(.) 수 있다$/.exec(s)) && JONG(m[1]) === 8) { var b0 = setJong(m[1], 0); return s.replace(/. 수 있다$/, (L_STEM.indexOf(head2(s, m[1])) >= 0 ? m[1] : b0) + '기'); }
+    if (/한다$|하다$/.test(s)) return s.replace(/한다$|하다$/, '하기');
+    if (/는다$/.test(s)) return s.replace(/는다$/, '기');
+    if ((m = /(.)다$/.exec(s)) && JONG(m[1]) === 4) { var withL = setJong(m[1], 8), noJ = setJong(m[1], 0); return s.slice(0, -2) + (L_STEM.indexOf(head2(s.slice(0, -2) + withL + '다', withL)) >= 0 ? withL : noJ) + '기'; }
+    return s;
+  }
+  function head2(s, last) { var w = s.replace(/ 수 있다$|다$/, '').split(/\s+/).pop() || ''; w = w.slice(0, w.lastIndexOf(last) + 1); return w.length > 2 ? w.slice(-2) : w; }
+  function stepsFrom(text) {
+    var t = String(text || '').trim().replace(/\.$/, '');
+    var parts = t.split(/(?<=하고|하여) /), out = [];   /* '~하며'는 '파악하며 듣고'처럼 동시 동작이 많아 나누지 않음 */
+    parts.forEach(function (x, k) {
+      x = x.trim(); if (!x) return;
+      x = k < parts.length - 1 ? x.replace(/(하고|하여)$/, '하기') : nomEnd(x);
+      if (out.length && x.replace(/\s/g, '').length < 9) out[out.length - 1] = out[out.length - 1].replace(/하기$/, '하고 ') + x; else out.push(x);
+    });
+    return out;
+  }
+  function contentFor(code) {
+    var lines = stepsFrom(STD[code]).map(function (x) { return '- ' + x; });
+    ((window.OKS_STD_ACT || {})[code] || []).slice(0, 2).forEach(function (a) { lines.push('- 탐구 활동: ' + a); });
+    lines.push('- 생활 속 장면에서 적용해 보기');
+    return lines.join('\n');
   }
   function toQuestion(goal) { return String(goal || '').replace(/수 있다\.?$/, '수 있는가?').replace(/\.$/, '?'); }
 
@@ -324,7 +353,7 @@
         '<td><button class="ghost" data-act="pickLes" data-si="' + si + '" data-ri="' + ri + '" title="앱 차시 연결">🎮</button><button class="ghost" data-act="moveRow" data-si="' + si + '" data-ri="' + ri + '" data-dir="-1" aria-label="위로">▲</button><button class="ghost del" data-del="' + rb + '" aria-label="삭제">✕</button></td></tr>';
     }).join('');
     h += '</tbody></table></div><datalist id="months-' + si + '">' + termMonths(cur.term).map(function (m) { return '<option value="' + m + '">'; }).join('') + '<option value="학기 내내"></datalist>';
-    h += '<div class="actions"><button data-add="' + base + '.rows">＋ 행 추가</button></div></div></div>';
+    h += '<div class="actions"><button data-add="' + base + '.rows">＋ 행 추가</button><button data-act="fillContent" data-si="' + si + '">📝 빈 교육내용 채우기</button></div></div></div>';
     return h;
   }
   function stdListHtml(s, si, q) {
@@ -354,7 +383,7 @@
       if (!ls.length) ls = lessonsFor(c);
       var m = meta(c);
       if (!ls.length) {
-        var r = newRow(month); r.unit = m.area ? '[' + m.area + ']' : ''; r.goal = toGoal(STD[c]); r.content = '- '; r.crit = toQuestion(r.goal); r.std = [c];
+        var r = newRow(month); r.unit = m.area ? '[' + m.area + ']' : ''; r.goal = toGoal(STD[c]); r.content = contentFor(c); r.crit = toQuestion(r.goal); r.std = [c];
         s.rows.push(r); made++; return;
       }
       ls.slice(0, 3).forEach(function (l) {
@@ -728,6 +757,16 @@
     if (act === 'moveSubj') { var d = +b.getAttribute('data-dir'), j = si + d; if (j >= 0 && j < cur.subjects.length) { var tmp = cur.subjects[si]; cur.subjects[si] = cur.subjects[j]; cur.subjects[j] = tmp; save(); rerender(); } return; }
     if (act === 'moveRow') { var rows = cur.subjects[si].rows; if (ri > 0) { var t2 = rows[ri]; rows[ri] = rows[ri - 1]; rows[ri - 1] = t2; save(); rerender(); } return; }
     if (act === 'autoFill') return autoFill(si);
+    if (act === 'fillContent') {
+      var nfc = 0;
+      cur.subjects[si].rows.forEach(function (r) {
+        if (String(r.content || '').replace(/[-\s]/g, '')) return;
+        var c0 = r.std[0] || cur.subjects[si].stds[0];
+        if (c0 && STD[c0]) { r.content = contentFor(c0); nfc++; }
+        else if (r.goal) { r.content = stepsFrom(String(r.goal).replace(/할 수 있다\.?$/, '한다')).map(function (x) { return '- ' + x; }).join('\n') + '\n- 생활 속 장면에서 적용해 보기'; nfc++; }
+      });
+      save(); rerender(); toast(nfc ? '비어 있던 교육내용 ' + nfc + '칸을 채웠어요' : '비어 있는 교육내용이 없어요'); return;
+    }
     if (act === 'presentFromRec') return presentFromRec(si);
     if (act === 'recSummary') return recSummary();
     if (act === 'fillEval') return fillEval();
