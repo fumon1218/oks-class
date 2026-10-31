@@ -163,11 +163,24 @@
       evalTotal: '', evalNote: ''
     };
   }
-  function newSubject(name, band, course) {
+  /* 한 교과 안에서 기본·공통 교육과정과 여러 학년군을 함께 고름(예: 국어 = 기본 초5~6 + 공통 초3~4) */
+  function newSubject(name, courses, bands) {
     var life = LIFE.indexOf(name) >= 0;
-    return { id: uid(), name: name, band: band || '', course: life ? '' : (course || COURSE_B), life: life, present: '', longGoals: '', stds: [], rows: [], eval: '', open: true };
+    return { id: uid(), name: name, courses: life ? [] : courses, bands: life ? [] : bands, life: life, present: '', longGoals: '', stds: [], rows: [], eval: '', open: true };
   }
-  function courseOf(s) { return s.life ? '' : (s.course || COURSE_B); }   /* 예전에 만든 계획은 기본 교육과정 */
+  function coursesOf(s) { if (s.life) return []; return s.courses && s.courses.length ? s.courses : (s.courses ? [] : [s.course || COURSE_B]); }   /* 예전 계획(course 하나)도 읽음 */
+  function bandsOf(s) { return s.bands ? s.bands : (s.band ? [s.band] : []); }
+  function availCourses(name) { return COURSES.filter(function (c) { return ALL.some(function (x) { return x.course === c && x.subj === name; }); }); }
+  function availBands(name, courses) { return BAND_ORDER.filter(function (b) { return ALL.some(function (x) { return courses.indexOf(x.course) >= 0 && x.subj === name && x.band === b; }); }); }
+  function shortC(c) { return c === COURSE_C ? '공통' : '기본'; }
+  function planCourses(p) { return p.course === COURSE_C ? [COURSE_C] : p.course === COURSE_B || !p.course ? [COURSE_B] : [COURSE_B, COURSE_C]; }
+  function subjSummary(s) {
+    if (s.life) return '';
+    var g = {};   /* 고른 성취기준이 있으면 그 교육과정·학년군으로, 없으면 고른 범위로 */
+    if (s.stds.length) s.stds.forEach(function (c) { var m = meta(c); if (m) { (g[m.course] = g[m.course] || []); if (g[m.course].indexOf(m.band) < 0) g[m.course].push(m.band); } });
+    else coursesOf(s).forEach(function (c) { g[c] = bandsOf(s).filter(function (b) { return availBands(s.name, [c]).indexOf(b) >= 0; }); });
+    return COURSES.filter(function (c) { return g[c]; }).map(function (c) { return shortC(c) + (g[c].length ? ' ' + BAND_ORDER.filter(function (b) { return g[c].indexOf(b) >= 0; }).join('·') : ''); }).join(' + ');
+  }
   function newRow(month) { return { month: month || '', unit: '', goal: '', content: '', method: '직접교수, 모델링, 최소촉진', crit: '', result: '', memo: '', std: [], lessons: [] }; }
 
   /* ---------- 기록 → 평가 ---------- */
@@ -217,7 +230,9 @@
     h += '<section class="card" id="s-basic"><h2>기본 정보</h2><p class="hint">특수교육법 시행규칙 제4조: 개별화교육지원팀은 학기 시작일부터 2주 이내 구성, 계획은 매 학기 시작일부터 30일 이내 작성(지역 지침 확인).</p>';
     h += '<div class="grid">' + fld('학년도', 'year', p.year) + fld('학기', 'term', p.term, { sel: ['1', '2'] }) + fld('학기 시작일(배치일)', 'start', p.start, { type: 'date' }) +
       fld('계획 유형', 'type', p.type, { sel: ['교과 중심', '생활지원 중심', '교과 및 생활지원 중심'] }) +
-      fld('적용 교육과정', 'course', p.course || COURSE_B, { sel: [COURSE_B, COURSE_C, '기본·공통 교육과정 병행'] }) + '</div>';
+      fld('적용 교육과정', 'course', p.course || COURSE_B, { sel: [COURSE_B, COURSE_C, '기본·공통 교육과정 병행'] }) + '</div>' +
+      '<div style="margin-top:10px"><label>학생 학년군 <small>(여러 개 고를 수 있어요 · 새로 추가하는 교과의 기본값)</small></label><div class="chips">' +
+      BAND_ORDER.map(function (b) { return '<label class="chk"><input type="checkbox" data-pband="' + b + '"' + ((p.bands || []).indexOf(b) >= 0 ? ' checked' : '') + '> ' + b + '</label>'; }).join('') + '</div></div>';
     h += '<p class="dates">팀 구성 기한 <b>' + (addDays(p.start, 14) || '-') + '</b> · 계획 결재 기한 <b>' + (addDays(p.start, 30) || '-') + '</b> · 학기 말 평가 결과 보호자 안내</p>';
     h += '</section><section class="card" id="s-info"><h2>학교·학생 인적사항</h2><p class="hint">출력물 첫 장의 학교·학생 정보예요. 비워 두면 출력에서도 빠집니다.</p>';
     h += '<div class="grid">' + fld('학교명', 'info.school', i.school) + fld('학년 반', 'info.gradeClass', i.gradeClass, { ph: '예: 5학년 2반' }) + fld('이름', 'info.name', i.name) +
@@ -252,11 +267,10 @@
       fld('학부모 요구사항', 'parentNeeds', p.parentNeeds, { area: 1, wide: 1 }) + fld('기타(건강·투약·의사소통 수단 등)', 'etc', p.etc, { area: 1, wide: 1 }) + '</div></section>';
 
     /* 4 교과·영역별 계획 */
-    h += '<section class="card" id="s-subj"><h2>4. 교과·영역별 교육계획</h2><p class="hint">교육과정과 교과를 고르면 성취기준에서 목표를 고를 수 있습니다. <b>기본 교육과정</b>은 특수학교 기본 교육과정(별책 3, 초1~고3), <b>공통 교육과정</b>은 일반 초·중학교 교과 교육과정(초1~중3)입니다. 앱 차시가 연결된 성취기준은 단원·차시·평가 준거까지 월별 표에 채워집니다. 생활지원 영역은 성취기준 없이 학교가 정한 목표로 씁니다.</p>';
-    var defCourse = p.course === COURSE_C ? COURSE_C : COURSE_B, addCourse = render.addCourse || defCourse;
-    h += '<div class="actions"><select id="addSubjCourse" style="width:auto" aria-label="교육과정">' + COURSES.map(function (c) { return '<option' + (c === addCourse ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select>' +
-      '<select id="addSubjName" style="width:auto" aria-label="교과"><optgroup label="교과">' + SUBJ_ORDER_BY[addCourse].map(function (s) { return '<option>' + s + '</option>'; }).join('') + '</optgroup><optgroup label="생활지원 영역">' + LIFE.map(function (s) { return '<option>' + s + '</option>'; }).join('') + '</optgroup></select>' +
-      '<select id="addSubjBand" style="width:auto" aria-label="학년군">' + BAND_ORDER.map(function (b) { return '<option>' + b + '</option>'; }).join('') + '</select><button class="pri" data-act="addSubj">＋ 교과·영역 추가</button></div>';
+    h += '<section class="card" id="s-subj"><h2>4. 교과·영역별 교육계획</h2><p class="hint">교과를 추가한 뒤 그 안에서 교육과정과 학년군을 고르면 성취기준에서 목표를 고를 수 있습니다. 한 교과에 기본·공통 교육과정, 여러 학년군을 함께 담을 수 있어요. <b>기본 교육과정</b>은 특수학교 기본 교육과정(별책 3, 초1~고3), <b>공통 교육과정</b>은 일반 초·중학교 교과 교육과정(초1~중3)입니다. 앱 차시가 연결된 성취기준은 단원·차시·평가 준거까지 월별 표에 채워집니다. 생활지원 영역은 성취기준 없이 학교가 정한 목표로 씁니다.</p>';
+    var allSubj = SUBJ_ORDER_BY[COURSE_B].concat(SUBJ_ORDER_BY[COURSE_C].filter(function (x) { return SUBJ_ORDER_BY[COURSE_B].indexOf(x) < 0; }));
+    h += '<div class="actions"><select id="addSubjName" style="width:auto" aria-label="교과"><optgroup label="교과">' + allSubj.map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</optgroup><optgroup label="생활지원 영역">' + LIFE.map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</optgroup></select>' +
+      '<button class="pri" data-act="addSubj">＋ 교과·영역 추가</button><span class="hint" style="margin:0;align-self:center">교육과정(기본·공통)과 학년군은 교과 안에서 여러 개 고를 수 있어요</span></div>';
     h += p.subjects.map(subjectHtml).join('') || '<p class="hint">아직 추가한 교과·영역이 없어요.</p>';
     h += '</section>';
 
@@ -329,16 +343,20 @@
 
   function subjectHtml(s, si) {
     var base = 'subjects.' + si;
-    var h = '<div class="subj" data-si="' + si + '"><div class="head"><h3>' + esc(s.name) + (s.band ? ' <small style="font-weight:400;color:var(--soft)">' + esc((courseOf(s) === COURSE_C ? '공통 · ' : '기본 · ') + s.band) + '</small>' : '') + '</h3>' +
+    var h = '<div class="subj" data-si="' + si + '"><div class="head"><h3>' + esc(s.name) + (subjSummary(s) ? ' <small style="font-weight:400;color:var(--soft)">' + esc(subjSummary(s)) + '</small>' : '') + '</h3>' +
       '<button class="ghost" data-act="moveSubj" data-si="' + si + '" data-dir="-1" aria-label="위로">▲</button><button class="ghost" data-act="moveSubj" data-si="' + si + '" data-dir="1" aria-label="아래로">▼</button>' +
       '<button class="ghost del" data-act="delSubj" data-si="' + si + '">삭제</button></div><div class="body">';
     if (!s.life) {
-      h += '<div class="picker"><div class="row"><div><label>학년군</label><select data-pick="band" data-si="' + si + '">' + BAND_ORDER.map(function (b) { return '<option' + (b === s.band ? ' selected' : '') + '>' + b + '</option>'; }).join('') + '</select></div>' +
-        '<div><label>성취기준 찾기</label><input data-pick="q" data-si="' + si + '" placeholder="낱말로 찾기 (예: 시각, 화폐, 인사)"></div></div>' +
+      var cs = coursesOf(s), ac = availCourses(s.name), ab = availBands(s.name, cs), bs = bandsOf(s);
+      h += '<div class="picker"><div class="row"><div><label>교육과정 <small>(함께 고를 수 있어요)</small></label><div class="chips">' +
+        COURSES.map(function (c) { var ok = ac.indexOf(c) >= 0; return '<label class="chk' + (ok ? '' : ' off') + '"><input type="checkbox" data-scourse="' + c + '" data-si="' + si + '"' + (cs.indexOf(c) >= 0 ? ' checked' : '') + (ok ? '' : ' disabled title="이 교과는 ' + c + '에 없어요"') + '> ' + c + '</label>'; }).join('') + '</div></div>' +
+        '<div><label>학년군 <small>(여러 개)</small></label><div class="chips">' +
+        BAND_ORDER.map(function (b) { var ok = ab.indexOf(b) >= 0; return '<label class="chk' + (ok ? '' : ' off') + '"><input type="checkbox" data-sband="' + b + '" data-si="' + si + '"' + (bs.indexOf(b) >= 0 ? ' checked' : '') + (ok ? '' : ' disabled') + '> ' + b + '</label>'; }).join('') + '</div></div></div>' +
+        '<div class="row"><div><label>성취기준 찾기</label><input data-pick="q" data-si="' + si + '" placeholder="낱말로 찾기 (예: 시각, 화폐, 인사)"></div></div>' +
         '<div class="stdlist" id="stdlist-' + si + '">' + stdListHtml(s, si, '') + '</div>' +
         '<div class="actions"><button class="pri" data-act="autoFill" data-si="' + si + '">⚡ 고른 성취기준으로 장기 목표·월별 계획 채우기</button><span class="hint" style="margin:0;align-self:center">앱 차시가 있으면 단원·차시·평가 준거까지 들어가요</span></div></div>';
     }
-    if (s.stds.length) h += '<div class="chips" style="margin:6px 0">' + s.stds.map(function (c) { return '<span class="chip std" title="' + esc(STD[c]) + '"><b>' + esc(c) + '</b></span>'; }).join('') + '</div>';
+    if (s.stds.length) h += '<div class="chips" style="margin:6px 0">' + s.stds.map(function (c) { var m = meta(c) || {}; return '<span class="chip std" title="' + esc(STD[c]) + '"><span class="ctag ' + (m.course === COURSE_C ? 'c' : 'b') + '">' + shortC(m.course) + '</span><b>' + esc(c) + '</b></span>'; }).join('') + '</div>';
     h += '<div class="grid">' + fld('현재 학습 수행 수준', base + '.present', s.present, { area: 1, wide: 1, ph: '- 할 수 있는 것(구체적 행동)\n- 도움이 필요한 것' }) +
       fld('학기 장기 목표', base + '.longGoals', s.longGoals, { area: 1, wide: 1, ph: '- (조건) + 행동 + (기준) 으로 적어요. 예: 그림 단서가 주어지면 ~을 5회 중 4회 할 수 있다.' }) + '</div>';
     h += '<div class="actions"><button data-act="presentFromRec" data-si="' + si + '">📋 앱 기록으로 현재 수준 초안</button></div>';
@@ -357,12 +375,14 @@
     return h;
   }
   function stdListHtml(s, si, q) {
-    var list = ALL.filter(function (x) { return x.course === courseOf(s) && x.subj === s.name && x.band === s.band; });
+    var cs = coursesOf(s), bs = bandsOf(s);
+    var list = ALL.filter(function (x) { return cs.indexOf(x.course) >= 0 && x.subj === s.name && bs.indexOf(x.band) >= 0; });
+    list.sort(function (a, b) { return (COURSES.indexOf(a.course) - COURSES.indexOf(b.course)) || (BAND_ORDER.indexOf(a.band) - BAND_ORDER.indexOf(b.band)) || 0; });
     if (q) { var w = q.split(/\s+/).filter(Boolean); list = list.filter(function (x) { return w.every(function (t) { return (x.code + x.text + x.area).indexOf(t) >= 0; }); }); }
-    if (!list.length) return '<p class="hint" style="padding:8px">' + (q ? '찾는 성취기준이 없어요.' : '이 교과는 이 학년군에 성취기준이 없어요. 학년군을 바꿔 보세요(예: 진로와 직업은 중1~3·고1~3, 바른 생활 등은 초1~2).') + '</p>';
+    if (!list.length) return '<p class="hint" style="padding:8px">' + (q ? '찾는 성취기준이 없어요.' : (!cs.length || !bs.length ? '위에서 교육과정과 학년군을 하나 이상 골라 주세요.' : '고른 교육과정·학년군에 이 교과 성취기준이 없어요. 회색이 아닌 학년군을 골라 보세요.')) + '</p>';
     var lastA = null, h = '';
     list.forEach(function (x) {
-      if (x.areaKey !== lastA) { h += '<div class="area">' + esc(x.area || x.subj) + '</div>'; lastA = x.areaKey; }
+      if (x.course + x.areaKey !== lastA) { h += '<div class="area"><span class="ctag ' + (x.course === COURSE_C ? 'c' : 'b') + '">' + shortC(x.course) + '</span> ' + esc(x.band) + ' · ' + esc(x.area || x.subj) + '</div>'; lastA = x.course + x.areaKey; }
       var n = lessonsFor(x.code).length;
       h += '<label><input type="checkbox" data-std="' + x.code + '" data-si="' + si + '"' + (s.stds.indexOf(x.code) >= 0 ? ' checked' : '') + '><span><b>[' + esc(x.code) + ']</b> ' + esc(x.text) + (n ? ' <small>· 🎮 앱 차시 ' + n + '개</small>' : '') + '</span></label>';
     });
@@ -379,7 +399,7 @@
     var made = 0;
     stds.forEach(function (c, k) {
       var month = months[Math.min(months.length - 1, Math.floor(k * months.length / stds.length))];
-      var ls = lessonsFor(c).filter(function (l) { return !s.band || bandOfLesson(l) === s.band || !bandOfLesson(l); });
+      var bsx = bandsOf(s), ls = lessonsFor(c).filter(function (l) { return !bsx.length || bsx.indexOf(bandOfLesson(l)) >= 0 || !bandOfLesson(l); });
       if (!ls.length) ls = lessonsFor(c);
       var m = meta(c);
       if (!ls.length) {
@@ -442,7 +462,7 @@
     save(); render(); toast(n ? n + '개 행에 평가 결과를 제안했어요' + (none ? ' (기록 없는 행 ' + none + '개)' : '') : '학기 기간 안의 앱 기록이 없어요');
   }
   /* ---------- 평가: 목표별 결과 표 → 서술형 문장 ---------- */
-  function subjLabel(s) { return s.life ? s.name + ' 영역' : s.name + ' (' + (courseOf(s) === COURSE_C ? '공통' : '기본') + (s.band ? ' ' + s.band : '') + ')'; }
+  function subjLabel(s) { var sm = subjSummary(s); return s.life ? s.name + ' 영역' : s.name + (sm ? ' (' + sm + ')' : ''); }
   function oneLine(t) { return String(t || '').replace(/\s*\n\s*/g, ' ').trim(); }
   function cleanGoal(g) { return oneLine(g).replace(/^-\s*/, '').replace(/[.。]\s*$/, ''); }
   function unitName(u) { return oneLine(String(u || '').split('\n')[0]).replace(/^\[|\]$/g, ''); }
@@ -657,7 +677,14 @@
     p.subjects.forEach(function (s, k) {
       h += (firstSubj && k === 0 ? '' : '<div class="pb"></div>') + '<h3>' + esc(p.term) + '학기 ' + esc(s.name) + (s.life ? ' 영역' : / /.test(s.name) ? '' : '과') + ' 교육계획</h3>';
       h += '<table><tr><th>현재 학습 수행 수준</th></tr><tr><td>' + lines(s.present) + '</td></tr><tr><th>' + esc(p.term) + '학기 장기 목표</th></tr><tr><td>' + lines(s.longGoals) + '</td></tr></table>';
-      if (s.stds.length) h += '<table><tr><th style="width:18%">관련 성취기준<br><small>' + esc(courseLabel(courseOf(s))) + '</small></th><td>' + s.stds.map(function (c) { return '[' + esc(c) + '] ' + esc(STD[c]); }).join('<br>') + '</td></tr></table>';
+      if (s.stds.length) {
+        h += '<table>';
+        COURSES.forEach(function (crs, k) {
+          var list = s.stds.filter(function (c) { var m = meta(c); return m && m.course === crs; }); if (!list.length) return;
+          h += '<tr><th style="width:18%">관련 성취기준<br><small>' + esc(courseLabel(crs)) + '</small></th><td>' + list.map(function (c) { return '[' + esc(c) + '] ' + esc(STD[c]); }).join('<br>') + '</td></tr>';
+        });
+        h += '</table>';
+      }
       h += '<table><tr><th rowspan="2" style="width:7%">월</th><th rowspan="2" style="width:13%">단원</th><th rowspan="2" style="width:18%">단기 교육목표</th><th rowspan="2">교육내용</th><th rowspan="2" style="width:10%">교육<br>방법</th><th colspan="2">평가계획</th></tr><tr><th style="width:17%">성취준거</th><th style="width:8%">평가결과</th></tr>' +
         (s.rows.length ? s.rows.map(function (r) { return '<tr><td class="center">' + esc(r.month) + '</td><td>' + lines(r.unit) + '</td><td>' + lines(r.goal) + (r.std.length ? '<br><small>' + r.std.map(function (c) { return '[' + esc(c) + ']'; }).join(' ') + '</small>' : '') + '</td><td>' + lines(r.content) + '</td><td>' + lines(r.method) + '</td><td>' + lines(r.crit) + '</td><td class="center">' + esc(r.result) + '</td></tr>'; }).join('')
           : '<tr><td colspan="7" class="center">-</td></tr>') + '</table>';
@@ -718,14 +745,20 @@
     var t = e.target;
     if (t.id === 'profSel') { if (t.value === '__new') { var nm = prompt('학생 별명이나 번호를 적어 주세요 (실명 대신, 12자 이내)'); if (nm && nm.trim()) { pickProfile(addProfile(nm.trim().slice(0, 12))); } else drawHead(); } else pickProfile(t.value); return; }
     if (t.id === 'planSel') { choosePlan(t.value); return; }
-    if (t.id === 'addSubjCourse') { render.addCourse = t.value; var yy = window.scrollY; render(); window.scrollTo(0, yy); return; }
-    if (t.getAttribute('data-p') === 'course') { render.addCourse = t.value === COURSE_C ? COURSE_C : COURSE_B; save(); var y3 = window.scrollY; render(); window.scrollTo(0, y3); return; }
+    var sc = t.getAttribute('data-scourse'), sb = t.getAttribute('data-sband'), pb = t.getAttribute('data-pband');
+    if (sc || sb) {
+      var sx = cur.subjects[+t.getAttribute('data-si')], key = sc ? 'courses' : 'bands', val = sc || sb;
+      var arr = (sc ? coursesOf(sx) : bandsOf(sx)).slice(), ix = arr.indexOf(val);
+      if (t.checked && ix < 0) arr.push(val); if (!t.checked && ix >= 0) arr.splice(ix, 1);
+      sx[key] = sc ? COURSES.filter(function (c) { return arr.indexOf(c) >= 0; }) : BAND_ORDER.filter(function (b) { return arr.indexOf(b) >= 0; });
+      save(); var y4 = window.scrollY; render(); window.scrollTo(0, y4); return;
+    }
+    if (pb) { var pbs = (cur.bands || []).slice(), pi = pbs.indexOf(pb); if (t.checked && pi < 0) pbs.push(pb); if (!t.checked && pi >= 0) pbs.splice(pi, 1); cur.bands = BAND_ORDER.filter(function (b) { return pbs.indexOf(b) >= 0; }); save(); return; }
     if (t.id === 'keepP') { cur.keepPersonal = t.checked; persistNow(); toast(t.checked ? '인적사항을 이 기기에 저장해요' : '인적사항은 저장하지 않아요'); return; }
     if (t.id === 'importJson') { importFile(t.files[0]); t.value = ''; return; }
     var chk = t.getAttribute('data-chk'); if (chk) { setP(cur, chk, t.checked); save(); var y = window.scrollY; render(); window.scrollTo(0, y); return; }
     var code = t.getAttribute('data-std');
     if (code) { var s = cur.subjects[+t.getAttribute('data-si')]; var k = s.stds.indexOf(code); if (t.checked && k < 0) s.stds.push(code); if (!t.checked && k >= 0) s.stds.splice(k, 1); s.stds.sort(); save(); return; }
-    if (t.getAttribute('data-pick') === 'band') { var s2 = cur.subjects[+t.getAttribute('data-si')]; s2.band = t.value; save(); var y2 = window.scrollY; render(); window.scrollTo(0, y2); return; }
     if (t.getAttribute('data-p')) { save(); }
   });
   document.addEventListener('click', function (e) {
@@ -743,13 +776,11 @@
     if (del) { var ks = del.split('.'), idx = +ks.pop(), a2 = getP(cur, ks.join('.')); a2.splice(idx, 1); save(); rerender(); return; }
     var act = b.getAttribute('data-act'), si = +b.getAttribute('data-si'), ri = +b.getAttribute('data-ri');
     if (act === 'addSubj') {
-      var nm = $('#addSubjName').value, band = $('#addSubjBand').value, crs = $('#addSubjCourse').value;
-      var has = function (bb) { return ALL.some(function (x) { return x.course === crs && x.subj === nm && x.band === bb; }); };
-      if (LIFE.indexOf(nm) < 0 && !has(band)) {
-        var bands = BAND_ORDER.filter(has);
-        band = bands[0] || band; toast(crs + ' ' + nm + '은(는) ' + bands.join('·') + ' 학년군에 있어요 → ' + band);
-      }
-      cur.subjects.push(newSubject(nm, LIFE.indexOf(nm) >= 0 ? '' : band, crs)); save(); rerender();
+      var nm = $('#addSubjName').value, life = LIFE.indexOf(nm) >= 0;
+      var ac2 = availCourses(nm), cs2 = planCourses(cur).filter(function (c) { return ac2.indexOf(c) >= 0; }); if (!cs2.length) cs2 = ac2.slice(0, 1);
+      var ab2 = availBands(nm, cs2), bs2 = (cur.bands || []).filter(function (b) { return ab2.indexOf(b) >= 0; }); if (!bs2.length) bs2 = ab2.slice(0, 1);
+      cur.subjects.push(newSubject(nm, life ? [] : cs2, life ? [] : bs2)); save(); rerender();
+      if (!life && !(cur.bands || []).length) toast('학년군을 ' + bs2.join('·') + '(으)로 시작했어요. 교과 안에서 더 고를 수 있어요');
       var last = $$('.subj'); if (last.length) last[last.length - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
