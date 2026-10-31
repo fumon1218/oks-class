@@ -181,7 +181,82 @@
     else coursesOf(s).forEach(function (c) { g[c] = bandsOf(s).filter(function (b) { return availBands(s.name, [c]).indexOf(b) >= 0; }); });
     return COURSES.filter(function (c) { return g[c]; }).map(function (c) { return shortC(c) + (g[c].length ? ' ' + BAND_ORDER.filter(function (b) { return g[c].indexOf(b) >= 0; }).join('·') : ''); }).join(' + ');
   }
-  function newRow(month) { return { month: month || '', unit: '', goal: '', content: '', method: '직접교수, 모델링, 최소촉진', crit: '', result: '', memo: '', std: [], lessons: [] }; }
+  function newRow(month) { return { month: month || '', unit: '', goal: '', cond: '', measure: '', period: '', content: '', method: '직접교수, 모델링, 최소촉진', crit: '', result: '', memo: '', std: [], lessons: [], checks: [] }; }
+
+  /* ---------- ① 측정 가능한 목표: 조건 + 행동 + 기준 + 기간 (미국 IEP '측정 가능한 목표' 방식) ---------- */
+  var COND_OPTS = ['그림 단서가 주어지면', '시범을 본 후', '교사의 언어 촉진이 있으면', '시각 일과표를 보고', '2개 보기 중에서', '3개 보기 중에서', 'AAC(그림 카드)를 사용하여', '또래와 함께', '실제 생활 장면에서', '촉진 없이 스스로'];
+  var MEAS_OPTS = ['5회 중 4회', '5회 중 3회', '10회 중 8회', '80% 이상', '70% 이상', '10문항 중 8문항', '3회 연속', '독립 수행'];
+  var PER_OPTS = ['2주 연속', '3회기 연속', '한 달 동안', '학기 말까지', '2학기 동안'];
+  function measTail(r) { return [r.measure, r.period].map(function (x) { return oneLine(x); }).filter(Boolean).join(', '); }
+  function goalCore(r) { var core = cleanGoal(r.goal); if (!core) return ''; var c = oneLine(r.cond); return (c && core.indexOf(c) !== 0 ? c + ' ' : '') + core; }
+  function goalFull(r) { var g = goalCore(r); if (!g) return oneLine(r.goal); var t = measTail(r); return g + '.' + (t ? ' (' + t + ')' : ''); }
+  function critFull(r) { var c = oneLine(r.crit), t = measTail(r); return c + (t && c.indexOf(t) < 0 ? ' (' + t + ')' : ''); }
+  function targetPct(r) {
+    var m = String(r.measure || ''), x;
+    if ((x = /(\d+)\s*(?:회|문항|번|개|번 중)\s*중\s*(\d+)/.exec(m))) return Math.min(100, Math.round(+x[2] / +x[1] * 100));
+    if ((x = /(\d+)\s*%/.exec(m))) return +x[1];
+    if (/독립|스스로/.test(m)) return 100;
+    return (cur && cur.scale && +cur.scale.a) || 70;
+  }
+
+  /* ---------- ② 진전도 점검: 교사 점검 + 앱 기록(날짜별 독립 수행 비율) ---------- */
+  function today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function rowPoints(r) {
+    var pts = (r.checks || []).map(function (c) { return { date: c.date, pct: +c.pct, src: 't', note: c.note || '' }; });
+    if (r.lessons && r.lessons.length && cur) {
+      var by = {}; logsFor(cur, r.lessons).forEach(function (x) { var d = String(x.at).slice(0, 10); (by[d] = by[d] || []).push(x); });
+      Object.keys(by).forEach(function (d) { var a = by[d]; pts.push({ date: d, pct: Math.round(a.filter(function (x) { return INDEP[x.independence]; }).length / a.length * 100), src: 'a', note: '앱 ' + a.length + '회' }); });
+    }
+    return pts.filter(function (q) { return q.date && !isNaN(q.pct); }).sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+  }
+  function recentRate(pts) { if (!pts.length) return null; var l = pts.slice(-3); return Math.round(l.reduce(function (t, q) { return t + q.pct; }, 0) / l.length); }
+  function rowStatus(r) {
+    var pts = rowPoints(r), t = targetPct(r), rr = recentRate(pts);
+    if (rr == null) return { txt: '기록 없음', cls: 'none', rate: null, target: t, n: 0 };
+    var st = rr >= t ? ['목표 도달', 'ok'] : (pts.length >= 2 && pts[pts.length - 1].pct > pts[0].pct ? ['진전 중', 'up'] : ['지원 점검', 'warn']);
+    return { txt: st[0], cls: st[1], rate: rr, target: t, n: pts.length };
+  }
+  function spark(r, w, h) {
+    var pts = rowPoints(r), t = targetPct(r); w = w || 150; h = h || 42;
+    if (!pts.length) return '<span class="spark-none">기록 없음</span>';
+    var n = pts.length, X = function (i) { return n === 1 ? w / 2 : 6 + i * (w - 12) / (n - 1); }, Y = function (v) { return h - 5 - v / 100 * (h - 10); };
+    var g = '<svg class="spark" width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" role="img" aria-label="최근 ' + recentRate(pts) + '%, 목표 ' + t + '%">';
+    g += '<line x1="0" x2="' + w + '" y1="' + Y(t) + '" y2="' + Y(t) + '" stroke="#c07a2c" stroke-dasharray="4 3" stroke-width="1.2"/>';
+    if (n > 1) g += '<polyline fill="none" stroke="#2b6f9a" stroke-width="1.8" points="' + pts.map(function (q, i) { return X(i).toFixed(1) + ',' + Y(q.pct).toFixed(1); }).join(' ') + '"/>';
+    g += pts.map(function (q, i) { return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(q.pct).toFixed(1) + '" r="3.2" fill="' + (q.src === 't' ? '#2b6f9a' : '#fff') + '" stroke="#2b6f9a" stroke-width="1.5"><title>' + esc(q.date + ' · ' + q.pct + '%' + (q.note ? ' · ' + q.note : '')) + '</title></circle>'; }).join('');
+    return g + '</svg>';
+  }
+
+  /* ---------- ③ 지원·조정: 편의지원·평가 조정·교육과정 조정 수준·통합학급 참여 ---------- */
+  var SUP = [
+    ['present', '제시 방법', ['확대 자료', '읽어 주기(음성)', '그림·상징 단서', '쉬운 글', '과제 단계 나누기', '시각적 일과표', '실물·구체물']],
+    ['respond', '반응 방법', ['AAC·그림 카드', '말로 답하기', '고르기(선택형)', '가리키기', '스위치', '대필·받아쓰기', '보조공학기기']],
+    ['time', '시간·과제 양', ['시간 연장', '휴식 제공', '과제 양 줄이기', '짧게 나눠 하기', '미리 알려 주기(예고)']],
+    ['env', '환경·인력', ['자리 배치', '소음·자극 줄이기', '보조인력 지원', '또래 도우미', '감각 조절 공간']],
+    ['evaladj', '평가 조정', ['평가 시간 연장', '문항 읽어 주기', '별도 공간', '답 표기 방법 조정', '관찰·포트폴리오로 대체', '문항 수·수준 조정']]
+  ];
+  var ADJ_LEVELS = ['', '같은 성취기준·같은 방법', '편의지원(방법만 조정)', '내용 수정(성취기준 수준 조정)', '대체(다른 교육과정·생활 기능으로)'];
+  function supOf(s) { if (!s.sup) s.sup = { present: [], respond: [], time: [], env: [], evaladj: [], level: '', inclHours: '', inclNote: '', note: '' }; return s.sup; }
+  function supCount(s) { var u = s.sup; if (!u) return 0; return SUP.reduce(function (t, c) { return t + (u[c[0]] || []).length; }, 0) + (u.level ? 1 : 0) + (u.inclHours || u.inclNote ? 1 : 0) + (u.note ? 1 : 0); }
+  function supHtml(s, si) {
+    var u = supOf(s), n = supCount(s), b = 'subjects.' + si + '.sup.';
+    var h = '<details class="supbox"' + (n ? ' open' : '') + '><summary>🧩 지원·조정 <small>편의지원 · 평가 조정 · 통합학급 참여</small> <span class="opt-tag' + (n ? ' on">' + n + '개 기록' : '">비어 있음') + '</span></summary><div class="supbody">';
+    h += '<div class="grid">' + fld('교육과정 조정 수준', b + 'level', u.level, { sel: ADJ_LEVELS }) + fld('통합학급 참여(주당 시간)', b + 'inclHours', u.inclHours, { ph: '예: 주 12시간' }) + fld('통합학급 참여 형태', b + 'inclNote', u.inclNote, { ph: '예: 음악·체육은 통합학급, 국어·수학은 특수학급' }) + '</div>';
+    SUP.forEach(function (c) {
+      h += '<div class="suprow"><b>' + c[1] + '</b><div class="chips">' + c[2].map(function (v) { return '<label class="chk"><input type="checkbox" data-sup="' + c[0] + '" data-val="' + esc(v) + '" data-si="' + si + '"' + ((u[c[0]] || []).indexOf(v) >= 0 ? ' checked' : '') + '> ' + esc(v) + '</label>'; }).join('') + '</div></div>';
+    });
+    h += '<div class="grid">' + fld('그 밖의 지원(직접 쓰기)', b + 'note', u.note, { wide: 1, ph: '예: 활동 전 손 씻기 순서표 제시' }) + '</div></div></details>';
+    return h;
+  }
+  function supLines(s) {
+    var u = s.sup; if (!u) return [];
+    var out = [];
+    if (u.level) out.push(['교육과정 조정', u.level]);
+    SUP.forEach(function (c) { if ((u[c[0]] || []).length) out.push([c[1], u[c[0]].join(', ')]); });
+    if (u.note) out.push(['그 밖의 지원', u.note]);
+    if (u.inclHours || u.inclNote) out.push(['통합학급 참여', [u.inclHours, u.inclNote].filter(Boolean).join(' · ')]);
+    return out;
+  }
 
   /* ---------- 기록 → 평가 ---------- */
   function logsFor(p, lessonIds) {
@@ -272,6 +347,7 @@
     h += '<div class="actions"><select id="addSubjName" style="width:auto" aria-label="교과"><optgroup label="교과">' + allSubj.map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</optgroup><optgroup label="생활지원 영역">' + LIFE.map(function (x) { return '<option>' + x + '</option>'; }).join('') + '</optgroup></select>' +
       '<button class="pri" data-act="addSubj">＋ 교과·영역 추가</button><span class="hint" style="margin:0;align-self:center">교육과정(기본·공통)과 학년군은 교과 안에서 여러 개 고를 수 있어요</span></div>';
     h += p.subjects.map(subjectHtml).join('') || '<p class="hint">아직 추가한 교과·영역이 없어요.</p>';
+    h += '<datalist id="dl-cond">' + COND_OPTS.map(function (x) { return '<option value="' + x + '">'; }).join('') + '</datalist><datalist id="dl-meas">' + MEAS_OPTS.map(function (x) { return '<option value="' + x + '">'; }).join('') + '</datalist><datalist id="dl-per">' + PER_OPTS.map(function (x) { return '<option value="' + x + '">'; }).join('') + '</datalist>';
     h += '</section>';
 
     /* 5 행동지원·전환 */
@@ -291,7 +367,7 @@
     h += '<section class="card" id="s-eval"><h2>6. 평가</h2><p class="hint">학기별 1회 보호자에게 평가 결과를 안내합니다. 4번 월별 계획의 단원·단기 목표·성취준거마다 결과(가·나·다·라)와 관찰 메모를 남기면, 그 내용으로 교과별 서술형 평가 문장을 만듭니다. 앱 기록이 있으면 결과를 먼저 제안받을 수 있어요.</p>';
     h += '<div class="grid">' + fld('가: 이상(%)', 'scale.a', p.scale.a, { type: 'number' }) + fld('나: 이상(%)', 'scale.b', p.scale.b, { type: 'number' }) + '</div>';
     h += '<p class="hint" style="margin-top:6px">가 ' + p.scale.a + '% 이상 대체로 스스로 수행 · 나 ' + p.scale.b + '~' + p.scale.a + '% 부분적 도움 · 다 ' + p.scale.b + '% 미만 전반적 도움 · 라 수행하지 못함</p>';
-    h += '<div class="actions"><button data-act="fillEval">📊 앱 기록으로 결과 제안</button><button class="pri" data-act="evalWriteAll">✍️ 모든 교과 평가 문장 만들기</button><button data-act="aiOpen" data-si="-1">🤖 AI 도움 받기(전체)</button></div>';
+    h += '<div class="actions"><button data-act="fillEval">📊 점검·앱 기록으로 결과 제안</button><button data-act="progressReport">📨 보호자용 진전 안내</button><button class="pri" data-act="evalWriteAll">✍️ 모든 교과 평가 문장 만들기</button><button data-act="aiOpen" data-si="-1">🤖 AI 도움 받기(전체)</button></div>';
     if (!p.subjects.length) h += '<p class="note">4번에서 교과·영역을 먼저 추가해 주세요.</p>';
     h += p.subjects.map(evalSubjectHtml).join('');
     h += '<div class="subj"><div class="head"><h3>종합 평가</h3><button data-act="evalTotal">✍️ 종합 평가 만들기</button></div><div class="body"><div class="grid">' + fld('종합 평가', 'evalTotal', p.evalTotal, { area: 1, wide: 1, ph: '교과별 평가와 행동·생활 영역을 묶어 학생의 성장과 다음 학기 중점을 적어요.' }) + '</div></div></div></section>';
@@ -360,12 +436,17 @@
     h += '<div class="grid">' + fld('현재 학습 수행 수준', base + '.present', s.present, { area: 1, wide: 1, ph: '- 할 수 있는 것(구체적 행동)\n- 도움이 필요한 것' }) +
       fld('학기 장기 목표', base + '.longGoals', s.longGoals, { area: 1, wide: 1, ph: '- (조건) + 행동 + (기준) 으로 적어요. 예: 그림 단서가 주어지면 ~을 5회 중 4회 할 수 있다.' }) + '</div>';
     h += '<div class="actions"><button data-act="presentFromRec" data-si="' + si + '">📋 앱 기록으로 현재 수준 초안</button></div>';
+    h += supHtml(s, si);
+    if (s.rows.length) h += '<p class="hint" style="margin:8px 0 4px">단기 목표마다 <b>조건</b>(어떤 도움으로)·<b>기준</b>(얼마나)·<b>기간</b>(얼마 동안)을 붙이면 측정 가능한 목표가 됩니다. 목록에서 고르거나 직접 쓰세요.</p>';
     h += '<div class="scroll"><table class="edit"><thead><tr><th style="width:74px">월</th><th style="width:140px">단원</th><th>단기 교육목표</th><th>교육내용</th><th style="width:120px">교육방법</th><th style="width:150px">성취준거</th><th style="width:70px">평가결과</th><th style="width:96px"></th></tr></thead><tbody>';
     h += s.rows.map(function (r, ri) {
       var rb = base + '.rows.' + ri;
       var tags = r.std.map(function (c) { return '<span class="chip std" title="' + esc(STD[c]) + '">' + esc(c) + '</span>'; }).concat(r.lessons.map(function (id) { var l = lessonById(id); return '<span class="chip les" title="' + esc(l ? lessonLabel(l) : id) + '">🎮 ' + esc(id) + '</span>'; })).join('');
       return '<tr><td><input data-p="' + rb + '.month" value="' + esc(r.month) + '" list="months-' + si + '"></td><td><textarea data-p="' + rb + '.unit">' + esc(r.unit) + '</textarea></td>' +
-        '<td><textarea data-p="' + rb + '.goal">' + esc(r.goal) + '</textarea>' + (tags ? '<div class="chips">' + tags + '</div>' : '') + '</td><td><textarea data-p="' + rb + '.content">' + esc(r.content) + '</textarea></td>' +
+        '<td><textarea data-p="' + rb + '.goal">' + esc(r.goal) + '</textarea>' +
+        '<div class="meas"><input data-p="' + rb + '.cond" value="' + esc(r.cond || '') + '" list="dl-cond" placeholder="조건" title="조건: 어떤 도움·상황에서"><input data-p="' + rb + '.measure" value="' + esc(r.measure || '') + '" list="dl-meas" placeholder="기준" title="기준: 얼마나 정확하게"><input data-p="' + rb + '.period" value="' + esc(r.period || '') + '" list="dl-per" placeholder="기간" title="기간: 얼마 동안 유지"></div>' +
+        (goalCore(r) && (r.cond || r.measure || r.period) ? '<div class="goalfull">🎯 ' + esc(goalFull(r)) + '</div>' : '') +
+        (tags ? '<div class="chips">' + tags + '</div>' : '') + '</td><td><textarea data-p="' + rb + '.content">' + esc(r.content) + '</textarea></td>' +
         '<td><textarea data-p="' + rb + '.method">' + esc(r.method) + '</textarea></td><td><textarea data-p="' + rb + '.crit">' + esc(r.crit) + '</textarea></td>' +
         '<td><select data-p="' + rb + '.result"><option></option>' + ['가', '나', '다', '라'].map(function (g) { return '<option' + (g === r.result ? ' selected' : '') + '>' + g + '</option>'; }).join('') + '</select><input data-p="' + rb + '.memo" value="' + esc(r.memo) + '" placeholder="근거" title="평가 근거"></td>' +
         '<td><button class="ghost" data-act="pickLes" data-si="' + si + '" data-ri="' + ri + '" title="앱 차시 연결">🎮</button><button class="ghost" data-act="moveRow" data-si="' + si + '" data-ri="' + ri + '" data-dir="-1" aria-label="위로">▲</button><button class="ghost del" data-del="' + rb + '" aria-label="삭제">✕</button></td></tr>';
@@ -451,16 +532,50 @@
     var n = 0, none = 0;
     cur.subjects.forEach(function (s) {
       s.rows.forEach(function (r) {
-        if (!r.lessons.length) return;
-        var sm = summarize(logsFor(cur, r.lessons));
-        if (!sm) { none++; return; }
-        r.result = gradeOf(sm.rate, cur.scale);
-        r.memo = '앱 ' + sm.n + '회 · 독립 ' + sm.rate + '% · 수준 ' + sm.maxLevel + (sm.transfer.length ? ' · 생활 적용: ' + sm.transfer.slice(-1)[0] : '');
+        var st = rowStatus(r);
+        if (st.rate == null) { if (r.lessons.length || (r.checks || []).length) none++; return; }
+        r.result = gradeOf(st.rate, cur.scale);
+        var auto = '최근 ' + st.rate + '%·목표 ' + st.target + '%·기록 ' + st.n + '회';
+        if (!r.memo || /^(앱 |최근 )/.test(r.memo)) r.memo = auto;
         n++;
       });
     });
-    save(); render(); toast(n ? n + '개 행에 평가 결과를 제안했어요' + (none ? ' (기록 없는 행 ' + none + '개)' : '') : '학기 기간 안의 앱 기록이 없어요');
+    save(); render(); toast(n ? n + '개 목표에 결과를 제안했어요' + (none ? ' (기간 안 기록 없는 목표 ' + none + '개)' : '') : '점검 기록이나 앱 기록이 있는 목표가 없어요. ＋ 점검 기록으로 남겨 주세요');
   }
+  /* 점검 기록 창 */
+  var chkTarget = null;
+  function openChk(si, ri) {
+    chkTarget = { si: si, ri: ri };
+    var r = cur.subjects[si].rows[ri], d = $('#chkDlg');
+    var list = (r.checks || []).map(function (c, k) { return '<tr><td>' + esc(c.date) + '</td><td>' + esc(c.pct) + '%' + (c.raw ? ' <small>(' + esc(c.raw) + ')</small>' : '') + '</td><td>' + esc(c.note || '') + '</td><td><button type="button" class="ghost del" data-act="delCheck" data-k="' + k + '" aria-label="삭제">✕</button></td></tr>'; }).join('');
+    $('.dbody', d).innerHTML = '<p class="hint"><b>' + esc(goalFull(r)) + '</b><br>목표 수준 ' + targetPct(r) + '% · 앱 기록은 자동으로 합쳐져요</p>' +
+      '<div class="grid"><div><label for="ckDate">날짜</label><input id="ckDate" type="date" value="' + today() + '"></div>' +
+      '<div><label for="ckOk">해낸 횟수</label><input id="ckOk" type="number" min="0" inputmode="numeric" placeholder="예: 4"></div>' +
+      '<div><label for="ckTry">시도 횟수</label><input id="ckTry" type="number" min="1" inputmode="numeric" placeholder="예: 5"></div>' +
+      '<div><label for="ckPct">또는 수행률(%)</label><input id="ckPct" type="number" min="0" max="100" inputmode="numeric" placeholder="예: 80"></div>' +
+      '<div class="wide"><label for="ckNote">관찰 메모</label><input id="ckNote" placeholder="예: 그림 카드 2장 중에서 스스로 고름"></div></div>' +
+      '<div class="actions"><button type="button" class="pri" data-act="saveCheck">기록 추가</button></div>' +
+      (list ? '<table class="edit"><thead><tr><th>날짜</th><th>수행</th><th>메모</th><th></th></tr></thead><tbody>' + list + '</tbody></table>' : '<p class="hint">아직 점검 기록이 없어요.</p>');
+    if (!d.open) d.showModal();
+  }
+  /* 보호자용 진전 안내(1쪽) */
+  function progressHtml(p) {
+    var nm = p.info.name || profLabel(p.profile) || '';
+    var h = '<div class="docwrap"><h1>' + esc(p.year) + '학년도 ' + esc(p.term) + '학기 개별화교육 진전 안내</h1>';
+    h += '<p>' + (nm ? '<b>' + esc(nm) + '</b> 학생의 ' : '') + '이번 학기 개별화교육 목표를 향해 지금까지 배운 모습을 알려 드립니다. <small>(' + today() + ' 기준)</small></p>';
+    p.subjects.forEach(function (s) {
+      if (!s.rows.length) return;
+      h += '<h2>' + esc(subjLabel(s)) + '</h2><table><tr><th style="width:38%">목표</th><th style="width:28%">지금까지의 진전</th><th>지금의 모습</th></tr>' +
+        s.rows.map(function (r) {
+          var st = rowStatus(r), pts = rowPoints(r), lastNote = (r.checks || []).length ? r.checks[r.checks.length - 1].note : '';
+          return '<tr><td>' + esc(goalFull(r)) + '</td><td class="center">' + spark(r, 160, 44) + '<br><small>' + (st.rate != null ? '최근 ' + st.rate + '% · 목표 ' + st.target + '% · 기록 ' + pts.length + '회' : '아직 기록 없음') + '</small></td><td><b>' + st.txt + '</b>' + (lastNote ? '<br>' + esc(lastNote) : (r.memo ? '<br>' + esc(oneLine(r.memo)) : '')) + '</td></tr>';
+        }).join('') + '</table>';
+    });
+    h += '<table><tr><th style="width:24%">가정에서 함께해 주시면<br>좋은 점</th><td style="height:56pt"></td></tr></table>';
+    h += '<p><small>그래프: 실선 ● 선생님 관찰, ○ 앱 활동 기록(스스로 또는 말 도움으로 해낸 비율), 점선은 목표 수준입니다.' + (p.info.specialTeacher ? ' · 담당: ' + esc(p.info.specialTeacher) : '') + '</small></p></div>';
+    return h;
+  }
+
   /* ---------- 평가: 목표별 결과 표 → 서술형 문장 ---------- */
   function subjLabel(s) { var sm = subjSummary(s); return s.life ? s.name + ' 영역' : s.name + (sm ? ' (' + sm + ')' : ''); }
   function oneLine(t) { return String(t || '').replace(/\s*\n\s*/g, ' ').trim(); }
@@ -469,9 +584,11 @@
   function evalSubjectHtml(s, si) {
     var h = '<div class="subj"><div class="head"><h3>' + esc(subjLabel(s)) + ' 평가</h3><button data-act="evalWrite" data-si="' + si + '">✍️ 문장 만들기</button><button data-act="aiOpen" data-si="' + si + '">🤖 AI 도움</button></div><div class="body">';
     if (s.rows.length) {
-      h += '<div class="scroll"><table class="edit"><thead><tr><th style="width:64px">월</th><th style="width:150px">단원</th><th>단기 교육목표</th><th style="width:22%">성취준거</th><th style="width:150px">결과</th><th style="width:22%">관찰 메모·근거</th></tr></thead><tbody>' +
+      h += '<div class="scroll"><table class="edit"><thead><tr><th style="width:64px">월</th><th style="width:150px">단원</th><th>단기 교육목표</th><th style="width:19%">성취준거</th><th style="width:176px">진전(점검 기록)</th><th style="width:150px">결과</th><th style="width:19%">관찰 메모·근거</th></tr></thead><tbody>' +
         s.rows.map(function (r, ri) {
-          return '<tr><td>' + esc(r.month) + '</td><td>' + esc(unitName(r.unit)) + '</td><td>' + esc(cleanGoal(r.goal)) + (r.std.length ? '<div class="chips">' + r.std.map(function (c) { return '<span class="chip std" title="' + esc(STD[c]) + '">' + esc(c) + '</span>'; }).join('') + '</div>' : '') + '</td><td>' + esc(oneLine(r.crit)) + '</td>' +
+          var stt = rowStatus(r);
+          return '<tr><td>' + esc(r.month) + '</td><td>' + esc(unitName(r.unit)) + '</td><td>' + esc(goalFull(r)) + (r.std.length ? '<div class="chips">' + r.std.map(function (c) { return '<span class="chip std" title="' + esc(STD[c]) + '">' + esc(c) + '</span>'; }).join('') + '</div>' : '') + '</td><td>' + esc(critFull(r)) + '</td>' +
+            '<td>' + spark(r) + '<div class="stline"><span class="st ' + stt.cls + '">' + stt.txt + '</span>' + (stt.rate != null ? ' 최근 ' + stt.rate + '% / 목표 ' + stt.target + '%' : ' 목표 ' + stt.target + '%') + '</div><button type="button" class="ghost" data-act="addCheck" data-si="' + si + '" data-ri="' + ri + '">＋ 점검 기록' + ((r.checks || []).length ? ' (' + r.checks.length + ')' : '') + '</button></td>' +
             '<td><div class="gbtns" role="group" aria-label="평가 결과">' + ['가', '나', '다', '라'].map(function (g) { return '<button type="button" class="gbtn' + (r.result === g ? ' on' : '') + '" data-grade="' + g + '" data-si="' + si + '" data-ri="' + ri + '" aria-pressed="' + (r.result === g) + '" title="' + GRADE_TEXT[g] + '">' + g + '</button>'; }).join('') + '</div></td>' +
             '<td><textarea data-p="subjects.' + si + '.rows.' + ri + '.memo" placeholder="예: 그림 카드를 주면 스스로 고름">' + esc(r.memo) + '</textarea></td></tr>';
         }).join('') + '</tbody></table></div>';
@@ -483,7 +600,7 @@
   }
   var GRADE_PHRASE = { '가': '대체로 스스로 수행함', '나': '부분적인 도움을 받아 수행함', '다': '전반적인 도움을 받아 수행함', '라': '아직 수행하지 못함' };
   function goalPhrase(r) {
-    var g = cleanGoal(r.goal) || cleanGoal(r.content) || unitName(r.unit);
+    var g = goalCore(r) || cleanGoal(r.content) || unitName(r.unit);
     var memo = oneLine(r.memo);
     return '‘' + g + '’' + (/있다$/.test(g) ? '는' : '') + ' 목표는 ' + GRADE_PHRASE[r.result] + (memo ? '(' + memo + ')' : '') + '.';
   }
@@ -573,9 +690,10 @@
       if (s.stds.length) L.push('관련 성취기준: ' + s.stds.map(function (c) { return '[' + c + '] ' + STD[c]; }).join(' / '));
       if (s.longGoals) L.push('장기 목표: ' + oneLine(s.longGoals));
       if (s.present) L.push('학기 초 수행 수준: ' + oneLine(s.present).slice(0, 300));
+      if (supLines(s).length) L.push('지원·조정: ' + supLines(s).map(function (x) { return x[0] + ' — ' + x[1]; }).join(' / '));
       s.rows.forEach(function (r) {
-        L.push('- ' + (r.month ? r.month + ' · ' : '') + (unitName(r.unit) ? '단원 ' + unitName(r.unit) + ' · ' : '') + '단기 목표: ' + cleanGoal(r.goal) +
-          (r.crit ? ' · 성취준거: ' + oneLine(r.crit) : '') + ' · 결과: ' + (r.result ? r.result + '(' + GRADE_TEXT[r.result] + ')' : '미평가') + (r.memo ? ' · 관찰: ' + oneLine(r.memo) : ''));
+        L.push('- ' + (r.month ? r.month + ' · ' : '') + (unitName(r.unit) ? '단원 ' + unitName(r.unit) + ' · ' : '') + '단기 목표: ' + goalFull(r) +
+          (r.crit ? ' · 성취준거: ' + critFull(r) : '') + (rowStatus(r).rate != null ? ' · 점검 기록: 최근 ' + rowStatus(r).rate + '%(목표 ' + rowStatus(r).target + '%)' : '') + ' · 결과: ' + (r.result ? r.result + '(' + GRADE_TEXT[r.result] + ')' : '미평가') + (r.memo ? ' · 관찰: ' + oneLine(r.memo) : ''));
       });
     });
     if (si < 0 && p.behavior && p.behavior.on && p.behavior.target) { L.push(''); L.push('[도전행동 지원] 목표 행동: ' + oneLine(p.behavior.target) + (p.behavior.replace ? ' · 대체행동: ' + oneLine(p.behavior.replace) : '')); }
@@ -685,8 +803,9 @@
         });
         h += '</table>';
       }
+      if (supLines(s).length) h += '<table>' + supLines(s).map(function (x, k) { return '<tr>' + (k === 0 ? '<th rowspan="' + supLines(s).length + '" style="width:12%">지원·<br>조정</th>' : '') + '<th style="width:16%">' + esc(x[0]) + '</th><td>' + esc(x[1]) + '</td></tr>'; }).join('') + '</table>';
       h += '<table><tr><th rowspan="2" style="width:7%">월</th><th rowspan="2" style="width:13%">단원</th><th rowspan="2" style="width:18%">단기 교육목표</th><th rowspan="2">교육내용</th><th rowspan="2" style="width:10%">교육<br>방법</th><th colspan="2">평가계획</th></tr><tr><th style="width:17%">성취준거</th><th style="width:8%">평가결과</th></tr>' +
-        (s.rows.length ? s.rows.map(function (r) { return '<tr><td class="center">' + esc(r.month) + '</td><td>' + lines(r.unit) + '</td><td>' + lines(r.goal) + (r.std.length ? '<br><small>' + r.std.map(function (c) { return '[' + esc(c) + ']'; }).join(' ') + '</small>' : '') + '</td><td>' + lines(r.content) + '</td><td>' + lines(r.method) + '</td><td>' + lines(r.crit) + '</td><td class="center">' + esc(r.result) + '</td></tr>'; }).join('')
+        (s.rows.length ? s.rows.map(function (r) { return '<tr><td class="center">' + esc(r.month) + '</td><td>' + lines(r.unit) + '</td><td>' + esc(goalFull(r)) + (r.std.length ? '<br><small>' + r.std.map(function (c) { return '[' + esc(c) + ']'; }).join(' ') + '</small>' : '') + '</td><td>' + lines(r.content) + '</td><td>' + lines(r.method) + '</td><td>' + esc(critFull(r)) + '</td><td class="center">' + esc(r.result) + '</td></tr>'; }).join('')
           : '<tr><td colspan="7" class="center">-</td></tr>') + '</table>';
     });
     h += '<div class="pb"></div><h1>' + esc(p.year) + '학년도 ' + esc(p.term) + '학기 개별화교육계획 평가</h1>';
@@ -696,14 +815,16 @@
     h += '<p><small>※ 성취기준: 기본 교육과정 — 교육부 고시 제2022-34호 [별책 3](국가교육위원회 고시 제2026-2호 일부개정 포함), 공통 교육과정 — 교육부 고시 제2022-33호 [별책 2] 초등학교 교육과정(국가교육위원회 고시 제2026-1호 일부개정 포함)·[별책 5~14] 교과별 교육과정. 성취기준·차시 연결과 자동 작성 문장은 작성 보조용 제안이며, 최종 내용은 개별화교육지원팀 협의로 정합니다.</small></p></div>';
     return h;
   }
-  function openPreview() { if (!cur) { toast('먼저 계획을 만들어 주세요'); return; } persistNow(); var d = $('#preview'); $('.dbody', d).innerHTML = docHtml(cur); d.showModal(); }
+  var pvMode = 'plan';
+  function pvHtml() { return pvMode === 'progress' ? progressHtml(cur) : docHtml(cur); }
+  function openPreview(mode) { if (!cur) { toast('먼저 계획을 만들어 주세요'); return; } pvMode = mode === 'progress' ? 'progress' : 'plan'; persistNow(); var d = $('#preview'); $('.dhead b', d).textContent = pvMode === 'progress' ? '보호자용 진전 안내' : '미리보기'; $('.dbody', d).innerHTML = pvHtml(); d.showModal(); }
   function persistNow() { clearTimeout(saveT); persist(); }
   function fileBase() { var p = cur, nm = (p.info.name || profLabel(p.profile) || '학생').replace(/[\\/:*?"<>|\s]+/g, '_'); return '개별화교육계획_' + p.year + '_' + p.term + '학기_' + nm; }
   function download(name, blob) { var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500); }
   function exportWord() {
     var css = 'body{font-family:"맑은 고딕","Malgun Gothic",sans-serif;font-size:10pt}table{border-collapse:collapse;width:100%;margin-bottom:6pt}th,td{border:1px solid #000;padding:3pt 5pt;vertical-align:top;font-size:10pt}th{background:#e8e8e8;text-align:center}h1{font-size:15pt;text-align:center}h2{font-size:12pt}h3{font-size:12pt;text-align:center}.center{text-align:center}.pb{page-break-before:always}small{font-size:8.5pt}';
-    var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>' + esc(fileBase()) + '</title><style>' + css + '</style></head><body>' + docHtml(cur).replace(/<div class="pb"><\/div>/g, '<br style="page-break-before:always" clear="all">') + '</body></html>';
-    download(fileBase() + '.doc', new Blob(['﻿' + html], { type: 'application/msword' }));
+    var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>' + esc(fileBase()) + '</title><style>' + css + '</style></head><body>' + pvHtml().replace(/<div class="pb"><\/div>/g, '<br style="page-break-before:always" clear="all">') + '</body></html>';
+    download(fileBase() + (pvMode === 'progress' ? '_진전안내' : '') + '.doc', new Blob(['﻿' + html], { type: 'application/msword' }));
     toast('한글·Word에서 열 수 있는 파일을 저장했어요');
   }
   function profLabel(id) { var f = profiles().filter(function (x) { return x.id === id; })[0]; return f ? f.label : (id ? '' : '공용'); }
@@ -732,6 +853,7 @@
     var t = e.target, path = t.getAttribute && t.getAttribute('data-p');
     if (t.tagName === 'TEXTAREA' && t.closest('table.edit, #s-eval')) grow(t);
     if (path && cur) {
+      var mm = /^subjects\.(\d+)\.sup\./.exec(path); if (mm) supOf(cur.subjects[+mm[1]]);
       var v = t.type === 'number' ? Number(t.value) : t.value; setP(cur, path, v);
       if (PERSONAL.indexOf(path.replace('info.', '')) >= 0 && path.indexOf('info.') === 0) { memPersonal[cur.id] = memPersonal[cur.id] || {}; memPersonal[cur.id][path.slice(5)] = v; }
       save();
@@ -745,6 +867,8 @@
     var t = e.target;
     if (t.id === 'profSel') { if (t.value === '__new') { var nm = prompt('학생 별명이나 번호를 적어 주세요 (실명 대신, 12자 이내)'); if (nm && nm.trim()) { pickProfile(addProfile(nm.trim().slice(0, 12))); } else drawHead(); } else pickProfile(t.value); return; }
     if (t.id === 'planSel') { choosePlan(t.value); return; }
+    var sup = t.getAttribute('data-sup');
+    if (sup) { var su = supOf(cur.subjects[+t.getAttribute('data-si')]), arr0 = su[sup] = su[sup] || [], v0 = t.getAttribute('data-val'), i0 = arr0.indexOf(v0); if (t.checked && i0 < 0) arr0.push(v0); if (!t.checked && i0 >= 0) arr0.splice(i0, 1); save(); return; }
     var sc = t.getAttribute('data-scourse'), sb = t.getAttribute('data-sband'), pb = t.getAttribute('data-pband');
     if (sc || sb) {
       var sx = cur.subjects[+t.getAttribute('data-si')], key = sc ? 'courses' : 'bands', val = sc || sb;
@@ -812,6 +936,21 @@
     }
     if (act === 'evalTotal') { if (cur.evalTotal && !confirm('종합 평가를 새 문장으로 바꿀까요?')) return; cur.evalTotal = totalText(cur); save(); rerender(); toast('종합 평가 초안을 만들었어요. [ ] 부분을 채워 주세요'); return; }
     if (act === 'aiOpen') return openAi(si);
+    if (act === 'addCheck') return openChk(si, ri);
+    if (act === 'progressReport') return openPreview('progress');
+    if (act === 'saveCheck' || act === 'delCheck') {
+      var rw = cur.subjects[chkTarget.si].rows[chkTarget.ri]; rw.checks = rw.checks || [];
+      if (act === 'delCheck') { rw.checks.splice(+b.getAttribute('data-k'), 1); }
+      else {
+        var ok = $('#ckOk').value, tr = $('#ckTry').value, pc = $('#ckPct').value, pct = null, raw = '';
+        if (ok !== '' && tr !== '' && +tr > 0) { pct = Math.round(+ok / +tr * 100); raw = ok + '/' + tr; } else if (pc !== '') pct = Math.max(0, Math.min(100, Math.round(+pc)));
+        if (pct == null) { toast('해낸 횟수와 시도 횟수, 또는 수행률을 적어 주세요'); return; }
+        rw.checks.push({ date: $('#ckDate').value || today(), pct: pct, raw: raw, note: $('#ckNote').value.trim() });
+        rw.checks.sort(function (x, y) { return x.date < y.date ? -1 : 1; });
+        toast('점검 기록을 남겼어요 (' + pct + '%)');
+      }
+      save(); openChk(chkTarget.si, chkTarget.ri); var y5 = window.scrollY; render(); window.scrollTo(0, y5); return;
+    }
     if (act === 'pickLes') return openLesDlg(si, ri);
     if (act === 'exportJson') { persistNow(); download(fileBase() + '.json', new Blob([JSON.stringify({ app: 'oks-iep', v: 1, plan: cur }, null, 1)], { type: 'application/json' })); toast('백업 파일을 저장했어요(인적사항 포함 — 보관에 주의)'); return; }
     if (act === 'copyPlan') {
@@ -836,12 +975,13 @@
     rd.readAsText(f);
   }
   $('#newPlan').onclick = function () { var p = newPlan(curProfile); store.plans.push(p); choosePlan(p.id); toast('새 계획을 만들었어요'); };
-  $('#prevBtn').onclick = openPreview;
+  $('#prevBtn').onclick = function () { openPreview('plan'); };
   $('#pClose').onclick = function () { $('#preview').close(); };
-  $('#pPrint').onclick = function () { $('#doc').innerHTML = docHtml(cur); $('#preview').close(); setTimeout(function () { window.print(); }, 50); };
+  $('#pPrint').onclick = function () { $('#doc').innerHTML = pvHtml(); $('#preview').close(); setTimeout(function () { window.print(); }, 50); };
   $('#pWord').onclick = exportWord;
   $('#lesClose').onclick = function () { $('#lesDlg').close(); };
   $('#aiClose').onclick = function () { $('#aiDlg').close(); };
+  $('#chkClose').onclick = function () { $('#chkDlg').close(); };
   $('#aiApply').onclick = applyAi;
   document.addEventListener('click', function (e) {
     if (!e.target.closest('#aiCopy')) return;

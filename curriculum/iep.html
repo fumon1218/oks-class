@@ -77,6 +77,19 @@ label.chk input{width:auto;margin:0}
 label.chk.off{opacity:.45;cursor:not-allowed}
 .ctag{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:0 5px;margin-right:4px;color:#fff;background:#4a7fa8}
 .ctag.c{background:#c07a2c}
+.meas{display:flex;gap:4px;margin-top:4px}
+.meas input{font-size:12.5px;padding:3px 6px;border:1px dashed #b9cbd8!important;border-radius:6px!important;min-width:0}
+.goalfull{font-size:12.5px;color:#1e5a80;background:#eef6ff;border-radius:6px;padding:3px 6px;margin-top:4px}
+.spark{display:block}
+.spark-none{font-size:12px;color:var(--soft)}
+.stline{font-size:12px;color:var(--soft);margin:2px 0}
+.st{font-weight:700;border-radius:6px;padding:0 5px}
+.st.ok{background:var(--ok);color:#1e6b3a}.st.up{background:#e8f1fb;color:#1e5a80}.st.warn{background:var(--warn);color:#7a5200}.st.none{background:#eef2f5;color:var(--soft)}
+details.supbox{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:#fcfdfe}
+details.supbox>summary{cursor:pointer;padding:9px 12px;font-weight:600}
+details.supbox>summary small{font-weight:400;color:var(--soft)}
+.supbody{padding:4px 12px 12px}
+.suprow{margin:8px 0}.suprow>b{display:block;font-size:13px;margin-bottom:4px}
 .okbox{background:var(--ok);border-radius:10px;padding:10px 12px;font-size:13.5px;margin:8px 0}
 .dates{display:flex;gap:14px;flex-wrap:wrap;font-size:14px}
 .dates b{color:var(--accent)}
@@ -139,6 +152,7 @@ dialog .dbody{padding:14px;max-height:78vh;overflow:auto}
 <div id="doc"></div>
 <dialog id="preview"><div class="dhead"><b>미리보기</b><button type="button" id="pPrint" class="pri">🖨️ 인쇄·PDF</button><button type="button" id="pWord">📄 한글·Word 파일</button><button type="button" id="pClose">닫기</button></div><div class="dbody"></div></dialog>
 <dialog id="aiDlg"><div class="dhead"><b>🤖 AI 도움으로 평가 쓰기</b><button type="button" id="aiApply" class="pri">평가 칸에 넣기</button><button type="button" id="aiClose">닫기</button></div><div class="dbody"></div></dialog>
+<dialog id="chkDlg"><div class="dhead"><b>📈 진전 점검 기록</b><button type="button" id="chkClose">닫기</button></div><div class="dbody"></div></dialog>
 <dialog id="lesDlg"><div class="dhead"><b>앱 차시 연결</b><button type="button" id="lesOk" class="pri">연결</button><button type="button" id="lesClose">닫기</button></div><div class="dbody"></div></dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="lessons.js"></script>
