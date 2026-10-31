@@ -90,7 +90,7 @@ td.orig{color:var(--soft);font-size:12.5px}
     bar.insertAdjacentHTML('beforeend', '<span class="sep"></span>');
     btn(showOrig ? '설계표 원문 숨기기' : '설계표 원문 보기', false, function(){ showOrig = !showOrig; render(); });
     btn('🖨️ 인쇄', false, function(){ window.print(); });
-    bar.insertAdjacentHTML('beforeend', '<a href="../learn/">🌱 배움 지도</a>');
+    bar.insertAdjacentHTML('beforeend', '<a href="../learn/">🌱 배움 지도</a> <a href="iep.html">📝 개별화교육계획</a>');
   }
   function render(){
     drawBar();

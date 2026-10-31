@@ -374,6 +374,7 @@
     [
       [O.iconHtml('icon_map.png', '배움 지도 (7교과 '+D.lessons.length+'차시 한눈에)'), 'learn/'],
       [O.iconHtml('icon_teacher.png', '선생님 지도 계획서'), 'curriculum/plan.html'],
+      ['📝 개별화교육계획 작성', 'curriculum/iep.html'],
       ['✏️ 선생님 문항 편집', 'curriculum/editor.html'],
       [O.iconHtml('icon_settings.png', '설정 (목소리·움직임·큰 버튼)'), 'learn/?set=1']
     ].forEach(function (l) { var a = E('a', 'sp-link', l[0]); a.href = l[1]; btns.appendChild(a); });
