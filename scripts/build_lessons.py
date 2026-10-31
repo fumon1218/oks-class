@@ -1,6 +1,28 @@
 """교육과정 설계표(엑셀) → curriculum/lessons.json 변환.
 엑셀을 고친 뒤 `python3 scripts/build_lessons.py` 를 다시 실행하면 앱 데이터가 갱신됩니다."""
-import json, os, openpyxl
+import json, os, re, openpyxl
+
+
+def _has_final(ch):
+    return '가' <= ch <= '힣' and (ord(ch) - 0xAC00) % 28 != 0
+
+
+def josa(s):
+    """설계표 틀 문장의 조사를 바로잡습니다. '소리을(를)' → '소리를', '이해을 수행' → '이해를 수행' ('마을'은 그대로)."""
+    if not isinstance(s, str):
+        return s
+    s = re.sub(r'([가-힣])(을|이|은|과)\((를|가|는|와)\)',
+               lambda m: m.group(1) + (m.group(2) if _has_final(m.group(1)) else m.group(3)), s)
+    s = re.sub(r'([가-힣])을 (생활|활용|수행|표현|스스로)',
+               lambda m: m.group(0) if m.group(1) == '마' or _has_final(m.group(1))
+               else m.group(1) + '를 ' + m.group(2), s)
+    return s
+
+
+def codes(v):
+    return [c.strip() for c in str(v).split(',') if c.strip()] if v else []
+
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'curriculum/source/okssem_7subjects_2022_game_curriculum_126lessons.xlsx')
 SUBJ = {'국어': 'korean', '수학': 'math', '사회': 'social', '과학': 'science', '영어': 'english', '미술': 'art', '음악': 'music'}
@@ -17,8 +39,12 @@ for r in wb['전체_차시'].iter_rows(min_row=2, values_only=True):
         'school': SCHOOL[r[2]], 'schoolName': r[2], 'track': r[3],
         'unit': r[4], 'unitNo': unit_no, 'lessonNo': lesson_no, 'no': str(r[5]),
         'topic': r[6], 'goal': r[7], 'space': r[8],
-        'levels': [r[9], r[10], r[11], r[12], r[13]],
+        'levels': [josa(r[i]) for i in range(9, 14)],
         'record': r[14], 'verify': r[15], 'source': r[16],
+        # 성취기준 연결(R~W열): 별책 3 대조 초안 — 교사 검토 필요, 고시 아님
+        'std': codes(r[17]) if len(r) > 17 else [], 'grade': r[18] if len(r) > 18 else None,
+        'match': r[19] if len(r) > 19 else None, 'stdEarly': codes(r[20]) if len(r) > 20 else [],
+        'stdLink': codes(r[21]) if len(r) > 21 else [], 'crit': r[22] if len(r) > 22 else None,
     })
 # 기초층(학교급과 상관없이 누구나 시작하는 단계): 영어(알파벳 → 낱말 → 문장), 국어(한글 자음·모음 → 글자 → 낱말)
 def basics(fname, key, subj, subjName, code, verify):

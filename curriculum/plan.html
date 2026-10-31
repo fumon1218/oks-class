@@ -47,6 +47,7 @@ td.orig{color:var(--soft);font-size:12.5px}
 <main id="main"></main>
 <script src="lessons.js"></script>
 <script src="art-standards.js"></script>
+<script src="standards.js"></script>
 <script src="../play/content.js"></script>
 <script src="../play/content2.js"></script>
 <script src="../play/content-extra.js"></script>
@@ -64,10 +65,16 @@ td.orig{color:var(--soft);font-size:12.5px}
   var subj = q.get('subject') || 'all', school = q.get('school') || 'all', showOrig = q.get('orig') !== '0';
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function stdHtml(l){
-    var m = window.OKS_ART_STD && window.OKS_ART_STD[l.id], T = window.OKS_ART_STD_TEXT || {};
-    if(!m) return '';
-    return '<div class="goal">📐 <b>성취기준</b> ' + m.std.map(function(k){ return '<span class="tag" title="' + esc(T[k] || '') + '">' + esc(k) + '</span>' + esc(T[k] || ''); }).join(' · ') + '</div>' +
-      '<div class="goal">✅ <b>평가 준거</b> ' + esc(m.crit) + ' <small style="color:var(--soft)">(수업 설계안 제안 · 고시 아님)</small></div>';
+    var T = window.OKS_STD_TEXT || window.OKS_ART_STD_TEXT || {}, a = window.OKS_ART_STD && window.OKS_ART_STD[l.id];
+    var std = (l.std && l.std.length) ? l.std : (a ? a.std : []), crit = l.crit || (a && a.crit);
+    function tags(list){ return list.map(function(k){ return '<span class="tag" title="' + esc(T[k] || '') + '">' + esc(k) + '</span>' + esc(T[k] || ''); }).join(' · '); }
+    var h = '';
+    if(std.length) h += '<div class="goal">📐 <b>성취기준</b>' + (l.match && l.match !== '직접' ? ' <small>(' + esc(l.match) + ')</small>' : '') + ' ' + tags(std) + '</div>';
+    else if(l.match === '없음') h += '<div class="goal">📐 <b>성취기준</b> 기본 교육과정에 직접 대응 없음</div>';
+    if(l.stdEarly && l.stdEarly.length) h += '<div class="goal">🌱 <b>초1~2 통합교과</b> ' + tags(l.stdEarly) + '</div>';
+    if(l.stdLink && l.stdLink.length) h += '<div class="goal">🔗 <b>타 교과 연계</b> ' + tags(l.stdLink) + '</div>';
+    if(crit) h += '<div class="goal">✅ <b>평가 준거</b> ' + esc(crit) + ' <small style="color:var(--soft)">(제안 · 고시 아님)</small></div>';
+    return h;
   }
   function strip(t){ return String(t).replace(/^〈[^〉]*〉\s*/, ''); }
   document.getElementById('sub').textContent = D.title + ' · ' + D.version + ' · ' + D.note;
