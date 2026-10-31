@@ -7,7 +7,10 @@
    - 성취기준·차시 연결과 자동 문장은 작성 보조용 제안이며 고시가 아닙니다. 최종 내용은 개별화교육지원팀이 정합니다. */
 (function () {
   'use strict';
-  var STD = window.OKS_STD_TEXT || {}, AREA = window.OKS_STD_AREA || {};
+  /* 기본 교육과정(별책 3)과 공통 교육과정(초·중학교 교과) 성취기준. 코드 약어가 서로 달라 한 사전에 함께 둡니다(국어 vs 국, 바생 vs 바). */
+  var STD_B = window.OKS_STD_TEXT || {}, STD_C = window.OKS_STD_COMMON || {};
+  var STD = Object.assign({}, STD_B, STD_C), AREA = Object.assign({}, window.OKS_STD_AREA || {}, window.OKS_STD_COMMON_AREA || {});
+  var COURSE_B = '기본 교육과정', COURSE_C = '공통 교육과정', COURSES = [COURSE_B, COURSE_C];
   var LES = ((window.OKS_LESSONS || {}).lessons) || [];
   var KEY = 'oks_iep_v1', PROF_KEY = 'oks_profiles_v1', LOG_KEY = 'oks_learning_log_v1';
   var $ = function (s, r) { return (r || document).querySelector(s); };
@@ -21,16 +24,23 @@
   /* ---------- 교육과정 메타 ---------- */
   var SUBJ = { '국어': '국어', '수학': '수학', '사회': '사회', '과학': '과학', '진로': '진로와 직업', '체육': '체육', '음악': '음악', '미술': '미술',
     '생영': '생활영어', '정통': '정보통신활용', '보건': '보건', '실과': '실과', '바생': '바른 생활', '슬생': '슬기로운 생활', '건생': '건강한 생활', '즐생': '즐거운 생활' };
-  var SUBJ_ORDER = ['국어', '수학', '사회', '과학', '진로와 직업', '체육', '음악', '미술', '바른 생활', '슬기로운 생활', '건강한 생활', '즐거운 생활', '실과', '생활영어', '정보통신활용', '보건'];
+  var SUBJ_C = { '국': '국어', '수': '수학', '사': '사회', '사(일사)': '사회', '사(지리)': '사회', '역': '역사', '도': '도덕', '과': '과학', '실': '실과', '기가': '기술·가정', '정': '정보',
+    '체': '체육', '음': '음악', '미': '미술', '영': '영어', '바': '바른 생활', '슬': '슬기로운 생활', '즐': '즐거운 생활', '건': '건강한 생활' };
+  var SUBJ_ORDER_BY = {};
+  SUBJ_ORDER_BY[COURSE_B] = ['국어', '수학', '사회', '과학', '진로와 직업', '체육', '음악', '미술', '바른 생활', '슬기로운 생활', '건강한 생활', '즐거운 생활', '실과', '생활영어', '정보통신활용', '보건'];
+  SUBJ_ORDER_BY[COURSE_C] = ['국어', '수학', '사회', '도덕', '과학', '실과', '체육', '음악', '미술', '영어', '바른 생활', '슬기로운 생활', '건강한 생활', '즐거운 생활', '역사', '기술·가정', '정보'];
   var BAND = { '2': '초1~2', '4': '초3~4', '6': '초5~6', '9': '중1~3', '09': '중1~3', '12': '고1~3' };
   var BAND_ORDER = ['초1~2', '초3~4', '초5~6', '중1~3', '고1~3'];
   /* 생활지원 영역: 총론의 일상생활 활동 영역 + 행동지원(나이스 생활지원 영역 기준) — 성취기준 없이 학교·교사가 목표를 정함 */
   var LIFE = ['의사소통', '자립생활', '신체활동', '여가활동', '생활적응', '행동지원', '진로·직업(전환)'];
   function meta(code) {
-    var m = /^(\d+)([가-힣]{2})(\d{2})-(\d{2})$/.exec(code); if (!m) return null;
-    return { band: BAND[m[1]], subj: SUBJ[m[2]], area: AREA[m[1] + m[2] + m[3]] || '', areaKey: m[1] + m[2] + m[3] };
+    var m = /^(\d+)(.+?)(\d{2})-(\d{2})$/.exec(code); if (!m) return null;
+    var course = STD_C[code] ? COURSE_C : COURSE_B, subj = (course === COURSE_C ? SUBJ_C : SUBJ)[m[2]];
+    if (!subj) return null;
+    return { course: course, band: BAND[m[1]], subj: subj, area: AREA[m[1] + m[2] + m[3]] || '', areaKey: m[1] + m[2] + m[3] };
   }
-  var ALL = Object.keys(STD).map(function (c) { var m = meta(c); return m && { code: c, text: STD[c], band: m.band, subj: m.subj, area: m.area, areaKey: m.areaKey }; }).filter(Boolean);
+  var ALL = Object.keys(STD).map(function (c) { var m = meta(c); return m && { code: c, text: STD[c], course: m.course, band: m.band, subj: m.subj, area: m.area, areaKey: m.areaKey }; }).filter(Boolean);
+  function courseLabel(c) { return c === COURSE_C ? '2022 개정 공통 교육과정(초·중학교 교과)' : '2022 개정 특수교육 기본 교육과정'; }
 
   /* 기초층 차시(한글·시계·영어 기초)는 엑셀 밖 JSON이라 여기서 연결합니다(worksheet/clock.js 의 배움 근거와 같음) */
   var BASIC_STD = {
@@ -53,7 +63,12 @@
     }
     return [];
   }
-  LES.forEach(function (l) { l._std = [].concat(l.std || [], l.stdEarly || [], l.stdLink || [], basicStd(l)); });
+  /* 공통 교육과정 연결: 초등 영어 6차시(기본 교육과정 초등에는 영어가 없음) */
+  var COMMON_STD = {
+    '05-01-01-01': ['4영02-01', '4영01-05'], '05-01-01-02': ['4영01-05', '4영01-01'], '05-01-02-01': ['4영01-05'],
+    '05-01-02-02': ['4영01-05', '4영02-06'], '05-01-03-01': ['4영02-05'], '05-01-03-02': ['4영01-04']
+  };
+  LES.forEach(function (l) { l._std = [].concat(l.std || [], l.stdEarly || [], l.stdLink || [], basicStd(l), COMMON_STD[l.id] || []); });
   function lessonsFor(code) { return LES.filter(function (l) { return l._std.indexOf(code) >= 0; }); }
   function lessonById(id) { return LES.filter(function (l) { return l.id === id; })[0]; }
   function lessonLabel(l) { return l.subjectName + ' ' + l.schoolName + ' ' + l.no + ' ' + l.topic; }
@@ -105,7 +120,7 @@
     var now = new Date(), y = now.getMonth() < 2 ? now.getFullYear() - 1 : now.getFullYear(), term = (now.getMonth() >= 7 || now.getMonth() < 1) ? '2' : '1';
     return {
       id: uid(), profile: profileId, created: now.toISOString(), year: String(y), term: term, type: '교과 및 생활지원 중심',
-      start: term === '1' ? y + '-03-02' : y + '-08-17', keepPersonal: false,
+      start: term === '1' ? y + '-03-02' : y + '-08-17', keepPersonal: false, course: COURSE_B,
       info: { school: '', gradeClass: '', name: '', specialTeacher: '', generalTeacher: '', birth: '', placement: '특수학급', disability: '', welfare: '', guardian: '', address: '', selectDate: '', phone: '' },
       team: [['개별화교육지원팀장(교감)', ''], ['보호자', ''], ['특수교육교원', ''], ['일반교육교원(통합학급 담임)', ''], ['진로·직업교육 담당교원', ''], ['특수교육 관련서비스 담당 인력', '']].map(function (r) { return { role: r[0], name: r[1] }; }),
       meetings: [{ date: '', topic: '1차: 현재 수준·요구 공유, 계획 유형과 우선 영역 결정' }, { date: '', topic: '2차: 계획 확정·관련서비스 협의' }],
@@ -119,10 +134,11 @@
       evalTotal: '', evalNote: ''
     };
   }
-  function newSubject(name, band) {
+  function newSubject(name, band, course) {
     var life = LIFE.indexOf(name) >= 0;
-    return { id: uid(), name: name, band: band || '', life: life, present: '', longGoals: '', stds: [], rows: [], eval: '', open: true };
+    return { id: uid(), name: name, band: band || '', course: life ? '' : (course || COURSE_B), life: life, present: '', longGoals: '', stds: [], rows: [], eval: '', open: true };
   }
+  function courseOf(s) { return s.life ? '' : (s.course || COURSE_B); }   /* 예전에 만든 계획은 기본 교육과정 */
   function newRow(month) { return { month: month || '', unit: '', goal: '', content: '', method: '직접교수, 모델링, 최소촉진', crit: '', result: '', memo: '', std: [], lessons: [] }; }
 
   /* ---------- 기록 → 평가 ---------- */
@@ -171,7 +187,8 @@
     /* 1 기본 정보 */
     h += '<section class="card" id="s-basic"><h2>1. 기본 정보·인적사항</h2><p class="hint">특수교육법 시행규칙 제4조: 개별화교육지원팀은 학기 시작일부터 2주 이내 구성, 계획은 매 학기 시작일부터 30일 이내 작성(지역 지침 확인).</p>';
     h += '<div class="grid">' + fld('학년도', 'year', p.year) + fld('학기', 'term', p.term, { sel: ['1', '2'] }) + fld('학기 시작일(배치일)', 'start', p.start, { type: 'date' }) +
-      fld('계획 유형', 'type', p.type, { sel: ['교과 중심', '생활지원 중심', '교과 및 생활지원 중심'] }) + '</div>';
+      fld('계획 유형', 'type', p.type, { sel: ['교과 중심', '생활지원 중심', '교과 및 생활지원 중심'] }) +
+      fld('적용 교육과정', 'course', p.course || COURSE_B, { sel: [COURSE_B, COURSE_C, '기본·공통 교육과정 병행'] }) + '</div>';
     h += '<p class="dates">팀 구성 기한 <b>' + (addDays(p.start, 14) || '-') + '</b> · 계획 결재 기한 <b>' + (addDays(p.start, 30) || '-') + '</b> · 학기 말 평가 결과 보호자 안내</p>';
     h += '<div class="grid">' + fld('학교명', 'info.school', i.school) + fld('학년 반', 'info.gradeClass', i.gradeClass, { ph: '예: 5학년 2반' }) + fld('이름', 'info.name', i.name) +
       fld('특수학급(특수교육) 담임', 'info.specialTeacher', i.specialTeacher) + fld('통합학급 담임', 'info.generalTeacher', i.generalTeacher) + '</div>';
@@ -205,9 +222,11 @@
       fld('학부모 요구사항', 'parentNeeds', p.parentNeeds, { area: 1, wide: 1 }) + fld('기타(건강·투약·의사소통 수단 등)', 'etc', p.etc, { area: 1, wide: 1 }) + '</div></section>';
 
     /* 4 교과·영역별 계획 */
-    h += '<section class="card" id="s-subj"><h2>4. 교과·영역별 교육계획</h2><p class="hint">교과를 고르면 2022 개정 특수교육 기본 교육과정 성취기준(별책 3)에서 목표를 고를 수 있고, 앱 차시가 연결된 성취기준은 단원·차시·평가 준거까지 월별 표에 채워집니다. 생활지원 영역은 성취기준 없이 학교가 정한 목표로 씁니다.</p>';
-    h += '<div class="actions"><select id="addSubjName" style="width:auto"><optgroup label="교과">' + SUBJ_ORDER.map(function (s) { return '<option>' + s + '</option>'; }).join('') + '</optgroup><optgroup label="생활지원 영역">' + LIFE.map(function (s) { return '<option>' + s + '</option>'; }).join('') + '</optgroup></select>' +
-      '<select id="addSubjBand" style="width:auto">' + BAND_ORDER.map(function (b) { return '<option>' + b + '</option>'; }).join('') + '</select><button class="pri" data-act="addSubj">＋ 교과·영역 추가</button></div>';
+    h += '<section class="card" id="s-subj"><h2>4. 교과·영역별 교육계획</h2><p class="hint">교육과정과 교과를 고르면 성취기준에서 목표를 고를 수 있습니다. <b>기본 교육과정</b>은 특수학교 기본 교육과정(별책 3, 초1~고3), <b>공통 교육과정</b>은 일반 초·중학교 교과 교육과정(초1~중3)입니다. 앱 차시가 연결된 성취기준은 단원·차시·평가 준거까지 월별 표에 채워집니다. 생활지원 영역은 성취기준 없이 학교가 정한 목표로 씁니다.</p>';
+    var defCourse = p.course === COURSE_C ? COURSE_C : COURSE_B, addCourse = render.addCourse || defCourse;
+    h += '<div class="actions"><select id="addSubjCourse" style="width:auto" aria-label="교육과정">' + COURSES.map(function (c) { return '<option' + (c === addCourse ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select>' +
+      '<select id="addSubjName" style="width:auto" aria-label="교과"><optgroup label="교과">' + SUBJ_ORDER_BY[addCourse].map(function (s) { return '<option>' + s + '</option>'; }).join('') + '</optgroup><optgroup label="생활지원 영역">' + LIFE.map(function (s) { return '<option>' + s + '</option>'; }).join('') + '</optgroup></select>' +
+      '<select id="addSubjBand" style="width:auto" aria-label="학년군">' + BAND_ORDER.map(function (b) { return '<option>' + b + '</option>'; }).join('') + '</select><button class="pri" data-act="addSubj">＋ 교과·영역 추가</button></div>';
     h += p.subjects.map(subjectHtml).join('') || '<p class="hint">아직 추가한 교과·영역이 없어요.</p>';
     h += '</section>';
 
@@ -243,7 +262,7 @@
 
   function subjectHtml(s, si) {
     var base = 'subjects.' + si;
-    var h = '<div class="subj" data-si="' + si + '"><div class="head"><h3>' + esc(s.name) + (s.band ? ' <small style="font-weight:400;color:var(--soft)">' + esc(s.band) + '</small>' : '') + '</h3>' +
+    var h = '<div class="subj" data-si="' + si + '"><div class="head"><h3>' + esc(s.name) + (s.band ? ' <small style="font-weight:400;color:var(--soft)">' + esc((courseOf(s) === COURSE_C ? '공통 · ' : '기본 · ') + s.band) + '</small>' : '') + '</h3>' +
       '<button class="ghost" data-act="moveSubj" data-si="' + si + '" data-dir="-1" aria-label="위로">▲</button><button class="ghost" data-act="moveSubj" data-si="' + si + '" data-dir="1" aria-label="아래로">▼</button>' +
       '<button class="ghost del" data-act="delSubj" data-si="' + si + '">삭제</button></div><div class="body">';
     if (!s.life) {
@@ -271,7 +290,7 @@
     return h;
   }
   function stdListHtml(s, si, q) {
-    var list = ALL.filter(function (x) { return x.subj === s.name && x.band === s.band; });
+    var list = ALL.filter(function (x) { return x.course === courseOf(s) && x.subj === s.name && x.band === s.band; });
     if (q) { var w = q.split(/\s+/).filter(Boolean); list = list.filter(function (x) { return w.every(function (t) { return (x.code + x.text + x.area).indexOf(t) >= 0; }); }); }
     if (!list.length) return '<p class="hint" style="padding:8px">' + (q ? '찾는 성취기준이 없어요.' : '이 교과는 이 학년군에 성취기준이 없어요. 학년군을 바꿔 보세요(예: 진로와 직업은 중1~3·고1~3, 바른 생활 등은 초1~2).') + '</p>';
     var lastA = null, h = '';
@@ -395,7 +414,8 @@
     var subjNames = p.subjects.map(function (s) { return s.name; }).join(', ');
     var h = '<div class="docwrap"><h1>' + esc(title) + (subjNames ? ' (' + esc(subjNames) + ')' : '') + '</h1>';
     h += '<table><tr><th>학교명</th><td>' + esc(i.school) + '</td><th>학년 반</th><td>' + esc(i.gradeClass) + '</td><th>이 름</th><td>' + esc(i.name) + '</td></tr>' +
-      '<tr><th>특수학급 담임</th><td>' + esc(i.specialTeacher) + '</td><th>통합학급 담임</th><td>' + esc(i.generalTeacher) + '</td><th>계획 유형</th><td>' + esc(p.type) + '</td></tr></table>';
+      '<tr><th>특수학급 담임</th><td>' + esc(i.specialTeacher) + '</td><th>통합학급 담임</th><td>' + esc(i.generalTeacher) + '</td><th>계획 유형</th><td>' + esc(p.type) + '</td></tr>' +
+      '<tr><th>적용 교육과정</th><td colspan="5">' + esc(p.course || COURSE_B) + '</td></tr></table>';
     h += '<h2>1. 인적사항</h2><table><tr><th colspan="2">학생 정보</th><th colspan="2">가족 정보</th></tr>' +
       '<tr><th>생년월일</th><td>' + esc(i.birth) + '</td><th>보호자</th><td>' + esc(i.guardian) + '</td></tr>' +
       '<tr><th>배치형태</th><td>' + esc(i.placement) + '</td><th>주 소</th><td>' + esc(i.address) + '</td></tr>' +
@@ -423,7 +443,7 @@
     p.subjects.forEach(function (s) {
       h += '<div class="pb"></div><h3>' + esc(p.term) + '학기 ' + esc(s.name) + (s.life ? ' 영역' : / /.test(s.name) ? '' : '과') + ' 교육계획</h3>';
       h += '<table><tr><th>현재 학습 수행 수준</th></tr><tr><td>' + lines(s.present) + '</td></tr><tr><th>' + esc(p.term) + '학기 장기 목표</th></tr><tr><td>' + lines(s.longGoals) + '</td></tr></table>';
-      if (s.stds.length) h += '<table><tr><th style="width:18%">관련 성취기준<br><small>2022 개정 특수교육<br>기본 교육과정</small></th><td>' + s.stds.map(function (c) { return '[' + esc(c) + '] ' + esc(STD[c]); }).join('<br>') + '</td></tr></table>';
+      if (s.stds.length) h += '<table><tr><th style="width:18%">관련 성취기준<br><small>' + esc(courseLabel(courseOf(s))) + '</small></th><td>' + s.stds.map(function (c) { return '[' + esc(c) + '] ' + esc(STD[c]); }).join('<br>') + '</td></tr></table>';
       h += '<table><tr><th rowspan="2" style="width:7%">월</th><th rowspan="2" style="width:13%">단원</th><th rowspan="2" style="width:18%">단기 교육목표</th><th rowspan="2">교육내용</th><th rowspan="2" style="width:10%">교육<br>방법</th><th colspan="2">평가계획</th></tr><tr><th style="width:17%">성취준거</th><th style="width:8%">평가결과</th></tr>' +
         (s.rows.length ? s.rows.map(function (r) { return '<tr><td class="center">' + esc(r.month) + '</td><td>' + lines(r.unit) + '</td><td>' + lines(r.goal) + (r.std.length ? '<br><small>' + r.std.map(function (c) { return '[' + esc(c) + ']'; }).join(' ') + '</small>' : '') + '</td><td>' + lines(r.content) + '</td><td>' + lines(r.method) + '</td><td>' + lines(r.crit) + '</td><td class="center">' + esc(r.result) + '</td></tr>'; }).join('')
           : '<tr><td colspan="7" class="center">-</td></tr>') + '</table>';
@@ -432,7 +452,7 @@
     h += '<table><tr><th>평가 기준</th></tr><tr><td><ul><li>가: ' + p.scale.a + '% 이상 수행한 경우: 대체로 스스로 수행함</li><li>나: ' + p.scale.b + '~' + p.scale.a + '% 수행한 경우: 부분적인 도움을 필요로 함</li><li>다: ' + p.scale.b + '% 미만 수행한 경우: 전반적인 도움을 필요로 함</li><li>라: 과제 수행을 전혀 하지 못함</li></ul></td></tr></table>';
     h += '<table><tr><th colspan="2">' + esc(p.term) + '학기 개별화교육계획 평가 결과</th></tr>' + p.subjects.map(function (s) { return '<tr><th style="width:16%">' + esc(s.name) + '</th><td style="height:60pt">' + lines(s.eval) + '</td></tr>'; }).join('') +
       '<tr><th>종합<br>평가</th><td style="height:70pt">' + lines(p.evalTotal) + '</td></tr></table>';
-    h += '<p><small>※ 성취기준: 교육부 고시 제2022-34호 [별책 3] 특수교육 기본 교육과정(국가교육위원회 고시 제2026-2호 일부개정 포함). 성취기준·차시 연결과 자동 작성 문장은 작성 보조용 제안이며, 최종 내용은 개별화교육지원팀 협의로 정합니다.</small></p></div>';
+    h += '<p><small>※ 성취기준: 기본 교육과정 — 교육부 고시 제2022-34호 [별책 3](국가교육위원회 고시 제2026-2호 일부개정 포함), 공통 교육과정 — 교육부 고시 제2022-33호 [별책 2] 초등학교 교육과정(국가교육위원회 고시 제2026-1호 일부개정 포함)·[별책 5~14] 교과별 교육과정. 성취기준·차시 연결과 자동 작성 문장은 작성 보조용 제안이며, 최종 내용은 개별화교육지원팀 협의로 정합니다.</small></p></div>';
     return h;
   }
   function openPreview() { if (!cur) { toast('먼저 계획을 만들어 주세요'); return; } persistNow(); var d = $('#preview'); $('.dbody', d).innerHTML = docHtml(cur); d.showModal(); }
@@ -484,6 +504,8 @@
     var t = e.target;
     if (t.id === 'profSel') { if (t.value === '__new') { var nm = prompt('학생 별명이나 번호를 적어 주세요 (실명 대신, 12자 이내)'); if (nm && nm.trim()) { pickProfile(addProfile(nm.trim().slice(0, 12))); } else drawHead(); } else pickProfile(t.value); return; }
     if (t.id === 'planSel') { choosePlan(t.value); return; }
+    if (t.id === 'addSubjCourse') { render.addCourse = t.value; var yy = window.scrollY; render(); window.scrollTo(0, yy); return; }
+    if (t.getAttribute('data-p') === 'course') { render.addCourse = t.value === COURSE_C ? COURSE_C : COURSE_B; save(); var y3 = window.scrollY; render(); window.scrollTo(0, y3); return; }
     if (t.id === 'keepP') { cur.keepPersonal = t.checked; persistNow(); toast(t.checked ? '인적사항을 이 기기에 저장해요' : '인적사항은 저장하지 않아요'); return; }
     if (t.id === 'importJson') { importFile(t.files[0]); t.value = ''; return; }
     var chk = t.getAttribute('data-chk'); if (chk) { setP(cur, chk, t.checked); save(); var y = window.scrollY; render(); window.scrollTo(0, y); return; }
@@ -505,12 +527,13 @@
     if (del) { var ks = del.split('.'), idx = +ks.pop(), a2 = getP(cur, ks.join('.')); a2.splice(idx, 1); save(); rerender(); return; }
     var act = b.getAttribute('data-act'), si = +b.getAttribute('data-si'), ri = +b.getAttribute('data-ri');
     if (act === 'addSubj') {
-      var nm = $('#addSubjName').value, band = $('#addSubjBand').value;
-      if (LIFE.indexOf(nm) < 0 && !ALL.some(function (x) { return x.subj === nm && x.band === band; })) {
-        var bands = BAND_ORDER.filter(function (bb) { return ALL.some(function (x) { return x.subj === nm && x.band === bb; }); });
-        band = bands.indexOf(band) >= 0 ? band : bands[0] || band; toast(nm + '은(는) ' + bands.join('·') + ' 학년군에 있어요 → ' + band);
+      var nm = $('#addSubjName').value, band = $('#addSubjBand').value, crs = $('#addSubjCourse').value;
+      var has = function (bb) { return ALL.some(function (x) { return x.course === crs && x.subj === nm && x.band === bb; }); };
+      if (LIFE.indexOf(nm) < 0 && !has(band)) {
+        var bands = BAND_ORDER.filter(has);
+        band = bands[0] || band; toast(crs + ' ' + nm + '은(는) ' + bands.join('·') + ' 학년군에 있어요 → ' + band);
       }
-      cur.subjects.push(newSubject(nm, LIFE.indexOf(nm) >= 0 ? '' : band)); save(); rerender();
+      cur.subjects.push(newSubject(nm, LIFE.indexOf(nm) >= 0 ? '' : band, crs)); save(); rerender();
       var last = $$('.subj'); if (last.length) last[last.length - 1].scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
